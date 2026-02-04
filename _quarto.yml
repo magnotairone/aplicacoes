@@ -23,8 +23,8 @@ format:
     toc: true
     number-sections: true
     number-depth: 3
-  pdf:
-    documentclass: scrreprt
+  # pdf:
+  #   documentclass: scrreprt
 
 editor: source
 
