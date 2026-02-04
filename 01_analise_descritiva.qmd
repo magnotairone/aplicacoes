@@ -1,10 +1,19 @@
 # Análise Descritiva de Dados
 
 ```{r include=FALSE}
+
+knitr::opts_chunk$set(
+  warning = FALSE,
+  message = FALSE,
+  echo = TRUE
+)
+
 library(nycflights13)
 library(kableExtra)
 library(tidyverse)
+
 set.seed(1)
+
 flights <- flights %>% 
   mutate(origin = factor(origin),
          dest = factor(dest),
@@ -236,7 +245,7 @@ flights %>%
 
 ```
 
-## Associação entre Duas Variáveis
+### Associação entre Duas Variáveis
 Na análise de dados, é comum investigar a associação entre duas variáveis para entender como elas estão relacionadas ou se influenciam mutuamente. A associação entre duas variáveis pode ser examinada usando diferentes técnicas estatísticas e gráficas, dependendo do tipo de variáveis envolvidas.
 
 
