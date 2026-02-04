@@ -310,6 +310,25 @@ if (knitr::is_html_output()){
 
 **Exercício:** quais outras variáveis poderiam ter suas relações exploradas? 
 
+### Questões estratégicas de negócio
+
+1. Quais são os principais gargalos operacionais?
+
+    - Identificação de rotas com maiores atrasos, cancelamentos e remanejamentos.
+    - Alguma rota específica tem consistentemente atrasos elevados?
+
+2. Há diferenças operacionais entre os três aeroportos de Nova York (JFK, LGA e EWR)?
+    
+    - Qual deles apresenta maior índice de atrasos? Quais são os horários mais críticos?
+
+3. A sazonalidade afeta a operação?
+
+    - Existem meses ou dias da semana com maior índice de cancelamentos ou atrasos?
+
+4. Como as condições meteorológicas impactam os voos?
+
+    - Quais eventos climáticos mais afetam as operações? Neve, tempestades ou ventos fortes?
+
 
 ## Sugestão de Referência
 
