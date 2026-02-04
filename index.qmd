@@ -1,3 +1,3 @@
 # Introdução {.unnumbered}
 
-Este livro apresenta aplicações de ciência de dados inspirados em casos reais.
+Esta página apresenta aplicações de ciência de dados inspirados em casos reais.
