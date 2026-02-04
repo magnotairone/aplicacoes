@@ -1,9 +1,315 @@
-# Introduction
+# Análise Descritiva de Dados
 
-This is a book created from markdown and executable code.
+```{r include=FALSE}
+library(nycflights13)
+library(kableExtra)
+library(tidyverse)
+set.seed(1)
+flights <- flights %>% 
+  mutate(origin = factor(origin),
+         dest = factor(dest),
+         tailnum = factor(tailnum),
+         carrier = factor(carrier)) %>% 
+  slice_sample(prop = 0.1)
 
-See @knuth84 for additional discussion of literate programming.
+theme_set(theme_bw())
+```
+
+O objetivo deste capítulo é oferecer uma compreensão abrangente da análise descritiva de dados, fundamental em estatística e ciência de dados. Essa análise permite explorar e resumir características importantes dos dados, oferecendo insights iniciais para análises mais detalhadas.
+ 
+Para exemplificar os conceitos abordados neste relatório, utilizaremos o conjunto de dados do pacote R `{nycflights13}`. 
+Este pacote contém diversas tabelas que fornecem informações detalhadas sobre voos que partiram dos aeroportos de Nova York em 2013, dentre elas: 
+
+  - `flights`, que contém informações sobre voos, como horários de partida e chegada, companhias aéreas, destinos e atrasos; 
+  - `weather`, que fornece dados meteorológicos relacionados aos aeroportos de Nova York durante o ano de 2013;
+  - `airlines`, que lista informações sobre as companhias aéreas que operam em Nova York; 
+  - `airports`, que contém detalhes sobre os aeroportos de Nova York;
+  - `planes`, que oferece dados sobre os aviões utilizados nos voos. Essas tabelas abrangentes permitem uma análise abrangente e detalhada do sistema de transporte aéreo da cidade de Nova York em 2013.
+
+Utilize o código abaixo para carregar o pacote na sua sessão.
+```{r}
+library(nycflights13)
+```
+  
+<!-- FAZER: tabea cm amstra de dads -->
+```{r eval=FALSE}
+library(tidyverse)
+
+set.seed(1)
+
+flights %>% 
+  slice_sample(n = 5)
+```
+
+```{r echo=FALSE}
+library(tidyverse)
+set.seed(1)
+
+if (knitr::is_html_output()){
+  flights %>% 
+    slice_sample(n = 5) %>% 
+    kable("html")
+} else {
+  flights %>% 
+    slice_sample(n = 5) %>% 
+    kable("latex")
+}
+```
+
+## Principais Conceitos
+
+### Tipos de Variáveis
+
+As variáveis em um conjunto de dados podem ser classificadas em diferentes tipos, dependendo da natureza da informação que representam. Existem dois principais tipos de variáveis: qualitativas e quantitativas.
+
+#### Variáveis Qualitativas
+
+São características não numéricas que descrevem qualidades ou atributos dos elementos em estudo. Podem ser subdivididas em:
+
+- **Nominal**: Não possuem ordem intrínseca. Exemplos incluem origem (`orign`: EWR, LGA, JFK) e destino (`dest`: IAH, MIA, BQN) dos voos.
+- **Ordinal**: Possuem uma ordem intrínseca, indicando um grau ou posição. Exemplos incluem mês (`month`) e dia (`day`).
+
+#### Variáveis Quantitativas
+
+Representam quantidades numéricas mensuráveis. Podem ser subdivididas em contínuas e discretas:
+
+- **Contínua**: Podem assumir qualquer valor dentro de um intervalo. Exemplos incluem tempo de voo (`air_time`) em minutos e distância percorrida (`distance`) em milhas.
+- **Discreta**: São contáveis e assumem valores inteiros. Exemplos incluem hora programada da partida (`hour`) e minuto programado da partida (`minute`).
+
+### Medidas Descritivas
+
+As medidas descritivas são ferramentas essenciais para resumir e interpretar as características fundamentais de uma distribuição de dados.
+
+
+#### Medidas de Posição:
+
+As medidas de posição fornecem informações sobre a localização dos dados dentro da distribuição.
+
+- **Mínimo**: O menor valor observado no conjunto de dados.
+- **Máximo**: O maior valor observado no conjunto de dados.
+- **Moda**: O valor que ocorre com maior frequência no conjunto de dados.
+- **Média**: A média aritmética dos valores no conjunto de dados.
+- **Mediana**: O valor que separa os dados em duas metades, onde metade dos dados estão abaixo dela e metade acima.
+- **Percentis**: São os valores que dividem uma amostra ordenada em cem partes iguais. O percentil 50 é equivalente à mediana.
+
+#### Medidas de Dispersão:
+
+As medidas de dispersão indicam o quão espalhados os dados estão em torno da medida de posição central. 
+
+- **Amplitude**: A diferença entre o maior e o menor valor no conjunto de dados.
+- **Distância Interquartil**: A diferença entre o terceiro quartil (Q3) e o primeiro quartil (Q1). Ela indica a dispersão dos valores centrais.
+- **Variância**: A média dos quadrados das diferenças entre cada valor e a média.
+- **Desvio Padrão**: A raiz quadrada da variância. Indica a dispersão dos valores em relação à média.
+- **Coeficiente de Variação**: É a razão entre o desvio padrão e a média, expressa como uma porcentagem. Fornece uma medida relativa da variabilidade em relação à magnitude da média.
+
+## Estudo de Caso: Analisando dados de voos de Nova York
+
+A função `summary()` do R, quando aplicada a um dataframe, fornece um resumo estatístico das variáveis contidas no dataframe, incluindo contagem de observações, média, desvio padrão, mínimo, máximo e quartis para variáveis numéricas, além da contagem de valores únicos e dos valores mais frequentes para variáveis categóricas.
+
+
+```{r warning=FALSE, message=FALSE}
+library(skimr)
+
+skim(flights)
+```
+
+### Visualização de dados
+
+A visualização de dados é essencial na análise de dados, transformando valores em representações visuais claras. 
+Os gráficos facilitam a identificação de padrões e tendências, além de melhorar a comunicação dos resultados, contribuindo para a tomada de decisões informadas.
+
+#### Histograma
+Um histograma é útil para representar a distribuição de uma variável quantitativa. Ele divide os dados em intervalos e mostra a frequência de observações em cada intervalo.
 
 ```{r}
-1 + 1
+
+ggplot(flights, aes(x = air_time)) +
+  geom_histogram(binwidth = 30, fill = "skyblue", color = "black") +
+  labs(title = "Distribuição do Tempo de Voo", 
+       x = "Tempo de Voo (minutos)", 
+       y = "Frequência")
 ```
+
+#### Boxplot (Gráfico de Caixa)
+
+Um boxplot é útil para visualizar a distribuição, a mediana e a dispersão dos dados. Ele representa os quartis, a mediana e os possíveis valores discrepantes.
+
+Os principais elementos de um boxplot incluem:
+
+1. **Caixa (Box)**: A caixa do boxplot representa o intervalo interquartil (IQR), que é a distância entre o primeiro quartil (Q1) e o terceiro quartil (Q3). Ela abrange o meio dos dados e mostra onde está localizada a maior parte dos valores.
+
+2. **Linha Mediana (Mediana)**: A linha dentro da caixa representa a mediana dos dados, que é o valor que divide o conjunto de dados ao meio.
+
+3. **Whiskers (Hastes)**: As hastes que se estendem para fora da caixa, conhecidas como whiskers, mostram a extensão dos dados. Podem ser calculadas de diferentes maneiras, mas geralmente estendem-se até 1,5 vezes o IQR a partir dos quartis.
+
+4. **Outliers (Valores Atípicos)**: Valores que estão além das extremidades dos whiskers são considerados outliers e são representados individualmente no gráfico.
+
+5. **Pontos**: Além dos outliers, pontos individuais podem ser mostrados no gráfico para representar dados que são excepcionalmente distantes da maioria dos valores.
+
+Esses elementos combinados fornecem uma representação concisa e informativa da distribuição dos dados, destacando medidas de tendência central, variabilidade e presença de valores atípicos.
+
+```{r}
+# Criando um boxplot para a variável "distance"
+ggplot(flights, aes(y = distance)) +
+  geom_boxplot(fill = "lightgreen", color = "black") +
+  labs(title = "Distribuição da Distância dos Voos", y = "Distância (milhas)")
+```
+
+#### Gráfico de Densidade
+
+Um gráfico de densidade é útil para visualizar a distribuição de uma variável quantitativa de forma suavizada.
+
+```{r}
+# Criando um gráfico de densidade para a variável "dep_delay"
+ggplot(flights, aes(x = dep_delay)) +
+  geom_density(fill = "lightcoral", color = "black") +
+  labs(title = "Densidade do Atraso na Partida", 
+       x = "Atraso na Partida (minutos)", 
+       y = "Densidade")
+
+```
+
+#### Gráfico de Dispersão
+
+Um gráfico de dispersão é útil para visualizar a relação entre duas variáveis quantitativas. Ele mostra como uma variável depende da outra.
+
+```{r cache=TRUE}
+# Criando um gráfico de dispersão para a relação entre "air_time" e "distance"
+ggplot(flights, aes(x = air_time, y = distance)) +
+  geom_point(color = "darkorange", alpha=0.8) +
+  labs(title = "Relação entre Tempo de Voo e Distância", 
+       x = "Tempo de Voo (minutos)", 
+       y = "Distância (milhas)")
+
+```
+
+#### Gráfico de Barras
+
+Um gráfico de barras é útil para representar a frequência de ocorrência de diferentes categorias em uma variável discreta.
+
+
+```{r}
+# Criando um gráfico de barras para a variável "origin"
+ggplot(flights, aes(x = origin)) +
+  geom_bar(fill = "lightblue", color = "black") +
+  labs(title = "Frequência de Voos por Origem", 
+       x = "Origem", 
+       y = "Frequência")
+```
+
+#### Gráfico de Setores (Pizza)
+
+Um gráfico de setores é útil para representar a proporção de cada categoria em relação ao total.
+
+```{r}
+# Criando um gráfico de setores para a variável "origin"
+ggplot(flights, aes(x = "", fill = origin)) +
+  geom_bar(width = 1) +
+  coord_polar(theta = "y") +
+  labs(title = "Proporção de Voos por Destino", fill = "Origem", 
+       x = NULL, y = NULL)+
+  scale_fill_manual(values = c("EWR" = "skyblue", 
+                               "LGA" = "lightgreen", 
+                               "JFK" = "salmon"))  # Definindo cores personalizadas
+
+```
+
+#### Gráfico de Mosaico
+
+Um gráfico de mosaico é útil para visualizar a relação entre duas variáveis categóricas, mostrando a proporção de cada categoria em cada nível da outra variável.
+
+```{r}
+# Criando um gráfico de mosaico para a relação entre "origin" e dia da semana do voo.
+flights %>%  
+  mutate(day_of_week = factor(weekdays(as.Date(time_hour)),
+                              levels = c("domingo", "segunda-feira", 
+                                         "terça-feira", "quarta-feira", 
+                                         "quinta-feira", "sexta-feira", 
+                                         "sábado"))) %>% 
+  ggplot(aes(x = origin, fill = day_of_week)) +
+  geom_bar(position = "fill") +
+  labs(title = "Relação entre Origem e Dia da Semana", 
+       fill = "Dia da Semana", 
+       x = "Origem", 
+       y = "Proporção")+
+  scale_fill_manual(values=RColorBrewer::brewer.pal(7, "Set2"))
+
+```
+
+## Associação entre Duas Variáveis
+Na análise de dados, é comum investigar a associação entre duas variáveis para entender como elas estão relacionadas ou se influenciam mutuamente. A associação entre duas variáveis pode ser examinada usando diferentes técnicas estatísticas e gráficas, dependendo do tipo de variáveis envolvidas.
+
+
+Um exemplo de análise de associação entre duas variáveis pode ser feito ao contar o número de voos de cada origem para cada destino e selecionar os 5 destinos mais frequentes para cada origem, podemos explorar a associação entre origem e destin
+O código abaixo fornece os 5 destinos mais frequentes a partir de cada origem, permitindo-nos explorar a associação entre origem e destino de voos.
+
+```{r}
+most_frequent_dest <- flights %>% 
+  group_by(origin, dest) %>% 
+  count() %>% 
+  arrange(desc(n)) %>%  
+  group_by(origin) %>%
+  slice_max(n, n = 5)
+
+most_frequent_dest %>% 
+  kableExtra::kable()
+```
+
+Além da análise tabular, também podemos visualizar os destinos mais frequentes por origem usando um gráfico de barras.
+```{r}
+# Gráfico de barras dos destinos mais frequentes por origem
+library(tidytext)
+ggplot(most_frequent_dest, aes(x = reorder_within(dest,n,dest), y = n, fill = dest)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  scale_x_reordered() +
+  labs(title = "Destinos Mais Frequentes por Origem", 
+       x = "Origem", 
+       y = "Número de Voos", 
+       fill = "Destino") +
+  facet_grid(~origin, scales = "free_x") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+```
+
+Podemos investigar se existe alguma relação entre a distância do voo e o atraso médio. Para explorar essa relação, podemos criar um gráfico de dispersão que mostra a distância média em relação ao atraso médio para cada destino.
+
+```{r}
+library(plotly)
+grafico <- flights %>% 
+  filter(!is.na(distance), !is.na(arr_delay)) %>%
+  group_by(dest) %>%
+  summarise(distance = mean(distance),
+            delay = mean(arr_delay)) %>% 
+  mutate(sinal = ifelse(delay > 0, "Atrasou", "Adiantou")) %>%
+  ggplot(aes(x = distance, y = delay, label = dest, color = sinal))+
+  geom_point() +  
+  scale_color_manual(values = c("Adiantou" = "lightgreen", 
+                                "Atrasou" = "salmon")) +  # Definindo cores manualmente
+  labs(title = "Relação entre Distância Média e Atraso Médio por Destino", 
+       x = "Distância Média (milhas)", 
+       y = "Atraso Médio (minutos)", 
+       color = "Atraso / Adiantamento")
+```
+
+```{r echo=FALSE}
+if (knitr::is_html_output()){
+  ggplotly(grafico)
+} else {
+  grafico
+}
+```
+
+**Exercício:** quais outras variáveis poderiam ter suas relações exploradas? 
+
+
+## Sugestão de Referência
+
+O site [Data to Viz](https://www.data-to-viz.com/) é uma excelente referência online que fornece orientações sobre a escolha adequada de tipos de gráficos com base no tipo de dados disponíveis. 
+Esta plataforma oferece uma abordagem prática e acessível para ajudar as pessoas a selecionar visualizações apropriadas para seus conjuntos de dados.
+
+A plataforma apresenta uma ampla galeria de gráficos, incluindo gráficos de dispersão, barras, linhas, áreas, mapas e muito mais. Cada tipo de gráfico é acompanhado por exemplos e instruções claras de implementação.
+Além de recomendar visualizações específicas, o Data to Viz também fornece dicas e orientações sobre boas práticas de visualização, incluindo interpretação de gráficos e considerações éticas.
+
+
+
+
