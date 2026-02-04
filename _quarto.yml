@@ -1,0 +1,27 @@
+project:
+  type: book
+
+book:
+  title: "Aplicações de Ciência de Dados"
+  author: "Magno T. F. Severino"
+  date: "03/02/2026"
+  chapters:
+    - index.qmd
+    - 01_analise_descritiva.qmd
+    # - summary.qmd
+    # - references.qmd
+
+# bibliography: references.bib
+
+format:
+  html:
+    theme:
+      - cosmo
+      - brand
+    toc: true
+    number-sections: true
+  pdf:
+    documentclass: scrreprt
+
+editor: source
+
