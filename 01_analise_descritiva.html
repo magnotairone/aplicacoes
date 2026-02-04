@@ -1,0 +1,1518 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="pt-BR" xml:lang="pt-BR"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.8.25">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>1&nbsp; Análise Descritiva de Dados – Aplicações de Ciência de Dados</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./index.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/axe/axe-check.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-7b89279ff1a6dce999919e0e67d4d9ec.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-70a47bd5681a7291082a5b9f83d58762.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "Nenhum resultado",
+    "search-matching-documents-text": "documentos correspondentes",
+    "search-copy-link-title": "Copiar link para a busca",
+    "search-hide-matches-text": "Esconder correspondências adicionais",
+    "search-more-match-text": "mais correspondência neste documento",
+    "search-more-matches-text": "mais correspondências neste documento",
+    "search-clear-button-title": "Limpar",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancelar",
+    "search-submit-button-title": "Enviar",
+    "search-label": "Procurar"
+  }
+}</script>
+<link href="site_libs/htmltools-fill-0.5.8.1/fill.css" rel="stylesheet">
+
+<script src="site_libs/htmlwidgets-1.6.4/htmlwidgets.js"></script>
+
+<script src="site_libs/plotly-binding-4.11.0/plotly.js"></script>
+
+<script src="site_libs/typedarray-0.1/typedarray.min.js"></script>
+
+<script src="site_libs/jquery-3.5.1/jquery.min.js"></script>
+
+<link href="site_libs/crosstalk-1.2.2/css/crosstalk.min.css" rel="stylesheet">
+
+<script src="site_libs/crosstalk-1.2.2/js/crosstalk.min.js"></script>
+
+<link href="site_libs/plotly-htmlwidgets-css-2.11.1/plotly-htmlwidgets.css" rel="stylesheet">
+
+<script src="site_libs/plotly-main-2.11.1/plotly-latest.min.js"></script>
+
+
+
+</head>
+
+<body class="nav-sidebar floating quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Alternar barra lateral" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./01_analise_descritiva.html"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Análise Descritiva de Dados</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Alternar barra lateral" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Procurar" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header sidebar-header-stacked">
+      <a href="./index.html" class="sidebar-logo-link">
+      </a>
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">Aplicações de Ciência de Dados</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Procurar"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Introdução</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./01_analise_descritiva.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Análise Descritiva de Dados</span></span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Índice</h2>
+   
+  <ul>
+  <li><a href="#principais-conceitos" id="toc-principais-conceitos" class="nav-link active" data-scroll-target="#principais-conceitos"><span class="header-section-number">1.1</span> Principais Conceitos</a>
+  <ul class="collapse">
+  <li><a href="#tipos-de-variáveis" id="toc-tipos-de-variáveis" class="nav-link" data-scroll-target="#tipos-de-variáveis"><span class="header-section-number">1.1.1</span> Tipos de Variáveis</a></li>
+  <li><a href="#medidas-descritivas" id="toc-medidas-descritivas" class="nav-link" data-scroll-target="#medidas-descritivas"><span class="header-section-number">1.1.2</span> Medidas Descritivas</a></li>
+  </ul></li>
+  <li><a href="#estudo-de-caso-analisando-dados-de-voos-de-nova-york" id="toc-estudo-de-caso-analisando-dados-de-voos-de-nova-york" class="nav-link" data-scroll-target="#estudo-de-caso-analisando-dados-de-voos-de-nova-york"><span class="header-section-number">1.2</span> Estudo de Caso: Analisando dados de voos de Nova York</a>
+  <ul class="collapse">
+  <li><a href="#visualização-de-dados" id="toc-visualização-de-dados" class="nav-link" data-scroll-target="#visualização-de-dados"><span class="header-section-number">1.2.1</span> Visualização de dados</a></li>
+  </ul></li>
+  <li><a href="#associação-entre-duas-variáveis" id="toc-associação-entre-duas-variáveis" class="nav-link" data-scroll-target="#associação-entre-duas-variáveis"><span class="header-section-number">1.3</span> Associação entre Duas Variáveis</a></li>
+  <li><a href="#sugestão-de-referência" id="toc-sugestão-de-referência" class="nav-link" data-scroll-target="#sugestão-de-referência"><span class="header-section-number">1.4</span> Sugestão de Referência</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Análise Descritiva de Dados</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>O objetivo deste capítulo é oferecer uma compreensão abrangente da análise descritiva de dados, fundamental em estatística e ciência de dados. Essa análise permite explorar e resumir características importantes dos dados, oferecendo insights iniciais para análises mais detalhadas.</p>
+<p>Para exemplificar os conceitos abordados neste relatório, utilizaremos o conjunto de dados do pacote R <code>{nycflights13}</code>. Este pacote contém diversas tabelas que fornecem informações detalhadas sobre voos que partiram dos aeroportos de Nova York em 2013, dentre elas:</p>
+<ul>
+<li><code>flights</code>, que contém informações sobre voos, como horários de partida e chegada, companhias aéreas, destinos e atrasos;</li>
+<li><code>weather</code>, que fornece dados meteorológicos relacionados aos aeroportos de Nova York durante o ano de 2013;</li>
+<li><code>airlines</code>, que lista informações sobre as companhias aéreas que operam em Nova York;</li>
+<li><code>airports</code>, que contém detalhes sobre os aeroportos de Nova York;</li>
+<li><code>planes</code>, que oferece dados sobre os aviões utilizados nos voos. Essas tabelas abrangentes permitem uma análise abrangente e detalhada do sistema de transporte aéreo da cidade de Nova York em 2013.</li>
+</ul>
+<p>Utilize o código abaixo para carregar o pacote na sua sessão.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(nycflights13)</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<!-- FAZER: tabea cm amstra de dads -->
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1</span>)</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>flights <span class="sc">%&gt;%</span> </span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">slice_sample</span>(<span class="at">n =</span> <span class="dv">5</span>)</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="cell">
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: right;" data-quarto-table-cell-role="th">year</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">month</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">day</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">dep_time</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">sched_dep_time</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">dep_delay</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">arr_time</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">sched_arr_time</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">arr_delay</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">carrier</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">flight</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">tailnum</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">origin</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">dest</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">air_time</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">distance</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">hour</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">minute</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">time_hour</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">2013</td>
+<td style="text-align: right;">7</td>
+<td style="text-align: right;">8</td>
+<td style="text-align: right;">804</td>
+<td style="text-align: right;">730</td>
+<td style="text-align: right;">34</td>
+<td style="text-align: right;">1043</td>
+<td style="text-align: right;">1010</td>
+<td style="text-align: right;">33</td>
+<td style="text-align: left;">B6</td>
+<td style="text-align: right;">683</td>
+<td style="text-align: left;">N809JB</td>
+<td style="text-align: left;">JFK</td>
+<td style="text-align: left;">MCO</td>
+<td style="text-align: right;">129</td>
+<td style="text-align: right;">944</td>
+<td style="text-align: right;">7</td>
+<td style="text-align: right;">30</td>
+<td style="text-align: left;">2013-07-08 07:00:00</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">2013</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">23</td>
+<td style="text-align: right;">807</td>
+<td style="text-align: right;">810</td>
+<td style="text-align: right;">-3</td>
+<td style="text-align: right;">1102</td>
+<td style="text-align: right;">1111</td>
+<td style="text-align: right;">-9</td>
+<td style="text-align: left;">DL</td>
+<td style="text-align: right;">1167</td>
+<td style="text-align: left;">N303DQ</td>
+<td style="text-align: left;">JFK</td>
+<td style="text-align: left;">TPA</td>
+<td style="text-align: right;">158</td>
+<td style="text-align: right;">1005</td>
+<td style="text-align: right;">8</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: left;">2013-10-23 08:00:00</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">2013</td>
+<td style="text-align: right;">8</td>
+<td style="text-align: right;">8</td>
+<td style="text-align: right;">1258</td>
+<td style="text-align: right;">1255</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">1605</td>
+<td style="text-align: right;">1606</td>
+<td style="text-align: right;">-1</td>
+<td style="text-align: left;">UA</td>
+<td style="text-align: right;">1700</td>
+<td style="text-align: left;">N37409</td>
+<td style="text-align: left;">EWR</td>
+<td style="text-align: left;">SFO</td>
+<td style="text-align: right;">341</td>
+<td style="text-align: right;">2565</td>
+<td style="text-align: right;">12</td>
+<td style="text-align: right;">55</td>
+<td style="text-align: left;">2013-08-08 12:00:00</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">2013</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">13</td>
+<td style="text-align: right;">1813</td>
+<td style="text-align: right;">1815</td>
+<td style="text-align: right;">-2</td>
+<td style="text-align: right;">2036</td>
+<td style="text-align: right;">1958</td>
+<td style="text-align: right;">38</td>
+<td style="text-align: left;">9E</td>
+<td style="text-align: right;">4019</td>
+<td style="text-align: left;">N8432A</td>
+<td style="text-align: left;">JFK</td>
+<td style="text-align: left;">RIC</td>
+<td style="text-align: right;">55</td>
+<td style="text-align: right;">288</td>
+<td style="text-align: right;">18</td>
+<td style="text-align: right;">15</td>
+<td style="text-align: left;">2013-01-13 18:00:00</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">2013</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">23</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">1931</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">2216</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: left;">EV</td>
+<td style="text-align: right;">4204</td>
+<td style="text-align: left;">N14117</td>
+<td style="text-align: left;">EWR</td>
+<td style="text-align: left;">OKC</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">1325</td>
+<td style="text-align: right;">19</td>
+<td style="text-align: right;">31</td>
+<td style="text-align: left;">2013-05-23 19:00:00</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<section id="principais-conceitos" class="level2" data-number="1.1">
+<h2 data-number="1.1" class="anchored" data-anchor-id="principais-conceitos"><span class="header-section-number">1.1</span> Principais Conceitos</h2>
+<section id="tipos-de-variáveis" class="level3" data-number="1.1.1">
+<h3 data-number="1.1.1" class="anchored" data-anchor-id="tipos-de-variáveis"><span class="header-section-number">1.1.1</span> Tipos de Variáveis</h3>
+<p>As variáveis em um conjunto de dados podem ser classificadas em diferentes tipos, dependendo da natureza da informação que representam. Existem dois principais tipos de variáveis: qualitativas e quantitativas.</p>
+<section id="variáveis-qualitativas" class="level4">
+<h4 class="anchored" data-anchor-id="variáveis-qualitativas">Variáveis Qualitativas</h4>
+<p>São características não numéricas que descrevem qualidades ou atributos dos elementos em estudo. Podem ser subdivididas em:</p>
+<ul>
+<li><strong>Nominal</strong>: Não possuem ordem intrínseca. Exemplos incluem origem (<code>orign</code>: EWR, LGA, JFK) e destino (<code>dest</code>: IAH, MIA, BQN) dos voos.</li>
+<li><strong>Ordinal</strong>: Possuem uma ordem intrínseca, indicando um grau ou posição. Exemplos incluem mês (<code>month</code>) e dia (<code>day</code>).</li>
+</ul>
+</section>
+<section id="variáveis-quantitativas" class="level4">
+<h4 class="anchored" data-anchor-id="variáveis-quantitativas">Variáveis Quantitativas</h4>
+<p>Representam quantidades numéricas mensuráveis. Podem ser subdivididas em contínuas e discretas:</p>
+<ul>
+<li><strong>Contínua</strong>: Podem assumir qualquer valor dentro de um intervalo. Exemplos incluem tempo de voo (<code>air_time</code>) em minutos e distância percorrida (<code>distance</code>) em milhas.</li>
+<li><strong>Discreta</strong>: São contáveis e assumem valores inteiros. Exemplos incluem hora programada da partida (<code>hour</code>) e minuto programado da partida (<code>minute</code>).</li>
+</ul>
+</section>
+</section>
+<section id="medidas-descritivas" class="level3" data-number="1.1.2">
+<h3 data-number="1.1.2" class="anchored" data-anchor-id="medidas-descritivas"><span class="header-section-number">1.1.2</span> Medidas Descritivas</h3>
+<p>As medidas descritivas são ferramentas essenciais para resumir e interpretar as características fundamentais de uma distribuição de dados.</p>
+<section id="medidas-de-posição" class="level4">
+<h4 class="anchored" data-anchor-id="medidas-de-posição">Medidas de Posição:</h4>
+<p>As medidas de posição fornecem informações sobre a localização dos dados dentro da distribuição.</p>
+<ul>
+<li><strong>Mínimo</strong>: O menor valor observado no conjunto de dados.</li>
+<li><strong>Máximo</strong>: O maior valor observado no conjunto de dados.</li>
+<li><strong>Moda</strong>: O valor que ocorre com maior frequência no conjunto de dados.</li>
+<li><strong>Média</strong>: A média aritmética dos valores no conjunto de dados.</li>
+<li><strong>Mediana</strong>: O valor que separa os dados em duas metades, onde metade dos dados estão abaixo dela e metade acima.</li>
+<li><strong>Percentis</strong>: São os valores que dividem uma amostra ordenada em cem partes iguais. O percentil 50 é equivalente à mediana.</li>
+</ul>
+</section>
+<section id="medidas-de-dispersão" class="level4">
+<h4 class="anchored" data-anchor-id="medidas-de-dispersão">Medidas de Dispersão:</h4>
+<p>As medidas de dispersão indicam o quão espalhados os dados estão em torno da medida de posição central.</p>
+<ul>
+<li><strong>Amplitude</strong>: A diferença entre o maior e o menor valor no conjunto de dados.</li>
+<li><strong>Distância Interquartil</strong>: A diferença entre o terceiro quartil (Q3) e o primeiro quartil (Q1). Ela indica a dispersão dos valores centrais.</li>
+<li><strong>Variância</strong>: A média dos quadrados das diferenças entre cada valor e a média.</li>
+<li><strong>Desvio Padrão</strong>: A raiz quadrada da variância. Indica a dispersão dos valores em relação à média.</li>
+<li><strong>Coeficiente de Variação</strong>: É a razão entre o desvio padrão e a média, expressa como uma porcentagem. Fornece uma medida relativa da variabilidade em relação à magnitude da média.</li>
+</ul>
+</section>
+</section>
+</section>
+<section id="estudo-de-caso-analisando-dados-de-voos-de-nova-york" class="level2" data-number="1.2">
+<h2 data-number="1.2" class="anchored" data-anchor-id="estudo-de-caso-analisando-dados-de-voos-de-nova-york"><span class="header-section-number">1.2</span> Estudo de Caso: Analisando dados de voos de Nova York</h2>
+<p>A função <code>summary()</code> do R, quando aplicada a um dataframe, fornece um resumo estatístico das variáveis contidas no dataframe, incluindo contagem de observações, média, desvio padrão, mínimo, máximo e quartis para variáveis numéricas, além da contagem de valores únicos e dos valores mais frequentes para variáveis categóricas.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(skimr)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="fu">skim</span>(flights)</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<caption>Data summary</caption>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Name</td>
+<td style="text-align: left;">flights</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Number of rows</td>
+<td style="text-align: left;">33677</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Number of columns</td>
+<td style="text-align: left;">19</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">_______________________</td>
+<td style="text-align: left;"></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Column type frequency:</td>
+<td style="text-align: left;"></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">factor</td>
+<td style="text-align: left;">4</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">numeric</td>
+<td style="text-align: left;">14</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">POSIXct</td>
+<td style="text-align: left;">1</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">________________________</td>
+<td style="text-align: left;"></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Group variables</td>
+<td style="text-align: left;">None</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Variable type: factor</strong></p>
+<table class="caption-top table table-sm table-striped small">
+<colgroup>
+<col style="width: 14%">
+<col style="width: 10%">
+<col style="width: 14%">
+<col style="width: 8%">
+<col style="width: 9%">
+<col style="width: 43%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">skim_variable</th>
+<th style="text-align: right;">n_missing</th>
+<th style="text-align: right;">complete_rate</th>
+<th style="text-align: left;">ordered</th>
+<th style="text-align: right;">n_unique</th>
+<th style="text-align: left;">top_counts</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">carrier</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">16</td>
+<td style="text-align: left;">UA: 5963, EV: 5426, B6: 5403, DL: 4877</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">tailnum</td>
+<td style="text-align: right;">246</td>
+<td style="text-align: right;">0.99</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">3509</td>
+<td style="text-align: left;">N71: 60, N71: 54, N72: 54, N72: 49</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">origin</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: left;">EWR: 12239, JFK: 10917, LGA: 10521</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">dest</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">99</td>
+<td style="text-align: left;">ATL: 1765, ORD: 1709, LAX: 1601, MCO: 1523</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Variable type: numeric</strong></p>
+<table class="caption-top table table-sm table-striped small">
+<colgroup>
+<col style="width: 17%">
+<col style="width: 11%">
+<col style="width: 16%">
+<col style="width: 9%">
+<col style="width: 9%">
+<col style="width: 5%">
+<col style="width: 5%">
+<col style="width: 5%">
+<col style="width: 5%">
+<col style="width: 5%">
+<col style="width: 6%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">skim_variable</th>
+<th style="text-align: right;">n_missing</th>
+<th style="text-align: right;">complete_rate</th>
+<th style="text-align: right;">mean</th>
+<th style="text-align: right;">sd</th>
+<th style="text-align: right;">p0</th>
+<th style="text-align: right;">p25</th>
+<th style="text-align: right;">p50</th>
+<th style="text-align: right;">p75</th>
+<th style="text-align: right;">p100</th>
+<th style="text-align: left;">hist</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">year</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">2013.00</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">2013</td>
+<td style="text-align: right;">2013</td>
+<td style="text-align: right;">2013</td>
+<td style="text-align: right;">2013</td>
+<td style="text-align: right;">2013</td>
+<td style="text-align: left;">▁▁▇▁▁</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">month</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">6.53</td>
+<td style="text-align: right;">3.41</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">7</td>
+<td style="text-align: right;">9</td>
+<td style="text-align: right;">12</td>
+<td style="text-align: left;">▇▆▆▆▇</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">day</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">15.72</td>
+<td style="text-align: right;">8.79</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">8</td>
+<td style="text-align: right;">16</td>
+<td style="text-align: right;">23</td>
+<td style="text-align: right;">31</td>
+<td style="text-align: left;">▇▇▇▇▆</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">dep_time</td>
+<td style="text-align: right;">824</td>
+<td style="text-align: right;">0.98</td>
+<td style="text-align: right;">1353.50</td>
+<td style="text-align: right;">488.88</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">909</td>
+<td style="text-align: right;">1408</td>
+<td style="text-align: right;">1749</td>
+<td style="text-align: right;">2400</td>
+<td style="text-align: left;">▁▇▆▇▃</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sched_dep_time</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">1349.38</td>
+<td style="text-align: right;">468.84</td>
+<td style="text-align: right;">500</td>
+<td style="text-align: right;">910</td>
+<td style="text-align: right;">1400</td>
+<td style="text-align: right;">1730</td>
+<td style="text-align: right;">2359</td>
+<td style="text-align: left;">▇▆▇▇▃</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">dep_delay</td>
+<td style="text-align: right;">824</td>
+<td style="text-align: right;">0.98</td>
+<td style="text-align: right;">12.45</td>
+<td style="text-align: right;">39.93</td>
+<td style="text-align: right;">-32</td>
+<td style="text-align: right;">-5</td>
+<td style="text-align: right;">-1</td>
+<td style="text-align: right;">11</td>
+<td style="text-align: right;">1137</td>
+<td style="text-align: left;">▇▁▁▁▁</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">arr_time</td>
+<td style="text-align: right;">872</td>
+<td style="text-align: right;">0.97</td>
+<td style="text-align: right;">1503.77</td>
+<td style="text-align: right;">536.23</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1105</td>
+<td style="text-align: right;">1538</td>
+<td style="text-align: right;">1944</td>
+<td style="text-align: right;">2400</td>
+<td style="text-align: left;">▁▃▇▇▇</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sched_arr_time</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">1539.85</td>
+<td style="text-align: right;">499.94</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1125</td>
+<td style="text-align: right;">1600</td>
+<td style="text-align: right;">1951</td>
+<td style="text-align: right;">2359</td>
+<td style="text-align: left;">▁▃▇▇▇</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">arr_delay</td>
+<td style="text-align: right;">960</td>
+<td style="text-align: right;">0.97</td>
+<td style="text-align: right;">6.80</td>
+<td style="text-align: right;">44.49</td>
+<td style="text-align: right;">-70</td>
+<td style="text-align: right;">-17</td>
+<td style="text-align: right;">-5</td>
+<td style="text-align: right;">14</td>
+<td style="text-align: right;">1127</td>
+<td style="text-align: left;">▇▁▁▁▁</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">flight</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">1970.27</td>
+<td style="text-align: right;">1632.59</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">561</td>
+<td style="text-align: right;">1496</td>
+<td style="text-align: right;">3465</td>
+<td style="text-align: right;">6181</td>
+<td style="text-align: left;">▇▅▂▃▁</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">air_time</td>
+<td style="text-align: right;">960</td>
+<td style="text-align: right;">0.97</td>
+<td style="text-align: right;">150.95</td>
+<td style="text-align: right;">92.77</td>
+<td style="text-align: right;">22</td>
+<td style="text-align: right;">83</td>
+<td style="text-align: right;">130</td>
+<td style="text-align: right;">192</td>
+<td style="text-align: right;">667</td>
+<td style="text-align: left;">▇▃▂▁▁</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">distance</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">1041.68</td>
+<td style="text-align: right;">724.33</td>
+<td style="text-align: right;">80</td>
+<td style="text-align: right;">509</td>
+<td style="text-align: right;">888</td>
+<td style="text-align: right;">1389</td>
+<td style="text-align: right;">4983</td>
+<td style="text-align: left;">▇▃▂▁▁</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">hour</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">13.23</td>
+<td style="text-align: right;">4.68</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">9</td>
+<td style="text-align: right;">14</td>
+<td style="text-align: right;">17</td>
+<td style="text-align: right;">23</td>
+<td style="text-align: left;">▇▆▆▇▃</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">minute</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">26.19</td>
+<td style="text-align: right;">19.31</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">8</td>
+<td style="text-align: right;">29</td>
+<td style="text-align: right;">44</td>
+<td style="text-align: right;">59</td>
+<td style="text-align: left;">▇▃▆▃▅</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Variable type: POSIXct</strong></p>
+<table class="caption-top table table-sm table-striped small">
+<colgroup>
+<col style="width: 13%">
+<col style="width: 9%">
+<col style="width: 13%">
+<col style="width: 18%">
+<col style="width: 18%">
+<col style="width: 18%">
+<col style="width: 8%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">skim_variable</th>
+<th style="text-align: right;">n_missing</th>
+<th style="text-align: right;">complete_rate</th>
+<th style="text-align: left;">min</th>
+<th style="text-align: left;">max</th>
+<th style="text-align: left;">median</th>
+<th style="text-align: right;">n_unique</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">time_hour</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">2013-01-01 05:00:00</td>
+<td style="text-align: left;">2013-12-31 21:00:00</td>
+<td style="text-align: left;">2013-07-02 16:00:00</td>
+<td style="text-align: right;">6231</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<section id="visualização-de-dados" class="level3" data-number="1.2.1">
+<h3 data-number="1.2.1" class="anchored" data-anchor-id="visualização-de-dados"><span class="header-section-number">1.2.1</span> Visualização de dados</h3>
+<p>A visualização de dados é essencial na análise de dados, transformando valores em representações visuais claras. Os gráficos facilitam a identificação de padrões e tendências, além de melhorar a comunicação dos resultados, contribuindo para a tomada de decisões informadas.</p>
+<section id="histograma" class="level4">
+<h4 class="anchored" data-anchor-id="histograma">Histograma</h4>
+<p>Um histograma é útil para representar a distribuição de uma variável quantitativa. Ele divide os dados em intervalos e mostra a frequência de observações em cada intervalo.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(flights, <span class="fu">aes</span>(<span class="at">x =</span> air_time)) <span class="sc">+</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="at">binwidth =</span> <span class="dv">30</span>, <span class="at">fill =</span> <span class="st">"skyblue"</span>, <span class="at">color =</span> <span class="st">"black"</span>) <span class="sc">+</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Distribuição do Tempo de Voo"</span>, </span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Tempo de Voo (minutos)"</span>, </span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Frequência"</span>)</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="01_analise_descritiva_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="boxplot-gráfico-de-caixa" class="level4">
+<h4 class="anchored" data-anchor-id="boxplot-gráfico-de-caixa">Boxplot (Gráfico de Caixa)</h4>
+<p>Um boxplot é útil para visualizar a distribuição, a mediana e a dispersão dos dados. Ele representa os quartis, a mediana e os possíveis valores discrepantes.</p>
+<p>Os principais elementos de um boxplot incluem:</p>
+<ol type="1">
+<li><p><strong>Caixa (Box)</strong>: A caixa do boxplot representa o intervalo interquartil (IQR), que é a distância entre o primeiro quartil (Q1) e o terceiro quartil (Q3). Ela abrange o meio dos dados e mostra onde está localizada a maior parte dos valores.</p></li>
+<li><p><strong>Linha Mediana (Mediana)</strong>: A linha dentro da caixa representa a mediana dos dados, que é o valor que divide o conjunto de dados ao meio.</p></li>
+<li><p><strong>Whiskers (Hastes)</strong>: As hastes que se estendem para fora da caixa, conhecidas como whiskers, mostram a extensão dos dados. Podem ser calculadas de diferentes maneiras, mas geralmente estendem-se até 1,5 vezes o IQR a partir dos quartis.</p></li>
+<li><p><strong>Outliers (Valores Atípicos)</strong>: Valores que estão além das extremidades dos whiskers são considerados outliers e são representados individualmente no gráfico.</p></li>
+<li><p><strong>Pontos</strong>: Além dos outliers, pontos individuais podem ser mostrados no gráfico para representar dados que são excepcionalmente distantes da maioria dos valores.</p></li>
+</ol>
+<p>Esses elementos combinados fornecem uma representação concisa e informativa da distribuição dos dados, destacando medidas de tendência central, variabilidade e presença de valores atípicos.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Criando um boxplot para a variável "distance"</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(flights, <span class="fu">aes</span>(<span class="at">y =</span> distance)) <span class="sc">+</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_boxplot</span>(<span class="at">fill =</span> <span class="st">"lightgreen"</span>, <span class="at">color =</span> <span class="st">"black"</span>) <span class="sc">+</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Distribuição da Distância dos Voos"</span>, <span class="at">y =</span> <span class="st">"Distância (milhas)"</span>)</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="01_analise_descritiva_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="gráfico-de-densidade" class="level4">
+<h4 class="anchored" data-anchor-id="gráfico-de-densidade">Gráfico de Densidade</h4>
+<p>Um gráfico de densidade é útil para visualizar a distribuição de uma variável quantitativa de forma suavizada.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Criando um gráfico de densidade para a variável "dep_delay"</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(flights, <span class="fu">aes</span>(<span class="at">x =</span> dep_delay)) <span class="sc">+</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_density</span>(<span class="at">fill =</span> <span class="st">"lightcoral"</span>, <span class="at">color =</span> <span class="st">"black"</span>) <span class="sc">+</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Densidade do Atraso na Partida"</span>, </span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Atraso na Partida (minutos)"</span>, </span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Densidade"</span>)</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="01_analise_descritiva_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="gráfico-de-dispersão" class="level4">
+<h4 class="anchored" data-anchor-id="gráfico-de-dispersão">Gráfico de Dispersão</h4>
+<p>Um gráfico de dispersão é útil para visualizar a relação entre duas variáveis quantitativas. Ele mostra como uma variável depende da outra.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Criando um gráfico de dispersão para a relação entre "air_time" e "distance"</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(flights, <span class="fu">aes</span>(<span class="at">x =</span> air_time, <span class="at">y =</span> distance)) <span class="sc">+</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">color =</span> <span class="st">"darkorange"</span>, <span class="at">alpha=</span><span class="fl">0.8</span>) <span class="sc">+</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Relação entre Tempo de Voo e Distância"</span>, </span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Tempo de Voo (minutos)"</span>, </span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Distância (milhas)"</span>)</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="01_analise_descritiva_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="gráfico-de-barras" class="level4">
+<h4 class="anchored" data-anchor-id="gráfico-de-barras">Gráfico de Barras</h4>
+<p>Um gráfico de barras é útil para representar a frequência de ocorrência de diferentes categorias em uma variável discreta.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Criando um gráfico de barras para a variável "origin"</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(flights, <span class="fu">aes</span>(<span class="at">x =</span> origin)) <span class="sc">+</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_bar</span>(<span class="at">fill =</span> <span class="st">"lightblue"</span>, <span class="at">color =</span> <span class="st">"black"</span>) <span class="sc">+</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Frequência de Voos por Origem"</span>, </span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Origem"</span>, </span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Frequência"</span>)</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="01_analise_descritiva_files/figure-html/unnamed-chunk-10-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="gráfico-de-setores-pizza" class="level4">
+<h4 class="anchored" data-anchor-id="gráfico-de-setores-pizza">Gráfico de Setores (Pizza)</h4>
+<p>Um gráfico de setores é útil para representar a proporção de cada categoria em relação ao total.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Criando um gráfico de setores para a variável "origin"</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(flights, <span class="fu">aes</span>(<span class="at">x =</span> <span class="st">""</span>, <span class="at">fill =</span> origin)) <span class="sc">+</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_bar</span>(<span class="at">width =</span> <span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">coord_polar</span>(<span class="at">theta =</span> <span class="st">"y"</span>) <span class="sc">+</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Proporção de Voos por Destino"</span>, <span class="at">fill =</span> <span class="st">"Origem"</span>, </span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="cn">NULL</span>, <span class="at">y =</span> <span class="cn">NULL</span>)<span class="sc">+</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">"EWR"</span> <span class="ot">=</span> <span class="st">"skyblue"</span>, </span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>                               <span class="st">"LGA"</span> <span class="ot">=</span> <span class="st">"lightgreen"</span>, </span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>                               <span class="st">"JFK"</span> <span class="ot">=</span> <span class="st">"salmon"</span>))  <span class="co"># Definindo cores personalizadas</span></span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="01_analise_descritiva_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="gráfico-de-mosaico" class="level4">
+<h4 class="anchored" data-anchor-id="gráfico-de-mosaico">Gráfico de Mosaico</h4>
+<p>Um gráfico de mosaico é útil para visualizar a relação entre duas variáveis categóricas, mostrando a proporção de cada categoria em cada nível da outra variável.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Criando um gráfico de mosaico para a relação entre "origin" e dia da semana do voo.</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>flights <span class="sc">%&gt;%</span>  </span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">day_of_week =</span> <span class="fu">factor</span>(<span class="fu">weekdays</span>(<span class="fu">as.Date</span>(time_hour)),</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>                              <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"domingo"</span>, <span class="st">"segunda-feira"</span>, </span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>                                         <span class="st">"terça-feira"</span>, <span class="st">"quarta-feira"</span>, </span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>                                         <span class="st">"quinta-feira"</span>, <span class="st">"sexta-feira"</span>, </span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>                                         <span class="st">"sábado"</span>))) <span class="sc">%&gt;%</span> </span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> origin, <span class="at">fill =</span> day_of_week)) <span class="sc">+</span></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_bar</span>(<span class="at">position =</span> <span class="st">"fill"</span>) <span class="sc">+</span></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Relação entre Origem e Dia da Semana"</span>, </span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>       <span class="at">fill =</span> <span class="st">"Dia da Semana"</span>, </span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Origem"</span>, </span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Proporção"</span>)<span class="sc">+</span></span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_manual</span>(<span class="at">values=</span>RColorBrewer<span class="sc">::</span><span class="fu">brewer.pal</span>(<span class="dv">7</span>, <span class="st">"Set2"</span>))</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="01_analise_descritiva_files/figure-html/unnamed-chunk-12-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+</section>
+</section>
+<section id="associação-entre-duas-variáveis" class="level2" data-number="1.3">
+<h2 data-number="1.3" class="anchored" data-anchor-id="associação-entre-duas-variáveis"><span class="header-section-number">1.3</span> Associação entre Duas Variáveis</h2>
+<p>Na análise de dados, é comum investigar a associação entre duas variáveis para entender como elas estão relacionadas ou se influenciam mutuamente. A associação entre duas variáveis pode ser examinada usando diferentes técnicas estatísticas e gráficas, dependendo do tipo de variáveis envolvidas.</p>
+<p>Um exemplo de análise de associação entre duas variáveis pode ser feito ao contar o número de voos de cada origem para cada destino e selecionar os 5 destinos mais frequentes para cada origem, podemos explorar a associação entre origem e destin O código abaixo fornece os 5 destinos mais frequentes a partir de cada origem, permitindo-nos explorar a associação entre origem e destino de voos.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>most_frequent_dest <span class="ot">&lt;-</span> flights <span class="sc">%&gt;%</span> </span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(origin, dest) <span class="sc">%&gt;%</span> </span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">count</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(n)) <span class="sc">%&gt;%</span>  </span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(origin) <span class="sc">%&gt;%</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">slice_max</span>(n, <span class="at">n =</span> <span class="dv">5</span>)</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>most_frequent_dest <span class="sc">%&gt;%</span> </span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>  kableExtra<span class="sc">::</span><span class="fu">kable</span>()</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;">origin</th>
+<th style="text-align: left;">dest</th>
+<th style="text-align: right;">n</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">EWR</td>
+<td style="text-align: left;">ORD</td>
+<td style="text-align: right;">622</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">EWR</td>
+<td style="text-align: left;">MCO</td>
+<td style="text-align: right;">553</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">EWR</td>
+<td style="text-align: left;">SFO</td>
+<td style="text-align: right;">549</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">EWR</td>
+<td style="text-align: left;">CLT</td>
+<td style="text-align: right;">516</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">EWR</td>
+<td style="text-align: left;">BOS</td>
+<td style="text-align: right;">512</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">JFK</td>
+<td style="text-align: left;">LAX</td>
+<td style="text-align: right;">1118</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">JFK</td>
+<td style="text-align: left;">SFO</td>
+<td style="text-align: right;">766</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">JFK</td>
+<td style="text-align: left;">MCO</td>
+<td style="text-align: right;">591</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">JFK</td>
+<td style="text-align: left;">BOS</td>
+<td style="text-align: right;">571</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">JFK</td>
+<td style="text-align: left;">SJU</td>
+<td style="text-align: right;">485</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">LGA</td>
+<td style="text-align: left;">ATL</td>
+<td style="text-align: right;">1065</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">LGA</td>
+<td style="text-align: left;">ORD</td>
+<td style="text-align: right;">879</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">LGA</td>
+<td style="text-align: left;">CLT</td>
+<td style="text-align: right;">646</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">LGA</td>
+<td style="text-align: left;">MIA</td>
+<td style="text-align: right;">567</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">LGA</td>
+<td style="text-align: left;">DFW</td>
+<td style="text-align: right;">493</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>Além da análise tabular, também podemos visualizar os destinos mais frequentes por origem usando um gráfico de barras.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Gráfico de barras dos destinos mais frequentes por origem</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidytext)</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(most_frequent_dest, <span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">reorder_within</span>(dest,n,dest), <span class="at">y =</span> n, <span class="at">fill =</span> dest)) <span class="sc">+</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_bar</span>(<span class="at">stat =</span> <span class="st">"identity"</span>, <span class="at">position =</span> <span class="st">"dodge"</span>) <span class="sc">+</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_x_reordered</span>() <span class="sc">+</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Destinos Mais Frequentes por Origem"</span>, </span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Origem"</span>, </span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Número de Voos"</span>, </span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>       <span class="at">fill =</span> <span class="st">"Destino"</span>) <span class="sc">+</span></span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_grid</span>(<span class="sc">~</span>origin, <span class="at">scales =</span> <span class="st">"free_x"</span>) <span class="sc">+</span></span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">angle =</span> <span class="dv">45</span>, <span class="at">hjust =</span> <span class="dv">1</span>))</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="01_analise_descritiva_files/figure-html/unnamed-chunk-14-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Podemos investigar se existe alguma relação entre a distância do voo e o atraso médio. Para explorar essa relação, podemos criar um gráfico de dispersão que mostra a distância média em relação ao atraso médio para cada destino.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(plotly)</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>grafico <span class="ot">&lt;-</span> flights <span class="sc">%&gt;%</span> </span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(distance), <span class="sc">!</span><span class="fu">is.na</span>(arr_delay)) <span class="sc">%&gt;%</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(dest) <span class="sc">%&gt;%</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">distance =</span> <span class="fu">mean</span>(distance),</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>            <span class="at">delay =</span> <span class="fu">mean</span>(arr_delay)) <span class="sc">%&gt;%</span> </span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">sinal =</span> <span class="fu">ifelse</span>(delay <span class="sc">&gt;</span> <span class="dv">0</span>, <span class="st">"Atrasou"</span>, <span class="st">"Adiantou"</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> distance, <span class="at">y =</span> delay, <span class="at">label =</span> dest, <span class="at">color =</span> sinal))<span class="sc">+</span></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span>  </span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">"Adiantou"</span> <span class="ot">=</span> <span class="st">"lightgreen"</span>, </span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>                                <span class="st">"Atrasou"</span> <span class="ot">=</span> <span class="st">"salmon"</span>)) <span class="sc">+</span>  <span class="co"># Definindo cores manualmente</span></span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Relação entre Distância Média e Atraso Médio por Destino"</span>, </span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Distância Média (milhas)"</span>, </span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Atraso Médio (minutos)"</span>, </span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>       <span class="at">color =</span> <span class="st">"Atraso / Adiantamento"</span>)</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="cell">
+<div class="cell-output-display">
+<div class="plotly html-widget html-fill-item" id="htmlwidget-b5ed4906484ed42468d8" style="width:100%;height:464px;"></div>
+<script type="application/json" data-for="htmlwidget-b5ed4906484ed42468d8">{"x":{"data":[{"x":[3370,116,378,2465,1207,4975.2222222222226,2241.1158940397349,2468.7039597737271,2412.366492146597,1986.1818181818182,2521,2434,652.25],"y":[-14.5,-2.8163265306122449,-4.6923076923076925,-3.6470588235294117,-10,-3.9629629629629628,-1.9337748344370862,-1.0590823381521055,-2.5392670157068062,-0.91774891774891776,-6.8499999999999996,-13.126436781609195,-8.875],"text":["distance: 3370.00000<br />delay: -14.5000000<br />dest: ANC<br />sinal: Adiantou","distance:  116.00000<br />delay:  -2.8163265<br />dest: BDL<br />sinal: Adiantou","distance:  378.00000<br />delay:  -4.6923077<br />dest: BGR<br />sinal: Adiantou","distance: 2465.00000<br />delay:  -3.6470588<br />dest: BUR<br />sinal: Adiantou","distance: 1207.00000<br />delay: -10.0000000<br />dest: EYW<br />sinal: Adiantou","distance: 4975.22222<br />delay:  -3.9629630<br />dest: HNL<br />sinal: Adiantou","distance: 2241.11589<br />delay:  -1.9337748<br />dest: LAS<br />sinal: Adiantou","distance: 2468.70396<br />delay:  -1.0590823<br />dest: LAX<br />sinal: Adiantou","distance: 2412.36649<br />delay:  -2.5392670<br />dest: SEA<br />sinal: Adiantou","distance: 1986.18182<br />delay:  -0.9177489<br />dest: SLC<br />sinal: Adiantou","distance: 2521.00000<br />delay:  -6.8500000<br />dest: SMF<br />sinal: Adiantou","distance: 2434.00000<br />delay: -13.1264368<br />dest: SNA<br />sinal: Adiantou","distance:  652.25000<br />delay:  -8.8750000<br />dest: TVC<br />sinal: Adiantou"],"type":"scatter","mode":"markers","marker":{"autocolorscale":false,"color":"rgba(144,238,144,1)","opacity":1,"size":5.6692913385826778,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(144,238,144,1)"}},"hoveron":"points","name":"Adiantou","legendgroup":"Adiantou","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[1826,199,143,757.22486926205693,1513.8641975308642,583.5,866,758.21327014218014,190.62627637848877,1578.922077922078,265.28682170542635,297.30172413793105,178.80748663101605,605.75,397,305,633.3552123552123,414.36613272311212,537.97624190064789,476.44378698224853,444,575.69209809264305,537.17910447761199,210.66554809843402,1614.7296195652175,1382.9977116704806,1020.2558139534884,497.8768197088466,1736.909090909091,1070.0641233766235,605.59090909090912,450.07042253521126,596.03174603174602,1728,1420.370731707317,224.71833648393195,1407.3966942148761,500,652.48730964467006,1879,824.48529411764707,2465,1097.4000000000001,942.95968274950428,717.81578947368416,953.83888888888885,207.18000000000001,1091.5126859142608,733.41218637992836,803.66666666666663,1017.4493927125507,1177.4784946236559,173,550,2576,1325,1136.0631578947368,728.80946527350955,288.24615384615385,1028.8218125960061,2444.4065040650407,93.973509933774835,2141.3613445378151,333.78195488721803,1617,160,275.85135135135135,426.49513212795551,281.3878504672897,259.14018691588785,1072.9240121580547,2437.5038167938933,1576.605633802817,709.25842696629218,646.66346153846155,2577.2674865488084,2569,1599.9765494137353,1044.8048780487804,878.99186991869919,1627.3488372093022,206.42465753424656,1003.7364130434783,1215,639,1142.7431192660551],"y":[10.111111111111111,0.80769230769230771,10.625,10.630447414294014,4.2222222222222223,14.65625,16.449999999999999,15.107424960505529,2.6065350578624913,14.116883116883116,7.7906976744186043,7.6918103448275863,9.6417112299465249,107.5,10.784090909090908,3.5,7.583011583011583,9.446224256292906,6.004319654427646,18.828402366863905,17.125,16.923705722070846,19.126865671641792,10.186800894854587,9.9116847826086953,1.9153318077803203,13.813953488372093,3.4434490481522957,5.1363636363636367,8.7556818181818183,29.575757575757574,15.014084507042254,10.174603174603174,3,8.1853658536585368,14.958412098298677,2.7685950413223139,7.0714285714285712,4.4111675126903549,11.25,12.150735294117647,2.084507042253521,17.564102564102566,6.111037673496365,10.497368421052631,10.772222222222222,17.510000000000002,1.6421697287839021,16.551971326164875,15.333333333333334,6.4197031039136299,7.440860215053763,8.4444444444444446,8.25,3.8666666666666667,30.638888888888889,16.726315789473684,4.8192993239090347,12.292307692307693,9.6236559139784941,4.9837398373983737,5.5960264900662251,1.9327731092436975,8.3045112781954895,2.03125,10.588235294117647,9.486486486486486,10.778859527121002,25.897196261682243,9.7850467289719631,1.4924012158054711,1.8473282442748091,16.154929577464788,13.820224719101123,14.990384615384615,1.3697156033820139,6.25,4.2345058626465661,0.74796747967479671,11.704607046070461,1.2093023255813953,9.4246575342465757,7.7975543478260869,69.305555555555557,15.807692307692308,4.4587155963302756],"text":["distance: 1826.00000<br />delay:  10.1111111<br />dest: ABQ<br />sinal: Atrasou","distance:  199.00000<br />delay:   0.8076923<br />dest: ACK<br />sinal: Atrasou","distance:  143.00000<br />delay:  10.6250000<br />dest: ALB<br />sinal: Atrasou","distance:  757.22487<br />delay:  10.6304474<br />dest: ATL<br />sinal: Atrasou","distance: 1513.86420<br />delay:   4.2222222<br />dest: AUS<br />sinal: Atrasou","distance:  583.50000<br />delay:  14.6562500<br />dest: AVL<br />sinal: Atrasou","distance:  866.00000<br />delay:  16.4500000<br />dest: BHM<br />sinal: Atrasou","distance:  758.21327<br />delay:  15.1074250<br />dest: BNA<br />sinal: Atrasou","distance:  190.62628<br />delay:   2.6065351<br />dest: BOS<br />sinal: Atrasou","distance: 1578.92208<br />delay:  14.1168831<br />dest: BQN<br />sinal: Atrasou","distance:  265.28682<br />delay:   7.7906977<br />dest: BTV<br />sinal: Atrasou","distance:  297.30172<br />delay:   7.6918103<br />dest: BUF<br />sinal: Atrasou","distance:  178.80749<br />delay:   9.6417112<br />dest: BWI<br />sinal: Atrasou","distance:  605.75000<br />delay: 107.5000000<br />dest: CAE<br />sinal: Atrasou","distance:  397.00000<br />delay:  10.7840909<br />dest: CAK<br />sinal: Atrasou","distance:  305.00000<br />delay:   3.5000000<br />dest: CHO<br />sinal: Atrasou","distance:  633.35521<br />delay:   7.5830116<br />dest: CHS<br />sinal: Atrasou","distance:  414.36613<br />delay:   9.4462243<br />dest: CLE<br />sinal: Atrasou","distance:  537.97624<br />delay:   6.0043197<br />dest: CLT<br />sinal: Atrasou","distance:  476.44379<br />delay:  18.8284024<br />dest: CMH<br />sinal: Atrasou","distance:  444.00000<br />delay:  17.1250000<br />dest: CRW<br />sinal: Atrasou","distance:  575.69210<br />delay:  16.9237057<br />dest: CVG<br />sinal: Atrasou","distance:  537.17910<br />delay:  19.1268657<br />dest: DAY<br />sinal: Atrasou","distance:  210.66555<br />delay:  10.1868009<br />dest: DCA<br />sinal: Atrasou","distance: 1614.72962<br />delay:   9.9116848<br />dest: DEN<br />sinal: Atrasou","distance: 1382.99771<br />delay:   1.9153318<br />dest: DFW<br />sinal: Atrasou","distance: 1020.25581<br />delay:  13.8139535<br />dest: DSM<br />sinal: Atrasou","distance:  497.87682<br />delay:   3.4434490<br />dest: DTW<br />sinal: Atrasou","distance: 1736.90909<br />delay:   5.1363636<br />dest: EGE<br />sinal: Atrasou","distance: 1070.06412<br />delay:   8.7556818<br />dest: FLL<br />sinal: Atrasou","distance:  605.59091<br />delay:  29.5757576<br />dest: GRR<br />sinal: Atrasou","distance:  450.07042<br />delay:  15.0140845<br />dest: GSO<br />sinal: Atrasou","distance:  596.03175<br />delay:  10.1746032<br />dest: GSP<br />sinal: Atrasou","distance: 1728.00000<br />delay:   3.0000000<br />dest: HDN<br />sinal: Atrasou","distance: 1420.37073<br />delay:   8.1853659<br />dest: HOU<br />sinal: Atrasou","distance:  224.71834<br />delay:  14.9584121<br />dest: IAD<br />sinal: Atrasou","distance: 1407.39669<br />delay:   2.7685950<br />dest: IAH<br />sinal: Atrasou","distance:  500.00000<br />delay:   7.0714286<br />dest: ILM<br />sinal: Atrasou","distance:  652.48731<br />delay:   4.4111675<br />dest: IND<br />sinal: Atrasou","distance: 1879.00000<br />delay:  11.2500000<br />dest: JAC<br />sinal: Atrasou","distance:  824.48529<br />delay:  12.1507353<br />dest: JAX<br />sinal: Atrasou","distance: 2465.00000<br />delay:   2.0845070<br />dest: LGB<br />sinal: Atrasou","distance: 1097.40000<br />delay:  17.5641026<br />dest: MCI<br />sinal: Atrasou","distance:  942.95968<br />delay:   6.1110377<br />dest: MCO<br />sinal: Atrasou","distance:  717.81579<br />delay:  10.4973684<br />dest: MDW<br />sinal: Atrasou","distance:  953.83889<br />delay:  10.7722222<br />dest: MEM<br />sinal: Atrasou","distance:  207.18000<br />delay:  17.5100000<br />dest: MHT<br />sinal: Atrasou","distance: 1091.51269<br />delay:   1.6421697<br />dest: MIA<br />sinal: Atrasou","distance:  733.41219<br />delay:  16.5519713<br />dest: MKE<br />sinal: Atrasou","distance:  803.66667<br />delay:  15.3333333<br />dest: MSN<br />sinal: Atrasou","distance: 1017.44939<br />delay:   6.4197031<br />dest: MSP<br />sinal: Atrasou","distance: 1177.47849<br />delay:   7.4408602<br />dest: MSY<br />sinal: Atrasou","distance:  173.00000<br />delay:   8.4444444<br />dest: MVY<br />sinal: Atrasou","distance:  550.00000<br />delay:   8.2500000<br />dest: MYR<br />sinal: Atrasou","distance: 2576.00000<br />delay:   3.8666667<br />dest: OAK<br />sinal: Atrasou","distance: 1325.00000<br />delay:  30.6388889<br />dest: OKC<br />sinal: Atrasou","distance: 1136.06316<br />delay:  16.7263158<br />dest: OMA<br />sinal: Atrasou","distance:  728.80947<br />delay:   4.8192993<br />dest: ORD<br />sinal: Atrasou","distance:  288.24615<br />delay:  12.2923077<br />dest: ORF<br />sinal: Atrasou","distance: 1028.82181<br />delay:   9.6236559<br />dest: PBI<br />sinal: Atrasou","distance: 2444.40650<br />delay:   4.9837398<br />dest: PDX<br />sinal: Atrasou","distance:   93.97351<br />delay:   5.5960265<br />dest: PHL<br />sinal: Atrasou","distance: 2141.36134<br />delay:   1.9327731<br />dest: PHX<br />sinal: Atrasou","distance:  333.78195<br />delay:   8.3045113<br />dest: PIT<br />sinal: Atrasou","distance: 1617.00000<br />delay:   2.0312500<br />dest: PSE<br />sinal: Atrasou","distance:  160.00000<br />delay:  10.5882353<br />dest: PVD<br />sinal: Atrasou","distance:  275.85135<br />delay:   9.4864865<br />dest: PWM<br />sinal: Atrasou","distance:  426.49513<br />delay:  10.7788595<br />dest: RDU<br />sinal: Atrasou","distance:  281.38785<br />delay:  25.8971963<br />dest: RIC<br />sinal: Atrasou","distance:  259.14019<br />delay:   9.7850467<br />dest: ROC<br />sinal: Atrasou","distance: 1072.92401<br />delay:   1.4924012<br />dest: RSW<br />sinal: Atrasou","distance: 2437.50382<br />delay:   1.8473282<br />dest: SAN<br />sinal: Atrasou","distance: 1576.60563<br />delay:  16.1549296<br />dest: SAT<br />sinal: Atrasou","distance:  709.25843<br />delay:  13.8202247<br />dest: SAV<br />sinal: Atrasou","distance:  646.66346<br />delay:  14.9903846<br />dest: SDF<br />sinal: Atrasou","distance: 2577.26749<br />delay:   1.3697156<br />dest: SFO<br />sinal: Atrasou","distance: 2569.00000<br />delay:   6.2500000<br />dest: SJC<br />sinal: Atrasou","distance: 1599.97655<br />delay:   4.2345059<br />dest: SJU<br />sinal: Atrasou","distance: 1044.80488<br />delay:   0.7479675<br />dest: SRQ<br />sinal: Atrasou","distance:  878.99187<br />delay:  11.7046070<br />dest: STL<br />sinal: Atrasou","distance: 1627.34884<br />delay:   1.2093023<br />dest: STT<br />sinal: Atrasou","distance:  206.42466<br />delay:   9.4246575<br />dest: SYR<br />sinal: Atrasou","distance: 1003.73641<br />delay:   7.7975543<br />dest: TPA<br />sinal: Atrasou","distance: 1215.00000<br />delay:  69.3055556<br />dest: TUL<br />sinal: Atrasou","distance:  639.00000<br />delay:  15.8076923<br />dest: TYS<br />sinal: Atrasou","distance: 1142.74312<br />delay:   4.4587156<br />dest: XNA<br />sinal: Atrasou"],"type":"scatter","mode":"markers","marker":{"autocolorscale":false,"color":"rgba(250,128,114,1)","opacity":1,"size":5.6692913385826778,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(250,128,114,1)"}},"hoveron":"points","name":"Atrasou","legendgroup":"Atrasou","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null}],"layout":{"margin":{"t":40.840182648401829,"r":7.3059360730593621,"b":37.260273972602747,"l":37.260273972602747},"plot_bgcolor":"rgba(255,255,255,1)","paper_bgcolor":"rgba(255,255,255,1)","font":{"color":"rgba(0,0,0,1)","family":"","size":14.611872146118724},"title":{"text":"Relação entre Distância Média e Atraso Médio por Destino","font":{"color":"rgba(0,0,0,1)","family":"","size":17.534246575342465},"x":0,"xref":"paper"},"xaxis":{"domain":[0,1],"automargin":true,"type":"linear","autorange":false,"range":[-150.08892568064755,5219.2846578366452],"tickmode":"array","ticktext":["0","1000","2000","3000","4000","5000"],"tickvals":[0,1000.0000000000001,2000,3000,4000,5000],"categoryorder":"array","categoryarray":["0","1000","2000","3000","4000","5000"],"nticks":null,"ticks":"outside","tickcolor":"rgba(51,51,51,1)","ticklen":3.6529680365296811,"tickwidth":0,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":11.68949771689498},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(235,235,235,1)","gridwidth":0,"zeroline":false,"anchor":"y","title":{"text":"Distância Média (milhas)","font":{"color":"rgba(0,0,0,1)","family":"","size":14.611872146118724}},"hoverformat":".2f"},"yaxis":{"domain":[0,1],"automargin":true,"type":"linear","autorange":false,"range":[-20.600000000000001,113.59999999999999],"tickmode":"array","ticktext":["0","40","80"],"tickvals":[0,40,80],"categoryorder":"array","categoryarray":["0","40","80"],"nticks":null,"ticks":"outside","tickcolor":"rgba(51,51,51,1)","ticklen":3.6529680365296811,"tickwidth":0,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":11.68949771689498},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(235,235,235,1)","gridwidth":0,"zeroline":false,"anchor":"x","title":{"text":"Atraso Médio (minutos)","font":{"color":"rgba(0,0,0,1)","family":"","size":14.611872146118724}},"hoverformat":".2f"},"shapes":[{"type":"rect","fillcolor":"rgba(255,255,255,1)","line":{"color":"rgba(51,51,51,1)","width":0,"linetype":"solid"},"yref":"paper","xref":"paper","layer":"below","x0":0,"x1":1,"y0":0,"y1":1}],"showlegend":true,"legend":{"bgcolor":"rgba(255,255,255,1)","bordercolor":"transparent","borderwidth":0,"font":{"color":"rgba(0,0,0,1)","family":"","size":11.68949771689498},"title":{"text":"Atraso / Adiantamento","font":{"color":"rgba(0,0,0,1)","family":"","size":14.611872146118724}}},"hovermode":"closest","barmode":"relative"},"config":{"doubleClick":"reset","modeBarButtonsToAdd":["hoverclosest","hovercompare"],"showSendToCloud":false},"source":"A","attrs":{"3c2c5e175bfe":{"x":{},"y":{},"label":{},"colour":{},"type":"scatter"}},"cur_data":"3c2c5e175bfe","visdat":{"3c2c5e175bfe":["function (y) ","x"]},"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.20000000000000001,"selected":{"opacity":1},"debounce":0},"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
+</div>
+</div>
+<p><strong>Exercício:</strong> quais outras variáveis poderiam ter suas relações exploradas?</p>
+</section>
+<section id="sugestão-de-referência" class="level2" data-number="1.4">
+<h2 data-number="1.4" class="anchored" data-anchor-id="sugestão-de-referência"><span class="header-section-number">1.4</span> Sugestão de Referência</h2>
+<p>O site <a href="https://www.data-to-viz.com/">Data to Viz</a> é uma excelente referência online que fornece orientações sobre a escolha adequada de tipos de gráficos com base no tipo de dados disponíveis. Esta plataforma oferece uma abordagem prática e acessível para ajudar as pessoas a selecionar visualizações apropriadas para seus conjuntos de dados.</p>
+<p>A plataforma apresenta uma ampla galeria de gráficos, incluindo gráficos de dispersão, barras, linhas, áreas, mapas e muito mais. Cada tipo de gráfico é acompanhado por exemplos e instruções claras de implementação. Além de recomendar visualizações específicas, o Data to Viz também fornece dicas e orientações sobre boas práticas de visualização, incluindo interpretação de gráficos e considerações éticas.</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copiada");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copiada");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./index.html" class="pagination-link" aria-label="Introdução">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">Introdução</span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
