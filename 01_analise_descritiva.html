@@ -173,18 +173,20 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">Índice</h2>
    
   <ul>
-  <li><a href="#principais-conceitos" id="toc-principais-conceitos" class="nav-link active" data-scroll-target="#principais-conceitos"><span class="header-section-number">1.1</span> Principais Conceitos</a>
+  <li><a href="#base-de-dados-e-contexto-do-estudo" id="toc-base-de-dados-e-contexto-do-estudo" class="nav-link active" data-scroll-target="#base-de-dados-e-contexto-do-estudo"><span class="header-section-number">1.1</span> Base de Dados e Contexto do Estudo</a></li>
+  <li><a href="#fundamentos-de-estatística-descritiva" id="toc-fundamentos-de-estatística-descritiva" class="nav-link" data-scroll-target="#fundamentos-de-estatística-descritiva"><span class="header-section-number">1.2</span> Fundamentos de Estatística Descritiva</a>
   <ul class="collapse">
-  <li><a href="#tipos-de-variáveis" id="toc-tipos-de-variáveis" class="nav-link" data-scroll-target="#tipos-de-variáveis"><span class="header-section-number">1.1.1</span> Tipos de Variáveis</a></li>
-  <li><a href="#medidas-descritivas" id="toc-medidas-descritivas" class="nav-link" data-scroll-target="#medidas-descritivas"><span class="header-section-number">1.1.2</span> Medidas Descritivas</a></li>
+  <li><a href="#tipos-de-variáveis" id="toc-tipos-de-variáveis" class="nav-link" data-scroll-target="#tipos-de-variáveis"><span class="header-section-number">1.2.1</span> Tipos de Variáveis</a></li>
+  <li><a href="#medidas-descritivas" id="toc-medidas-descritivas" class="nav-link" data-scroll-target="#medidas-descritivas"><span class="header-section-number">1.2.2</span> Medidas Descritivas</a></li>
+  <li><a href="#resumo-estatístico-automatizado" id="toc-resumo-estatístico-automatizado" class="nav-link" data-scroll-target="#resumo-estatístico-automatizado"><span class="header-section-number">1.2.3</span> Resumo estatístico automatizado</a></li>
+  <li><a href="#visualização-de-dados" id="toc-visualização-de-dados" class="nav-link" data-scroll-target="#visualização-de-dados"><span class="header-section-number">1.2.4</span> Visualização de dados</a></li>
+  <li><a href="#associação-entre-duas-variáveis" id="toc-associação-entre-duas-variáveis" class="nav-link" data-scroll-target="#associação-entre-duas-variáveis"><span class="header-section-number">1.2.5</span> Associação entre Duas Variáveis</a></li>
   </ul></li>
-  <li><a href="#estudo-de-caso-analisando-dados-de-voos-de-nova-york" id="toc-estudo-de-caso-analisando-dados-de-voos-de-nova-york" class="nav-link" data-scroll-target="#estudo-de-caso-analisando-dados-de-voos-de-nova-york"><span class="header-section-number">1.2</span> Estudo de Caso: Analisando dados de voos de Nova York</a>
+  <li><a href="#estudo-de-caso-questões-estratégicas-de-negócio" id="toc-estudo-de-caso-questões-estratégicas-de-negócio" class="nav-link" data-scroll-target="#estudo-de-caso-questões-estratégicas-de-negócio"><span class="header-section-number">1.3</span> Estudo de Caso: questões estratégicas de negócio</a>
   <ul class="collapse">
-  <li><a href="#visualização-de-dados" id="toc-visualização-de-dados" class="nav-link" data-scroll-target="#visualização-de-dados"><span class="header-section-number">1.2.1</span> Visualização de dados</a></li>
-  <li><a href="#associação-entre-duas-variáveis" id="toc-associação-entre-duas-variáveis" class="nav-link" data-scroll-target="#associação-entre-duas-variáveis"><span class="header-section-number">1.2.2</span> Associação entre Duas Variáveis</a></li>
-  <li><a href="#questões-estratégicas-de-negócio" id="toc-questões-estratégicas-de-negócio" class="nav-link" data-scroll-target="#questões-estratégicas-de-negócio"><span class="header-section-number">1.2.3</span> Questões estratégicas de negócio</a></li>
+  <li><a href="#questões-estratégicas-de-negócio" id="toc-questões-estratégicas-de-negócio" class="nav-link" data-scroll-target="#questões-estratégicas-de-negócio"><span class="header-section-number">1.3.1</span> Questões estratégicas de negócio</a></li>
   </ul></li>
-  <li><a href="#sugestão-de-referência" id="toc-sugestão-de-referência" class="nav-link" data-scroll-target="#sugestão-de-referência"><span class="header-section-number">1.3</span> Sugestão de Referência</a></li>
+  <li><a href="#referências-e-materiais-complementares" id="toc-referências-e-materiais-complementares" class="nav-link" data-scroll-target="#referências-e-materiais-complementares"><span class="header-section-number">1.4</span> Referências e Materiais Complementares</a></li>
   </ul>
 </nav>
     </div>
@@ -210,8 +212,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<p>O objetivo deste capítulo é oferecer uma compreensão abrangente da análise descritiva de dados, fundamental em estatística e ciência de dados. Essa análise permite explorar e resumir características importantes dos dados, oferecendo insights iniciais para análises mais detalhadas.</p>
-<p>Para exemplificar os conceitos abordados neste relatório, utilizaremos o conjunto de dados do pacote R <code>{nycflights13}</code>. Este pacote contém diversas tabelas que fornecem informações detalhadas sobre voos que partiram dos aeroportos de Nova York em 2013, dentre elas:</p>
+<p>Este capítulo tem como objetivo apresentar os fundamentos da análise descritiva de dados, explorando conceitos estatísticos básicos e técnicas de visualização amplamente utilizadas em ciência de dados. Ao longo do capítulo, esses conceitos são aplicados a um conjunto de dados reais do setor aéreo, permitindo conectar teoria estatística a problemas práticos de análise e tomada de decisão.</p>
+<!-- O objetivo deste capítulo é oferecer uma compreensão abrangente da análise descritiva de dados, fundamental em estatística e ciência de dados. Essa análise permite explorar e resumir características importantes dos dados, oferecendo insights iniciais para análises mais detalhadas. -->
+<!-- Antes de avançarmos para análises aplicadas e questões estratégicas, é necessário formalizar alguns conceitos fundamentais de estatística descritiva e visualização de dados. Esses conceitos serão utilizados ao longo do estudo de caso apresentado nas seções seguintes. -->
+<section id="base-de-dados-e-contexto-do-estudo" class="level2" data-number="1.1">
+<h2 data-number="1.1" class="anchored" data-anchor-id="base-de-dados-e-contexto-do-estudo"><span class="header-section-number">1.1</span> Base de Dados e Contexto do Estudo</h2>
+<!-- Para exemplificar os conceitos abordados neste capítulo, utilizaremos o conjunto de dados do pacote R `{nycflights13}`.  -->
+<!-- Este pacote contém diversas tabelas que fornecem informações detalhadas sobre voos que partiram dos aeroportos de Nova York em 2013, dentre elas:  -->
+<p>Nesta seção, é apresentado o conjunto de dados utilizado ao longo do capítulo. O pacote <code>{nycflights13}</code> fornece informações detalhadas sobre voos que partiram dos aeroportos de Nova York em 2013, além de dados meteorológicos e características dos aeroportos e aeronaves. A compreensão da estrutura e do contexto desses dados é fundamental para interpretar corretamente as análises realizadas nas seções seguintes. As tabelas disponíves são:</p>
 <ul>
 <li><code>flights</code>, que contém informações sobre voos, como horários de partida e chegada, companhias aéreas, destinos e atrasos;</li>
 <li><code>weather</code>, que fornece dados meteorológicos relacionados aos aeroportos de Nova York durante o ano de 2013;</li>
@@ -219,18 +227,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li><code>airports</code>, que contém detalhes sobre os aeroportos de Nova York;</li>
 <li><code>planes</code>, que oferece dados sobre os aviões utilizados nos voos. Essas tabelas abrangentes permitem uma análise abrangente e detalhada do sistema de transporte aéreo da cidade de Nova York em 2013.</li>
 </ul>
-<p>Utilize o código abaixo para carregar o pacote na sua sessão.</p>
+<p>A análise será feita utilizando a liguagem <code>R</code>. Utilize o código abaixo para carregar o pacote na sua sessão e exibir uma amostra da base que registra os voos, <code>flights</code>.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(nycflights13)</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<!-- FAZER: tabea cm amstra de dads -->
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1</span>)</span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>flights <span class="sc">%&gt;%</span> </span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">slice_sample</span>(<span class="at">n =</span> <span class="dv">5</span>)</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1</span>)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>flights <span class="sc">|&gt;</span> </span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">slice_sample</span>(<span class="at">n =</span> <span class="dv">5</span>)</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="cell">
 <div class="cell-output-display">
@@ -368,18 +372,21 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </table>
 </div>
 </div>
-<section id="principais-conceitos" class="level2" data-number="1.1">
-<h2 data-number="1.1" class="anchored" data-anchor-id="principais-conceitos"><span class="header-section-number">1.1</span> Principais Conceitos</h2>
-<section id="tipos-de-variáveis" class="level3" data-number="1.1.1">
-<h3 data-number="1.1.1" class="anchored" data-anchor-id="tipos-de-variáveis"><span class="header-section-number">1.1.1</span> Tipos de Variáveis</h3>
+</section>
+<section id="fundamentos-de-estatística-descritiva" class="level2" data-number="1.2">
+<h2 data-number="1.2" class="anchored" data-anchor-id="fundamentos-de-estatística-descritiva"><span class="header-section-number">1.2</span> Fundamentos de Estatística Descritiva</h2>
+<p>A análise descritiva busca resumir e organizar informações contidas em um conjunto de dados, fornecendo uma visão inicial de seus principais padrões e características. Nesta seção, são apresentados os conceitos fundamentais relacionados aos tipos de variáveis e às principais medidas descritivas, que servirão de base para todas as análises exploratórias realizadas ao longo do capítulo.</p>
+<section id="tipos-de-variáveis" class="level3" data-number="1.2.1">
+<h3 data-number="1.2.1" class="anchored" data-anchor-id="tipos-de-variáveis"><span class="header-section-number">1.2.1</span> Tipos de Variáveis</h3>
 <p>As variáveis em um conjunto de dados podem ser classificadas em diferentes tipos, dependendo da natureza da informação que representam. Existem dois principais tipos de variáveis: qualitativas e quantitativas.</p>
 <section id="variáveis-qualitativas" class="level4">
 <h4 class="anchored" data-anchor-id="variáveis-qualitativas">Variáveis Qualitativas</h4>
 <p>São características não numéricas que descrevem qualidades ou atributos dos elementos em estudo. Podem ser subdivididas em:</p>
 <ul>
 <li><strong>Nominal</strong>: Não possuem ordem intrínseca. Exemplos incluem origem (<code>orign</code>: EWR, LGA, JFK) e destino (<code>dest</code>: IAH, MIA, BQN) dos voos.</li>
-<li><strong>Ordinal</strong>: Possuem uma ordem intrínseca, indicando um grau ou posição. Exemplos incluem mês (<code>month</code>) e dia (<code>day</code>).</li>
+<li><strong>Ordinal</strong>: Possuem uma ordem intrínseca. Exemplos incluem níveis de classificação ou categorias ordenadas, como faixas de atraso (baixo, médio, alto) ou níveis de prioridade operacional.</li>
 </ul>
+<p>Variáveis temporais, como mês e dia, frequentemente ocupam uma posição intermediária, podendo ser tratadas como quantitativas discretas ou categóricas ordenadas, a depender do objetivo da análise.</p>
 </section>
 <section id="variáveis-quantitativas" class="level4">
 <h4 class="anchored" data-anchor-id="variáveis-quantitativas">Variáveis Quantitativas</h4>
@@ -390,8 +397,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </ul>
 </section>
 </section>
-<section id="medidas-descritivas" class="level3" data-number="1.1.2">
-<h3 data-number="1.1.2" class="anchored" data-anchor-id="medidas-descritivas"><span class="header-section-number">1.1.2</span> Medidas Descritivas</h3>
+<section id="medidas-descritivas" class="level3" data-number="1.2.2">
+<h3 data-number="1.2.2" class="anchored" data-anchor-id="medidas-descritivas"><span class="header-section-number">1.2.2</span> Medidas Descritivas</h3>
 <p>As medidas descritivas são ferramentas essenciais para resumir e interpretar as características fundamentais de uma distribuição de dados.</p>
 <section id="medidas-de-posição" class="level4">
 <h4 class="anchored" data-anchor-id="medidas-de-posição">Medidas de Posição:</h4>
@@ -417,14 +424,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </ul>
 </section>
 </section>
-</section>
-<section id="estudo-de-caso-analisando-dados-de-voos-de-nova-york" class="level2" data-number="1.2">
-<h2 data-number="1.2" class="anchored" data-anchor-id="estudo-de-caso-analisando-dados-de-voos-de-nova-york"><span class="header-section-number">1.2</span> Estudo de Caso: Analisando dados de voos de Nova York</h2>
-<p>A função <code>summary()</code> do R, quando aplicada a um dataframe, fornece um resumo estatístico das variáveis contidas no dataframe, incluindo contagem de observações, média, desvio padrão, mínimo, máximo e quartis para variáveis numéricas, além da contagem de valores únicos e dos valores mais frequentes para variáveis categóricas.</p>
+<section id="resumo-estatístico-automatizado" class="level3" data-number="1.2.3">
+<h3 data-number="1.2.3" class="anchored" data-anchor-id="resumo-estatístico-automatizado"><span class="header-section-number">1.2.3</span> Resumo estatístico automatizado</h3>
+<p>A função <code>skim()</code> do pacote <code>skimr</code>, quando aplicada à uma base de dados, fornece um resumo estatístico das variáveis contidas no dataframe, incluindo contagem de observações, média, desvio padrão, mínimo, máximo e quartis para variáveis numéricas, além da contagem de valores únicos e dos valores mais frequentes para variáveis categóricas.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(skimr)</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="fu">skim</span>(flights)</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(skimr)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="fu">skim</span>(flights)</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
 <caption>Data summary</caption>
@@ -777,22 +783,26 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </table>
 </div>
 </div>
-<section id="visualização-de-dados" class="level3" data-number="1.2.1">
-<h3 data-number="1.2.1" class="anchored" data-anchor-id="visualização-de-dados"><span class="header-section-number">1.2.1</span> Visualização de dados</h3>
-<p>A visualização de dados é essencial na análise de dados, transformando valores em representações visuais claras. Os gráficos facilitam a identificação de padrões e tendências, além de melhorar a comunicação dos resultados, contribuindo para a tomada de decisões informadas.</p>
+<p>Veja que a tabela <code>flights</code> indica um conjunto relativamente grande e bem estruturado, com 33.677 observações e 19 variáveis, majoritariamente numéricas, o que é adequado para análises descritivas e exploratórias. As variáveis categóricas apresentam alta completude e diversidade relevante — com três aeroportos de origem, 99 destinos e 16 companhias aéreas — refletindo uma malha aérea ampla e heterogênea. As variáveis de atraso na partida e na chegada exibem médias positivas, mas medianas negativas, evidenciando distribuições assimétricas à direita, nas quais poucos atrasos extremos elevam a média. Observa-se também a presença moderada de valores ausentes, concentrados principalmente em horários e atrasos, o que é consistente com cancelamentos ou registros incompletos. Em conjunto, os dados sugerem boa qualidade geral, variabilidade operacional significativa e potencial para revelar padrões relevantes de pontualidade, sazonalidade e desempenho entre aeroportos e rotas.</p>
+</section>
+<section id="visualização-de-dados" class="level3" data-number="1.2.4">
+<h3 data-number="1.2.4" class="anchored" data-anchor-id="visualização-de-dados"><span class="header-section-number">1.2.4</span> Visualização de dados</h3>
+<!-- A visualização de dados desempenha um papel central na análise exploratória, pois permite transformar informações numéricas em representações visuais intuitivas. Nesta seção, são apresentados os principais tipos de gráficos utilizados em estatística e ciência de dados, com exemplos aplicados ao conjunto de dados de voos, destacando quando e por que cada tipo de visualização é mais adequado. -->
+<p>A visualização de dados é essencial na análise de dados, pois transfoma valores em representações visuais claras. Os gráficos facilitam a identificação de padrões e tendências, além de melhorar a comunicação dos resultados, contribuindo para a tomada de decisões informadas.</p>
+<p>Os gráficos apresentados a seguir não têm como objetivo responder perguntas de negócio específicas, mas ilustrar como diferentes tipos de visualizações podem ser utilizados para explorar dados conforme o tipo de variável envolvida.</p>
 <section id="histograma" class="level4">
 <h4 class="anchored" data-anchor-id="histograma">Histograma</h4>
 <p>Um histograma é útil para representar a distribuição de uma variável quantitativa. Ele divide os dados em intervalos e mostra a frequência de observações em cada intervalo.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(flights, <span class="fu">aes</span>(<span class="at">x =</span> air_time)) <span class="sc">+</span></span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="at">binwidth =</span> <span class="dv">30</span>, <span class="at">fill =</span> <span class="st">"skyblue"</span>, <span class="at">color =</span> <span class="st">"black"</span>) <span class="sc">+</span></span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Distribuição do Tempo de Voo"</span>, </span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Tempo de Voo (minutos)"</span>, </span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Frequência"</span>)</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(flights, <span class="fu">aes</span>(<span class="at">x =</span> air_time)) <span class="sc">+</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="at">binwidth =</span> <span class="dv">30</span>, <span class="at">fill =</span> <span class="st">"skyblue"</span>, <span class="at">color =</span> <span class="st">"black"</span>) <span class="sc">+</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Distribuição do Tempo de Voo"</span>, </span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Tempo de Voo (minutos)"</span>, </span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Frequência"</span>)</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="01_analise_descritiva_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="01_analise_descritiva_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
@@ -801,7 +811,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="boxplot-gráfico-de-caixa" class="level4">
 <h4 class="anchored" data-anchor-id="boxplot-gráfico-de-caixa">Boxplot (Gráfico de Caixa)</h4>
 <p>Um boxplot é útil para visualizar a distribuição, a mediana e a dispersão dos dados. Ele representa os quartis, a mediana e os possíveis valores discrepantes.</p>
-<p>Os principais elementos de um boxplot incluem:</p>
+<p>Por ser um gráfico que contém bastante informação, apresento em detalhes os principais elementos de um boxplot:</p>
 <ol type="1">
 <li><p><strong>Caixa (Box)</strong>: A caixa do boxplot representa o intervalo interquartil (IQR), que é a distância entre o primeiro quartil (Q1) e o terceiro quartil (Q3). Ela abrange o meio dos dados e mostra onde está localizada a maior parte dos valores.</p></li>
 <li><p><strong>Linha Mediana (Mediana)</strong>: A linha dentro da caixa representa a mediana dos dados, que é o valor que divide o conjunto de dados ao meio.</p></li>
@@ -811,14 +821,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </ol>
 <p>Esses elementos combinados fornecem uma representação concisa e informativa da distribuição dos dados, destacando medidas de tendência central, variabilidade e presença de valores atípicos.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Criando um boxplot para a variável "distance"</span></span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(flights, <span class="fu">aes</span>(<span class="at">y =</span> distance)) <span class="sc">+</span></span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_boxplot</span>(<span class="at">fill =</span> <span class="st">"lightgreen"</span>, <span class="at">color =</span> <span class="st">"black"</span>) <span class="sc">+</span></span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Distribuição da Distância dos Voos"</span>, <span class="at">y =</span> <span class="st">"Distância (milhas)"</span>)</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Criando um boxplot para a variável "distance"</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(flights, <span class="fu">aes</span>(<span class="at">y =</span> distance)) <span class="sc">+</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_boxplot</span>(<span class="at">fill =</span> <span class="st">"lightgreen"</span>, <span class="at">color =</span> <span class="st">"black"</span>) <span class="sc">+</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Distribuição da Distância dos Voos"</span>, <span class="at">y =</span> <span class="st">"Distância (milhas)"</span>)</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="01_analise_descritiva_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="01_analise_descritiva_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
@@ -828,16 +838,16 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h4 class="anchored" data-anchor-id="gráfico-de-densidade">Gráfico de Densidade</h4>
 <p>Um gráfico de densidade é útil para visualizar a distribuição de uma variável quantitativa de forma suavizada.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Criando um gráfico de densidade para a variável "dep_delay"</span></span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(flights, <span class="fu">aes</span>(<span class="at">x =</span> dep_delay)) <span class="sc">+</span></span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_density</span>(<span class="at">fill =</span> <span class="st">"lightcoral"</span>, <span class="at">color =</span> <span class="st">"black"</span>) <span class="sc">+</span></span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Densidade do Atraso na Partida"</span>, </span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Atraso na Partida (minutos)"</span>, </span>
-<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Densidade"</span>)</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Criando um gráfico de densidade para a variável "dep_delay"</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(flights, <span class="fu">aes</span>(<span class="at">x =</span> dep_delay)) <span class="sc">+</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_density</span>(<span class="at">fill =</span> <span class="st">"lightcoral"</span>, <span class="at">color =</span> <span class="st">"black"</span>) <span class="sc">+</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Densidade do Atraso na Partida"</span>, </span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Atraso na Partida (minutos)"</span>, </span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Densidade"</span>)</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="01_analise_descritiva_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="01_analise_descritiva_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
@@ -847,16 +857,16 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h4 class="anchored" data-anchor-id="gráfico-de-dispersão">Gráfico de Dispersão</h4>
 <p>Um gráfico de dispersão é útil para visualizar a relação entre duas variáveis quantitativas. Ele mostra como uma variável depende da outra.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Criando um gráfico de dispersão para a relação entre "air_time" e "distance"</span></span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(flights, <span class="fu">aes</span>(<span class="at">x =</span> air_time, <span class="at">y =</span> distance)) <span class="sc">+</span></span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">color =</span> <span class="st">"darkorange"</span>, <span class="at">alpha=</span><span class="fl">0.8</span>) <span class="sc">+</span></span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Relação entre Tempo de Voo e Distância"</span>, </span>
-<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Tempo de Voo (minutos)"</span>, </span>
-<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Distância (milhas)"</span>)</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Criando um gráfico de dispersão para a relação entre "air_time" e "distance"</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(flights, <span class="fu">aes</span>(<span class="at">x =</span> air_time, <span class="at">y =</span> distance)) <span class="sc">+</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">color =</span> <span class="st">"darkorange"</span>, <span class="at">alpha =</span> <span class="fl">0.5</span>) <span class="sc">+</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Relação entre Tempo de Voo e Distância"</span>, </span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Tempo de Voo (minutos)"</span>, </span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Distância (milhas)"</span>)</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="01_analise_descritiva_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="01_analise_descritiva_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
@@ -866,16 +876,16 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h4 class="anchored" data-anchor-id="gráfico-de-barras">Gráfico de Barras</h4>
 <p>Um gráfico de barras é útil para representar a frequência de ocorrência de diferentes categorias em uma variável discreta.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Criando um gráfico de barras para a variável "origin"</span></span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(flights, <span class="fu">aes</span>(<span class="at">x =</span> origin)) <span class="sc">+</span></span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_bar</span>(<span class="at">fill =</span> <span class="st">"lightblue"</span>, <span class="at">color =</span> <span class="st">"black"</span>) <span class="sc">+</span></span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Frequência de Voos por Origem"</span>, </span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Origem"</span>, </span>
-<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Frequência"</span>)</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Criando um gráfico de barras para a variável "origin"</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(flights, <span class="fu">aes</span>(<span class="at">x =</span> origin)) <span class="sc">+</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_bar</span>(<span class="at">fill =</span> <span class="st">"lightblue"</span>, <span class="at">color =</span> <span class="st">"black"</span>) <span class="sc">+</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Frequência de Voos por Origem"</span>, </span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Origem"</span>, </span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Frequência"</span>)</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="01_analise_descritiva_files/figure-html/unnamed-chunk-10-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="01_analise_descritiva_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
@@ -885,15 +895,55 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h4 class="anchored" data-anchor-id="gráfico-de-setores-pizza">Gráfico de Setores (Pizza)</h4>
 <p>Um gráfico de setores é útil para representar a proporção de cada categoria em relação ao total.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Criando um gráfico de setores para a variável "origin"</span></span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(flights, <span class="fu">aes</span>(<span class="at">x =</span> <span class="st">""</span>, <span class="at">fill =</span> origin)) <span class="sc">+</span></span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_bar</span>(<span class="at">width =</span> <span class="dv">1</span>) <span class="sc">+</span></span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">coord_polar</span>(<span class="at">theta =</span> <span class="st">"y"</span>) <span class="sc">+</span></span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Proporção de Voos por Destino"</span>, <span class="at">fill =</span> <span class="st">"Origem"</span>, </span>
-<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="cn">NULL</span>, <span class="at">y =</span> <span class="cn">NULL</span>)<span class="sc">+</span></span>
-<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">"EWR"</span> <span class="ot">=</span> <span class="st">"skyblue"</span>, </span>
-<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>                               <span class="st">"LGA"</span> <span class="ot">=</span> <span class="st">"lightgreen"</span>, </span>
-<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>                               <span class="st">"JFK"</span> <span class="ot">=</span> <span class="st">"salmon"</span>))  <span class="co"># Definindo cores personalizadas</span></span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Criando um gráfico de setores para a variável "origin"</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(flights, <span class="fu">aes</span>(<span class="at">x =</span> <span class="st">""</span>, <span class="at">fill =</span> origin)) <span class="sc">+</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_bar</span>(<span class="at">width =</span> <span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">coord_polar</span>(<span class="at">theta =</span> <span class="st">"y"</span>) <span class="sc">+</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Proporção de Voos por Destino"</span>, <span class="at">fill =</span> <span class="st">"Origem"</span>, </span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="cn">NULL</span>, <span class="at">y =</span> <span class="cn">NULL</span>)<span class="sc">+</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">"EWR"</span> <span class="ot">=</span> <span class="st">"skyblue"</span>, </span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>                               <span class="st">"LGA"</span> <span class="ot">=</span> <span class="st">"lightgreen"</span>, </span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>                               <span class="st">"JFK"</span> <span class="ot">=</span> <span class="st">"salmon"</span>))  <span class="co"># Definindo cores personalizadas</span></span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="01_analise_descritiva_files/figure-html/unnamed-chunk-10-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Embora gráficos de setores sejam populares, seu uso deve ser criterioso, pois dificultam comparações precisas entre categorias. Em muitos contextos, gráficos de barras oferecem maior clareza.</p>
+</section>
+<section id="gráfico-de-mosaico" class="level4">
+<h4 class="anchored" data-anchor-id="gráfico-de-mosaico">Gráfico de Mosaico</h4>
+<p>Um gráfico de mosaico é útil para visualizar a relação entre duas variáveis categóricas, mostrando a proporção de cada categoria em cada nível da outra variável.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Criando um gráfico de mosaico para a relação entre "origin" e dia da semana do voo.</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>dias_pt <span class="ot">&lt;-</span> <span class="fu">c</span>(</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>  <span class="st">"domingo"</span>,</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>  <span class="st">"segunda-feira"</span>,</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>  <span class="st">"terça-feira"</span>,</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>  <span class="st">"quarta-feira"</span>,</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>  <span class="st">"quinta-feira"</span>,</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>  <span class="st">"sexta-feira"</span>,</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>  <span class="st">"sábado"</span></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>flights <span class="sc">|&gt;</span>  </span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">day_of_week =</span> <span class="fu">wday</span>(time_hour, <span class="at">label =</span> <span class="cn">TRUE</span>, <span class="at">abbr =</span> <span class="cn">FALSE</span>, <span class="at">locale =</span> <span class="st">"Portuguese_Brazil.utf8"</span>), </span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">day_of_week =</span> <span class="fu">factor</span>(day_of_week, <span class="at">levels =</span> dias_pt)</span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> origin, <span class="at">fill =</span> day_of_week)) <span class="sc">+</span></span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_bar</span>(<span class="at">position =</span> <span class="st">"fill"</span>) <span class="sc">+</span></span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Relação entre Origem e Dia da Semana"</span>,</span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a>    <span class="at">fill =</span> <span class="st">"Dia da Semana"</span>,</span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"Origem"</span>,</span>
+<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"Proporção"</span></span>
+<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_manual</span>(<span class="at">values =</span> RColorBrewer<span class="sc">::</span><span class="fu">brewer.pal</span>(<span class="dv">7</span>, <span class="st">"Set2"</span>))</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -903,48 +953,21 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </section>
-<section id="gráfico-de-mosaico" class="level4">
-<h4 class="anchored" data-anchor-id="gráfico-de-mosaico">Gráfico de Mosaico</h4>
-<p>Um gráfico de mosaico é útil para visualizar a relação entre duas variáveis categóricas, mostrando a proporção de cada categoria em cada nível da outra variável.</p>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Criando um gráfico de mosaico para a relação entre "origin" e dia da semana do voo.</span></span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>flights <span class="sc">%&gt;%</span>  </span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">day_of_week =</span> <span class="fu">factor</span>(<span class="fu">weekdays</span>(<span class="fu">as.Date</span>(time_hour)),</span>
-<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>                              <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"domingo"</span>, <span class="st">"segunda-feira"</span>, </span>
-<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>                                         <span class="st">"terça-feira"</span>, <span class="st">"quarta-feira"</span>, </span>
-<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>                                         <span class="st">"quinta-feira"</span>, <span class="st">"sexta-feira"</span>, </span>
-<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>                                         <span class="st">"sábado"</span>))) <span class="sc">%&gt;%</span> </span>
-<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> origin, <span class="at">fill =</span> day_of_week)) <span class="sc">+</span></span>
-<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_bar</span>(<span class="at">position =</span> <span class="st">"fill"</span>) <span class="sc">+</span></span>
-<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Relação entre Origem e Dia da Semana"</span>, </span>
-<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>       <span class="at">fill =</span> <span class="st">"Dia da Semana"</span>, </span>
-<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Origem"</span>, </span>
-<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Proporção"</span>)<span class="sc">+</span></span>
-<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_manual</span>(<span class="at">values=</span>RColorBrewer<span class="sc">::</span><span class="fu">brewer.pal</span>(<span class="dv">7</span>, <span class="st">"Set2"</span>))</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="01_analise_descritiva_files/figure-html/unnamed-chunk-12-1.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
-</div>
 </section>
-</section>
-<section id="associação-entre-duas-variáveis" class="level3" data-number="1.2.2">
-<h3 data-number="1.2.2" class="anchored" data-anchor-id="associação-entre-duas-variáveis"><span class="header-section-number">1.2.2</span> Associação entre Duas Variáveis</h3>
-<p>Na análise de dados, é comum investigar a associação entre duas variáveis para entender como elas estão relacionadas ou se influenciam mutuamente. A associação entre duas variáveis pode ser examinada usando diferentes técnicas estatísticas e gráficas, dependendo do tipo de variáveis envolvidas.</p>
+<section id="associação-entre-duas-variáveis" class="level3" data-number="1.2.5">
+<h3 data-number="1.2.5" class="anchored" data-anchor-id="associação-entre-duas-variáveis"><span class="header-section-number">1.2.5</span> Associação entre Duas Variáveis</h3>
+<p>Até este ponto, a análise concentrou-se principalmente em variáveis isoladas, explorando suas distribuições e características individuais. No entanto, muitas perguntas relevantes em ciência de dados envolvem compreender como duas ou mais variáveis se relacionam. A análise de associação permite investigar padrões conjuntos, dependências e possíveis relações entre variáveis, constituindo um passo intermediário entre a exploração descritiva e análises explicativas mais avançadas.</p>
 <p>Um exemplo de análise de associação entre duas variáveis pode ser feito ao contar o número de voos de cada origem para cada destino e selecionar os 5 destinos mais frequentes para cada origem, podemos explorar a associação entre origem e destin O código abaixo fornece os 5 destinos mais frequentes a partir de cada origem, permitindo-nos explorar a associação entre origem e destino de voos.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>most_frequent_dest <span class="ot">&lt;-</span> flights <span class="sc">%&gt;%</span> </span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(origin, dest) <span class="sc">%&gt;%</span> </span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">count</span>() <span class="sc">%&gt;%</span> </span>
-<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(n)) <span class="sc">%&gt;%</span>  </span>
-<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(origin) <span class="sc">%&gt;%</span></span>
-<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">slice_max</span>(n, <span class="at">n =</span> <span class="dv">5</span>)</span>
-<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>most_frequent_dest <span class="sc">%&gt;%</span> </span>
-<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>  kableExtra<span class="sc">::</span><span class="fu">kable</span>()</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>most_frequent_dest <span class="ot">&lt;-</span> flights <span class="sc">|&gt;</span> </span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(origin, dest) <span class="sc">|&gt;</span> </span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">count</span>() <span class="sc">|&gt;</span> </span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(n)) <span class="sc">|&gt;</span>  </span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(origin) <span class="sc">|&gt;</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">slice_max</span>(n, <span class="at">n =</span> <span class="dv">5</span>)</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>most_frequent_dest <span class="sc">|&gt;</span> </span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>  kableExtra<span class="sc">::</span><span class="fu">kable</span>()</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
 <thead>
@@ -952,6 +975,101 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <th style="text-align: left;">origin</th>
 <th style="text-align: left;">dest</th>
 <th style="text-align: right;">n</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">EWR</td>
+<td style="text-align: left;">ORD</td>
+<td style="text-align: right;">622</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">EWR</td>
+<td style="text-align: left;">MCO</td>
+<td style="text-align: right;">553</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">EWR</td>
+<td style="text-align: left;">SFO</td>
+<td style="text-align: right;">549</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">EWR</td>
+<td style="text-align: left;">CLT</td>
+<td style="text-align: right;">516</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">EWR</td>
+<td style="text-align: left;">BOS</td>
+<td style="text-align: right;">512</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">JFK</td>
+<td style="text-align: left;">LAX</td>
+<td style="text-align: right;">1118</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">JFK</td>
+<td style="text-align: left;">SFO</td>
+<td style="text-align: right;">766</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">JFK</td>
+<td style="text-align: left;">MCO</td>
+<td style="text-align: right;">591</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">JFK</td>
+<td style="text-align: left;">BOS</td>
+<td style="text-align: right;">571</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">JFK</td>
+<td style="text-align: left;">SJU</td>
+<td style="text-align: right;">485</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">LGA</td>
+<td style="text-align: left;">ATL</td>
+<td style="text-align: right;">1065</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">LGA</td>
+<td style="text-align: left;">ORD</td>
+<td style="text-align: right;">879</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">LGA</td>
+<td style="text-align: left;">CLT</td>
+<td style="text-align: right;">646</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">LGA</td>
+<td style="text-align: left;">MIA</td>
+<td style="text-align: right;">567</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">LGA</td>
+<td style="text-align: left;">DFW</td>
+<td style="text-align: right;">493</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (knitr<span class="sc">::</span><span class="fu">is_html_output</span>()){</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  most_frequent_dest <span class="sc">|&gt;</span> </span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">kable</span>(<span class="st">"html"</span>)</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>} <span class="cf">else</span> {</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>  most_frequent_dest <span class="sc">|&gt;</span> </span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">kable</span>(<span class="st">"latex"</span>)</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th">origin</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">dest</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">n</th>
 </tr>
 </thead>
 <tbody>
@@ -1050,7 +1168,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="01_analise_descritiva_files/figure-html/unnamed-chunk-14-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="01_analise_descritiva_files/figure-html/unnamed-chunk-13-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
@@ -1058,12 +1176,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>Podemos investigar se existe alguma relação entre a distância do voo e o atraso médio. Para explorar essa relação, podemos criar um gráfico de dispersão que mostra a distância média em relação ao atraso médio para cada destino.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(plotly)</span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>grafico <span class="ot">&lt;-</span> flights <span class="sc">%&gt;%</span> </span>
-<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(distance), <span class="sc">!</span><span class="fu">is.na</span>(arr_delay)) <span class="sc">%&gt;%</span></span>
-<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(dest) <span class="sc">%&gt;%</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>grafico <span class="ot">&lt;-</span> flights <span class="sc">|&gt;</span> </span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(distance), <span class="sc">!</span><span class="fu">is.na</span>(arr_delay)) <span class="sc">|&gt;</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(dest) <span class="sc">|&gt;</span></span>
 <span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">distance =</span> <span class="fu">mean</span>(distance),</span>
-<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>            <span class="at">delay =</span> <span class="fu">mean</span>(arr_delay)) <span class="sc">%&gt;%</span> </span>
-<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">sinal =</span> <span class="fu">ifelse</span>(delay <span class="sc">&gt;</span> <span class="dv">0</span>, <span class="st">"Atrasou"</span>, <span class="st">"Adiantou"</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>            <span class="at">delay =</span> <span class="fu">mean</span>(arr_delay)) <span class="sc">|&gt;</span> </span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">sinal =</span> <span class="fu">ifelse</span>(delay <span class="sc">&gt;</span> <span class="dv">0</span>, <span class="st">"Atrasou"</span>, <span class="st">"Adiantou"</span>)) <span class="sc">|&gt;</span></span>
 <span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> distance, <span class="at">y =</span> delay, <span class="at">label =</span> dest, <span class="at">color =</span> sinal))<span class="sc">+</span></span>
 <span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span>  </span>
 <span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">"Adiantou"</span> <span class="ot">=</span> <span class="st">"lightgreen"</span>, </span>
@@ -1076,13 +1194,18 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="cell">
 <div class="cell-output-display">
 <div class="plotly html-widget html-fill-item" id="htmlwidget-b5ed4906484ed42468d8" style="width:100%;height:464px;"></div>
-<script type="application/json" data-for="htmlwidget-b5ed4906484ed42468d8">{"x":{"data":[{"x":[3370,116,378,2465,1207,4975.2222222222226,2241.1158940397349,2468.7039597737271,2412.366492146597,1986.1818181818182,2521,2434,652.25],"y":[-14.5,-2.8163265306122449,-4.6923076923076925,-3.6470588235294117,-10,-3.9629629629629628,-1.9337748344370862,-1.0590823381521055,-2.5392670157068062,-0.91774891774891776,-6.8499999999999996,-13.126436781609195,-8.875],"text":["distance: 3370.00000<br />delay: -14.5000000<br />dest: ANC<br />sinal: Adiantou","distance:  116.00000<br />delay:  -2.8163265<br />dest: BDL<br />sinal: Adiantou","distance:  378.00000<br />delay:  -4.6923077<br />dest: BGR<br />sinal: Adiantou","distance: 2465.00000<br />delay:  -3.6470588<br />dest: BUR<br />sinal: Adiantou","distance: 1207.00000<br />delay: -10.0000000<br />dest: EYW<br />sinal: Adiantou","distance: 4975.22222<br />delay:  -3.9629630<br />dest: HNL<br />sinal: Adiantou","distance: 2241.11589<br />delay:  -1.9337748<br />dest: LAS<br />sinal: Adiantou","distance: 2468.70396<br />delay:  -1.0590823<br />dest: LAX<br />sinal: Adiantou","distance: 2412.36649<br />delay:  -2.5392670<br />dest: SEA<br />sinal: Adiantou","distance: 1986.18182<br />delay:  -0.9177489<br />dest: SLC<br />sinal: Adiantou","distance: 2521.00000<br />delay:  -6.8500000<br />dest: SMF<br />sinal: Adiantou","distance: 2434.00000<br />delay: -13.1264368<br />dest: SNA<br />sinal: Adiantou","distance:  652.25000<br />delay:  -8.8750000<br />dest: TVC<br />sinal: Adiantou"],"type":"scatter","mode":"markers","marker":{"autocolorscale":false,"color":"rgba(144,238,144,1)","opacity":1,"size":5.6692913385826778,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(144,238,144,1)"}},"hoveron":"points","name":"Adiantou","legendgroup":"Adiantou","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[1826,199,143,757.22486926205693,1513.8641975308642,583.5,866,758.21327014218014,190.62627637848877,1578.922077922078,265.28682170542635,297.30172413793105,178.80748663101605,605.75,397,305,633.3552123552123,414.36613272311212,537.97624190064789,476.44378698224853,444,575.69209809264305,537.17910447761199,210.66554809843402,1614.7296195652175,1382.9977116704806,1020.2558139534884,497.8768197088466,1736.909090909091,1070.0641233766235,605.59090909090912,450.07042253521126,596.03174603174602,1728,1420.370731707317,224.71833648393195,1407.3966942148761,500,652.48730964467006,1879,824.48529411764707,2465,1097.4000000000001,942.95968274950428,717.81578947368416,953.83888888888885,207.18000000000001,1091.5126859142608,733.41218637992836,803.66666666666663,1017.4493927125507,1177.4784946236559,173,550,2576,1325,1136.0631578947368,728.80946527350955,288.24615384615385,1028.8218125960061,2444.4065040650407,93.973509933774835,2141.3613445378151,333.78195488721803,1617,160,275.85135135135135,426.49513212795551,281.3878504672897,259.14018691588785,1072.9240121580547,2437.5038167938933,1576.605633802817,709.25842696629218,646.66346153846155,2577.2674865488084,2569,1599.9765494137353,1044.8048780487804,878.99186991869919,1627.3488372093022,206.42465753424656,1003.7364130434783,1215,639,1142.7431192660551],"y":[10.111111111111111,0.80769230769230771,10.625,10.630447414294014,4.2222222222222223,14.65625,16.449999999999999,15.107424960505529,2.6065350578624913,14.116883116883116,7.7906976744186043,7.6918103448275863,9.6417112299465249,107.5,10.784090909090908,3.5,7.583011583011583,9.446224256292906,6.004319654427646,18.828402366863905,17.125,16.923705722070846,19.126865671641792,10.186800894854587,9.9116847826086953,1.9153318077803203,13.813953488372093,3.4434490481522957,5.1363636363636367,8.7556818181818183,29.575757575757574,15.014084507042254,10.174603174603174,3,8.1853658536585368,14.958412098298677,2.7685950413223139,7.0714285714285712,4.4111675126903549,11.25,12.150735294117647,2.084507042253521,17.564102564102566,6.111037673496365,10.497368421052631,10.772222222222222,17.510000000000002,1.6421697287839021,16.551971326164875,15.333333333333334,6.4197031039136299,7.440860215053763,8.4444444444444446,8.25,3.8666666666666667,30.638888888888889,16.726315789473684,4.8192993239090347,12.292307692307693,9.6236559139784941,4.9837398373983737,5.5960264900662251,1.9327731092436975,8.3045112781954895,2.03125,10.588235294117647,9.486486486486486,10.778859527121002,25.897196261682243,9.7850467289719631,1.4924012158054711,1.8473282442748091,16.154929577464788,13.820224719101123,14.990384615384615,1.3697156033820139,6.25,4.2345058626465661,0.74796747967479671,11.704607046070461,1.2093023255813953,9.4246575342465757,7.7975543478260869,69.305555555555557,15.807692307692308,4.4587155963302756],"text":["distance: 1826.00000<br />delay:  10.1111111<br />dest: ABQ<br />sinal: Atrasou","distance:  199.00000<br />delay:   0.8076923<br />dest: ACK<br />sinal: Atrasou","distance:  143.00000<br />delay:  10.6250000<br />dest: ALB<br />sinal: Atrasou","distance:  757.22487<br />delay:  10.6304474<br />dest: ATL<br />sinal: Atrasou","distance: 1513.86420<br />delay:   4.2222222<br />dest: AUS<br />sinal: Atrasou","distance:  583.50000<br />delay:  14.6562500<br />dest: AVL<br />sinal: Atrasou","distance:  866.00000<br />delay:  16.4500000<br />dest: BHM<br />sinal: Atrasou","distance:  758.21327<br />delay:  15.1074250<br />dest: BNA<br />sinal: Atrasou","distance:  190.62628<br />delay:   2.6065351<br />dest: BOS<br />sinal: Atrasou","distance: 1578.92208<br />delay:  14.1168831<br />dest: BQN<br />sinal: Atrasou","distance:  265.28682<br />delay:   7.7906977<br />dest: BTV<br />sinal: Atrasou","distance:  297.30172<br />delay:   7.6918103<br />dest: BUF<br />sinal: Atrasou","distance:  178.80749<br />delay:   9.6417112<br />dest: BWI<br />sinal: Atrasou","distance:  605.75000<br />delay: 107.5000000<br />dest: CAE<br />sinal: Atrasou","distance:  397.00000<br />delay:  10.7840909<br />dest: CAK<br />sinal: Atrasou","distance:  305.00000<br />delay:   3.5000000<br />dest: CHO<br />sinal: Atrasou","distance:  633.35521<br />delay:   7.5830116<br />dest: CHS<br />sinal: Atrasou","distance:  414.36613<br />delay:   9.4462243<br />dest: CLE<br />sinal: Atrasou","distance:  537.97624<br />delay:   6.0043197<br />dest: CLT<br />sinal: Atrasou","distance:  476.44379<br />delay:  18.8284024<br />dest: CMH<br />sinal: Atrasou","distance:  444.00000<br />delay:  17.1250000<br />dest: CRW<br />sinal: Atrasou","distance:  575.69210<br />delay:  16.9237057<br />dest: CVG<br />sinal: Atrasou","distance:  537.17910<br />delay:  19.1268657<br />dest: DAY<br />sinal: Atrasou","distance:  210.66555<br />delay:  10.1868009<br />dest: DCA<br />sinal: Atrasou","distance: 1614.72962<br />delay:   9.9116848<br />dest: DEN<br />sinal: Atrasou","distance: 1382.99771<br />delay:   1.9153318<br />dest: DFW<br />sinal: Atrasou","distance: 1020.25581<br />delay:  13.8139535<br />dest: DSM<br />sinal: Atrasou","distance:  497.87682<br />delay:   3.4434490<br />dest: DTW<br />sinal: Atrasou","distance: 1736.90909<br />delay:   5.1363636<br />dest: EGE<br />sinal: Atrasou","distance: 1070.06412<br />delay:   8.7556818<br />dest: FLL<br />sinal: Atrasou","distance:  605.59091<br />delay:  29.5757576<br />dest: GRR<br />sinal: Atrasou","distance:  450.07042<br />delay:  15.0140845<br />dest: GSO<br />sinal: Atrasou","distance:  596.03175<br />delay:  10.1746032<br />dest: GSP<br />sinal: Atrasou","distance: 1728.00000<br />delay:   3.0000000<br />dest: HDN<br />sinal: Atrasou","distance: 1420.37073<br />delay:   8.1853659<br />dest: HOU<br />sinal: Atrasou","distance:  224.71834<br />delay:  14.9584121<br />dest: IAD<br />sinal: Atrasou","distance: 1407.39669<br />delay:   2.7685950<br />dest: IAH<br />sinal: Atrasou","distance:  500.00000<br />delay:   7.0714286<br />dest: ILM<br />sinal: Atrasou","distance:  652.48731<br />delay:   4.4111675<br />dest: IND<br />sinal: Atrasou","distance: 1879.00000<br />delay:  11.2500000<br />dest: JAC<br />sinal: Atrasou","distance:  824.48529<br />delay:  12.1507353<br />dest: JAX<br />sinal: Atrasou","distance: 2465.00000<br />delay:   2.0845070<br />dest: LGB<br />sinal: Atrasou","distance: 1097.40000<br />delay:  17.5641026<br />dest: MCI<br />sinal: Atrasou","distance:  942.95968<br />delay:   6.1110377<br />dest: MCO<br />sinal: Atrasou","distance:  717.81579<br />delay:  10.4973684<br />dest: MDW<br />sinal: Atrasou","distance:  953.83889<br />delay:  10.7722222<br />dest: MEM<br />sinal: Atrasou","distance:  207.18000<br />delay:  17.5100000<br />dest: MHT<br />sinal: Atrasou","distance: 1091.51269<br />delay:   1.6421697<br />dest: MIA<br />sinal: Atrasou","distance:  733.41219<br />delay:  16.5519713<br />dest: MKE<br />sinal: Atrasou","distance:  803.66667<br />delay:  15.3333333<br />dest: MSN<br />sinal: Atrasou","distance: 1017.44939<br />delay:   6.4197031<br />dest: MSP<br />sinal: Atrasou","distance: 1177.47849<br />delay:   7.4408602<br />dest: MSY<br />sinal: Atrasou","distance:  173.00000<br />delay:   8.4444444<br />dest: MVY<br />sinal: Atrasou","distance:  550.00000<br />delay:   8.2500000<br />dest: MYR<br />sinal: Atrasou","distance: 2576.00000<br />delay:   3.8666667<br />dest: OAK<br />sinal: Atrasou","distance: 1325.00000<br />delay:  30.6388889<br />dest: OKC<br />sinal: Atrasou","distance: 1136.06316<br />delay:  16.7263158<br />dest: OMA<br />sinal: Atrasou","distance:  728.80947<br />delay:   4.8192993<br />dest: ORD<br />sinal: Atrasou","distance:  288.24615<br />delay:  12.2923077<br />dest: ORF<br />sinal: Atrasou","distance: 1028.82181<br />delay:   9.6236559<br />dest: PBI<br />sinal: Atrasou","distance: 2444.40650<br />delay:   4.9837398<br />dest: PDX<br />sinal: Atrasou","distance:   93.97351<br />delay:   5.5960265<br />dest: PHL<br />sinal: Atrasou","distance: 2141.36134<br />delay:   1.9327731<br />dest: PHX<br />sinal: Atrasou","distance:  333.78195<br />delay:   8.3045113<br />dest: PIT<br />sinal: Atrasou","distance: 1617.00000<br />delay:   2.0312500<br />dest: PSE<br />sinal: Atrasou","distance:  160.00000<br />delay:  10.5882353<br />dest: PVD<br />sinal: Atrasou","distance:  275.85135<br />delay:   9.4864865<br />dest: PWM<br />sinal: Atrasou","distance:  426.49513<br />delay:  10.7788595<br />dest: RDU<br />sinal: Atrasou","distance:  281.38785<br />delay:  25.8971963<br />dest: RIC<br />sinal: Atrasou","distance:  259.14019<br />delay:   9.7850467<br />dest: ROC<br />sinal: Atrasou","distance: 1072.92401<br />delay:   1.4924012<br />dest: RSW<br />sinal: Atrasou","distance: 2437.50382<br />delay:   1.8473282<br />dest: SAN<br />sinal: Atrasou","distance: 1576.60563<br />delay:  16.1549296<br />dest: SAT<br />sinal: Atrasou","distance:  709.25843<br />delay:  13.8202247<br />dest: SAV<br />sinal: Atrasou","distance:  646.66346<br />delay:  14.9903846<br />dest: SDF<br />sinal: Atrasou","distance: 2577.26749<br />delay:   1.3697156<br />dest: SFO<br />sinal: Atrasou","distance: 2569.00000<br />delay:   6.2500000<br />dest: SJC<br />sinal: Atrasou","distance: 1599.97655<br />delay:   4.2345059<br />dest: SJU<br />sinal: Atrasou","distance: 1044.80488<br />delay:   0.7479675<br />dest: SRQ<br />sinal: Atrasou","distance:  878.99187<br />delay:  11.7046070<br />dest: STL<br />sinal: Atrasou","distance: 1627.34884<br />delay:   1.2093023<br />dest: STT<br />sinal: Atrasou","distance:  206.42466<br />delay:   9.4246575<br />dest: SYR<br />sinal: Atrasou","distance: 1003.73641<br />delay:   7.7975543<br />dest: TPA<br />sinal: Atrasou","distance: 1215.00000<br />delay:  69.3055556<br />dest: TUL<br />sinal: Atrasou","distance:  639.00000<br />delay:  15.8076923<br />dest: TYS<br />sinal: Atrasou","distance: 1142.74312<br />delay:   4.4587156<br />dest: XNA<br />sinal: Atrasou"],"type":"scatter","mode":"markers","marker":{"autocolorscale":false,"color":"rgba(250,128,114,1)","opacity":1,"size":5.6692913385826778,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(250,128,114,1)"}},"hoveron":"points","name":"Atrasou","legendgroup":"Atrasou","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null}],"layout":{"margin":{"t":40.840182648401829,"r":7.3059360730593621,"b":37.260273972602747,"l":37.260273972602747},"plot_bgcolor":"rgba(255,255,255,1)","paper_bgcolor":"rgba(255,255,255,1)","font":{"color":"rgba(0,0,0,1)","family":"","size":14.611872146118724},"title":{"text":"Relação entre Distância Média e Atraso Médio por Destino","font":{"color":"rgba(0,0,0,1)","family":"","size":17.534246575342465},"x":0,"xref":"paper"},"xaxis":{"domain":[0,1],"automargin":true,"type":"linear","autorange":false,"range":[-150.08892568064755,5219.2846578366452],"tickmode":"array","ticktext":["0","1000","2000","3000","4000","5000"],"tickvals":[0,1000.0000000000001,2000,3000,4000,5000],"categoryorder":"array","categoryarray":["0","1000","2000","3000","4000","5000"],"nticks":null,"ticks":"outside","tickcolor":"rgba(51,51,51,1)","ticklen":3.6529680365296811,"tickwidth":0.66417600664176002,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":11.68949771689498},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(235,235,235,1)","gridwidth":0.66417600664176002,"zeroline":false,"anchor":"y","title":{"text":"Distância Média (milhas)","font":{"color":"rgba(0,0,0,1)","family":"","size":14.611872146118724}},"hoverformat":".2f"},"yaxis":{"domain":[0,1],"automargin":true,"type":"linear","autorange":false,"range":[-20.600000000000001,113.59999999999999],"tickmode":"array","ticktext":["0","40","80"],"tickvals":[0,40,80],"categoryorder":"array","categoryarray":["0","40","80"],"nticks":null,"ticks":"outside","tickcolor":"rgba(51,51,51,1)","ticklen":3.6529680365296811,"tickwidth":0.66417600664176002,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":11.68949771689498},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(235,235,235,1)","gridwidth":0.66417600664176002,"zeroline":false,"anchor":"x","title":{"text":"Atraso Médio (minutos)","font":{"color":"rgba(0,0,0,1)","family":"","size":14.611872146118724}},"hoverformat":".2f"},"shapes":[{"type":"rect","fillcolor":"rgba(255,255,255,1)","line":{"color":"rgba(51,51,51,1)","width":0.66417600664176002,"linetype":"solid"},"yref":"paper","xref":"paper","layer":"below","x0":0,"x1":1,"y0":0,"y1":1}],"showlegend":true,"legend":{"bgcolor":"rgba(255,255,255,1)","bordercolor":"transparent","borderwidth":1.8897637795275593,"font":{"color":"rgba(0,0,0,1)","family":"","size":11.68949771689498},"title":{"text":"Atraso / Adiantamento","font":{"color":"rgba(0,0,0,1)","family":"","size":14.611872146118724}}},"hovermode":"closest","barmode":"relative"},"config":{"doubleClick":"reset","modeBarButtonsToAdd":["hoverclosest","hovercompare"],"showSendToCloud":false},"source":"A","attrs":{"63d21949f568":{"x":{},"y":{},"label":{},"colour":{},"type":"scatter"}},"cur_data":"63d21949f568","visdat":{"63d21949f568":["function (y) ","x"]},"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.20000000000000001,"selected":{"opacity":1},"debounce":0},"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
+<script type="application/json" data-for="htmlwidget-b5ed4906484ed42468d8">{"x":{"data":[{"x":[3370,116,378,2465,1207,4975.2222222222226,2241.1158940397349,2468.7039597737271,2412.366492146597,1986.1818181818182,2521,2434,652.25],"y":[-14.5,-2.8163265306122449,-4.6923076923076925,-3.6470588235294117,-10,-3.9629629629629628,-1.9337748344370862,-1.0590823381521055,-2.5392670157068062,-0.91774891774891776,-6.8499999999999996,-13.126436781609195,-8.875],"text":["distance: 3370.00000<br />delay: -14.5000000<br />dest: ANC<br />sinal: Adiantou","distance:  116.00000<br />delay:  -2.8163265<br />dest: BDL<br />sinal: Adiantou","distance:  378.00000<br />delay:  -4.6923077<br />dest: BGR<br />sinal: Adiantou","distance: 2465.00000<br />delay:  -3.6470588<br />dest: BUR<br />sinal: Adiantou","distance: 1207.00000<br />delay: -10.0000000<br />dest: EYW<br />sinal: Adiantou","distance: 4975.22222<br />delay:  -3.9629630<br />dest: HNL<br />sinal: Adiantou","distance: 2241.11589<br />delay:  -1.9337748<br />dest: LAS<br />sinal: Adiantou","distance: 2468.70396<br />delay:  -1.0590823<br />dest: LAX<br />sinal: Adiantou","distance: 2412.36649<br />delay:  -2.5392670<br />dest: SEA<br />sinal: Adiantou","distance: 1986.18182<br />delay:  -0.9177489<br />dest: SLC<br />sinal: Adiantou","distance: 2521.00000<br />delay:  -6.8500000<br />dest: SMF<br />sinal: Adiantou","distance: 2434.00000<br />delay: -13.1264368<br />dest: SNA<br />sinal: Adiantou","distance:  652.25000<br />delay:  -8.8750000<br />dest: TVC<br />sinal: Adiantou"],"type":"scatter","mode":"markers","marker":{"autocolorscale":false,"color":"rgba(144,238,144,1)","opacity":1,"size":5.6692913385826778,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(144,238,144,1)"}},"hoveron":"points","name":"Adiantou","legendgroup":"Adiantou","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[1826,199,143,757.22486926205693,1513.8641975308642,583.5,866,758.21327014218014,190.62627637848877,1578.922077922078,265.28682170542635,297.30172413793105,178.80748663101605,605.75,397,305,633.3552123552123,414.36613272311212,537.97624190064789,476.44378698224853,444,575.69209809264305,537.17910447761199,210.66554809843402,1614.7296195652175,1382.9977116704806,1020.2558139534884,497.8768197088466,1736.909090909091,1070.0641233766235,605.59090909090912,450.07042253521126,596.03174603174602,1728,1420.370731707317,224.71833648393195,1407.3966942148761,500,652.48730964467006,1879,824.48529411764707,2465,1097.4000000000001,942.95968274950428,717.81578947368416,953.83888888888885,207.18000000000001,1091.5126859142608,733.41218637992836,803.66666666666663,1017.4493927125507,1177.4784946236559,173,550,2576,1325,1136.0631578947368,728.80946527350955,288.24615384615385,1028.8218125960061,2444.4065040650407,93.973509933774835,2141.3613445378151,333.78195488721803,1617,160,275.85135135135135,426.49513212795551,281.3878504672897,259.14018691588785,1072.9240121580547,2437.5038167938933,1576.605633802817,709.25842696629218,646.66346153846155,2577.2674865488084,2569,1599.9765494137353,1044.8048780487804,878.99186991869919,1627.3488372093022,206.42465753424656,1003.7364130434783,1215,639,1142.7431192660551],"y":[10.111111111111111,0.80769230769230771,10.625,10.630447414294014,4.2222222222222223,14.65625,16.449999999999999,15.107424960505529,2.6065350578624913,14.116883116883116,7.7906976744186043,7.6918103448275863,9.6417112299465249,107.5,10.784090909090908,3.5,7.583011583011583,9.446224256292906,6.004319654427646,18.828402366863905,17.125,16.923705722070846,19.126865671641792,10.186800894854587,9.9116847826086953,1.9153318077803203,13.813953488372093,3.4434490481522957,5.1363636363636367,8.7556818181818183,29.575757575757574,15.014084507042254,10.174603174603174,3,8.1853658536585368,14.958412098298677,2.7685950413223139,7.0714285714285712,4.4111675126903549,11.25,12.150735294117647,2.084507042253521,17.564102564102566,6.111037673496365,10.497368421052631,10.772222222222222,17.510000000000002,1.6421697287839021,16.551971326164875,15.333333333333334,6.4197031039136299,7.440860215053763,8.4444444444444446,8.25,3.8666666666666667,30.638888888888889,16.726315789473684,4.8192993239090347,12.292307692307693,9.6236559139784941,4.9837398373983737,5.5960264900662251,1.9327731092436975,8.3045112781954895,2.03125,10.588235294117647,9.486486486486486,10.778859527121002,25.897196261682243,9.7850467289719631,1.4924012158054711,1.8473282442748091,16.154929577464788,13.820224719101123,14.990384615384615,1.3697156033820139,6.25,4.2345058626465661,0.74796747967479671,11.704607046070461,1.2093023255813953,9.4246575342465757,7.7975543478260869,69.305555555555557,15.807692307692308,4.4587155963302756],"text":["distance: 1826.00000<br />delay:  10.1111111<br />dest: ABQ<br />sinal: Atrasou","distance:  199.00000<br />delay:   0.8076923<br />dest: ACK<br />sinal: Atrasou","distance:  143.00000<br />delay:  10.6250000<br />dest: ALB<br />sinal: Atrasou","distance:  757.22487<br />delay:  10.6304474<br />dest: ATL<br />sinal: Atrasou","distance: 1513.86420<br />delay:   4.2222222<br />dest: AUS<br />sinal: Atrasou","distance:  583.50000<br />delay:  14.6562500<br />dest: AVL<br />sinal: Atrasou","distance:  866.00000<br />delay:  16.4500000<br />dest: BHM<br />sinal: Atrasou","distance:  758.21327<br />delay:  15.1074250<br />dest: BNA<br />sinal: Atrasou","distance:  190.62628<br />delay:   2.6065351<br />dest: BOS<br />sinal: Atrasou","distance: 1578.92208<br />delay:  14.1168831<br />dest: BQN<br />sinal: Atrasou","distance:  265.28682<br />delay:   7.7906977<br />dest: BTV<br />sinal: Atrasou","distance:  297.30172<br />delay:   7.6918103<br />dest: BUF<br />sinal: Atrasou","distance:  178.80749<br />delay:   9.6417112<br />dest: BWI<br />sinal: Atrasou","distance:  605.75000<br />delay: 107.5000000<br />dest: CAE<br />sinal: Atrasou","distance:  397.00000<br />delay:  10.7840909<br />dest: CAK<br />sinal: Atrasou","distance:  305.00000<br />delay:   3.5000000<br />dest: CHO<br />sinal: Atrasou","distance:  633.35521<br />delay:   7.5830116<br />dest: CHS<br />sinal: Atrasou","distance:  414.36613<br />delay:   9.4462243<br />dest: CLE<br />sinal: Atrasou","distance:  537.97624<br />delay:   6.0043197<br />dest: CLT<br />sinal: Atrasou","distance:  476.44379<br />delay:  18.8284024<br />dest: CMH<br />sinal: Atrasou","distance:  444.00000<br />delay:  17.1250000<br />dest: CRW<br />sinal: Atrasou","distance:  575.69210<br />delay:  16.9237057<br />dest: CVG<br />sinal: Atrasou","distance:  537.17910<br />delay:  19.1268657<br />dest: DAY<br />sinal: Atrasou","distance:  210.66555<br />delay:  10.1868009<br />dest: DCA<br />sinal: Atrasou","distance: 1614.72962<br />delay:   9.9116848<br />dest: DEN<br />sinal: Atrasou","distance: 1382.99771<br />delay:   1.9153318<br />dest: DFW<br />sinal: Atrasou","distance: 1020.25581<br />delay:  13.8139535<br />dest: DSM<br />sinal: Atrasou","distance:  497.87682<br />delay:   3.4434490<br />dest: DTW<br />sinal: Atrasou","distance: 1736.90909<br />delay:   5.1363636<br />dest: EGE<br />sinal: Atrasou","distance: 1070.06412<br />delay:   8.7556818<br />dest: FLL<br />sinal: Atrasou","distance:  605.59091<br />delay:  29.5757576<br />dest: GRR<br />sinal: Atrasou","distance:  450.07042<br />delay:  15.0140845<br />dest: GSO<br />sinal: Atrasou","distance:  596.03175<br />delay:  10.1746032<br />dest: GSP<br />sinal: Atrasou","distance: 1728.00000<br />delay:   3.0000000<br />dest: HDN<br />sinal: Atrasou","distance: 1420.37073<br />delay:   8.1853659<br />dest: HOU<br />sinal: Atrasou","distance:  224.71834<br />delay:  14.9584121<br />dest: IAD<br />sinal: Atrasou","distance: 1407.39669<br />delay:   2.7685950<br />dest: IAH<br />sinal: Atrasou","distance:  500.00000<br />delay:   7.0714286<br />dest: ILM<br />sinal: Atrasou","distance:  652.48731<br />delay:   4.4111675<br />dest: IND<br />sinal: Atrasou","distance: 1879.00000<br />delay:  11.2500000<br />dest: JAC<br />sinal: Atrasou","distance:  824.48529<br />delay:  12.1507353<br />dest: JAX<br />sinal: Atrasou","distance: 2465.00000<br />delay:   2.0845070<br />dest: LGB<br />sinal: Atrasou","distance: 1097.40000<br />delay:  17.5641026<br />dest: MCI<br />sinal: Atrasou","distance:  942.95968<br />delay:   6.1110377<br />dest: MCO<br />sinal: Atrasou","distance:  717.81579<br />delay:  10.4973684<br />dest: MDW<br />sinal: Atrasou","distance:  953.83889<br />delay:  10.7722222<br />dest: MEM<br />sinal: Atrasou","distance:  207.18000<br />delay:  17.5100000<br />dest: MHT<br />sinal: Atrasou","distance: 1091.51269<br />delay:   1.6421697<br />dest: MIA<br />sinal: Atrasou","distance:  733.41219<br />delay:  16.5519713<br />dest: MKE<br />sinal: Atrasou","distance:  803.66667<br />delay:  15.3333333<br />dest: MSN<br />sinal: Atrasou","distance: 1017.44939<br />delay:   6.4197031<br />dest: MSP<br />sinal: Atrasou","distance: 1177.47849<br />delay:   7.4408602<br />dest: MSY<br />sinal: Atrasou","distance:  173.00000<br />delay:   8.4444444<br />dest: MVY<br />sinal: Atrasou","distance:  550.00000<br />delay:   8.2500000<br />dest: MYR<br />sinal: Atrasou","distance: 2576.00000<br />delay:   3.8666667<br />dest: OAK<br />sinal: Atrasou","distance: 1325.00000<br />delay:  30.6388889<br />dest: OKC<br />sinal: Atrasou","distance: 1136.06316<br />delay:  16.7263158<br />dest: OMA<br />sinal: Atrasou","distance:  728.80947<br />delay:   4.8192993<br />dest: ORD<br />sinal: Atrasou","distance:  288.24615<br />delay:  12.2923077<br />dest: ORF<br />sinal: Atrasou","distance: 1028.82181<br />delay:   9.6236559<br />dest: PBI<br />sinal: Atrasou","distance: 2444.40650<br />delay:   4.9837398<br />dest: PDX<br />sinal: Atrasou","distance:   93.97351<br />delay:   5.5960265<br />dest: PHL<br />sinal: Atrasou","distance: 2141.36134<br />delay:   1.9327731<br />dest: PHX<br />sinal: Atrasou","distance:  333.78195<br />delay:   8.3045113<br />dest: PIT<br />sinal: Atrasou","distance: 1617.00000<br />delay:   2.0312500<br />dest: PSE<br />sinal: Atrasou","distance:  160.00000<br />delay:  10.5882353<br />dest: PVD<br />sinal: Atrasou","distance:  275.85135<br />delay:   9.4864865<br />dest: PWM<br />sinal: Atrasou","distance:  426.49513<br />delay:  10.7788595<br />dest: RDU<br />sinal: Atrasou","distance:  281.38785<br />delay:  25.8971963<br />dest: RIC<br />sinal: Atrasou","distance:  259.14019<br />delay:   9.7850467<br />dest: ROC<br />sinal: Atrasou","distance: 1072.92401<br />delay:   1.4924012<br />dest: RSW<br />sinal: Atrasou","distance: 2437.50382<br />delay:   1.8473282<br />dest: SAN<br />sinal: Atrasou","distance: 1576.60563<br />delay:  16.1549296<br />dest: SAT<br />sinal: Atrasou","distance:  709.25843<br />delay:  13.8202247<br />dest: SAV<br />sinal: Atrasou","distance:  646.66346<br />delay:  14.9903846<br />dest: SDF<br />sinal: Atrasou","distance: 2577.26749<br />delay:   1.3697156<br />dest: SFO<br />sinal: Atrasou","distance: 2569.00000<br />delay:   6.2500000<br />dest: SJC<br />sinal: Atrasou","distance: 1599.97655<br />delay:   4.2345059<br />dest: SJU<br />sinal: Atrasou","distance: 1044.80488<br />delay:   0.7479675<br />dest: SRQ<br />sinal: Atrasou","distance:  878.99187<br />delay:  11.7046070<br />dest: STL<br />sinal: Atrasou","distance: 1627.34884<br />delay:   1.2093023<br />dest: STT<br />sinal: Atrasou","distance:  206.42466<br />delay:   9.4246575<br />dest: SYR<br />sinal: Atrasou","distance: 1003.73641<br />delay:   7.7975543<br />dest: TPA<br />sinal: Atrasou","distance: 1215.00000<br />delay:  69.3055556<br />dest: TUL<br />sinal: Atrasou","distance:  639.00000<br />delay:  15.8076923<br />dest: TYS<br />sinal: Atrasou","distance: 1142.74312<br />delay:   4.4587156<br />dest: XNA<br />sinal: Atrasou"],"type":"scatter","mode":"markers","marker":{"autocolorscale":false,"color":"rgba(250,128,114,1)","opacity":1,"size":5.6692913385826778,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(250,128,114,1)"}},"hoveron":"points","name":"Atrasou","legendgroup":"Atrasou","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null}],"layout":{"margin":{"t":40.840182648401829,"r":7.3059360730593621,"b":37.260273972602747,"l":37.260273972602747},"plot_bgcolor":"rgba(255,255,255,1)","paper_bgcolor":"rgba(255,255,255,1)","font":{"color":"rgba(0,0,0,1)","family":"","size":14.611872146118724},"title":{"text":"Relação entre Distância Média e Atraso Médio por Destino","font":{"color":"rgba(0,0,0,1)","family":"","size":17.534246575342465},"x":0,"xref":"paper"},"xaxis":{"domain":[0,1],"automargin":true,"type":"linear","autorange":false,"range":[-150.08892568064755,5219.2846578366452],"tickmode":"array","ticktext":["0","1000","2000","3000","4000","5000"],"tickvals":[0,1000.0000000000001,2000,3000,4000,5000],"categoryorder":"array","categoryarray":["0","1000","2000","3000","4000","5000"],"nticks":null,"ticks":"outside","tickcolor":"rgba(51,51,51,1)","ticklen":3.6529680365296811,"tickwidth":0.66417600664176002,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":11.68949771689498},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(235,235,235,1)","gridwidth":0.66417600664176002,"zeroline":false,"anchor":"y","title":{"text":"Distância Média (milhas)","font":{"color":"rgba(0,0,0,1)","family":"","size":14.611872146118724}},"hoverformat":".2f"},"yaxis":{"domain":[0,1],"automargin":true,"type":"linear","autorange":false,"range":[-20.600000000000001,113.59999999999999],"tickmode":"array","ticktext":["0","40","80"],"tickvals":[0,40,80],"categoryorder":"array","categoryarray":["0","40","80"],"nticks":null,"ticks":"outside","tickcolor":"rgba(51,51,51,1)","ticklen":3.6529680365296811,"tickwidth":0.66417600664176002,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":11.68949771689498},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(235,235,235,1)","gridwidth":0.66417600664176002,"zeroline":false,"anchor":"x","title":{"text":"Atraso Médio (minutos)","font":{"color":"rgba(0,0,0,1)","family":"","size":14.611872146118724}},"hoverformat":".2f"},"shapes":[{"type":"rect","fillcolor":"rgba(255,255,255,1)","line":{"color":"rgba(51,51,51,1)","width":0.66417600664176002,"linetype":"solid"},"yref":"paper","xref":"paper","layer":"below","x0":0,"x1":1,"y0":0,"y1":1}],"showlegend":true,"legend":{"bgcolor":"rgba(255,255,255,1)","bordercolor":"transparent","borderwidth":1.8897637795275593,"font":{"color":"rgba(0,0,0,1)","family":"","size":11.68949771689498},"title":{"text":"Atraso / Adiantamento","font":{"color":"rgba(0,0,0,1)","family":"","size":14.611872146118724}}},"hovermode":"closest","barmode":"relative"},"config":{"doubleClick":"reset","modeBarButtonsToAdd":["hoverclosest","hovercompare"],"showSendToCloud":false},"source":"A","attrs":{"1f364922f84d":{"x":{},"y":{},"label":{},"colour":{},"type":"scatter"}},"cur_data":"1f364922f84d","visdat":{"1f364922f84d":["function (y) ","x"]},"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.20000000000000001,"selected":{"opacity":1},"debounce":0},"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
 </div>
 </div>
 <p><strong>Exercício:</strong> quais outras variáveis poderiam ter suas relações exploradas?</p>
 </section>
-<section id="questões-estratégicas-de-negócio" class="level3" data-number="1.2.3">
-<h3 data-number="1.2.3" class="anchored" data-anchor-id="questões-estratégicas-de-negócio"><span class="header-section-number">1.2.3</span> Questões estratégicas de negócio</h3>
+</section>
+<section id="estudo-de-caso-questões-estratégicas-de-negócio" class="level2" data-number="1.3">
+<h2 data-number="1.3" class="anchored" data-anchor-id="estudo-de-caso-questões-estratégicas-de-negócio"><span class="header-section-number">1.3</span> Estudo de Caso: questões estratégicas de negócio</h2>
+<p>Esta seção propõe um conjunto de questões analíticas com foco em tomada de decisão e interpretação gerencial. Diferentemente das seções anteriores, que tiveram caráter predominantemente ilustrativo, este estudo de caso propõe uma análise orientada por perguntas de negócio. O objetivo é demonstrar como as ferramentas de estatística descritiva e visualização podem ser combinadas para apoiar diagnósticos operacionais e decisões gerenciais em contextos reais.</p>
+<section id="questões-estratégicas-de-negócio" class="level3" data-number="1.3.1">
+<h3 data-number="1.3.1" class="anchored" data-anchor-id="questões-estratégicas-de-negócio"><span class="header-section-number">1.3.1</span> Questões estratégicas de negócio</h3>
+<p>As questões a seguir têm como objetivo consolidar os conceitos apresentados e estimular o leitor a conduzir uma análise exploratória orientada a decisões de negócio. Para responder às questões, considere agregações por origem, destino e tempo, bem como o uso de visualizações comparativas. Não há uma única abordagem correta.</p>
 <ol type="1">
 <li><p>Quais são os principais gargalos operacionais?</p>
 <ul>
@@ -1102,10 +1225,511 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li>Quais eventos climáticos mais afetam as operações? Neve, tempestades ou ventos fortes?</li>
 </ul></li>
 </ol>
+<div class="callout callout-style-default callout-tip callout-titled" title="Respostas">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Dica</span>Respostas
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-1" class="callout-1-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>Os principais achados do estudo de caso estão consolidados abaixo e interpretados à luz de implicações operacionais e estratégicas. O objetivo é destacar como análises descritivas podem apoiar decisões gerenciais, além de discutir limitações e possíveis extensões da análise realizada.</p>
+<p><strong>1. Quais são os principais gargalos operacionais?</strong></p>
+<p>Vamos identificar rotas (origem–destino) com maior atraso médio na chegada, considerando apenas rotas com volume relevante de voos.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>gargalos_rotas <span class="ot">&lt;-</span> flights <span class="sc">|&gt;</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(arr_delay)) <span class="sc">|&gt;</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(origin, dest) <span class="sc">|&gt;</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">atraso_medio =</span> <span class="fu">mean</span>(arr_delay),</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">n_voos =</span> <span class="fu">n</span>(),</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">.groups =</span> <span class="st">"drop"</span></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(n_voos <span class="sc">&gt;=</span> <span class="dv">50</span>) <span class="sc">|&gt;</span></span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(atraso_medio))</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="cell">
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th">origin</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">dest</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">atraso_medio</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">n_voos</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">JFK</td>
+<td style="text-align: left;">CMH</td>
+<td style="text-align: right;">49.95312</td>
+<td style="text-align: right;">64</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">EWR</td>
+<td style="text-align: left;">RIC</td>
+<td style="text-align: right;">39.04138</td>
+<td style="text-align: right;">145</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">EWR</td>
+<td style="text-align: left;">GRR</td>
+<td style="text-align: right;">28.03175</td>
+<td style="text-align: right;">63</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">EWR</td>
+<td style="text-align: left;">DCA</td>
+<td style="text-align: right;">26.81111</td>
+<td style="text-align: right;">180</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">EWR</td>
+<td style="text-align: left;">DAY</td>
+<td style="text-align: right;">24.27273</td>
+<td style="text-align: right;">99</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">EWR</td>
+<td style="text-align: left;">MKE</td>
+<td style="text-align: right;">23.02655</td>
+<td style="text-align: right;">113</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">EWR</td>
+<td style="text-align: left;">GSO</td>
+<td style="text-align: right;">22.38144</td>
+<td style="text-align: right;">97</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">JFK</td>
+<td style="text-align: left;">CLE</td>
+<td style="text-align: right;">21.38571</td>
+<td style="text-align: right;">70</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">EWR</td>
+<td style="text-align: left;">MEM</td>
+<td style="text-align: right;">20.93814</td>
+<td style="text-align: right;">97</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">EWR</td>
+<td style="text-align: left;">PWM</td>
+<td style="text-align: right;">20.37313</td>
+<td style="text-align: right;">67</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>Veja no gráfico abaixo o top 10 rotas com maior atraso médio na chegada.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  gargalos_rotas <span class="sc">|&gt;</span> <span class="fu">slice_max</span>(atraso_medio, <span class="at">n =</span> <span class="dv">10</span>),</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">reorder</span>(<span class="fu">paste</span>(origin, dest, <span class="at">sep =</span> <span class="st">" → "</span>), atraso_medio),</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>      <span class="at">y =</span> atraso_medio)</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>) <span class="sc">+</span></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_col</span>(<span class="at">fill =</span> <span class="st">"salmon"</span>) <span class="sc">+</span></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">coord_flip</span>() <span class="sc">+</span></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Rotas com Maior Atraso Médio na Chegada"</span>,</span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"Rota"</span>,</span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"Atraso médio (minutos)"</span></span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="01_analise_descritiva_files/figure-html/unnamed-chunk-18-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Note que os gargalos operacionais não estão distribuídos aleatoriamente, mas concentrados em um conjunto específico de rotas, com destaque para aquelas que partem dos aeroportos de Newark (EWR) e JFK. Em particular, EWR aparece de forma recorrente entre as rotas mais problemáticas, sugerindo a presença de restrições estruturais ou operacionais persistentes. Além disso, observa-se que vários dos maiores atrasos médios ocorrem em rotas de curta ou média distância, o que indica que esses atrasos não são explicados apenas pelo tempo de voo, mas possivelmente por congestionamentos, limitações de capacidade aeroportuária ou atrasos acumulados ainda em solo.</p>
+<p>Do ponto de vista estratégico, os resultados indicam que iniciativas de melhoria operacional devem priorizar rotas específicas, em vez de ações genéricas sobre toda a malha. A recorrência de EWR entre as rotas mais atrasadas sugere a necessidade de uma avaliação aprofundada da capacidade do aeroporto, incluindo alocação de slots, eficiência das operações em solo e sensibilidade a fatores externos, como condições meteorológicas. Intervenções direcionadas nesses pontos têm potencial para gerar ganhos relevantes de pontualidade com custo relativamente controlado.</p>
+<p>Além disso, o fato de rotas mais curtas apresentarem atrasos elevados aponta para oportunidades de melhoria rápida por meio de ajustes operacionais, como revisão de horários críticos, otimização de processos de embarque e desembarque e melhor coordenação entre companhias aéreas e controle de tráfego aéreo. Essas ações podem reduzir atrasos sem depender de investimentos estruturais de longo prazo, contribuindo diretamente para a melhoria da experiência do passageiro e da eficiência operacional.</p>
+<p>Uma vez identificadas as rotas críticas, surge a questão de saber se esses atrasos estão associados a características estruturais da rota ou a práticas operacionais específicas das companhias aéreas.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Selecionar rotas críticas (top 10)</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>rotas_criticas <span class="ot">&lt;-</span> gargalos_rotas <span class="sc">|&gt;</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">slice_max</span>(atraso_medio, <span class="at">n =</span> <span class="dv">10</span>) <span class="sc">|&gt;</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(origin, dest)</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Atraso médio por companhia dentro das rotas críticas</span></span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>atraso_cia_rotas <span class="ot">&lt;-</span> flights <span class="sc">|&gt;</span></span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">semi_join</span>(rotas_criticas, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"origin"</span>, <span class="st">"dest"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(arr_delay)) <span class="sc">|&gt;</span></span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(origin, dest, carrier) <span class="sc">|&gt;</span></span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(</span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">atraso_medio =</span> <span class="fu">mean</span>(arr_delay),</span>
+<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">n_voos =</span> <span class="fu">n</span>(),</span>
+<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">.groups =</span> <span class="st">"drop"</span></span>
+<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(n_voos <span class="sc">&gt;=</span> <span class="dv">20</span>) <span class="sc">|&gt;</span>     <span class="co"># controle de volume</span></span>
+<span id="cb16-17"><a href="#cb16-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(atraso_medio))</span>
+<span id="cb16-18"><a href="#cb16-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-19"><a href="#cb16-19" aria-hidden="true" tabindex="-1"></a><span class="co"># atraso_cia_rotas |&gt;</span></span>
+<span id="cb16-20"><a href="#cb16-20" aria-hidden="true" tabindex="-1"></a><span class="co">#   kableExtra::kable()</span></span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>  atraso_cia_rotas,</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">reorder</span>(carrier, atraso_medio),</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>      <span class="at">y =</span> atraso_medio,</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>      <span class="at">fill =</span> carrier)</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>) <span class="sc">+</span></span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_col</span>(<span class="at">show.legend =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">coord_flip</span>() <span class="sc">+</span></span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_grid</span>(origin <span class="sc">+</span> dest <span class="sc">~</span> ., <span class="at">scales =</span> <span class="st">"free_y"</span>) <span class="sc">+</span></span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Atraso Médio por Companhia nas Rotas Críticas"</span>,</span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"Companhia aérea"</span>,</span>
+<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"Atraso médio na chegada (minutos)"</span></span>
+<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="01_analise_descritiva_files/figure-html/unnamed-chunk-20-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>A análise dos atrasos por companhia aérea nas rotas críticas revela que os gargalos observados não são, em sua maioria, de natureza estrutural do aeroporto ou da rota. Em diversas rotas com elevado atraso médio, observa-se forte concentração em uma única companhia aérea, em especial a EV (ExpressJet Airlines), que domina praticamente todas as rotas mais problemáticas a partir de EWR, mesmo quando o número de voos é suficientemente grande para garantir robustez estatística. Além disso, em rotas operadas por mais de uma companhia, como JFK–CLE, o desempenho heterogêneo entre empresas — com 9E (Endeavor Air) apresentando atraso médio substancialmente superior ao da MQ (Envoy Air) — indica que fatores operacionais internos, e não condições aeroportuárias ou da rota, desempenham papel central na geração dos atrasos. Esses resultados sugerem que políticas voltadas exclusivamente à infraestrutura aeroportuária seriam insuficientes para mitigar os atrasos observados, sendo necessária também a consideração de práticas operacionais específicas das companhias aéreas.</p>
+<p><strong>2. Há diferenças operacionais entre os três aeroportos de Nova York (JFK, LGA e EWR)?</strong></p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>atraso_origem <span class="ot">&lt;-</span> flights <span class="sc">|&gt;</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(dep_delay)) <span class="sc">|&gt;</span></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(origin) <span class="sc">|&gt;</span></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(</span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">atraso_medio =</span> <span class="fu">mean</span>(dep_delay),</span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">mediana =</span> <span class="fu">median</span>(dep_delay),</span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">.groups =</span> <span class="st">"drop"</span></span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Veja na tabela abaixo o atraso médio na partida por aeroporto.</p>
+<div class="cell">
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th">origin</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">atraso_medio</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">mediana</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">EWR</td>
+<td style="text-align: right;">14.88826</td>
+<td style="text-align: right;">-1</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">JFK</td>
+<td style="text-align: right;">11.43401</td>
+<td style="text-align: right;">-1</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">LGA</td>
+<td style="text-align: right;">10.67389</td>
+<td style="text-align: right;">-3</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>A figura a seguir mostra o atraso médio por horário e origem do voo.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>flights <span class="sc">|&gt;</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(dep_delay)) <span class="sc">|&gt;</span></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">hour =</span> <span class="fu">hour</span>(time_hour)) <span class="sc">|&gt;</span></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(origin, hour) <span class="sc">|&gt;</span></span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">atraso_medio =</span> <span class="fu">mean</span>(dep_delay), <span class="at">.groups =</span> <span class="st">"drop"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(atraso_medio <span class="sc">&gt;=</span> <span class="dv">0</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> hour, <span class="at">y =</span> atraso_medio)) <span class="sc">+</span></span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_col</span>(<span class="at">linewidth =</span> <span class="dv">1</span>, <span class="at">alpha =</span> <span class="fl">0.8</span>) <span class="sc">+</span></span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Atraso Médio por Horário e Aeroporto"</span>,</span>
+<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"Hora do dia"</span>,</span>
+<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"Atraso médio (minutos)"</span></span>
+<span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb19-14"><a href="#cb19-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_grid</span>(<span class="sc">~</span>origin)</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="01_analise_descritiva_files/figure-html/unnamed-chunk-23-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>A análise agregada dos atrasos por aeroporto de origem mostra diferenças claras de desempenho operacional entre os três principais aeroportos de Nova York. O aeroporto de Newark (EWR) apresenta o maior atraso médio na partida (14,9 minutos), seguido por JFK (11,4 minutos) e LaGuardia (LGA), com o menor atraso médio (10,7 minutos). Apesar disso, as medianas negativas em todos os aeroportos indicam que mais da metade dos voos parte no horário ou antecipadamente, o que sugere que os atrasos médios elevados são influenciados por uma cauda de eventos extremos — poucos voos muito atrasados que puxam a média para cima.</p>
+<p>A análise por horário do dia revela um padrão consistente de deterioração operacional ao longo do dia, caracterizando um forte efeito de propagação de atrasos. Nos três aeroportos, os voos realizados nas primeiras horas da manhã apresentam atrasos médios próximos de zero ou mesmo negativos, indicando maior pontualidade. À medida que o dia avança, os atrasos médios aumentam progressivamente, alcançando seus piores níveis no final da tarde e início da noite. Esse padrão é mais acentuado em EWR, onde os atrasos ultrapassam 25 minutos entre 17h e 20h, evidenciando maior sensibilidade ao acúmulo de atrasos e possíveis limitações de capacidade.</p>
+<p>Comparativamente, JFK apresenta uma evolução mais gradual dos atrasos ao longo do dia, com crescimento significativo apenas a partir do início da tarde, enquanto LGA mantém níveis relativamente baixos até o meio da tarde, quando também passa a apresentar aumentos mais pronunciados. Ainda assim, LGA exibe picos relevantes em horários específicos, como no período noturno, indicando que, embora seja o aeroporto mais eficiente em média, não está imune a congestionamentos pontuais.</p>
+<p>Do ponto de vista estratégico, os resultados sugerem que EWR representa o principal gargalo operacional do sistema aeroportuário nova-iorquino, exigindo ações prioritárias de gestão de capacidade, revisão de slots e mitigação da propagação de atrasos ao longo do dia. Além disso, a forte dependência do horário reforça a importância de políticas operacionais voltadas para a proteção da malha nos períodos da manhã, uma vez que atrasos iniciais tendem a se amplificar nas horas subsequentes, afetando de forma sistêmica o desempenho ao longo do dia.</p>
+<p><strong>3. A sazonalidade afeta a operação?</strong></p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>atraso_mes <span class="ot">&lt;-</span> flights <span class="sc">|&gt;</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(arr_delay)) <span class="sc">|&gt;</span></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(origin, month) <span class="sc">|&gt;</span></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(</span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">atraso_medio =</span> <span class="fu">mean</span>(arr_delay)</span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(atraso_mes, <span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">factor</span>(month), <span class="at">y =</span> atraso_medio)) <span class="sc">+</span></span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_col</span>(<span class="at">fill =</span> <span class="st">"lightgreen"</span>) <span class="sc">+</span></span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_grid</span>(<span class="sc">~</span>origin) <span class="sc">+</span> </span>
+<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Atraso Médio por Mês"</span>,</span>
+<span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"Mês"</span>,</span>
+<span id="cb20-14"><a href="#cb20-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"Atraso médio (minutos)"</span></span>
+<span id="cb20-15"><a href="#cb20-15" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="01_analise_descritiva_files/figure-html/unnamed-chunk-24-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>dias_pt <span class="ot">&lt;-</span> <span class="fu">c</span>(</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>  <span class="st">"domingo"</span>, <span class="st">"segunda-feira"</span>, <span class="st">"terça-feira"</span>,</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>  <span class="st">"quarta-feira"</span>, <span class="st">"quinta-feira"</span>, <span class="st">"sexta-feira"</span>, <span class="st">"sábado"</span></span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>atraso_dia <span class="ot">&lt;-</span> flights <span class="sc">|&gt;</span></span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">day_of_week =</span> <span class="fu">wday</span>(</span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a>      time_hour,</span>
+<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a>      <span class="at">label =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a>      <span class="at">abbr =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a>      <span class="at">locale =</span> <span class="st">"Portuguese_Brazil.utf8"</span></span>
+<span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb21-14"><a href="#cb21-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">day_of_week =</span> <span class="fu">factor</span>(day_of_week, <span class="at">levels =</span> dias_pt)</span>
+<span id="cb21-15"><a href="#cb21-15" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb21-16"><a href="#cb21-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(arr_delay)) <span class="sc">|&gt;</span></span>
+<span id="cb21-17"><a href="#cb21-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(origin, day_of_week) <span class="sc">|&gt;</span></span>
+<span id="cb21-18"><a href="#cb21-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">atraso_medio =</span> <span class="fu">mean</span>(arr_delay), <span class="at">.groups =</span> <span class="st">"drop"</span>)</span>
+<span id="cb21-19"><a href="#cb21-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-20"><a href="#cb21-20" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(atraso_dia, <span class="fu">aes</span>(<span class="at">x =</span> day_of_week, <span class="at">y =</span> atraso_medio)) <span class="sc">+</span></span>
+<span id="cb21-21"><a href="#cb21-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_col</span>(<span class="at">fill =</span> <span class="st">"plum"</span>) <span class="sc">+</span></span>
+<span id="cb21-22"><a href="#cb21-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_grid</span>(<span class="sc">~</span>origin) <span class="sc">+</span></span>
+<span id="cb21-23"><a href="#cb21-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb21-24"><a href="#cb21-24" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Atraso Médio por Dia da Semana"</span>,</span>
+<span id="cb21-25"><a href="#cb21-25" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"Dia da semana"</span>,</span>
+<span id="cb21-26"><a href="#cb21-26" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"Atraso médio (minutos)"</span></span>
+<span id="cb21-27"><a href="#cb21-27" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="01_analise_descritiva_files/figure-html/unnamed-chunk-25-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Os gráficos evidenciam um padrão claro de sazonalidade tanto ao longo da semana quanto ao longo do ano, com diferenças consistentes entre as origens. Em termos semanais, EWR apresenta atrasos médios sistematicamente mais elevados e maior variabilidade, sugerindo maior sensibilidade a congestionamentos operacionais, especialmente em dias úteis de maior demanda; JFK mostra atrasos médios mais moderados e estáveis, enquanto LGA apresenta comportamento intermediário, com alguns dias específicos concentrando picos de atraso. No recorte mensal, observa-se um efeito sazonal pronunciado: meses associados a maior demanda e condições meteorológicas adversas (verão e inverno) concentram os maiores atrasos médios, sobretudo em EWR e JFK, enquanto meses de transição tendem a apresentar desempenho operacional melhor. Em conjunto, os resultados indicam que a pontualidade é fortemente influenciada por fatores estruturais do aeroporto e por sazonalidade temporal, reforçando a importância de planejamento operacional diferenciado por origem, dia da semana e época do ano.</p>
+<p><strong>4. Como as condições meteorológicas impactam os voos?</strong></p>
+<p>Vamos aprofundar essa análise, olhando para as condições meteorológicas nas rotas que apresentam maior atraso médio na chegada.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>rotas_criticas <span class="ot">&lt;-</span> gargalos_rotas <span class="sc">|&gt;</span> </span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">slice_max</span>(atraso_medio, <span class="at">n =</span> <span class="dv">10</span>) <span class="sc">|&gt;</span></span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(origin, dest)</span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Filtrar voos apenas dessas rotas</span></span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>flights_rotas_criticas <span class="ot">&lt;-</span> flights <span class="sc">|&gt;</span> </span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">semi_join</span>(rotas_criticas, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"origin"</span>, <span class="st">"dest"</span>))</span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Cruzar com dados meteorológicos</span></span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a>flights_weather <span class="ot">&lt;-</span> flights_rotas_criticas <span class="sc">|&gt;</span> </span>
+<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(</span>
+<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a>    weather,</span>
+<span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"origin"</span>, <span class="st">"time_hour"</span>)</span>
+<span id="cb22-14"><a href="#cb22-14" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb22-15"><a href="#cb22-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-16"><a href="#cb22-16" aria-hidden="true" tabindex="-1"></a><span class="co"># Resumo descritivo das condições meteorológicas nas rotas críticas</span></span>
+<span id="cb22-17"><a href="#cb22-17" aria-hidden="true" tabindex="-1"></a>resumo_meteo <span class="ot">&lt;-</span> flights_weather <span class="sc">|&gt;</span> </span>
+<span id="cb22-18"><a href="#cb22-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(</span>
+<span id="cb22-19"><a href="#cb22-19" aria-hidden="true" tabindex="-1"></a>    <span class="at">temp_media =</span> <span class="fu">mean</span>(temp, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb22-20"><a href="#cb22-20" aria-hidden="true" tabindex="-1"></a>    <span class="at">vento_medio =</span> <span class="fu">mean</span>(wind_speed, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb22-21"><a href="#cb22-21" aria-hidden="true" tabindex="-1"></a>    <span class="at">visibilidade_media =</span> <span class="fu">mean</span>(visib, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb22-22"><a href="#cb22-22" aria-hidden="true" tabindex="-1"></a>    <span class="at">precipitacao_media =</span> <span class="fu">mean</span>(precip, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb22-23"><a href="#cb22-23" aria-hidden="true" tabindex="-1"></a>    <span class="at">atraso_medio =</span> <span class="fu">mean</span>(arr_delay, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb22-24"><a href="#cb22-24" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb22-25"><a href="#cb22-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-26"><a href="#cb22-26" aria-hidden="true" tabindex="-1"></a>resumo_meteo_origin_dest <span class="ot">&lt;-</span> flights_weather <span class="sc">|&gt;</span> </span>
+<span id="cb22-27"><a href="#cb22-27" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(origin, dest) <span class="sc">|&gt;</span> </span>
+<span id="cb22-28"><a href="#cb22-28" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(</span>
+<span id="cb22-29"><a href="#cb22-29" aria-hidden="true" tabindex="-1"></a>    <span class="at">temp_media =</span> <span class="fu">mean</span>(temp, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb22-30"><a href="#cb22-30" aria-hidden="true" tabindex="-1"></a>    <span class="at">vento_medio =</span> <span class="fu">mean</span>(wind_speed, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb22-31"><a href="#cb22-31" aria-hidden="true" tabindex="-1"></a>    <span class="at">visibilidade_media =</span> <span class="fu">mean</span>(visib, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb22-32"><a href="#cb22-32" aria-hidden="true" tabindex="-1"></a>    <span class="at">precipitacao_media =</span> <span class="fu">mean</span>(precip, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb22-33"><a href="#cb22-33" aria-hidden="true" tabindex="-1"></a>    <span class="at">atraso_medio =</span> <span class="fu">mean</span>(arr_delay, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb22-34"><a href="#cb22-34" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>A tabela abaixo mostra as estatísticas descritivas gerais das condições meteorológicas nos voos das rotas com maior atraso.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (knitr<span class="sc">::</span><span class="fu">is_html_output</span>()){</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>  resumo_meteo <span class="sc">|&gt;</span> </span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">kable</span>(<span class="st">"html"</span>)</span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>} <span class="cf">else</span> {</span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>  resumo_meteo <span class="sc">|&gt;</span> </span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">kable</span>(<span class="st">"latex"</span>)</span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: right;" data-quarto-table-cell-role="th">temp_media</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">vento_medio</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">visibilidade_media</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">precipitacao_media</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">atraso_medio</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">56.67704</td>
+<td style="text-align: right;">10.31411</td>
+<td style="text-align: right;">9.124761</td>
+<td style="text-align: right;">0.0067495</td>
+<td style="text-align: right;">27.65729</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>A tabela abaixo segmenta a análise por rota.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (knitr<span class="sc">::</span><span class="fu">is_html_output</span>()){</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>  resumo_meteo_origin_dest <span class="sc">|&gt;</span> </span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">kable</span>(<span class="st">"html"</span>)</span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>} <span class="cf">else</span> {</span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>  resumo_meteo_origin_dest <span class="sc">|&gt;</span> </span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">kable</span>(<span class="st">"latex"</span>)</span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th">origin</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">dest</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">temp_media</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">vento_medio</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">visibilidade_media</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">precipitacao_media</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">atraso_medio</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">EWR</td>
+<td style="text-align: left;">DAY</td>
+<td style="text-align: right;">56.81000</td>
+<td style="text-align: right;">10.154568</td>
+<td style="text-align: right;">8.979167</td>
+<td style="text-align: right;">0.0091667</td>
+<td style="text-align: right;">24.27273</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">EWR</td>
+<td style="text-align: left;">DCA</td>
+<td style="text-align: right;">56.75886</td>
+<td style="text-align: right;">9.552070</td>
+<td style="text-align: right;">9.274611</td>
+<td style="text-align: right;">0.0073057</td>
+<td style="text-align: right;">26.81111</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">EWR</td>
+<td style="text-align: left;">GRR</td>
+<td style="text-align: right;">54.07631</td>
+<td style="text-align: right;">9.896708</td>
+<td style="text-align: right;">8.903846</td>
+<td style="text-align: right;">0.0032308</td>
+<td style="text-align: right;">28.03175</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">EWR</td>
+<td style="text-align: left;">GSO</td>
+<td style="text-align: right;">54.49258</td>
+<td style="text-align: right;">9.526560</td>
+<td style="text-align: right;">8.971649</td>
+<td style="text-align: right;">0.0032990</td>
+<td style="text-align: right;">22.38144</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">EWR</td>
+<td style="text-align: left;">MEM</td>
+<td style="text-align: right;">58.50459</td>
+<td style="text-align: right;">11.180514</td>
+<td style="text-align: right;">9.252294</td>
+<td style="text-align: right;">0.0146789</td>
+<td style="text-align: right;">20.93814</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">EWR</td>
+<td style="text-align: left;">MKE</td>
+<td style="text-align: right;">55.07385</td>
+<td style="text-align: right;">9.304597</td>
+<td style="text-align: right;">9.181624</td>
+<td style="text-align: right;">0.0038462</td>
+<td style="text-align: right;">23.02655</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">EWR</td>
+<td style="text-align: left;">PWM</td>
+<td style="text-align: right;">51.36543</td>
+<td style="text-align: right;">10.389899</td>
+<td style="text-align: right;">8.757143</td>
+<td style="text-align: right;">0.0034286</td>
+<td style="text-align: right;">20.37313</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">EWR</td>
+<td style="text-align: left;">RIC</td>
+<td style="text-align: right;">58.71102</td>
+<td style="text-align: right;">9.793373</td>
+<td style="text-align: right;">8.848640</td>
+<td style="text-align: right;">0.0089116</td>
+<td style="text-align: right;">39.04138</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">JFK</td>
+<td style="text-align: left;">CLE</td>
+<td style="text-align: right;">58.45486</td>
+<td style="text-align: right;">13.233970</td>
+<td style="text-align: right;">9.785714</td>
+<td style="text-align: right;">0.0012857</td>
+<td style="text-align: right;">21.38571</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">JFK</td>
+<td style="text-align: left;">CMH</td>
+<td style="text-align: right;">60.78457</td>
+<td style="text-align: right;">12.576381</td>
+<td style="text-align: right;">9.346429</td>
+<td style="text-align: right;">0.0062857</td>
+<td style="text-align: right;">49.95312</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>Os resultados indicam que os maiores atrasos médios observados nas rotas analisadas não estão associados, em geral, a condições meteorológicas adversas. As rotas com pior desempenho operacional apresentam, em média, temperaturas amenas, boa visibilidade, baixos níveis de precipitação e ventos moderados. Ainda assim, os atrasos médios são elevados, o que sugere que fatores climáticos exercem papel secundário na explicação dos gargalos identificados, atuando mais como agravantes pontuais do que como causa estrutural dos problemas.</p>
+<p>A análise por rota revela que os principais gargalos estão concentrados em poucos corredores específicos, com destaque para rotas partindo de Newark (EWR) e, em menor grau, de JFK. Algumas rotas, como JFK–CMH e EWR–RIC, apresentam atrasos médios persistentemente altos mesmo sob condições climáticas favoráveis, indicando ineficiências operacionais recorrentes, possivelmente relacionadas à gestão de slots, congestionamento aeroportuário ou propagação de atrasos ao longo do dia.</p>
+<p>Do ponto de vista estratégico, os achados sugerem que ações voltadas exclusivamente à mitigação de impactos climáticos terão efeito limitado na redução dos atrasos. Medidas focadas em melhoria de processos operacionais, aumento de resiliência da malha aérea e priorização de rotas cronicamente problemáticas tendem a gerar maior impacto. Em especial, o aeroporto de EWR emerge como um ponto crítico da operação, demandando atenção prioritária em iniciativas de planejamento, alocação de recursos e revisão de capacidade.</p>
+<p>Ressalta-se que esta análise é descritiva e não estabelece relações causais, sendo possível que eventos meteorológicos extremos, ainda que raros, tenham impactos desproporcionais não capturados pela média.</p>
+</div>
+</div>
+</div>
 </section>
 </section>
-<section id="sugestão-de-referência" class="level2" data-number="1.3">
-<h2 data-number="1.3" class="anchored" data-anchor-id="sugestão-de-referência"><span class="header-section-number">1.3</span> Sugestão de Referência</h2>
+<section id="referências-e-materiais-complementares" class="level2" data-number="1.4">
+<h2 data-number="1.4" class="anchored" data-anchor-id="referências-e-materiais-complementares"><span class="header-section-number">1.4</span> Referências e Materiais Complementares</h2>
 <p>O site <a href="https://www.data-to-viz.com/">Data to Viz</a> é uma excelente referência online que fornece orientações sobre a escolha adequada de tipos de gráficos com base no tipo de dados disponíveis. Esta plataforma oferece uma abordagem prática e acessível para ajudar as pessoas a selecionar visualizações apropriadas para seus conjuntos de dados.</p>
 <p>A plataforma apresenta uma ampla galeria de gráficos, incluindo gráficos de dispersão, barras, linhas, áreas, mapas e muito mais. Cada tipo de gráfico é acompanhado por exemplos e instruções claras de implementação. Além de recomendar visualizações específicas, o Data to Viz também fornece dicas e orientações sobre boas práticas de visualização, incluindo interpretação de gráficos e considerações éticas.</p>
 
