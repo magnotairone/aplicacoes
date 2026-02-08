@@ -293,8 +293,10 @@ most_frequent_dest <- flights |>
 
 most_frequent_dest |> 
   kableExtra::kable()
+```
 
 
+```{r echo=FALSE}
 if (knitr::is_html_output()){
   most_frequent_dest |> 
     kable("html")
@@ -632,7 +634,7 @@ resumo_meteo_origin_dest <- flights_weather |>
 
 A tabela abaixo mostra as estatísticas descritivas gerais das condições meteorológicas nos voos das rotas com maior atraso.
 
-```{r}
+```{r echo=FALSE}
 if (knitr::is_html_output()){
   resumo_meteo |> 
     kable("html")
@@ -644,7 +646,7 @@ if (knitr::is_html_output()){
 
 A tabela abaixo segmenta a análise por rota.
 
-```{r}
+```{r echo=FALSE}
 if (knitr::is_html_output()){
   resumo_meteo_origin_dest |> 
     kable("html")
