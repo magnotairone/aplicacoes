@@ -1,6 +1,6 @@
 bookdown::gitbook:
   config:
-    download: ["pdf"]
+    download: ["Aplicacoes-de-Ciencia-de-Dados.pdf.pdf"]
 
 bookdown::pdf_book:
   latex_engine: xelatex
