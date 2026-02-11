@@ -2,3 +2,6 @@
 **/*.quarto_ipynb
 .Rproj.user
 /_book/
+config.R
+*_cache/
+*_files/
