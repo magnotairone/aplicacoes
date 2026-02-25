@@ -10,6 +10,10 @@ book:
   chapters:
     - index.qmd
     - 01_analise_descritiva.qmd
+    - part: Classificação
+      chapters:
+        # - 02_classificacao.qmd
+        - 02_classificacao_manutencao_preventiva.qmd
     # - summary.qmd
     # - references.qmd
 

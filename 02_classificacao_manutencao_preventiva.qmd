@@ -1,0 +1,379 @@
+---
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+# Análise de Manutenção Preditiva
+
+```{r echo=FALSE}
+library(reticulate)
+library(kableExtra)
+use_python("C:/Users/m_tai/AppData/Local/Programs/Python/Python313/python.exe", required = TRUE)
+```
+
+Este case aborda a análise de dados e construção de modelos de classificação para um problema de **Manutenção Preditiva**. 
+O objetivo é prever se um equipamento apresentará falha (**Target**) com base em sensores operacionais.
+
+## Configuração e Importação de Dados
+
+Primeiro, importamos as bibliotecas necessárias e carregamos o dataset, **predictive_maintainance** que está relacionado à manutenção preditiva em um ambiente industrial.
+Cada linha representa uma observação de um equipamento, com várias variáveis registradas:
+
+- **UDI**: Identificador único para cada observação.
+- **Product ID**: Identificador do produto associado à observação.
+- **Type**: Tipo do produto ou equipamento.
+- **Air temperature [K]**: Temperatura do ar em Kelvin durante a operação.
+- **Process temperature [K]**: Temperatura do processo em Kelvin durante a operação.
+- **Rotational speed [rpm]**: Velocidade de rotação em rotações por minuto (RPM).
+- **Torque [Nm]**: Torque aplicado durante o processo, medido em Newton-metros (Nm).
+- **Tool wear [min]**: Tempo de desgaste da ferramenta, em minutos.
+- **Target**: Variável alvo, indicando se ocorreu alguma falha ou não.
+- **Failure Type**: Tipo de falha, se houver.
+
+```{python}
+import pandas as pd
+import seaborn as sns
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score, confusion_matrix
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.neural_network import MLPClassifier
+```
+
+Carregamento do dataset (ajuste o caminho conforme sua máquina).
+
+```{python}
+#| eval: false
+
+data = pd.read_csv('data/predictive_maintenance.csv')
+data.head(10)
+```
+
+```{python}
+#| echo: false
+data = pd.read_csv('data/predictive_maintenance.csv')
+```
+
+```{r}
+#| echo: false
+knitr::kable(head(py$data), "html") |> kable_styling("striped")
+```
+
+
+## Avaliação Inicial e Análise Descritiva
+
+Vamos entender o tamanho da base, a presença de valores nulos e a distribuição da variável alvo.
+
+```{python}
+print("Número de observações:", data.shape[0])
+print("Número de variáveis:", data.shape[1])
+
+# Checagem de valores faltantes
+print("\nValores faltantes no dataset:\n", data.isnull().sum())
+
+# Checagem de duplicatas
+print("\nObservações duplicadas no dataset:", data.duplicated().sum())
+```
+
+
+## Análise Descritiva
+
+Primeiramente, avaliamos a frequencia da variável alvo.
+
+```{python}
+# Frequência da variável Target
+target_counts = data['Target'].value_counts()
+target_percentage = data['Target'].value_counts(normalize=True) * 100
+print("\nFrequência da variável Target:\n", target_counts)
+print("\nPorcentagem da variável Target:\n", target_percentage)
+```
+
+Frequência das variáveis categóricas.
+
+```{python}
+# Frequência da variável Type
+print("Frequência da variável Type:\n", data['Type'].value_counts())
+print("\nFrequência da variável Type:\n", data['Failure Type'].value_counts())
+```
+
+Estatísticas descritivas das variáveis numéricas.
+
+```{python}
+print("Estatísticas descritivas das variáveis numéricas:\n", data.describe())
+```
+
+
+### Relação das Variáveis com a Target
+
+
+A matriz de correlação nos ajuda a identificar quais variáveis numéricas possuem maior relação com a ocorrência de falhas.
+
+```{python}
+numeric_data = data.select_dtypes(include=np.number)
+correlation_matrix = numeric_data.corr()
+
+plt.figure(figsize=(12, 8))
+sns.heatmap(correlation_matrix, annot=True, cmap='coolwarm')
+plt.title('Matriz de Correlação')
+plt.show()
+```
+
+Relação entre a variável Type e a variável Target.
+
+```{python}
+media_target_por_type = data.groupby('Type')['Target'].mean()
+print("Média de Target por classe de Type:\n", media_target_por_type)
+
+media_target_por_type = data.groupby('Failure Type')['Target'].mean()
+print("\n\nMédia de Target por classe de Failure Type:\n", media_target_por_type)
+```
+
+
+```{python}
+#| echo: false
+#| include: false
+# media_target_por_type = data.groupby('Product ID')['Target'].mean()
+# print("\n\nMédia de Target por classe de Product ID:\n", media_target_por_type)
+```
+
+## Construção do Modelo Preditivo
+
+### Preparação dos Dados
+
+Para o modelo, precisamos remover identificadores e transformar variáveis categóricas (como o tipo do produto) em variáveis numéricas (*dummies*).
+
+Removendo identificadores e colunas de diagnóstico posterior
+
+```{python}
+data_model = data.drop(['UDI', 'Failure Type', 'Product ID'], axis=1)
+```
+
+Transformando variáveis categóricas em dummies
+
+```{python}
+data_model = pd.get_dummies(data_model, drop_first=True)
+```
+
+Definição das variávei explicativas (features) e da variável alvo (target).
+
+```{python}
+# Definição de X e y
+variaveis_explicativas = ['Air temperature [K]', 'Process temperature [K]', 
+                          'Rotational speed [rpm]', 'Torque [Nm]', 'Tool wear [min]']
+X = data_model[variaveis_explicativas]
+y = data_model['Target']
+```
+
+Divisão em treino (85%) e validação (15%).
+
+```{python}
+X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.15, random_state=42)
+```
+
+### Treinamento e Comparação de Modelos
+
+Vamos testar quatro algoritmos diferentes: Regressão Logística, Random Forest, KNN e Redes Neurais.
+
+```{python modelos}
+# Inicialização dos modelos
+modelos = {
+    "Regressão Logística": LogisticRegression(),
+    "Random Forest": RandomForestClassifier(random_state=42),
+    "KNN": KNeighborsClassifier(),
+    "Redes Neurais": MLPClassifier(random_state=42)
+}
+
+# Função de avaliação para automatizar o processo
+def avaliar_modelo(nome, model, X_train, y_train, X_val, y_val):
+    # O modelo é treinado aqui
+    model.fit(X_train, y_train)
+    # Predições
+    y_pred_train = model.predict(X_train)
+    y_pred_val = model.predict(X_val)
+    
+    # Cálculo das métricas de Acurácia
+    acuracia_train = accuracy_score(y_train, y_pred_train)
+    acuracia_val = accuracy_score(y_val, y_pred_val)
+    
+    # Matrizes de Confusão
+    cm_train = confusion_matrix(y_train, y_pred_train)
+    cm_val = confusion_matrix(y_val, y_pred_val)
+    
+    # Cálculo de % de Falsos Positivos e Negativos sobre o TOTAL da amostra
+    # (Refletindo a lógica exata do seu notebook original)
+    fp_train = (cm_train[0, 1] / (sum(cm_train[0]) + sum(cm_train[1])))
+    fn_train = (cm_train[1, 0] / (sum(cm_train[0]) + sum(cm_train[1])))
+    
+    fp_val = (cm_val[0, 1] / (sum(cm_val[0]) + sum(cm_val[1])))
+    fn_val = (cm_val[1, 0] / (sum(cm_val[0]) + sum(cm_val[1])))
+    
+    # Saída formatada para a aula
+    print(f"--- {nome} ---")
+    print(f"Acurácia no treino: {acuracia_train:.4f}")
+    print(f"Acurácia na validação: {acuracia_val:.4f}")
+    print(f"Matriz de Confusão no treino:\n{cm_train}")
+    print(f"Matriz de Confusão na validação:\n{cm_val}")
+    print(f"% de Falsos Positivos no treino: {fp_train:.4%}")
+    print(f"% de Falsos Negativos no treino: {fn_train:.4%}")
+    print(f"% de Falsos Positivos na validação: {fp_val:.4%}")
+    print(f"% de Falsos Negativos na validação: {fn_val:.4%}")
+    print("\n" + "="*30 + "\n")
+
+for nome, modelo in modelos.items():
+    avaliar_modelo(nome, modelo, X_train, y_train, X_val, y_val)
+```
+
+<!-- ## Análise de Probabilidades (Regressão Logística) -->
+
+<!-- Em negócios, muitas vezes o corte de 0.50 não é o ideal. Vamos observar as probabilidades geradas. -->
+
+<!-- ```{python} -->
+<!-- model_lr = LogisticRegression() -->
+<!-- model_lr.fit(X_train, y_train) -->
+<!-- y_pred_proba = model_lr.predict_proba(X_val)[:, 1] -->
+
+<!-- resultados = X_val.copy() -->
+<!-- resultados['Target_Real'] = y_val -->
+<!-- resultados['Probabilidade'] = y_pred_proba -->
+<!-- resultados['Pred_Binaria'] = model_lr.predict(X_val) -->
+
+<!-- print("Exemplo das probabilidades preditas:") -->
+<!-- print(resultados[['Target_Real', 'Probabilidade', 'Pred_Binaria']].head(10)) -->
+<!-- ``` -->
+
+## Análise de Performance por Percentil
+
+Criando um dataframe para consolidar as probabilidades.
+
+```{python}
+df_probabilidades = pd.DataFrame({'Target_Real': y_val})
+
+for nome, modelo in modelos.items():
+# Treinando (garantindo que todos estão fitados)
+  modelo.fit(X_train, y_train)
+
+  # Extraindo a probabilidade da classe 1 (falha)
+  # Nota: Alguns modelos podem não ter predict_proba, mas os selecionados possuem.
+  df_probabilidades[f'Prob_{nome}'] = modelo.predict_proba(X_val)[:, 1]
+  print("Primeras linhas do consolidado de probabilidades:")
+```
+
+
+```{python}
+#| eval: false
+print(df_probabilidades.head())
+```
+
+```{r}
+#| echo: false
+knitr::kable(head(py$df_probabilidades), "html") |> kable_styling("striped") 
+```
+
+Agora, vamos calcular a taxa de falha real para cada decil de probabilidade de cada modelo. Um modelo "bom de negócio" deve concentrar quase todas as falhas nos primeiros decis (maior probabilidade).
+
+```{python}
+def calcular_performance_decil(df, col_prob, col_target, nome_modelo):
+  # Criando os decis
+  df_temp = df[[col_target, col_prob]].copy()
+  # Usamos rank para lidar com probabilidades repetidas (comum no KNN e RF)
+  df_temp['Decil'] = pd.qcut(df_temp[col_prob].rank(method='first'), 10, labels=range(10, 0, -1))
+  # Agrupando por decil
+  performance = df_temp.groupby('Decil', observed=True).agg(
+      total_maquinas=(col_target, 'count'),
+      falhas_reais=(col_target, 'sum')
+  ).reset_index()
+  
+  performance['Taxa_Falha'] = performance['falhas_reais'] / performance['total_maquinas']
+  performance['Modelo'] = nome_modelo
+  return performance
+
+analise_decis_completa = pd.concat([
+calcular_performance_decil(df_probabilidades, f'Prob_{nome}', 'Target_Real', nome)
+for nome in modelos.keys()
+])
+```
+
+Visualização Comparativa
+
+```{python}
+plt.figure(figsize=(12, 6))
+sns.lineplot(data=analise_decis_completa, x='Decil', y='Taxa_Falha', hue='Modelo', marker='o')
+plt.title('Capacidade de Ordenamento: Taxa de Falha Real por Decil')
+plt.ylabel('Taxa de Falha Real (Hit Rate)')
+plt.xlabel('Decil de Risco (1 = Mais Provável)')
+plt.gca().invert_xaxis() # Inverter para o Decil 10 (maior risco) ficar na esquerda
+plt.grid(True, linestyle='--', alpha=0.7)
+plt.show()
+```
+
+## Impacto Financeiro e Seleção do Modelo
+
+A escolha do "Melhor Modelo" depende do custo do erro. Vamos calcular o impacto financeiro considerando que uma Quebra (Falso Negativo) custa 20x mais que uma Inspeção (Falso Positivo).
+
+```{python}
+def avaliar_custo_modelo(df_probs, col_target, modelos_dict, custo_fp=500, custo_fn=10000):
+  relatorio_custos = []
+  
+  for nome in modelos_dict.keys():
+    # Usando o corte padrão de 0.5 para comparação
+    preds = (df_probs[f'Prob_{nome}'] >= 0.5).astype(int)
+    cm = confusion_matrix(df_probs[col_target], preds)
+    
+    fp = cm[0, 1]
+    fn = cm[1, 0]
+    custo_total = (fp * custo_fp) + (fn * custo_fn)
+    
+    relatorio_custos.append({
+        'Modelo': nome,
+        'Falsos Positivos': fp,
+        'Falsos Negativos': fn,
+        'Custo Total (R$)': custo_total
+    })
+
+  return pd.DataFrame(relatorio_custos).sort_values('Custo Total (R$)')
+
+df_custos = avaliar_custo_modelo(df_probabilidades, 'Target_Real', modelos)
+print("Relatório de Impacto Financeiro (Corte 0.50):")
+print(df_custos)
+```
+
+```{r}
+#| echo: false
+knitr::kable(py$df_custos, "html") |> kable_styling("striped")
+```
+
+
+Ao atribuirmos valores monetários aos erros — R\$ 500,00 para uma inspeção desnecessária (FP) e R\$ 10.000,00 para uma quebra catastrófica (FN) — a hierarquia dos modelos muda:
+
+- **O modelo vencedor: Random Forest**
+
+  - Com um custo total de R$ 162.000, este modelo é o mais eficiente para a operação.
+  - Sua vantagem reside na baixa taxa de Falsos Negativos (16), provando que cada falha evitada compensa financeiramente até 20 inspeções preventivas sem falha.
+  - O Random Forest conseguiu o melhor equilíbrio entre sensibilidade e precisão.
+
+- **A Armadilha das Redes Neurais (O "Modelo Limpinho")**
+
+  - Embora tenha apresentado 0 Falsos Positivos (precisão perfeita nos alarmes - não "jogar dinheiro fora" com inspeções inúteis), é o pior cenário financeiro (R$ 470.000).
+
+  - Isso demonstra que o conservadorismo extremo do modelo ignora muitas quebras reais (47 Falsos Negativos), custando caro para a operação.
+
+Apesar de não "jogar dinheiro fora" com inspeções inúteis, ele é o pior modelo financeiramente (R$ 470.000).
+
+Ser conservador demais e só "apontar o dedo" quando se tem certeza absoluta (zero FPs) pode custar uma fortuna em quebras não detectadas (47 Falsos Negativos). Precisão absoluta pode ser um péssimo negócio.
+
+- **Regressão Logística vs. KNN**
+
+  - A Regressão Logística é R$ 29.000 mais barata que o KNN, pois capturou 3 falhas a mais, mesmo gerando 2 alarmes falsos adicionais.
+  
+
+Em manutenção preditiva, preferimos modelos "barulhentos" (mais FPs) a modelos "míopes" (mais FNs). A precisão absoluta pode ser um péssimo negócio se o custo da omissão for elevado.
+
+## Próximos Passos
+
+O modelo selecionado para implementação é a Random Forest. Como evolução desta análise, o próximo passo estratégico é:
+
+- Otimização de Threshold: "Podemos ajustar o ponto de corte (threshold) da Random Forest para reduzir os 16 Falsos Negativos ainda mais, mesmo que o número de Falsos Positivos suba para 20 ou 30?"

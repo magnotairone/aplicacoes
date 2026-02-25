@@ -1,0 +1,182 @@
+---
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+# Introdução à Classificação
+
+Vamos entender como os modelos de Data Science tomam decisões binárias (Sim/Não, Fraude/Legal, Compra/Não Compra, 0/1).
+
+### Terminologia Básica {.unnumbered}
+
+- **Target ($Y$):** O fenômeno que queremos prever (ex: Inadimplência).
+- **Features ($X$):** As características que usamos para explicar o fenômeno (ex: Score de crédito, renda).
+- **O Modelo ($f$):** A regra de decisão que conecta as features ao resultado esperado.
+
+Um modelo preditivo é uma classe de funções $f$ que tenta se aproximar $X$ de $Y$, ou seja, 
+$$Y = f(X).$$
+
+## Avaliação de performance de um modelo de classificação
+
+Antes de aprender a treinar um modelo, vamos considerar que o modelo foi treinado e vamos avaliar sua performance.
+
+
+<!-- Para entender as métricas, vamos considerar dois modelos hipotéticos. O **Modelo A** é mais agressivo (quer capturar tudo), enquanto o **Modelo B** é conservador (só aponta quando tem muita certeza). -->
+
+Para entender as métricas, vamos considerar dois modelos hipotéticos. O **Modelo A** e o **Modelo B**. A predição da probabilidade do evento de interesse (target ser `1`) calculada por cada um dos modelos está na tabela abaixo.
+
+```{r}
+#| label: geracao-dados
+#| warning: false
+#| message: false
+#| echo: false
+
+# 1. Carregar bibliotecas
+library(dplyr)
+library(ggplot2)
+library(tidyr)
+library(kableExtra)
+
+set.seed(123) # Para garantir que você tenha o mesmo resultado na aula
+
+# 2. Criando 1000 observações
+n <- 1000
+prevalencia <- 0.2 # 20% de casos positivos (ex: 20% de churn ou fraude)
+
+aula_data <- data.frame(
+  id = 1:n,
+  real = rbinom(n, 1, prevalencia)
+)
+
+# 3. Gerando probabilidades preditas (Simulando a "inteligência" do modelo)
+# Modelo A (Agressivo): Bom Recall, mas gera muitos Falsos Positivos
+# Modelo B (Conservador): Alta Precisão, mas "perde" muitos casos reais (Falsos Negativos)
+
+aula_data <- aula_data %>%
+  mutate(
+    # Modelo A: Dá notas altas para positivos, mas "suja" os negativos com notas médias
+    prob_mod_A = ifelse(real == 1, 
+                        rbeta(n(), 5, 2),  # Concentra perto de 0.7 - 0.9
+                        rbeta(n(), 2, 5)), # Concentra perto de 0.2 - 0.4
+    
+    # Modelo B: Só dá nota alta quando tem muita certeza, mas é muito rigoroso
+    prob_mod_B = ifelse(real == 1, 
+                        rbeta(n(), 2, 5),  # Mais espalhado, difícil de cravar
+                        rbeta(n(), 1, 10)) # Quase zerado para negativos
+  )
+
+aula_data |> 
+  kable("html") |> 
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"),
+                full_width = F,
+                position = "center") |>
+  scroll_box(height = "300px", width = "100%")
+```
+
+
+
+```{r}
+# 4. Função para calcular métricas em massa (Vários Thresholds)
+calcular_curva <- function(probs, real, nome_modelo) {
+  thresholds <- seq(0.05, 0.95, by = 0.01)
+  
+  map_df(thresholds, function(t) {
+    preds <- ifelse(probs >= t, 1, 0)
+    tp <- sum(preds == 1 & real == 1)
+    fp <- sum(preds == 1 & real == 0)
+    fn <- sum(preds == 0 & real == 1)
+    
+    precisao <- ifelse((tp + fp) == 0, 1, tp / (tp + fp))
+    recall <- tp / (tp + fn)
+    
+    data.frame(Modelo = nome_modelo, Threshold = t, Precisao = precisao, Recall = recall)
+  })
+}
+
+# 5. Gerando os dados para o gráfico
+library(purrr) # para o map_df
+tradeoff_A <- calcular_curva(aula_data$prob_mod_A, aula_data$real, "Modelo A")
+tradeoff_B <- calcular_curva(aula_data$prob_mod_B, aula_data$real, "Modelo B")
+
+df_plot <- bind_rows(tradeoff_A, tradeoff_B)
+```
+
+```{r}
+df_plot |> 
+  # pivot_longer(Precisao:Recall, names_to = "Metrica", values_to = "Valor") |> 
+  pivot_wider(names_from = Modelo, values_from = Precisao:Recall, names_sep = " ") |> 
+  knitr::kable()
+```
+
+
+## Visualizando o Dilema do Negócio (Trade-off)
+
+O gráfico abaixo mostra como a Precisão (capacidade de evitar alarmes falsos) e o Recall (capacidade de capturar os alvos reais) se comportam conforme mudamos o rigor do modelo.
+
+```{r}
+#| label: grafico-tradeoff
+#| fig-cap: ""
+#| echo: false
+
+ggplot(df_plot, aes(x = Threshold)) +
+  geom_line(aes(y = Precisao, color = "Precisão (Evitar Alarme Falso)"), size = 1.1) +
+  geom_line(aes(y = Recall, color = "Recall (Capturar o Alvo)"), size = 1.1, linetype = "dashed") +
+  facet_grid(~Modelo) +
+  scale_color_manual(values = c("#2c3e50", "#e74c3c")) +
+  labs(
+    title = "Comparativo de Modelos: Precisão vs. Recall",
+    subtitle = "Amostra de 1000 clientes - Diferentes perfis de erro",
+    x = "Ponto de Corte (Threshold de Probabilidade)",
+    y = "Performance (0 a 1)",
+    color = "Métrica"
+  ) +
+  theme_minimal() +
+  theme(legend.position = "bottom", strip.text = element_text(face="bold", size=12))
+```
+
+```{r}
+#| label: grafico-tradeoff2
+#| fig-cap: "Comparativo de Performance: Preto (Precisão) vs Vermelho (Recall)"
+#| echo: false
+
+# O dataframe que você gerou se chama 'df_plot', vamos usá-lo diretamente
+ggplot(df_plot, aes(x = Threshold)) +
+  # Linhas de Precisão (Preto)
+  geom_line(aes(y = Precisao, linetype = Modelo), color = "black", size = 1) +
+  # Linhas de Recall (Vermelho)
+  geom_line(aes(y = Recall, linetype = Modelo), color = "red", size = 1) +
+  # Ajuste manual para os nomes que você criou no Passo 5
+  scale_linetype_manual(values = c("Modelo A" = "solid", 
+                                   "Modelo B" = "dashed")) +
+  labs(
+    title = "O Dilema do Negócio: Modelo A vs. Modelo B",
+    subtitle = "Linha Contínua = Agressivo | Linha Tracejada = Conservador\nPreto = Precisão | Vermelho = Recall",
+    x = "Ponto de Corte (Threshold de Probabilidade)",
+    y = "Performance (0 a 1)",
+    linetype = "Estratégia do Modelo"
+  ) +
+  theme_minimal() +
+  theme(
+    legend.position = "bottom",
+    panel.grid.minor = element_blank(),
+    plot.title = element_text(face = "bold", size = 14),
+    axis.title = element_text(face = "bold")
+  )
+
+```
+
+
+## Aplicação no Mundo Real: Manutenção Preditiva
+
+Imagine o custo de uma máquina parada por um erro do modelo:
+
+- **Falso Positivo (Alarme Falso)**: Paramos a produção para manutenção, mas a peça estava boa. Custo: Mão de obra e perda de produção desnecessária.
+
+- **Falso Negativo (Falha Não Detectada)**: O modelo disse que estava tudo bem, mas a máquina quebrou. Custo: Reparo emergencial caríssimo e parada não planejada.
+
+
+**Perguntas para reflexão:**
+
+- Se o custo de uma quebra (Falso Negativo) é 10x maior que o custo da inspeção, qual modelo você escolheria?
+
+- Em qual threshold você operaria o Modelo A para garantir que não perderia nenhuma falha?
