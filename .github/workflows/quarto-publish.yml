@@ -32,7 +32,7 @@ jobs:
         uses: actions/upload-pages-artifact@v3
         with:
           # Garanta que o nome da pasta aqui seja exatamente o que você tem no PC
-          path: docs/ 
+          path: _book/ 
 
       - name: Deploy to GitHub Pages
         id: deployment
