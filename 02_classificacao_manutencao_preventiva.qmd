@@ -9,7 +9,7 @@ editor_options:
 ```{r echo=FALSE}
 library(reticulate)
 library(kableExtra)
-# use_python("C:/Users/m_tai/AppData/Local/Programs/Python/Python313/python.exe", required = TRUE)
+use_python("C:/Users/m_tai/AppData/Local/Programs/Python/Python313/python.exe", required = TRUE)
 ```
 
 Este case aborda a análise de dados e construção de modelos de classificação para um problema de **Manutenção Preditiva**. 
