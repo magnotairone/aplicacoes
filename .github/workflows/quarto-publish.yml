@@ -4,19 +4,38 @@ on:
   push:
     branches: [ main ]
 
+# --- ESSA PARTE É OBRIGATÓRIA PARA O DEPLOY FUNCIONAR ---
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Garante que apenas um deploy rode por vez
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
 jobs:
   deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: _book/  # O GitHub vai ler o que já está pronto aqui
+          # Garanta que o nome da pasta aqui seja exatamente o que você tem no PC
+          path: docs/ 
 
       - name: Deploy to GitHub Pages
+        id: deployment
         uses: actions/deploy-pages@v4
 
 # name: Render and Publish Quarto Book
