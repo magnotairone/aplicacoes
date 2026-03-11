@@ -1,0 +1,698 @@
+---
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r}
+
+knitr::opts_chunk$set(
+  warning = FALSE,
+  message = FALSE,
+  echo = TRUE
+)
+```
+
+
+# Aluguel de apartamentos na cidade de São Paulo
+
+O objetivo desta análise é avaliar os valores de aluguel de apartamentos em diferentes regiões da cidade de São Paulo, de acordo com a sua metragem e quantidade de quartos, bem como a diferenciação de preços nos quesitos de vaga de garagem e condomínio.
+Construir um modelo preditivo que seja capaz de prever o valor de aluguel de um imóvel dadas as suas caracteristicas.
+
+Este conjunto de dados contém cerca de 13.000 imóveis para venda e aluguel na cidade de São Paulo, Brasil. Os dados são provenientes de várias fontes, especialmente sites classificados de imóveis.
+
+O conjunto de dados representa propriedades anunciadas no mês de abril de 2019 e contém as seguintes informações para cada propriedade:
+
+- **Price**: Preço final anunciado (em real),
+- **Condo**: Despesas do condomínio,
+- **Size**: tamanho da propriedade em metros quadrados $m^2$ (apenas áreas privadas),
+- **Rooms**: Número de quartos,
+- **Toilets**: Número de banheiros,
+- **Suites**: Número de quartos com banheiro privativo,
+- **Parking**: Número de vagas de estacionamento,
+- **Elevator**: binário: 1 se houver elevador no prédio, 0 caso contrário,
+- **Furnished**: 1 se a propriedade é mobiliada, 0 caso contrário,
+- **Swimming Pool**: 1 se a propriedade tiver piscina, 0 caso contrário,
+- **New**: 1 se a propriedade for muito recente, 0 caso contrário,
+- **District**: bairro e a cidade onde a propriedade está localizada, ei: Itaim Bibi / - São Paulo,
+- **Negotiation Type**: Venda ou Aluguel,
+- **Property Type**: tipo de propriedade,
+- **Latitude**: Localização-Latitude,
+- **Longitude**: Localização - Longitude.
+
+O código abaixo carrega e exibe uma amostra dos dados.
+```{r message=FALSE, warning=FALSE, eval=FALSE}
+library(tidyverse)
+library(janitor)
+
+dados <- read_csv("data/sao-paulo-properties-april-2019.csv") %>% 
+  clean_names()
+
+set.seed(42)
+dados %>% 
+  slice_sample(n=5)
+```
+
+
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+library(tidyverse)
+library(kableExtra)
+library(janitor)
+
+theme_set(theme_bw())
+
+dados <- read_csv("data/sao-paulo-properties-april-2019.csv") %>% 
+  clean_names()
+
+set.seed(42)
+mostrar <- dados %>% 
+  slice_sample(n=5)
+
+if (knitr::is_html_output()){
+  mostrar %>% 
+    kable("html")
+} else {
+  mostrar %>% 
+    kable("latex")
+}
+```
+
+::: {.callout-tip title="Dica" collapse="false"}
+
+O codigo acima usou a função `clean_names()` do pacote `janitor` que tem por objetivo padronizar os nomes das variáveis presentes no conjunto de dados, deixando todas letras minusculas e separadores são transformados em underscore (`_`). 
+Esta é uma boa prática de programação.
+:::
+
+
+## Análise Descritiva Inicial
+
+
+<!-- TODO: completar -->
+<!-- https://www.kaggle.com/code/rsiqueiraeliane/analytics-models-pre-o-de-venda-e-aluguel-em-sp/notebook -->
+
+Inicialmente, vamos ver os tipos de propriedades existentes na base de dados.
+
+```{r eval=FALSE}
+dados %>% 
+  group_by(property_type) %>% 
+  count()
+```
+
+```{r echo=FALSE}
+if (knitr::is_html_output()){
+  dados %>% 
+    group_by(property_type) %>% 
+    count() %>% 
+    kable("html")
+} else {
+  dados %>% 
+    group_by(property_type) %>% 
+    count() %>% 
+    kable("latex")
+}
+```
+
+
+Agora vamos analisar os diferentes tipos de negociação.
+
+```{r eval=FALSE}
+dados %>% 
+  group_by(negotiation_type) %>% 
+  summarize(prop = n() / nrow(dados), mean_price = mean(price))
+```
+
+```{r echo=FALSE}
+if (knitr::is_html_output()){
+  dados %>% 
+    group_by(negotiation_type) %>% 
+    summarize(prop = n() / nrow(dados), mean_price = mean(price)) %>% 
+    kable("html")
+} else {
+  dados %>% 
+    group_by(negotiation_type) %>% 
+    summarize(prop = n() / nrow(dados), mean_price = mean(price)) %>% 
+    kable("latex")
+}
+
+generate_table <- function(df){
+  if (knitr::is_html_output()){
+    df %>% 
+      kable("html")
+  } else {
+    df %>% 
+      kable("latex")
+  }
+}
+```
+
+Por se tratar de problemas distintos (aluguel e venda), vamos considerar apenas imóveis disponíveis para aluguel.
+Alem disso, vamos desconsiderar as variáveis `district` (por questão de simplicidade do modelo), `property_type` por ser todas de *apartamento* e a variável `negotiation_type`, pois, após essa filtragem, restarão apenas imóveis para aluguel.
+
+```{r}
+dados_aluguel <- dados %>% 
+  filter(negotiation_type == "rent") %>% 
+  select(-negotiation_type, -district, -property_type)
+```
+
+
+
+```{r}
+library(geobr)
+
+# obter código IBGE do município
+cod <- geobr::lookup_muni(name_muni = "São Paulo")$code_muni
+
+municipio_sp <- geobr::read_municipality(code_muni = cod,
+                                         simplified = T,
+                                         showProgress = F)
+```
+
+Abaixo estão as informações sobre as coordenadas do mapa da cidade de São Paulo:
+
+```{r}
+municipio_sp
+```
+
+Agora veja as latitudes e longitudes presentes no mapa. Claramente há imóveis com algum problema na localização. Vamos retirar esses imóveis da nossa base.
+
+```{r}
+dados_aluguel %>% select(latitude,longitude) %>% summary()
+
+dados_aluguel <- dados_aluguel %>% 
+  filter(longitude <= -46.36531,
+         longitude >= -46.82619,
+         latitude <= -23.35629,
+         latitude >= -24.00826)
+```
+
+Agora, vamos construir um gráfico que mostra o mapa da cidade e a localização dos imóveis considerados nesta análise.
+Para isso, temos que representar o dataframe no formato `sf`.
+Essa classe é usada para representar dados geográficos, especificamente aqueles que contêm informações espaciais (como coordenadas latitude e longitude). 
+A classe faz parte do pacote sf (Simple Features), que oferece uma maneira simples e eficiente de lidar com dados espaciais no R.
+
+```{r}
+dados_aluguel_sf <- sf::st_as_sf(x = dados_aluguel,
+                                 coords = c("longitude", "latitude"),
+                                 crs = "+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0")
+
+ggplot(dados_aluguel_sf) + 
+  geom_sf(data = municipio_sp)+
+  geom_sf(alpha = .05) +
+  ggthemes::theme_map() +
+  ggtitle("Localização dos Imóveis na Cidade de São Paulo")  
+
+```
+
+
+Abaixo apresentamos a análise gráfica dos dados, com o objetivo de investigar a relação entre as preditoras e o valor de aluguel (variável price).
+
+```{r}
+dados_aluguel %>% 
+  group_by(rooms) %>% 
+  summarise(price = mean(price)) %>% 
+  ggplot(aes(rooms, price)) +
+  geom_col() +
+  scale_y_continuous(expand = expansion(mult = c(0, .05))) +
+  scale_x_continuous(breaks = c(1:10)) +
+  labs(title = "Preço médio de aluguel por quantidade de quartos",
+       x = "Quartos",
+       y = "Preço médio")
+```
+
+```{r eval=FALSE}
+dados_aluguel %>% 
+  group_by(rooms) %>% 
+  summarise(perc = 100 * n()/nrow(dados_aluguel))
+```
+
+```{r echo=FALSE}
+generate_table(dados_aluguel %>% 
+                 group_by(rooms) %>% 
+                 summarise(perc = 100 * n()/nrow(dados_aluguel)))
+```
+
+```{r}
+dados_aluguel %>% 
+  group_by(toilets) %>% 
+  summarise(price = mean(price)) %>% 
+  ggplot(aes(x = toilets, y = price)) +
+  geom_col()+#stat="identity", width=0.5) + 
+  labs(title = "Preço médio de aluguel por quantidade de banheiros",
+       x = "Banheiros",
+       y = "Preço médio") +
+  scale_y_continuous(expand = expansion(mult = c(0, .05))) +
+  scale_x_continuous(breaks = c(1:10))
+```
+
+```{r eval=FALSE}
+dados_aluguel %>% 
+  group_by(toilets) %>%  
+  summarise(perc = 100 * n()/nrow(dados_aluguel))
+```
+
+```{r echo=FALSE}
+generate_table(dados_aluguel %>% 
+                 group_by(toilets) %>%  
+                 summarise(perc = 100 * n()/nrow(dados_aluguel)))
+```
+
+```{r}
+dados_aluguel %>% 
+  group_by(suites) %>% 
+  summarise(price = mean(price)) %>% 
+  ggplot(aes(x = suites, y = price)) +
+  geom_bar(stat="identity", width=0.5) + 
+  labs(title = "Preço médio de aluguel por quantidade de suites",
+       x = "Suites",
+       y = "Preço médio") +
+  scale_y_continuous(expand = expansion(mult = c(0, .05))) +
+  scale_x_continuous(breaks = c(0:10))
+```
+
+```{r eval=FALSE}
+dados_aluguel %>% 
+  group_by(suites) %>%  
+  summarise(perc = 100 * n()/nrow(dados_aluguel))
+```
+
+```{r echo=FALSE}
+generate_table(dados_aluguel %>% 
+                 group_by(suites) %>%  
+                 summarise(perc = 100 * n()/nrow(dados_aluguel)))
+```
+
+```{r}
+dados_aluguel %>% 
+  group_by(parking) %>% 
+  summarise(price = mean(price)) %>% 
+  ggplot(aes(parking, price)) +
+  geom_bar(stat="identity", width=0.5) + 
+  labs(title = "Preço médio de aluguel por quantidade de vagas estacionamento",
+       x = "Estacionamento",
+       y = "Preço médio") +
+  scale_y_continuous(expand = expansion(mult = c(0, .05))) +
+  scale_x_continuous(breaks = c(0:10))
+```
+
+```{r eval=FALSE}
+dados_aluguel %>% 
+  group_by(parking) %>%  
+  summarise(perc = 100 * n()/nrow(dados_aluguel))
+```
+
+```{r echo=FALSE}
+generate_table(dados_aluguel %>% 
+                 group_by(parking) %>%  
+                 summarise(perc = 100 * n()/nrow(dados_aluguel)))
+```
+
+```{r}
+ggplot(dados_aluguel, 
+       aes(x=swimming_pool, y=price, group=swimming_pool)) +
+  geom_boxplot() + 
+  labs(title = "Distribuição do preço de aluguel por quantidade de piscina",
+       x = "Piscina",
+       y = "Preço médio (escala logarítimica)") +
+  scale_y_continuous(expand = expansion(mult = c(0, .05))) +
+  scale_x_continuous(breaks = c(0:1)) +
+  scale_y_log10()
+```
+
+```{r eval=FALSE}
+dados_aluguel %>% 
+  group_by(swimming_pool) %>%  
+  summarise(perc = 100 * n()/nrow(dados_aluguel))
+```
+
+```{r echo=FALSE}
+generate_table(dados_aluguel %>% 
+                 group_by(swimming_pool) %>%  
+                 summarise(perc = 100 * n()/nrow(dados_aluguel)))
+```
+
+```{r}
+ggplot(dados_aluguel, 
+       aes(x=furnished, y=price, group=furnished)) +
+  geom_boxplot() + 
+  labs(title = "Distribuição de preço médio de aluguel por status de mobiliado",
+       x = "Mobiliado",
+       y = "Preço médio (escala logarítimica)") +
+  scale_y_continuous(expand = expansion(mult = c(0, .05))) +
+  scale_x_continuous(breaks = c(0:10))  +
+  scale_y_log10()
+```
+
+```{r eval=FALSE}
+dados_aluguel %>% 
+  group_by(furnished) %>%  
+  summarise(perc = 100 * n()/nrow(dados_aluguel))
+```
+
+```{r echo=FALSE}
+generate_table(dados_aluguel %>% 
+                 group_by(furnished) %>%  
+                 summarise(perc = 100 * n()/nrow(dados_aluguel)))
+```
+
+::: {.callout-warning title="Atenção" collapse="false"}
+Os dois últimos gráficos de boxplot apresentam o eixo-y na escala logarítimica. Essa abordagem é útil especialmente quando os valores discrepantes (outliers) estão muito acima (ou abaixo) dos valores que estão próximos à média, mediana e o intervalo interquartílico.
+:::
+
+## Separação dos dados
+
+<!-- treino validacao e teste - estratificada  -->
+
+Vamos considerar apenas os dados referentes à aluguel, totalizando `r dados %>%  filter(negotiation_type == "rent") %>% nrow()` observações. 
+
+```{r}
+library(rsample)
+
+split_treino_teste <- initial_split(dados_aluguel, 0.8)
+split_treino_validacao <- initial_split(training(split_treino_teste), 0.8)
+
+dados_treinamento <- training(split_treino_validacao)
+dados_validacao <- testing(split_treino_validacao)
+dados_teste <- testing(split_treino_teste)
+```
+
+## Treinamento de Modelos
+
+Nesta análise, abordaremos três modelos: regressão linear, árvore de decisão e floresta aleatória.
+Os dados já foram divididos em conjuntos de treinamento, validação e teste.
+Cada um dos três modelos será treinado utilizando o conjunto de treinamento
+A métrica de erro RMSE será calculada usando o conjunto de validação.
+Com isso, poderemos selecionar o melhor modelo, aquele que apresentar o menor erro no conjunto de validação.
+Após a escolha do melhor modelo, iremos reestimá-lo utilizando todos os dados dos conjuntos de treinamento e validação combinados.
+Em seguida, avaliaremos o erro deste modelo final no conjunto de teste, fornecendo uma boa estimativa do erro de generalização esperado para este modelo em novos dados.
+
+### Modelo de Regressão Linear
+
+Vamos aplicar o modelo de regressão linear ao conjunto de treinamento e avaliá-lo utilizando o conjunto de validação.
+
+```{r}
+mod_linear <- lm(price ~ ., dados_treinamento)
+
+pred_linear <- predict(mod_linear, dados_validacao)
+
+df_pred <- tibble(y_obs = dados_validacao$price,
+                  y_pred = pred_linear,
+                  modelo = "linear")
+```
+
+O gráfico abaixo apresenta o resultado do modelo de regressão linear aplicado aos dados. Cada ponto no gráfico representa uma observação do valor do aluguel, sendo o eixo x o valor observado e o eixo y o valor predito pelo modelo. A linha vermelha indica a linha de igualdade, onde os valores observados são iguais aos valores preditos. Idealmente, os pontos devem estar alinhados ao longo dessa linha, indicando uma boa predição do modelo.
+
+```{r}
+df_pred %>% 
+  ggplot(aes(y_obs, y_pred)) +
+  geom_abline(slope = 1, intercept = 0, color = "salmon", size = 2) +
+  geom_point(alpha = 0.1) +
+  labs(title = "Modelo de Regressão Linear - Resultado",
+       x = "Valor do Aluguel Observado",
+       y = "Valor do Aluguel Predito")
+```
+
+
+### Modelo de Árvore de Decisão
+Vamos aplicar o modelo de árvore de decisão ao conjunto de treinamento e avaliá-lo utilizando o conjunto de validação.
+
+```{r}
+library(rpart)
+mod_arvore <- rpart(price ~ ., dados_treinamento)
+
+rpart.plot::rpart.plot(mod_arvore)
+```
+
+A árvore de decisão gerada para prever o valor do aluguel (`price`), utilizando os dados de treinamento, é visualizada acima. Cada nó na árvore representa uma decisão baseada em uma característica do imóvel, e os ramos indicam o resultado dessa decisão, levando a novas decisões ou a um valor de aluguel previsto (nós folha). A porcentagem em cada nó indica a proporção de observações do conjunto de treinamento que se enquadram naquele critério.
+
+* **Nó Raiz (Topo da Árvore):** Representa todas as 3132 observações do conjunto de treinamento (100%). A primeira e mais significativa divisão é baseada no `size` (tamanho do imóvel em $m^2$). A condição é `size < 204`.
+
+* **Ramo da Esquerda (`size < 204` - "yes"):**
+    * Este caminho é seguido por 94% dos imóveis.
+    * A próxima divisão importante neste ramo é `condo < 1031` (valor do condomínio).
+        * Se `condo < 1031` ("yes", 76% do total de imóveis): O modelo prevê um aluguel médio de 1963. Este grupo é novamente dividido por `size < 91`.
+            * Para `size < 91` ("yes", 68% do total): O aluguel previsto é 1807.
+            * Para `size >= 91` ("no", 8% do total): O aluguel previsto é 3292.
+        * Se `condo >= 1031` ("no", 18% do total de imóveis): O modelo prevê um aluguel médio de 4977. Este grupo é subsequentemente dividido por `suites < 2`.
+            * Para `suites < 2` ("yes", 11% do total): O aluguel previsto é 4055.
+            * Para `suites >= 2` ("no", 8% do total): O aluguel previsto é 6300.
+
+* **Ramo da Direita (`size >= 204` - "no"):**
+    * Este caminho é seguido por apenas 6% dos imóveis, que tendem a ter um valor de aluguel previsto inicial mais alto (o nó indica 12e+3, ou seja, R$ 12.000).
+    * A primeira divisão neste ramo é `condo < 4262`.
+        * Se `condo < 4262` ("yes", 5% do total de imóveis, com valor base de 11e+3): A árvore segmenta com base na `longitude >= -47`.
+            * Se `longitude >= -47` ("yes", 4% do total, valor base 12e+3): Novas divisões ocorrem por `furnished = 0` (imóvel não mobiliado) e, em seguida, por `size < 268`.
+                * Para imóveis não mobiliados (`furnished = 0`, 1% do total, valor base 15e+3):
+                    * Se `size < 268`: Aluguel previsto de 13e+3 (1% do total).
+                    * Se `size >= 268`: Aluguel previsto de 24e+3 (0% do total, indicando uma fração pequena).
+                * Para imóveis mobiliados (`furnished = 1`, o ramo "no" da condição `furnished = 0`, 3% do total): Aluguel previsto de 11e+3.
+            * Se `longitude < -47` ("no", 1% do total): O aluguel previsto é 5680.
+        * Se `condo >= 4262` ("no", 1% do total de imóveis, com valor base de 20e+3): A árvore divide por `longitude < -47`.
+            * Se `longitude < -47` ("yes", 0% do total): Aluguel previsto de 4929.
+            * Se `longitude >= -47` ("no", 1% do total, valor base 22e+3): Uma última divisão por `longitude >= -47` (provavelmente refinando a faixa) leva a:
+                * Aluguel previsto de 28e+3 (0% do total) se `longitude >= -47` ("yes").
+                * Aluguel previsto de 18e+3 (0% do total) se `longitude < -47` ("no").
+
+**Observações sobre a árvore de decisão:**
+
+* A variável `size` (tamanho do imóvel) é a mais discriminatória, aparecendo no topo da árvore e sendo usada para a primeira grande divisão dos dados.
+* `condo` (valor do condomínio) é a segunda variável mais importante, utilizada para refinar as previsões em ambos os ramos principais.
+* Variáveis como `suites` (número de suítes), `longitude` (localização geográfica) e `furnished` (mobiliado) aparecem em níveis inferiores, ajudando a detalhar as previsões para subconjuntos mais específicos de imóveis.
+* Os nós folha (terminais) indicam o valor médio de aluguel previsto para os imóveis que seguem aquele caminho específico de decisões, juntamente com a porcentagem de imóveis do conjunto de treinamento que se enquadram nesse nó.
+* A cor dos nós (geralmente mais escura para valores mais altos, dependendo da configuração do `rpart.plot`) também oferece uma indicação visual da faixa de preço prevista.
+
+Esta estrutura hierárquica de decisões permite que o modelo de árvore de decisão estime o valor do aluguel com base nas características mais relevantes do imóvel.
+
+```{r}
+pred_arvore <- predict(mod_arvore, dados_validacao)
+
+df_pred <- df_pred %>% 
+  bind_rows(tibble(y_obs = dados_validacao$price,
+                   y_pred = pred_arvore,
+                   modelo = "árvore")) 
+
+df_pred %>% 
+  filter(modelo == "árvore") %>% 
+  ggplot(aes(y_obs, y_pred)) +
+  geom_abline(slope = 1, intercept = 0, color = "lightgreen", size = 2) +
+  geom_point(alpha = 0.1) +
+  labs(title = "Modelo de Árvore de Decisão - Resultado",
+       x = "Valor do Aluguel Observado",
+       y = "Valor do Aluguel Predito")
+
+```
+::: {.callout-tip title="Dica" collapse="false"}
+Observe que os valores preditos pela árvore de decisão apresentam um padrão (linhas horizontais) por conta da forma como o modelo é contruído!
+:::
+
+### Modelo de Floresta Aleatória
+Vamos aplicar o modelo de floresta aleatória ao conjunto de treinamento e avaliá-lo utilizando o conjunto de validação.
+
+
+```{r}
+library(randomForest)
+mod_floresta <- randomForest(price ~ ., data = dados_treinamento)
+
+pred_floresta <- predict(mod_floresta, dados_validacao)
+
+df_pred <- df_pred %>% 
+  bind_rows(tibble(y_obs = dados_validacao$price,
+                   y_pred = pred_floresta,
+                   modelo = "floresta aleatória")) 
+
+df_pred %>% 
+  filter(modelo == "floresta aleatória") %>% 
+  ggplot(aes(y_obs, y_pred)) +
+  geom_abline(slope = 1, intercept = 0, color = "lightblue", size = 2) +
+  geom_point(alpha = 0.1) +
+  labs(title = "Modelo de Floresta Aleatória - Resultado",
+       x = "Valor do Aluguel Observado",
+       y = "Valor do Aluguel Predito")
+
+```
+
+
+#### Comparativo da performance dos modelos na validacao
+
+Observando a tabela abaixo que compara os modelos com base no erro quadrático médio (EQM) e na raiz do erro quadrático médio (REQM) no conjunto de validação, observamos que a floresta aleatória obteve o menor EQM e REQM.
+
+```{r eval=FALSE}
+df_pred %>% 
+  mutate(eq = (y_obs-y_pred)^2) %>% 
+  group_by(modelo) %>%  
+  summarise(eqm = mean(eq)/n()) %>% 
+  mutate(reqm = sqrt(eqm)) %>% 
+  arrange(reqm)
+```
+
+```{r echo=FALSE}
+if (knitr::is_html_output()){
+  df_pred %>% 
+    mutate(eq = (y_obs-y_pred)^2) %>% 
+    group_by(modelo) %>%  
+    summarise(eqm = mean(eq)/n()) %>% 
+    mutate(reqm = sqrt(eqm))  %>% 
+    arrange(reqm) %>% 
+    kable("html")
+} else {
+  df_pred %>% 
+    mutate(eq = (y_obs-y_pred)^2) %>% 
+    group_by(modelo) %>%  
+    summarise(eqm = mean(eq)/n()) %>% 
+    mutate(reqm = sqrt(eqm))  %>% 
+    arrange(reqm) %>% 
+    kable("latex")
+}
+```
+
+Veja de forma gráfica os valores da tabela acima.
+
+```{r}
+df_pred %>%
+  mutate(eq = (y_obs - y_pred)^2) %>%
+  group_by(modelo) %>%
+  summarise(eqm = mean(eq) / n()) %>%
+  mutate(reqm = sqrt(eqm)) %>%
+  arrange(reqm) %>%
+  ggplot(aes(x = factor(modelo, levels = modelo), y = reqm, fill = modelo)) +
+  geom_col(show.legend = FALSE) +
+  scale_fill_manual(values = c("floresta aleatória" = "lightblue",
+                               "árvore" = "lightgreen",
+                               "linear" = "salmon")) +
+  scale_y_continuous(expand = expansion(mult = c(0, .05))) +
+  labs(x = NULL, y = "Raiz do Erro Quadrático Médio",
+       title = "Erro no Conjunto de Validação")
+```
+Veja que o modelo que apresentou o menor erro no conjunto de validação é o modelo de floresta aleatória
+
+## Cálculo do erro de generalização
+
+Vamos agora refazer a estimação do melhor modelo utilizando o conjunto de treinamento e validação combinados. 
+Em seguida, vamos avaliar o erro de generalização no conjunto de testes.
+
+```{r}
+novo_treinamento <- dados_treinamento %>% 
+  bind_rows(dados_validacao)
+
+mod_floresta_final <- randomForest(price ~ ., data = novo_treinamento)
+
+pred_floresta <- predict(mod_floresta_final, dados_teste)
+
+pred_final <- tibble(y_obs = dados_teste$price,
+                     y_pred = pred_floresta,
+                     modelo = "floresta aleatória")
+```
+
+Os resultados estão apresentados na tabela abaixo. 
+Observe que, de acordo com nossas estimativas, espera-se um erro médio de R$`r pred_final %>% mutate(eq = (y_obs-y_pred)^2) %>% summarise(eqm = mean(eq)/n()) %>% mutate(reqm = sqrt(eqm)) %>% pull(reqm) %>% round(2)` com este modelo.
+
+```{r eval=FALSE}
+pred_final %>% 
+  mutate(eq = (y_obs-y_pred)^2) %>% 
+  summarise(eqm = mean(eq)/n()) %>% 
+  mutate(reqm = sqrt(eqm))
+```
+
+```{r echo=FALSE}
+if (knitr::is_html_output()){
+  pred_final %>% 
+    mutate(eq = (y_obs-y_pred)^2) %>% 
+    summarise(eqm = mean(eq)/n()) %>% 
+    mutate(reqm = sqrt(eqm)) %>% 
+    kable("html")
+} else {
+  pred_final %>% 
+    mutate(eq = (y_obs-y_pred)^2) %>% 
+    summarise(eqm = mean(eq)/n()) %>% 
+    mutate(reqm = sqrt(eqm)) %>% 
+    kable("latex")
+}
+```
+
+## Importância das Variáveis
+
+Ao avaliar a importância das variáveis em um modelo de regressão, como a floresta aleatória utilizada neste estudo, podemos identificar quais características são mais influentes na previsão do valor de aluguel dos imóveis. 
+Isso é fundamental para entender o comportamento do modelo e validar se as variáveis mais importantes fazem sentido do ponto de vista do domínio do problema. 
+A análise da importância das variáveis pode ser feita usando o gráfico gerado pelo pacote `vip`, que exibe as variáveis mais relevantes para a previsão, como mostrado abaixo.
+
+```{r}
+library(vip)
+vip(mod_floresta_final) +
+  labs(y = "Importância")
+```
+
+A análise da importância das variáveis revela quais características dos imóveis mais influenciam o valor do aluguel, conforme indicado pelo modelo de floresta aleatória.
+
+1. **Size (Tamanho do Imóvel)**:
+   - A variável mais importante, indicando que a metragem quadrada é o principal fator determinante do valor do aluguel. Imóveis maiores têm aluguéis mais altos devido ao espaço adicional.
+
+2. **Condo (Condomínio)**:
+   - A segunda variável mais influente, mostrando que o valor do condomínio está fortemente correlacionado com o custo total mensal do imóvel. Condominios mais altos geralmente indicam mais serviços ou comodidades.
+
+3. **Parking (Vagas de Estacionamento)**:
+   - A disponibilidade de vagas de estacionamento é um fator importante, especialmente em uma cidade grande como São Paulo, onde ter estacionamento é um diferencial que agrega valor.
+
+4. **Longitude**:
+   - A posição geográfica leste-oeste influencia os valores de aluguel, indicando variações de preços entre diferentes regiões da cidade.
+
+5. **Suites (Quartos com Banheiro Privativo)**:
+   - A presença de suítes aumenta o valor do aluguel, refletindo a valorização de imóveis que oferecem mais conforto e privacidade.
+
+6. **Latitude**:
+   - Assim como a longitude, a latitude também é um fator relevante, sugerindo que a proximidade a áreas específicas ou infraestruturas impacta o valor.
+
+7. **Toilets (Banheiros)**:
+   - O número de banheiros é importante, pois imóveis com mais banheiros costumam ser mais valorizados.
+
+8. **Rooms (Quartos)**:
+   - O número de quartos influencia o valor do aluguel, mas com menor impacto em comparação ao tamanho ou às suítes, indicando que a qualidade e o espaço são mais valorizados.
+
+9. **Furnished (Mobiliado)**:
+   - Ter o imóvel mobiliado é menos determinante, sugerindo que os inquilinos priorizam características estruturais e localização.
+
+10. **Swimming Pool (Piscina)**:
+    - A presença de piscina é a variável de menor importância, indicando que, apesar de ser um atrativo, não é um fator decisivo para a maioria dos inquilinos.
+
+Em geral, o gráfico de importância das variáveis mostra que características estruturais (como metragem, condomínio e estacionamento) e localização são os principais fatores que determinam o valor do aluguel. 
+
+Os gráficos de Dependência Parcial (PDP) gerados permitem visualizar o efeito isolado de cada variável sobre a predição do valor do aluguel, mantendo todas as outras variáveis constantes. Abaixo está a interpretação dos gráficos gerados para as variáveis `size`, `condo`, `parking` e `rooms`.
+
+```{r}
+library(pdp)
+
+g1 <- mod_floresta_final %>% 
+  partial(pred.var = "size") %>% 
+  ggplot(aes(size, yhat)) +
+  geom_line() +
+  labs(x = "Size", y = "Price (pred)")
+
+g2 <- mod_floresta_final %>% 
+  partial(pred.var = "condo") %>% 
+  ggplot(aes(condo, yhat)) +
+  geom_line() +
+  labs(x = "Condo", y = "Price (pred)")
+
+g3 <- mod_floresta_final %>% 
+  partial(pred.var = "parking") %>% 
+  mutate(parking = as.factor(parking)) %>% 
+  ggplot(aes(parking, yhat)) +
+  geom_col() +
+  labs(x = "Parking", y = "Price (pred)")
+
+g4 <- mod_floresta_final %>% 
+  partial(pred.var = "rooms") %>% 
+  mutate(rooms = as.factor(rooms)) %>% 
+  ggplot(aes(rooms, yhat)) +
+  geom_col() +
+  labs(x = "Rooms", y = "Price (pred)")
+
+library(patchwork)
+
+g1 + g2
+
+g3 + g4
+```
+
+## Conclusão
+
+Neste estudo, exploramos um conjunto de dados de imóveis para venda e aluguel na cidade de São Paulo, buscando construir um modelo preditivo para estimar o valor do aluguel com base em suas características. Experimentamos três modelos diferentes - regressão linear, árvore de decisão e floresta aleatória - e observamos que a floresta aleatória apresentou o melhor desempenho, com o menor erro quadrático médio no conjunto de validação. 
+Isso sugere que a floresta aleatória é uma boa escolha para este problema específico, embora seja importante considerar a **complexidade do modelo** e a **interpretabilidade dos resultados** ao tomar decisões finais sobre a implementação prática.
