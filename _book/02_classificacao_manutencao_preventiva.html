@@ -411,7 +411,7 @@ Observações duplicadas no dataset: 0</code></pre>
 </section>
 <section id="análise-descritiva" class="level2" data-number="2.3">
 <h2 data-number="2.3" class="anchored" data-anchor-id="análise-descritiva"><span class="header-section-number">2.3</span> Análise Descritiva</h2>
-<p>Primeiramente, avaliamos a frequencia da variável alvo.</p>
+<p>Primeiramente, avaliamos a frequência da variável alvo.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Frequência da variável Target</span></span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>target_counts <span class="op">=</span> data[<span class="st">'Target'</span>].value_counts()</span>
@@ -447,10 +447,10 @@ M    2997
 H    1003
 Name: count, dtype: int64</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">Frequência da variável Type:</span><span class="ch">\n</span><span class="st">"</span>, data[<span class="st">'Failure Type'</span>].value_counts())</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"</span><span class="ch">\n</span><span class="st">Frequência da variável Failure Type:</span><span class="ch">\n</span><span class="st">"</span>, data[<span class="st">'Failure Type'</span>].value_counts())</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>
-Frequência da variável Type:
+Frequência da variável Failure Type:
  Failure Type
 No Failure                  9652
 Heat Dissipation Failure     112

@@ -82,7 +82,7 @@ print("\nObservações duplicadas no dataset:", data.duplicated().sum())
 
 ## Análise Descritiva
 
-Primeiramente, avaliamos a frequencia da variável alvo.
+Primeiramente, avaliamos a frequência da variável alvo.
 
 ```{python}
 # Frequência da variável Target
@@ -97,7 +97,7 @@ Frequência das variáveis categóricas.
 ```{python}
 # Frequência da variável Type
 print("Frequência da variável Type:\n", data['Type'].value_counts())
-print("\nFrequência da variável Type:\n", data['Failure Type'].value_counts())
+print("\nFrequência da variável Failure Type:\n", data['Failure Type'].value_counts())
 ```
 
 Estatísticas descritivas das variáveis numéricas.
