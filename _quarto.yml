@@ -17,6 +17,10 @@ book:
     - part: Regressão
       chapters:
         - 03_regressao.qmd
+    - part: Agrupamento
+      chapters:
+        - 04_cluster_538.qmd
+        - 05_cluster_pda.qmd
     # - summary.qmd
     # - references.qmd
 

@@ -362,10 +362,24 @@ Os dois últimos gráficos de boxplot apresentam o eixo-y na escala logarítimic
 
 <!-- treino validacao e teste - estratificada  -->
 
+```{r}
+str(dados_aluguel)
+
+dados_aluguel <- dados_aluguel |> 
+  mutate(rooms = as.factor(rooms),
+         toilets = as.factor(toilets),
+         furnished = as.factor(furnished),
+         swimming_pool = as.factor(swimming_pool))
+```
+
+
+
 Vamos considerar apenas os dados referentes à aluguel, totalizando `r dados |>  filter(negotiation_type == "rent") |> nrow()` observações. 
 
 ```{r}
 library(rsample)
+
+set.seed(123)
 
 split_treino_teste <- initial_split(dados_aluguel, 0.8)
 split_treino_validacao <- initial_split(training(split_treino_teste), 0.8)
