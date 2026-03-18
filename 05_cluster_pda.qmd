@@ -12,11 +12,12 @@ library(kableExtra)
 use_python("C:/Users/m_tai/AppData/Local/Programs/Python/Python313/python.exe", required = TRUE)
 ```
 
+Carregamento das bibliotecas necessárias
+
 ```{python}
 import numpy as np
 import pandas as pd
 
-# from tqdm import tqdm
 from sklearn.cluster import KMeans
 from sklearn.decomposition import PCA
 
@@ -27,6 +28,7 @@ import warnings
 warnings.filterwarnings("ignore")
 ```
 
+Deinição da função utilizada para construção dos gráficos spider.
 
 ```{python}
 def make_spider(df_plot, n_cols = None):
@@ -193,16 +195,105 @@ plt.tight_layout()
 plt.show()
 ```
 
-```{python}
-```
+## Algoritmo k-médias
 
 ```{python}
+normalize = True
+df_cluster = df.copy()
+
+if normalize:
+    df_cluster = (df_cluster - df_cluster.mean()) / df_cluster.std()
+    # df_cluster = (df_cluster - df_cluster.min()) / (df_cluster.max() - df_cluster.min()) ## min max
+
+kmeans = KMeans(n_clusters = 4, random_state=42, init = 'k-means++', n_init = 1)
+kmeans.fit(df_cluster)
+
+predict = kmeans.predict(df_cluster)
+df_cluster["cluster"] = predict
+df_cluster["cluster"] = [chr(x+65) for x in df_cluster.cluster]
 ```
 
-```{python}
-```
+
+Características de cada grupo mostradas em uma tabela
 
 ```{python}
+df_cluster = df.copy()
+df_cluster["cluster"] = predict
+df_cluster["cluster"] = [chr(x+65) for x in df_cluster.cluster]
+
+df_cluster_info = df_cluster.groupby("cluster").median().reset_index()
+df_cluster_count = df_cluster.groupby("cluster").count()["idade"].reset_index()
+df_cluster_count.columns = ["cluster", "Count"]
+
+df_cluster_table = pd.merge(df_cluster_info, df_cluster_count, how="left", on="cluster")
+df_cluster_table
+```
+
+Visualização dessas características com o gráfico spider.
+
+
+```{python}
+make_spider(df_cluster_info)
+```
+
+Interpretação dos grupos
+
+```{python}
+def divide_chunks(l, n):
+    for i in range(0, len(l), n):
+        yield l[i:i + n]
+
+num_cols = 4
+num_rows = 2
+total_plots = num_cols * num_rows
+
+l_cols = list(divide_chunks(cols, num_cols))
+
+for cluster in ["A", "B", "C", "D"]:
+    for sub_cols in l_cols:
+        fig, axes = plt.subplots(num_rows, num_cols, figsize=(15,5))
+        for idx, col in enumerate(sub_cols):
+            data = df_cluster[df_cluster["cluster"] == cluster]
+
+            ax_his = axes[0, idx]
+            ax_box = axes[1, idx]
+
+            ax_his.set_title(f"{col} - {cluster}")
+
+            sns.histplot(data=data, x=col, bins = "doane", stat="percent", color="#fec868", common_norm=False, ax=ax_his)
+            sns.boxplot(data=data, x=col, color = "#bdb2ff", flierprops={"marker": "x", "markersize": 0.001}, ax=ax_box)
+
+            ax_his.set_xlabel("")
+            ax_box.set_xlabel("")
+
+        axes = axes.ravel(order = "F")
+        for j in range(len(sub_cols)*3, num_cols * num_rows):
+            axes[j].axis("off")
+
+
+        plt.tight_layout()
+        plt.show()
+```
+
+Escolha do melhor valor de $k$
+
+```{python}
+inertia = []
+k_values = range(2, 8)
+
+for k in k_values:
+    kmeans = KMeans(n_clusters=k, random_state=42, init='k-means++', n_init=10) # n_init=10 para melhores resultados
+    kmeans.fit(df_cluster.drop(columns=['cluster'], errors='ignore')) # Certifica que a coluna 'cluster' não esteja presente se já foi adicionada
+    inertia.append(kmeans.inertia_)
+
+plt.figure(figsize=(10, 6))
+plt.plot(k_values, inertia, marker='o')
+plt.title('Gráfico de Cotovelo para K-Means')
+plt.xlabel('Número de Clusters (k)')
+plt.ylabel('Inércia (Soma dos Quadrados Intra-Cluster)')
+plt.xticks(k_values)
+plt.grid(True)
+plt.show()
 ```
 
 ```{python}
