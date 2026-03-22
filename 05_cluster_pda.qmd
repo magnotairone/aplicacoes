@@ -10,6 +10,12 @@ editor_options:
 library(reticulate)
 library(kableExtra)
 use_python("C:/Users/m_tai/AppData/Local/Programs/Python/Python313/python.exe", required = TRUE)
+
+knitr::opts_chunk$set(
+  warning = FALSE,
+  message = FALSE,
+  echo = TRUE
+)
 ```
 
 Carregamento das bibliotecas necessárias

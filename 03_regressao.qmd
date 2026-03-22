@@ -46,7 +46,8 @@ library(tidyverse)
 library(janitor)
 
 dados <- read_csv("data/sao-paulo-properties-april-2019.csv") |> 
-  clean_names()
+  clean_names() |> 
+  mutate(id = row_number())
 
 set.seed(42)
 dados |> 
@@ -62,7 +63,8 @@ library(janitor)
 theme_set(theme_bw())
 
 dados <- read_csv("data/sao-paulo-properties-april-2019.csv") |> 
-  clean_names()
+  clean_names() |> 
+  mutate(id = row_number())
 
 set.seed(42)
 mostrar <- dados |> 
@@ -366,6 +368,7 @@ Os dois últimos gráficos de boxplot apresentam o eixo-y na escala logarítimic
 str(dados_aluguel)
 
 dados_aluguel <- dados_aluguel |> 
+  mutate(rooms = if_else(rooms >= 5, "5+", as.character(rooms))) |> 
   mutate(rooms = as.factor(rooms),
          toilets = as.factor(toilets),
          furnished = as.factor(furnished),
@@ -404,11 +407,12 @@ Em seguida, avaliaremos o erro deste modelo final no conjunto de teste, fornecen
 Vamos aplicar o modelo de regressão linear ao conjunto de treinamento e avaliá-lo utilizando o conjunto de validação.
 
 ```{r}
-mod_linear <- lm(price ~ ., dados_treinamento)
+mod_linear <- lm(price ~ ., dados_treinamento |> select(-id))
 
 pred_linear <- predict(mod_linear, dados_validacao)
 
-df_pred <- tibble(y_obs = dados_validacao$price,
+df_pred <- tibble(id = dados_validacao$id,
+                  y_obs = dados_validacao$price,
                   y_pred = pred_linear,
                   modelo = "linear")
 ```
@@ -431,7 +435,7 @@ Vamos aplicar o modelo de árvore de decisão ao conjunto de treinamento e avali
 
 ```{r}
 library(rpart)
-mod_arvore <- rpart(price ~ ., dados_treinamento)
+mod_arvore <- rpart(price ~ ., dados_treinamento |> select(-id))
 
 rpart.plot::rpart.plot(mod_arvore)
 ```
@@ -480,7 +484,8 @@ Esta estrutura hierárquica de decisões permite que o modelo de árvore de deci
 pred_arvore <- predict(mod_arvore, dados_validacao)
 
 df_pred <- df_pred |> 
-  bind_rows(tibble(y_obs = dados_validacao$price,
+  bind_rows(tibble(id = dados_validacao$id,
+                   y_obs = dados_validacao$price,
                    y_pred = pred_arvore,
                    modelo = "árvore")) 
 
@@ -509,7 +514,8 @@ mod_floresta <- randomForest(price ~ ., data = dados_treinamento)
 pred_floresta <- predict(mod_floresta, dados_validacao)
 
 df_pred <- df_pred |> 
-  bind_rows(tibble(y_obs = dados_validacao$price,
+  bind_rows(tibble(id = dados_validacao$id,
+                   y_obs = dados_validacao$price,
                    y_pred = pred_floresta,
                    modelo = "floresta aleatória")) 
 
@@ -526,6 +532,34 @@ df_pred |>
 
 
 #### Comparativo da performance dos modelos na validacao
+
+Veja na tabela abaixo os valores preditos por cada modelo para cada observação do conjunto de validação. São esses valores que serão utilizados para calcular o erro de cada modelo e, consequentemente, escolher o melhor entre eles.
+
+```{r eval=FALSE}
+df_pred |> 
+  pivot_wider(names_from = modelo, values_from = y_pred) |> 
+  slice_sample(n = 20)
+```
+
+```{r echo=FALSE}
+set.seed(42)
+if (knitr::is_html_output()){
+  df_pred |> 
+    mutate(id = as.character(id),
+           y_pred = format(round(y_pred, 2), nsmall = 2)) |>
+    pivot_wider(names_from = modelo, values_from = y_pred)  |> 
+    slice_sample(n = 20) |> 
+    kable("html", format.args = list(nsmall = 2, decimal.mark = "."), align = c("r", "r", "r", "r"))
+} else {
+  df_pred |> 
+    mutate(id = as.character(id),
+           y_pred = format(round(y_pred, 2), nsmall = 2)) |>
+    pivot_wider(names_from = modelo, values_from = y_pred)  |> 
+    slice_sample(n = 20) |> 
+    kable("latex", format.args = list(nsmall = 2, decimal.mark = "."), align = c("r", "r", "r", "r"))
+}
+```
+
 
 Observando a tabela abaixo, que compara os modelos com base no erro quadrático médio (EQM) e na raiz do erro quadrático médio (REQM) no conjunto de validação, observamos que a floresta aleatória obteve o menor EQM e REQM.
 
