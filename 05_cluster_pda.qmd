@@ -456,3 +456,8 @@ O algoritmo K-Means nos ofereceu um mapa, mas a navegação é feita pelo gestor
 ::: {.callout-tip title="Desafio Próximo"}
 Como exercício de reflexão: se o orçamento de marketing fosse cortado pela metade, quais desses 4 clusters você deixaria de atender primeiro? Por quê?
 :::
+
+## Conclusão
+
+Neste estudo, exploramos o comportamento de uma base de clientes do varejo utilizando o algoritmo $K$-means para transformar dados transacionais e demográficos em segmentos acionáveis.
+O agrupamento bem-sucedido não é aquele que apenas minimiza a inércia, mas aquele que é operacionalizável. De nada adianta uma perfeição estatística se o time de marketing não possui recursos para gerenciar a complexidade de múltiplos segmentos. Portanto, ao implementar esses modelos na prática, deve-se sempre equilibrar a precisão do algoritmo com a capacibilidade de execução da empresa, garantindo que os insights gerados se convertam em decisões que tragam retorno real sobre o investimento.
