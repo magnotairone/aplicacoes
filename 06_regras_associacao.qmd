@@ -1,0 +1,163 @@
+---
+title: "06_regras_associacao"
+format: html
+---
+
+```{r include=FALSE}
+library(kableExtra)
+
+knitr::opts_chunk$set(
+  warning = FALSE,
+  message = FALSE,
+  echo = TRUE
+)
+```
+
+## Estratégias de Cross-Selling com Regras de Associação 
+
+Como os supermercados e e-commerces decidem o layout das gôndolas ou as recomendações de "compre junto"? Vamos utilizar o algoritmo Apriori para minerar associações e entender o trade-off entre volume e especificidade. Em um mar de milhares de regras, como identificar aquelas que são estatisticamente robustas e comercialmente relevantes?
+
+### Terminologia de Regras de Associação {.unnumbered}
+
+Ao trabalhar com arules, nosso foco está em três métricas que definem a qualidade da nossa "entrega":
+
+- Antecedente ($X$): O produto que já está no carrinho do cliente.
+- Consequente ($Y$): O produto que queremos oferecer (o "próximo passo").
+- Suporte: Qual a penetração dessa combinação no faturamento total? (É um nicho ou é massa?)
+- Confiança: Se o cliente comprou $X$, qual a probabilidade real de ele aceitar $Y$?
+- Lift: O quanto a oferta de $X$ impulsiona $Y$ para além da venda natural do produto?
+
+## O cenário e os dados
+
+Vamos analisar o dataset `Groceries`. Imagine que você é o Category Manager de uma rede de supermercados e precisa decidir quais produtos colocar em promoção conjunta.
+
+Diferente de modelos de regressão, aqui trabalhamos com objetos de classe transactions (matrizes esparsas), otimizados para grandes volumes de itens.
+
+```{r}
+library(arules)
+library(dplyr)
+
+
+data(Groceries)
+```
+
+
+### Diagnóstico da Operação {.unnumbered}
+Antes de rodar o algoritmo, precisamos entender o comportamento da base:
+
+```{r}
+summary(Groceries)
+```
+
+Note que, com 9.835 transações registradas e 169 itens distintos, podemos observar uma densidade de aproximadamente 0.026, indicando que o conjunto de dados é relativamente esparsamente povoado. 
+Além disso, os itens mais frequentemente comprados incluem leite integral, vegetais diversos, pães, refrigerantes e iogurte, com quantidades significativamente maiores em comparação com outros itens. 
+Também, a distribuição do comprimento dos itens mostra que a maioria das transações contém entre 1 e 6 itens, com uma mediana de 3 itens por transação. Isso sugere que os clientes geralmente compram um pequeno número de itens por vez. 
+
+::: {.callout-tip collapse="false" title="O Desafio"}
+Vender leite é fácil (alta frequência). O lucro real está em descobrir quais itens de nicho "puxam" outros itens de maior margem.
+:::
+
+## O algoritmo _apriori_
+
+
+O algoritmo *Apriori* é um método popular para mineração de regras de associação em conjuntos de dados. 
+Ele opera em duas etapas principais: primeiro, **identifica** todos os conjuntos de itens frequentes, ou seja, aqueles que aparecem com uma frequência maior que um limite pré-definido (suporte mínimo). 
+Em seguida, com base nesses conjuntos frequentes, **gera regras** de associação, que são implicações do tipo "se $X$, então $Y$", onde $X$ e $Y$ são conjuntos de itens, calculando medidas como _confiança_ e _lift_ para avaliar a força das associações entre os itens.
+
+A _confiança_ de uma regra é a probabilidade condicional de que um item (ou conjunto de itens) $Y$ seja comprado, dado que o item (ou conjunto de itens) $X$ também foi comprado. 
+Em outras palavras, é a proporção de transações que contêm tanto $X$ quanto $Y$, em relação ao número de transações que contêm $X$. 
+Uma alta confiança indica que o item $Y$ é frequentemente comprado quando o item $X$ é comprado, o que sugere uma forte associação entre eles.
+
+O _lift_ de uma regra é uma medida de quão mais frequentemente $X$ e $Y$ ocorrem juntos do que seria esperado se fossem independentes. 
+Em termos simples, o lift é a razão entre a confiança da regra e a frequência absoluta de $Y$. 
+Um lift maior que 1 indica que a regra tem uma associação positiva (os itens ocorrem juntos com mais frequência do que o esperado ao acaso), enquanto um lift menor que 1 indica uma associação negativa (os itens ocorrem juntos com menos frequência do que o esperado ao acaso).
+
+Não queremos todas as regras possíveis (seriam milhões). Precisamos filtrar aquelas que têm relevância estatística e potencial de negócio.
+
+```{r}
+# Gerando regras: Queremos algo que aconteça em pelo menos 0.1% das vendas
+# e que tenha pelo menos 80% de chance de acontecer (Confiança)
+rules <- apriori(Groceries, parameter = list(sup = 0.001, conf = 0.8))
+```
+
+O código abaixo exibe os cinco primeiros conjuntos de regras de associação descobertos pelo algoritmo Apriori. 
+Ele mostra as associações entre os itens, juntamente com suas medidas de suporte, confiança e lift.
+
+```{r}
+inspect(rules[1:5])
+```
+
+Cada regra é apresentada acima com os itens à esquerda (`lhs`) e os itens à direita (`rhs`), indicando a associação entre eles. A coluna "support" indica a frequência relativa da ocorrência da regra no conjunto de dados, enquanto a coluna "confidence" mostra a probabilidade condicional de que os itens à direita da regra sejam comprados, dado que os itens à esquerda foram comprados. O "lift" é uma medida da força da associação entre os itens, indicando quantas vezes mais provável é a compra dos itens à direita da regra em comparação com sua compra independente.
+
+
+## Visualizando o Dilema: Confiança vs. Lift
+
+No negócio, existe um trade-off:
+
+- **Regras de Alta Confiança**: São óbvias (ex: quem compra pão, compra manteiga). O risco de errar é baixo, mas o valor agregado da sugestão também pode ser baixo.
+
+- **Regras de Alto Lift**: São as "minas de ouro". Elas mostram associações surpreendentes que a intuição humana geralmente não percebe.
+
+
+### Top 5: As Regras "Certeiras" (Alta Confiança) {.unnumbered}
+
+No código abaixo, estamos extraindo as cinco primeiras regras com base na confiança mais alta. Isso nos permite identificar as associações mais fortes entre os itens, onde a confiança é uma medida da probabilidade de que o item B seja comprado quando o item A é comprado. Todas as cinco regras apresentam uma confiança de 100%, o que indica que sempre que os itens à esquerda da regra são comprados, os itens à direita também são comprados. Isso sugere que essas combinações de itens são altamente associadas no conjunto de dados.
+
+```{r}
+inspect(head(rules, n = 5, by = "confidence"))
+```
+
+::: {.callout-tip collapse="false" title="Impactos práticos"}
+Note que o whole milk aparece em quase todos os consequentes. 
+Faz sentido gastar verba de marketing recomendando leite para quem já está comprando itens de café da manhã? Provavelmente não, ele já levaria o leite de qualquer forma.
+:::
+
+### Top 5: As Regras de "Impulso" (Alto Lift) {.unnumbered}
+
+Agora, vamos extrair as cinco primeiras regras com base no lift mais alto. 
+Ele nos diz quantas vezes o item B é mais provável de ser comprado quando o item A é comprado do que se eles fossem comprados independentemente.
+
+```{r}
+inspect(head(rules, n = 5, by = "lift"))
+```
+
+Aqui o cenário muda. O Lift de 11.24 para a regra {liquor, red/blush wine} => {bottled beer} indica uma oportunidade de cross-selling fortíssima que não é óbvia para quem olha apenas o volume de vendas isolado.
+
+A segunda regra mostra que a compra de "citrus fruit", "other vegetables", "soda" e "fruit/vegetable juice" está 8.34 vezes mais associada à compra de "root vegetables" do que se fosse uma compra independente.
+E assim, sucessivamente.
+
+## Aplicação Prática: "Operação Cerveja"
+
+Imagine que o estoque de `bottled beer` está alto. Onde devemos atuar?
+
+```{r}
+# Filtrando regras onde a cerveja é o alvo
+regras_cerveja <- subset(rules, subset = rhs %in% "bottled beer")
+inspect(sort(regras_cerveja, by = "lift"))
+```
+
+Identificamos que clientes que compram licor e vinhos têm uma probabilidade de 90.4% de comprar cerveja de garrafa (um comportamento de "abastecimento de adega").
+Portanto, uma ação recomendada seria: Em vez de dar desconto na cerveja para todo o mercado, crie um cupom de desconto em cervejas artesanais impresso no verso da nota fiscal apenas para quem comprar vinhos ou licores.
+
+
+<!-- Esse resultado mostra uma regra de associação onde a compra conjunta de "liquor" e "red/blush wine" (à esquerda, `lhs`) está associada à compra de "bottled beer" (à direita, `rhs`).  -->
+<!-- Neste caso, o suporte é de aproximadamente 0.19%, o que significa que cerca de 0.19% de todas as transações incluem "liquor", "red/blush wine" e "bottled beer". -->
+<!-- A confiança é de cerca de 90.48%, o que sugere uma forte associação entre esses itens. -->
+<!-- O  lift é de aproximadamente 11.24, o que significa que a compra de "liquor" e "red/blush wine" aumenta a probabilidade de compra de "bottled beer" em cerca de 11.24 vezes, em comparação com a situação em que essas compras são independentes. -->
+
+<!-- Se fossemos fazer uma ação de divulgação de uma "bottled beer", qual seria? -->
+
+<!-- > Uma proporção significativa (aproximadamente 90.5%) dos consumidores que compram licor e vinho vermelho/branco também compram "bottled beer". Portanto, seria vantajoso direcionar campanhas publicitárias para esse grupo demográfico, destacando a disponibilidade e a qualidade da "bottled beer" em relação aos produtos relacionados, como licores e vinhos. -->
+
+
+### Conclusão
+
+A análise de regras de associação através do algoritmo *apriori* nos permite compreender melhor o comportamento do consumidor e tomar decisões informadas para otimizar as estratégias de marketing. 
+
+
+A análise de associação nos permite compreender melhor o comportamento do consumidor. Entretanto, pode servir também para provocar novos comportamentos nos clientes:
+
+- **Suporte Baixo + Lift Alto**: Oportunidade de criar novos hábitos em nichos rentáveis.
+
+- **Suporte Alto + Confiança Alta**: Itens "âncora". Não precisam de promoção, mas devem estar localizados no fundo da loja para o cliente percorrer outros corredores.
+
