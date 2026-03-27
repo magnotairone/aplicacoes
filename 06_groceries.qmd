@@ -1,7 +1,10 @@
 ---
-title: "06_regras_associacao"
-format: html
+output: html_document
+editor_options: 
+  chunk_output_type: console
 ---
+
+## Estratégias de Cross-Selling em Mercado
 
 ```{r include=FALSE}
 library(kableExtra)
@@ -13,7 +16,6 @@ knitr::opts_chunk$set(
 )
 ```
 
-## Estratégias de Cross-Selling com Regras de Associação 
 
 Como os supermercados e e-commerces decidem o layout das gôndolas ou as recomendações de "compre junto"? Vamos utilizar o algoritmo Apriori para minerar associações e entender o trade-off entre volume e especificidade. Em um mar de milhares de regras, como identificar aquelas que são estatisticamente robustas e comercialmente relevantes?
 

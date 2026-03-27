@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>6&nbsp; 06_regras_associacao – Aplicações de Ciência de Dados</title>
+<title>6&nbsp; Estratégias de Cross-Selling em Mercado – Aplicações de Ciência de Dados</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -146,7 +146,7 @@ window.Quarto = {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Alternar barra lateral" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./06_groceries.html">Regras de associação</a></li><li class="breadcrumb-item"><a href="./06_groceries.html"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">06_regras_associacao</span></a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./06_groceries.html">Regras de associação</a></li><li class="breadcrumb-item"><a href="./06_groceries.html"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Estratégias de Cross-Selling em Mercado</span></a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Alternar barra lateral" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="Procurar" onclick="window.quartoOpenSearch();">
@@ -254,7 +254,7 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./06_groceries.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">06_regras_associacao</span></span></a>
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Estratégias de Cross-Selling em Mercado</span></span></a>
   </div>
 </li>
       </ul>
@@ -269,23 +269,20 @@ window.Quarto = {
     <h2 id="toc-title">Índice</h2>
    
   <ul>
-  <li><a href="#estratégias-de-cross-selling-com-regras-de-associação" id="toc-estratégias-de-cross-selling-com-regras-de-associação" class="nav-link active" data-scroll-target="#estratégias-de-cross-selling-com-regras-de-associação"><span class="header-section-number">6.1</span> Estratégias de Cross-Selling com Regras de Associação</a>
-  <ul class="collapse">
-  <li><a href="#terminologia-de-regras-de-associação" id="toc-terminologia-de-regras-de-associação" class="nav-link" data-scroll-target="#terminologia-de-regras-de-associação">Terminologia de Regras de Associação</a></li>
-  </ul></li>
-  <li><a href="#o-cenário-e-os-dados" id="toc-o-cenário-e-os-dados" class="nav-link" data-scroll-target="#o-cenário-e-os-dados"><span class="header-section-number">6.2</span> O cenário e os dados</a>
+  <li><a href="#terminologia-de-regras-de-associação" id="toc-terminologia-de-regras-de-associação" class="nav-link active" data-scroll-target="#terminologia-de-regras-de-associação">Terminologia de Regras de Associação</a></li>
+  <li><a href="#o-cenário-e-os-dados" id="toc-o-cenário-e-os-dados" class="nav-link" data-scroll-target="#o-cenário-e-os-dados"><span class="header-section-number">6.1</span> O cenário e os dados</a>
   <ul class="collapse">
   <li><a href="#diagnóstico-da-operação" id="toc-diagnóstico-da-operação" class="nav-link" data-scroll-target="#diagnóstico-da-operação">Diagnóstico da Operação</a></li>
   </ul></li>
-  <li><a href="#o-algoritmo-apriori" id="toc-o-algoritmo-apriori" class="nav-link" data-scroll-target="#o-algoritmo-apriori"><span class="header-section-number">6.3</span> O algoritmo <em>apriori</em></a></li>
-  <li><a href="#visualizando-o-dilema-confiança-vs.-lift" id="toc-visualizando-o-dilema-confiança-vs.-lift" class="nav-link" data-scroll-target="#visualizando-o-dilema-confiança-vs.-lift"><span class="header-section-number">6.4</span> Visualizando o Dilema: Confiança vs.&nbsp;Lift</a>
+  <li><a href="#o-algoritmo-apriori" id="toc-o-algoritmo-apriori" class="nav-link" data-scroll-target="#o-algoritmo-apriori"><span class="header-section-number">6.2</span> O algoritmo <em>apriori</em></a></li>
+  <li><a href="#visualizando-o-dilema-confiança-vs.-lift" id="toc-visualizando-o-dilema-confiança-vs.-lift" class="nav-link" data-scroll-target="#visualizando-o-dilema-confiança-vs.-lift"><span class="header-section-number">6.3</span> Visualizando o Dilema: Confiança vs.&nbsp;Lift</a>
   <ul class="collapse">
   <li><a href="#top-5-as-regras-certeiras-alta-confiança" id="toc-top-5-as-regras-certeiras-alta-confiança" class="nav-link" data-scroll-target="#top-5-as-regras-certeiras-alta-confiança">Top 5: As Regras “Certeiras” (Alta Confiança)</a></li>
   <li><a href="#top-5-as-regras-de-impulso-alto-lift" id="toc-top-5-as-regras-de-impulso-alto-lift" class="nav-link" data-scroll-target="#top-5-as-regras-de-impulso-alto-lift">Top 5: As Regras de “Impulso” (Alto Lift)</a></li>
   </ul></li>
-  <li><a href="#aplicação-prática-operação-cerveja" id="toc-aplicação-prática-operação-cerveja" class="nav-link" data-scroll-target="#aplicação-prática-operação-cerveja"><span class="header-section-number">6.5</span> Aplicação Prática: “Operação Cerveja”</a>
+  <li><a href="#aplicação-prática-operação-cerveja" id="toc-aplicação-prática-operação-cerveja" class="nav-link" data-scroll-target="#aplicação-prática-operação-cerveja"><span class="header-section-number">6.4</span> Aplicação Prática: “Operação Cerveja”</a>
   <ul class="collapse">
-  <li><a href="#conclusão" id="toc-conclusão" class="nav-link" data-scroll-target="#conclusão"><span class="header-section-number">6.5.1</span> Conclusão</a></li>
+  <li><a href="#conclusão" id="toc-conclusão" class="nav-link" data-scroll-target="#conclusão"><span class="header-section-number">6.4.1</span> Conclusão</a></li>
   </ul></li>
   </ul>
 </nav>
@@ -293,9 +290,9 @@ window.Quarto = {
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
-<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./06_groceries.html">Regras de associação</a></li><li class="breadcrumb-item"><a href="./06_groceries.html"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">06_regras_associacao</span></a></li></ol></nav>
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./06_groceries.html">Regras de associação</a></li><li class="breadcrumb-item"><a href="./06_groceries.html"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Estratégias de Cross-Selling em Mercado</span></a></li></ol></nav>
 <div class="quarto-title">
-<h1 class="title"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">06_regras_associacao</span></h1>
+<h1 class="title"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Estratégias de Cross-Selling em Mercado</span></h1>
 </div>
 
 
@@ -312,8 +309,6 @@ window.Quarto = {
 </header>
 
 
-<section id="estratégias-de-cross-selling-com-regras-de-associação" class="level2" data-number="6.1">
-<h2 data-number="6.1" class="anchored" data-anchor-id="estratégias-de-cross-selling-com-regras-de-associação"><span class="header-section-number">6.1</span> Estratégias de Cross-Selling com Regras de Associação</h2>
 <p>Como os supermercados e e-commerces decidem o layout das gôndolas ou as recomendações de “compre junto”? Vamos utilizar o algoritmo Apriori para minerar associações e entender o trade-off entre volume e especificidade. Em um mar de milhares de regras, como identificar aquelas que são estatisticamente robustas e comercialmente relevantes?</p>
 <section id="terminologia-de-regras-de-associação" class="level3 unnumbered">
 <h3 class="unnumbered anchored" data-anchor-id="terminologia-de-regras-de-associação">Terminologia de Regras de Associação</h3>
@@ -326,9 +321,8 @@ window.Quarto = {
 <li>Lift: O quanto a oferta de <span class="math inline">\(X\)</span> impulsiona <span class="math inline">\(Y\)</span> para além da venda natural do produto?</li>
 </ul>
 </section>
-</section>
-<section id="o-cenário-e-os-dados" class="level2" data-number="6.2">
-<h2 data-number="6.2" class="anchored" data-anchor-id="o-cenário-e-os-dados"><span class="header-section-number">6.2</span> O cenário e os dados</h2>
+<section id="o-cenário-e-os-dados" class="level2" data-number="6.1">
+<h2 data-number="6.1" class="anchored" data-anchor-id="o-cenário-e-os-dados"><span class="header-section-number">6.1</span> O cenário e os dados</h2>
 <p>Vamos analisar o dataset <code>Groceries</code>. Imagine que você é o Category Manager de uma rede de supermercados e precisa decidir quais produtos colocar em promoção conjunta.</p>
 <p>Diferente de modelos de regressão, aqui trabalhamos com objetos de classe transactions (matrizes esparsas), otimizados para grandes volumes de itens.</p>
 <div class="cell">
@@ -390,8 +384,8 @@ includes extended item information - examples:
 </div>
 </section>
 </section>
-<section id="o-algoritmo-apriori" class="level2" data-number="6.3">
-<h2 data-number="6.3" class="anchored" data-anchor-id="o-algoritmo-apriori"><span class="header-section-number">6.3</span> O algoritmo <em>apriori</em></h2>
+<section id="o-algoritmo-apriori" class="level2" data-number="6.2">
+<h2 data-number="6.2" class="anchored" data-anchor-id="o-algoritmo-apriori"><span class="header-section-number">6.2</span> O algoritmo <em>apriori</em></h2>
 <p>O algoritmo <em>Apriori</em> é um método popular para mineração de regras de associação em conjuntos de dados. Ele opera em duas etapas principais: primeiro, <strong>identifica</strong> todos os conjuntos de itens frequentes, ou seja, aqueles que aparecem com uma frequência maior que um limite pré-definido (suporte mínimo). Em seguida, com base nesses conjuntos frequentes, <strong>gera regras</strong> de associação, que são implicações do tipo “se <span class="math inline">\(X\)</span>, então <span class="math inline">\(Y\)</span>”, onde <span class="math inline">\(X\)</span> e <span class="math inline">\(Y\)</span> são conjuntos de itens, calculando medidas como <em>confiança</em> e <em>lift</em> para avaliar a força das associações entre os itens.</p>
 <p>A <em>confiança</em> de uma regra é a probabilidade condicional de que um item (ou conjunto de itens) <span class="math inline">\(Y\)</span> seja comprado, dado que o item (ou conjunto de itens) <span class="math inline">\(X\)</span> também foi comprado. Em outras palavras, é a proporção de transações que contêm tanto <span class="math inline">\(X\)</span> quanto <span class="math inline">\(Y\)</span>, em relação ao número de transações que contêm <span class="math inline">\(X\)</span>. Uma alta confiança indica que o item <span class="math inline">\(Y\)</span> é frequentemente comprado quando o item <span class="math inline">\(X\)</span> é comprado, o que sugere uma forte associação entre eles.</p>
 <p>O <em>lift</em> de uma regra é uma medida de quão mais frequentemente <span class="math inline">\(X\)</span> e <span class="math inline">\(Y\)</span> ocorrem juntos do que seria esperado se fossem independentes. Em termos simples, o lift é a razão entre a confiança da regra e a frequência absoluta de <span class="math inline">\(Y\)</span>. Um lift maior que 1 indica que a regra tem uma associação positiva (os itens ocorrem juntos com mais frequência do que o esperado ao acaso), enquanto um lift menor que 1 indica uma associação negativa (os itens ocorrem juntos com menos frequência do que o esperado ao acaso).</p>
@@ -444,8 +438,8 @@ creating S4 object  ... done [0.00s].</code></pre>
 </div>
 <p>Cada regra é apresentada acima com os itens à esquerda (<code>lhs</code>) e os itens à direita (<code>rhs</code>), indicando a associação entre eles. A coluna “support” indica a frequência relativa da ocorrência da regra no conjunto de dados, enquanto a coluna “confidence” mostra a probabilidade condicional de que os itens à direita da regra sejam comprados, dado que os itens à esquerda foram comprados. O “lift” é uma medida da força da associação entre os itens, indicando quantas vezes mais provável é a compra dos itens à direita da regra em comparação com sua compra independente.</p>
 </section>
-<section id="visualizando-o-dilema-confiança-vs.-lift" class="level2" data-number="6.4">
-<h2 data-number="6.4" class="anchored" data-anchor-id="visualizando-o-dilema-confiança-vs.-lift"><span class="header-section-number">6.4</span> Visualizando o Dilema: Confiança vs.&nbsp;Lift</h2>
+<section id="visualizando-o-dilema-confiança-vs.-lift" class="level2" data-number="6.3">
+<h2 data-number="6.3" class="anchored" data-anchor-id="visualizando-o-dilema-confiança-vs.-lift"><span class="header-section-number">6.3</span> Visualizando o Dilema: Confiança vs.&nbsp;Lift</h2>
 <p>No negócio, existe um trade-off:</p>
 <ul>
 <li><p><strong>Regras de Alta Confiança</strong>: São óbvias (ex: quem compra pão, compra manteiga). O risco de errar é baixo, mas o valor agregado da sugestão também pode ser baixo.</p></li>
@@ -521,8 +515,8 @@ creating S4 object  ... done [0.00s].</code></pre>
 <p>A segunda regra mostra que a compra de “citrus fruit”, “other vegetables”, “soda” e “fruit/vegetable juice” está 8.34 vezes mais associada à compra de “root vegetables” do que se fosse uma compra independente. E assim, sucessivamente.</p>
 </section>
 </section>
-<section id="aplicação-prática-operação-cerveja" class="level2" data-number="6.5">
-<h2 data-number="6.5" class="anchored" data-anchor-id="aplicação-prática-operação-cerveja"><span class="header-section-number">6.5</span> Aplicação Prática: “Operação Cerveja”</h2>
+<section id="aplicação-prática-operação-cerveja" class="level2" data-number="6.4">
+<h2 data-number="6.4" class="anchored" data-anchor-id="aplicação-prática-operação-cerveja"><span class="header-section-number">6.4</span> Aplicação Prática: “Operação Cerveja”</h2>
 <p>Imagine que o estoque de <code>bottled beer</code> está alto. Onde devemos atuar?</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Filtrando regras onde a cerveja é o alvo</span></span>
@@ -542,8 +536,8 @@ creating S4 object  ... done [0.00s].</code></pre>
 <!-- O  lift é de aproximadamente 11.24, o que significa que a compra de "liquor" e "red/blush wine" aumenta a probabilidade de compra de "bottled beer" em cerca de 11.24 vezes, em comparação com a situação em que essas compras são independentes. -->
 <!-- Se fossemos fazer uma ação de divulgação de uma "bottled beer", qual seria? -->
 <!-- > Uma proporção significativa (aproximadamente 90.5%) dos consumidores que compram licor e vinho vermelho/branco também compram "bottled beer". Portanto, seria vantajoso direcionar campanhas publicitárias para esse grupo demográfico, destacando a disponibilidade e a qualidade da "bottled beer" em relação aos produtos relacionados, como licores e vinhos. -->
-<section id="conclusão" class="level3" data-number="6.5.1">
-<h3 data-number="6.5.1" class="anchored" data-anchor-id="conclusão"><span class="header-section-number">6.5.1</span> Conclusão</h3>
+<section id="conclusão" class="level3" data-number="6.4.1">
+<h3 data-number="6.4.1" class="anchored" data-anchor-id="conclusão"><span class="header-section-number">6.4.1</span> Conclusão</h3>
 <p>A análise de regras de associação através do algoritmo <em>apriori</em> nos permite compreender melhor o comportamento do consumidor e tomar decisões informadas para otimizar as estratégias de marketing.</p>
 <p>A análise de associação nos permite compreender melhor o comportamento do consumidor. Entretanto, pode servir também para provocar novos comportamentos nos clientes:</p>
 <ul>
