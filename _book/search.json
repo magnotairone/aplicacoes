@@ -416,7 +416,18 @@
     "href": "06_groceries.html#aplicação-prática-operação-cerveja",
     "title": "6  Estratégias de Cross-Selling em Mercado",
     "section": "6.4 Aplicação Prática: “Operação Cerveja”",
-    "text": "6.4 Aplicação Prática: “Operação Cerveja”\nImagine que o estoque de bottled beer está alto. Onde devemos atuar?\n\n# Filtrando regras onde a cerveja é o alvo\nregras_cerveja &lt;- subset(rules, subset = rhs %in% \"bottled beer\")\ninspect(sort(regras_cerveja, by = \"lift\"))\n\n    lhs                         rhs            support     confidence\n[1] {liquor, red/blush wine} =&gt; {bottled beer} 0.001931876 0.9047619 \n    coverage    lift     count\n[1] 0.002135231 11.23527 19   \n\n\nIdentificamos que clientes que compram licor e vinhos têm uma probabilidade de 90.4% de comprar cerveja de garrafa (um comportamento de “abastecimento de adega”). Portanto, uma ação recomendada seria: Em vez de dar desconto na cerveja para todo o mercado, crie um cupom de desconto em cervejas artesanais impresso no verso da nota fiscal apenas para quem comprar vinhos ou licores.\n\n\n\n\n\n\n\n6.4.1 Conclusão\nA análise de regras de associação através do algoritmo apriori nos permite compreender melhor o comportamento do consumidor e tomar decisões informadas para otimizar as estratégias de marketing.\nA análise de associação nos permite compreender melhor o comportamento do consumidor. Entretanto, pode servir também para provocar novos comportamentos nos clientes:\n\nSuporte Baixo + Lift Alto: Oportunidade de criar novos hábitos em nichos rentáveis.\nSuporte Alto + Confiança Alta: Itens “âncora”. Não precisam de promoção, mas devem estar localizados no fundo da loja para o cliente percorrer outros corredores.",
+    "text": "6.4 Aplicação Prática: “Operação Cerveja”\nImagine que o estoque de bottled beer está alto. Onde devemos atuar?\n\n# Filtrando regras onde a cerveja é o alvo\nregras_cerveja &lt;- subset(rules, subset = rhs %in% \"bottled beer\")\ninspect(sort(regras_cerveja, by = \"lift\"))\n\n    lhs                         rhs            support     confidence\n[1] {liquor, red/blush wine} =&gt; {bottled beer} 0.001931876 0.9047619 \n    coverage    lift     count\n[1] 0.002135231 11.23527 19   \n\n\nIdentificamos que clientes que compram licor e vinhos têm uma probabilidade de 90.4% de comprar cerveja de garrafa (um comportamento de “abastecimento de adega”). Portanto, uma ação recomendada seria: Em vez de dar desconto na cerveja para todo o mercado, crie um cupom de desconto em cervejas artesanais impresso no verso da nota fiscal apenas para quem comprar vinhos ou licores.",
+    "crumbs": [
+      "Regras de associação",
+      "<span class='chapter-number'>6</span>  <span class='chapter-title'>Estratégias de Cross-Selling em Mercado</span>"
+    ]
+  },
+  {
+    "objectID": "06_groceries.html#conclusão",
+    "href": "06_groceries.html#conclusão",
+    "title": "6  Estratégias de Cross-Selling em Mercado",
+    "section": "6.5 Conclusão",
+    "text": "6.5 Conclusão\nA análise de regras de associação através do algoritmo apriori nos permite compreender melhor o comportamento do consumidor e tomar decisões informadas para otimizar as estratégias de marketing.\nA análise de associação nos permite compreender melhor o comportamento do consumidor. Entretanto, pode servir também para provocar novos comportamentos nos clientes:\n\nSuporte Baixo + Lift Alto: Oportunidade de criar novos hábitos em nichos rentáveis.\nSuporte Alto + Confiança Alta: Itens “âncora”. Não precisam de promoção, mas devem estar localizados no fundo da loja para o cliente percorrer outros corredores.",
     "crumbs": [
       "Regras de associação",
       "<span class='chapter-number'>6</span>  <span class='chapter-title'>Estratégias de Cross-Selling em Mercado</span>"

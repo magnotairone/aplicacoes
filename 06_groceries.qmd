@@ -152,7 +152,7 @@ Portanto, uma ação recomendada seria: Em vez de dar desconto na cerveja para t
 <!-- > Uma proporção significativa (aproximadamente 90.5%) dos consumidores que compram licor e vinho vermelho/branco também compram "bottled beer". Portanto, seria vantajoso direcionar campanhas publicitárias para esse grupo demográfico, destacando a disponibilidade e a qualidade da "bottled beer" em relação aos produtos relacionados, como licores e vinhos. -->
 
 
-### Conclusão
+## Conclusão
 
 A análise de regras de associação através do algoritmo *apriori* nos permite compreender melhor o comportamento do consumidor e tomar decisões informadas para otimizar as estratégias de marketing. 
 
