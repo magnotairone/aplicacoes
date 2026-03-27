@@ -65,6 +65,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="site_libs/quarto-search/fuse.min.js"></script>
 <script src="site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="./">
+<link href="./06_groceries.html" rel="next">
 <link href="./04_cluster_538.html" rel="prev">
 <script src="site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
@@ -242,6 +243,23 @@ window.Quarto = {
 </li>
       </ul>
   </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true">
+ <span class="menu-text">Regras de associação</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Alternar seção">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./06_groceries.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">06_regras_associacao</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
     </ul>
     </div>
 </nav>
@@ -365,16 +383,16 @@ window.Quarto = {
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>df.sample(<span class="dv">10</span>)</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>       idade    renda  ...  gasto_flv_6m  gasto_mercearia_6m
-41945     41  3284.41  ...          0.86               19.32
-19818     40  3677.52  ...          6.72                0.00
-43052     42  4742.70  ...         52.80               21.20
-49570     43  3109.17  ...          9.46               28.30
-24982     45  6964.75  ...         83.07               52.84
-16858     43  2445.68  ...         17.00               21.94
-548       44  5226.34  ...         52.82                0.00
-57967     42  6912.22  ...         40.08                6.62
-1285      45  5526.61  ...         24.93               54.42
-31930     43  8088.02  ...         50.57               59.83
+10202     43  8481.65  ...          0.00               49.88
+45099     48  3633.53  ...        214.57               14.54
+54034     41  4330.58  ...          0.08                3.49
+3982      45  3515.84  ...          1.39                0.00
+38713     43  3628.22  ...          0.00                0.00
+51110     48  3674.54  ...        196.95              148.15
+7827      42  3264.93  ...          7.93               21.88
+29078     43  5834.75  ...          0.00               53.08
+38079     43  3132.28  ...         16.74                0.00
+3179      46  4695.08  ...        193.80              285.09
 
 [10 rows x 11 columns]</code></pre>
 </div>
@@ -2322,7 +2340,7 @@ forceTheme('sk-container-id-2');</script>
 <span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">'Inércia (Soma dos Quadrados Intra-Cluster)'</span>)</span>
 <span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>plt.xticks(k_values)</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>([&lt;matplotlib.axis.XTick object at 0x000001EF5856B250&gt;, &lt;matplotlib.axis.XTick object at 0x000001EF585E16D0&gt;, &lt;matplotlib.axis.XTick object at 0x000001EF585E1E50&gt;, &lt;matplotlib.axis.XTick object at 0x000001EF585E25D0&gt;, &lt;matplotlib.axis.XTick object at 0x000001EF585E2D50&gt;, &lt;matplotlib.axis.XTick object at 0x000001EF585E34D0&gt;], [Text(2, 0, '2'), Text(3, 0, '3'), Text(4, 0, '4'), Text(5, 0, '5'), Text(6, 0, '6'), Text(7, 0, '7')])</code></pre>
+<pre><code>([&lt;matplotlib.axis.XTick object at 0x00000223A3B6B250&gt;, &lt;matplotlib.axis.XTick object at 0x00000223A3BDD6D0&gt;, &lt;matplotlib.axis.XTick object at 0x00000223A3BDDE50&gt;, &lt;matplotlib.axis.XTick object at 0x00000223A3BDE5D0&gt;, &lt;matplotlib.axis.XTick object at 0x00000223A3BDED50&gt;, &lt;matplotlib.axis.XTick object at 0x00000223A3BDF4D0&gt;], [Text(2, 0, '2'), Text(3, 0, '3'), Text(4, 0, '4'), Text(5, 0, '5'), Text(6, 0, '6'), Text(7, 0, '7')])</code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>plt.grid(<span class="va">True</span>)</span>
 <span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
@@ -2779,6 +2797,9 @@ forceTheme('sk-container-id-2');</script>
       </a>          
   </div>
   <div class="nav-page nav-page-next">
+      <a href="./06_groceries.html" class="pagination-link" aria-label="06_regras_associacao">
+        <span class="nav-page-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">06_regras_associacao</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
   </div>
 </nav>
 </div> <!-- /content -->

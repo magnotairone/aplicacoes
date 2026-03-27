@@ -21,6 +21,9 @@ book:
       chapters:
         - 04_cluster_538.qmd
         - 05_cluster_pda.qmd
+    - part: Regras de associação
+      chapters:
+        - 06_groceries.qmd
     # - summary.qmd
     # - references.qmd
 
@@ -39,3 +42,5 @@ format:
 
 editor: source
 
+execute:
+  freeze: auto
