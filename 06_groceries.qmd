@@ -39,7 +39,6 @@ Diferente de modelos de regressão, aqui trabalhamos com objetos de classe trans
 library(arules)
 library(dplyr)
 
-
 data(Groceries)
 ```
 

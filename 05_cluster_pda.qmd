@@ -414,7 +414,7 @@ for cluster in ["A", "B", "C", "D"]:
 
 A escolha do número de grupos em uma análise de clustering não deve ser arbitrária. Para validarmos se $k=4$ é uma escolha tecnicamente robusta, utilizamos o Método do Cotovelo (Elbow Method).
 
-```{python}
+```{python, warnings=FALSE, message=FALSE}
 inertia = []
 k_values = range(2, 8)
 
@@ -434,6 +434,56 @@ plt.show()
 ```
 
 A métrica no eixo $y$ do gráfico acima é a Inércia (ou _Within-Cluster Sum of Squares_), que mede a soma das distâncias quadráticas entre cada ponto e o centroide do seu cluster. À medida que aumentamos o número de clusters ($k$), a inércia inevitavelmente diminui, pois os grupos ficam menores e mais "apertados". O objetivo é encontrar o ponto onde o ganho de informação (a queda na inércia) deixa de ser drástico e passa a ser marginal.Interpretação dos ResultadosNo gráfico gerado, observamos uma queda acentuada de $k=2$ para $k=3$ e de $k=3$ para $k=4$. No entanto, após o 4, a curva suaviza significativamente (o declive se torna menor). Esse "cotovelo" no $k=4$ indica que adicionar um quinto ou sexto grupo não traria uma melhora substancial na coesão dos dados que justificasse a complexidade extra.
+
+## Visualização dos Clusters através do PCA
+
+O PCA (Análise de Componentes Principais) é uma técnica de redução de dimensionalidade que nos permite visualizar dados de alta dimensão em um espaço 2D ou 3D, preservando a maior parte da variância dos dados. Ao aplicar o PCA aos nossos dados normalizados, podemos plotar os clientes em um gráfico onde cada ponto representa um cliente e a cor indica a qual cluster ele pertence.
+
+Por que PCA aqui? O K-Means calculou os clusters em um espaço de 11 dimensões. É impossível para o ser humano visualizar isso. O PCA projeta essas 11 dimensões em 2 novas (PC1 e PC2) que capturam a maior parte da separação entre os dados.
+
+```{python}
+# 1. Preparação dos Dados para o PCA
+# Usamos os dados normalizados (df_cluster), mas removemos a coluna 'cluster' que acabamos de adicionar, pois o PCA só trabalha com variáveis numéricas.
+X = df_cluster.drop(columns=['cluster'], errors='ignore')
+
+# 2. Inicialização e Ajuste do PCA
+# Queremos reduzir as 11 dimensões originais para apenas 2 componentes principais, permitindo a visualização em um gráfico de dispersão (X, Y).
+pca = PCA(n_components=2, random_state=42)
+pca_components = pca.fit_transform(X)
+
+# 3. Criação de um DataFrame para Visualização
+# Convertemos a matriz resultante do PCA em um DataFrame do Pandas
+df_pca = pd.DataFrame(data=pca_components, columns=['PC1', 'PC2'])
+
+# Recuperamos a identificação do cluster (A, B, C, D) do DataFrame original para usar como legenda de cor no gráfico.
+df_pca['cluster'] = df_cluster['cluster'].values
+
+# 4. Cálculo da Variância Explicada
+var_explicada = pca.explained_variance_ratio_
+total_var = var_explicada.sum() * 100
+
+print(f"Variância explicada pelo PC1: {var_explicada[0]*100:.2f}%")
+print(f"Variância explicada pelo PC2: {var_explicada[1]*100:.2f}%")
+print(f"Variância total explicada pelos dois componentes: {total_var:.2f}%")
+
+# 5. Visualização Gráfica com Seaborn
+plt.figure(figsize=(12, 8))
+sns.scatterplot(
+    x='PC1', y='PC2',
+    hue='cluster',  # Define a cor baseada no cluster
+    palette='Set2', # Mesma paleta usada no gráfico spider
+    data=df_pca,
+    alpha=0.3,      # Transparência para lidar com a sobreposição de pontos
+    edgecolor=None  # Remove a borda dos pontos para clareza
+)
+
+plt.title(f'Visualização dos Clusters em 2D via PCA\n(Variância Total Explicada: {total_var:.1f}%)', size=15)
+plt.xlabel(f'Componente Principal 1 ({var_explicada[0]*100:.1f}% var)', size=12)
+plt.ylabel(f'Componente Principal 2 ({var_explicada[1]*100:.1f}% var)', size=12)
+plt.grid(True, linestyle='--', alpha=0.5)
+plt.show()
+```
+
 
 ## Discussão
 

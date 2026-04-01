@@ -507,7 +507,7 @@ Observe que os valores preditos pela árvore de decisão apresentam um padrão (
 Vamos aplicar o modelo de floresta aleatória ao conjunto de treinamento e avaliá-lo utilizando o conjunto de validação.
 
 
-```{r}
+```{r cache=TRUE}
 library(randomForest)
 mod_floresta <- randomForest(price ~ ., data = dados_treinamento)
 

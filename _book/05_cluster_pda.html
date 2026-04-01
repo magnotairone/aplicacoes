@@ -255,7 +255,7 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./06_groceries.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">06_regras_associacao</span></span></a>
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Estratégias de Cross-Selling em Mercado</span></span></a>
   </div>
 </li>
       </ul>
@@ -276,8 +276,9 @@ window.Quarto = {
   <ul class="collapse">
   <li><a href="#escolha-do-melhor-valor-de-k" id="toc-escolha-do-melhor-valor-de-k" class="nav-link" data-scroll-target="#escolha-do-melhor-valor-de-k"><span class="header-section-number">5.3.1</span> Escolha do melhor valor de <span class="math inline">\(k\)</span></a></li>
   </ul></li>
-  <li><a href="#discussão" id="toc-discussão" class="nav-link" data-scroll-target="#discussão"><span class="header-section-number">5.4</span> Discussão</a></li>
-  <li><a href="#conclusão" id="toc-conclusão" class="nav-link" data-scroll-target="#conclusão"><span class="header-section-number">5.5</span> Conclusão</a></li>
+  <li><a href="#visualização-dos-clusters-através-do-pca" id="toc-visualização-dos-clusters-através-do-pca" class="nav-link" data-scroll-target="#visualização-dos-clusters-através-do-pca"><span class="header-section-number">5.4</span> Visualização dos Clusters através do PCA</a></li>
+  <li><a href="#discussão" id="toc-discussão" class="nav-link" data-scroll-target="#discussão"><span class="header-section-number">5.5</span> Discussão</a></li>
+  <li><a href="#conclusão" id="toc-conclusão" class="nav-link" data-scroll-target="#conclusão"><span class="header-section-number">5.6</span> Conclusão</a></li>
   </ul>
 </nav>
     </div>
@@ -383,16 +384,16 @@ window.Quarto = {
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>df.sample(<span class="dv">10</span>)</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>       idade    renda  ...  gasto_flv_6m  gasto_mercearia_6m
-10202     43  8481.65  ...          0.00               49.88
-45099     48  3633.53  ...        214.57               14.54
-54034     41  4330.58  ...          0.08                3.49
-3982      45  3515.84  ...          1.39                0.00
-38713     43  3628.22  ...          0.00                0.00
-51110     48  3674.54  ...        196.95              148.15
-7827      42  3264.93  ...          7.93               21.88
-29078     43  5834.75  ...          0.00               53.08
-38079     43  3132.28  ...         16.74                0.00
-3179      46  4695.08  ...        193.80              285.09
+27433     45  3969.65  ...        138.41              248.00
+21745     43  7599.63  ...         10.45               61.06
+47671     43  3948.80  ...         69.08               62.73
+30046     47  4737.41  ...         76.61               18.48
+51435     42  3590.90  ...          5.00               29.32
+1299      41  2873.06  ...          0.00               29.69
+32967     41  3418.86  ...          5.75               14.94
+12510     41  3947.19  ...         10.85                0.00
+32349     47  2762.79  ...          7.05                0.00
+27238     46  2708.31  ...          6.06                0.00
 
 [10 rows x 11 columns]</code></pre>
 </div>
@@ -1523,7 +1524,7 @@ Count               30000.000  9987.00  9253.00  10760.000</code></pre>
 <section id="escolha-do-melhor-valor-de-k" class="level3" data-number="5.3.1">
 <h3 data-number="5.3.1" class="anchored" data-anchor-id="escolha-do-melhor-valor-de-k"><span class="header-section-number">5.3.1</span> Escolha do melhor valor de <span class="math inline">\(k\)</span></h3>
 <p>A escolha do número de grupos em uma análise de clustering não deve ser arbitrária. Para validarmos se <span class="math inline">\(k=4\)</span> é uma escolha tecnicamente robusta, utilizamos o Método do Cotovelo (Elbow Method).</p>
-<div class="cell">
+<div class="cell" data-warnings="false">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>inertia <span class="op">=</span> []</span>
 <span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>k_values <span class="op">=</span> <span class="bu">range</span>(<span class="dv">2</span>, <span class="dv">8</span>)</span>
 <span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -2340,7 +2341,7 @@ forceTheme('sk-container-id-2');</script>
 <span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">'Inércia (Soma dos Quadrados Intra-Cluster)'</span>)</span>
 <span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>plt.xticks(k_values)</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>([&lt;matplotlib.axis.XTick object at 0x00000223A3B6B250&gt;, &lt;matplotlib.axis.XTick object at 0x00000223A3BDD6D0&gt;, &lt;matplotlib.axis.XTick object at 0x00000223A3BDDE50&gt;, &lt;matplotlib.axis.XTick object at 0x00000223A3BDE5D0&gt;, &lt;matplotlib.axis.XTick object at 0x00000223A3BDED50&gt;, &lt;matplotlib.axis.XTick object at 0x00000223A3BDF4D0&gt;], [Text(2, 0, '2'), Text(3, 0, '3'), Text(4, 0, '4'), Text(5, 0, '5'), Text(6, 0, '6'), Text(7, 0, '7')])</code></pre>
+<pre><code>([&lt;matplotlib.axis.XTick object at 0x00000245F7F63250&gt;, &lt;matplotlib.axis.XTick object at 0x00000245F7FE16D0&gt;, &lt;matplotlib.axis.XTick object at 0x00000245F7FE1E50&gt;, &lt;matplotlib.axis.XTick object at 0x00000245F7FE25D0&gt;, &lt;matplotlib.axis.XTick object at 0x00000245F7FE2D50&gt;, &lt;matplotlib.axis.XTick object at 0x00000245F7FE34D0&gt;], [Text(2, 0, '2'), Text(3, 0, '3'), Text(4, 0, '4'), Text(5, 0, '5'), Text(6, 0, '6'), Text(7, 0, '7')])</code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>plt.grid(<span class="va">True</span>)</span>
 <span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
@@ -2355,8 +2356,70 @@ forceTheme('sk-container-id-2');</script>
 <p>A métrica no eixo <span class="math inline">\(y\)</span> do gráfico acima é a Inércia (ou <em>Within-Cluster Sum of Squares</em>), que mede a soma das distâncias quadráticas entre cada ponto e o centroide do seu cluster. À medida que aumentamos o número de clusters (<span class="math inline">\(k\)</span>), a inércia inevitavelmente diminui, pois os grupos ficam menores e mais “apertados”. O objetivo é encontrar o ponto onde o ganho de informação (a queda na inércia) deixa de ser drástico e passa a ser marginal.Interpretação dos ResultadosNo gráfico gerado, observamos uma queda acentuada de <span class="math inline">\(k=2\)</span> para <span class="math inline">\(k=3\)</span> e de <span class="math inline">\(k=3\)</span> para <span class="math inline">\(k=4\)</span>. No entanto, após o 4, a curva suaviza significativamente (o declive se torna menor). Esse “cotovelo” no <span class="math inline">\(k=4\)</span> indica que adicionar um quinto ou sexto grupo não traria uma melhora substancial na coesão dos dados que justificasse a complexidade extra.</p>
 </section>
 </section>
-<section id="discussão" class="level2" data-number="5.4">
-<h2 data-number="5.4" class="anchored" data-anchor-id="discussão"><span class="header-section-number">5.4</span> Discussão</h2>
+<section id="visualização-dos-clusters-através-do-pca" class="level2" data-number="5.4">
+<h2 data-number="5.4" class="anchored" data-anchor-id="visualização-dos-clusters-através-do-pca"><span class="header-section-number">5.4</span> Visualização dos Clusters através do PCA</h2>
+<p>O PCA (Análise de Componentes Principais) é uma técnica de redução de dimensionalidade que nos permite visualizar dados de alta dimensão em um espaço 2D ou 3D, preservando a maior parte da variância dos dados. Ao aplicar o PCA aos nossos dados normalizados, podemos plotar os clientes em um gráfico onde cada ponto representa um cliente e a cor indica a qual cluster ele pertence.</p>
+<p>Por que PCA aqui? O K-Means calculou os clusters em um espaço de 11 dimensões. É impossível para o ser humano visualizar isso. O PCA projeta essas 11 dimensões em 2 novas (PC1 e PC2) que capturam a maior parte da separação entre os dados.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 1. Preparação dos Dados para o PCA</span></span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Usamos os dados normalizados (df_cluster), mas removemos a coluna 'cluster' que acabamos de adicionar, pois o PCA só trabalha com variáveis numéricas.</span></span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> df_cluster.drop(columns<span class="op">=</span>[<span class="st">'cluster'</span>], errors<span class="op">=</span><span class="st">'ignore'</span>)</span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a><span class="co"># 2. Inicialização e Ajuste do PCA</span></span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Queremos reduzir as 11 dimensões originais para apenas 2 componentes principais, permitindo a visualização em um gráfico de dispersão (X, Y).</span></span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a>pca <span class="op">=</span> PCA(n_components<span class="op">=</span><span class="dv">2</span>, random_state<span class="op">=</span><span class="dv">42</span>)</span>
+<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a>pca_components <span class="op">=</span> pca.fit_transform(X)</span>
+<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a><span class="co"># 3. Criação de um DataFrame para Visualização</span></span>
+<span id="cb26-11"><a href="#cb26-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Convertemos a matriz resultante do PCA em um DataFrame do Pandas</span></span>
+<span id="cb26-12"><a href="#cb26-12" aria-hidden="true" tabindex="-1"></a>df_pca <span class="op">=</span> pd.DataFrame(data<span class="op">=</span>pca_components, columns<span class="op">=</span>[<span class="st">'PC1'</span>, <span class="st">'PC2'</span>])</span>
+<span id="cb26-13"><a href="#cb26-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-14"><a href="#cb26-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Recuperamos a identificação do cluster (A, B, C, D) do DataFrame original para usar como legenda de cor no gráfico.</span></span>
+<span id="cb26-15"><a href="#cb26-15" aria-hidden="true" tabindex="-1"></a>df_pca[<span class="st">'cluster'</span>] <span class="op">=</span> df_cluster[<span class="st">'cluster'</span>].values</span>
+<span id="cb26-16"><a href="#cb26-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-17"><a href="#cb26-17" aria-hidden="true" tabindex="-1"></a><span class="co"># 4. Cálculo da Variância Explicada</span></span>
+<span id="cb26-18"><a href="#cb26-18" aria-hidden="true" tabindex="-1"></a>var_explicada <span class="op">=</span> pca.explained_variance_ratio_</span>
+<span id="cb26-19"><a href="#cb26-19" aria-hidden="true" tabindex="-1"></a>total_var <span class="op">=</span> var_explicada.<span class="bu">sum</span>() <span class="op">*</span> <span class="dv">100</span></span>
+<span id="cb26-20"><a href="#cb26-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-21"><a href="#cb26-21" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Variância explicada pelo PC1: </span><span class="sc">{</span>var_explicada[<span class="dv">0</span>]<span class="op">*</span><span class="dv">100</span><span class="sc">:.2f}</span><span class="ss">%"</span>)</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Variância explicada pelo PC1: 78.16%</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb28"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Variância explicada pelo PC2: </span><span class="sc">{</span>var_explicada[<span class="dv">1</span>]<span class="op">*</span><span class="dv">100</span><span class="sc">:.2f}</span><span class="ss">%"</span>)</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Variância explicada pelo PC2: 19.63%</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Variância total explicada pelos dois componentes: </span><span class="sc">{</span>total_var<span class="sc">:.2f}</span><span class="ss">%"</span>)</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Variância total explicada pelos dois componentes: 97.79%</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb32"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 5. Visualização Gráfica com Seaborn</span></span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize<span class="op">=</span>(<span class="dv">12</span>, <span class="dv">8</span>))</span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>sns.scatterplot(</span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>    x<span class="op">=</span><span class="st">'PC1'</span>, y<span class="op">=</span><span class="st">'PC2'</span>,</span>
+<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a>    hue<span class="op">=</span><span class="st">'cluster'</span>,  <span class="co"># Define a cor baseada no cluster</span></span>
+<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a>    palette<span class="op">=</span><span class="st">'Set2'</span>, <span class="co"># Mesma paleta usada no gráfico spider</span></span>
+<span id="cb32-7"><a href="#cb32-7" aria-hidden="true" tabindex="-1"></a>    data<span class="op">=</span>df_pca,</span>
+<span id="cb32-8"><a href="#cb32-8" aria-hidden="true" tabindex="-1"></a>    alpha<span class="op">=</span><span class="fl">0.3</span>,      <span class="co"># Transparência para lidar com a sobreposição de pontos</span></span>
+<span id="cb32-9"><a href="#cb32-9" aria-hidden="true" tabindex="-1"></a>    edgecolor<span class="op">=</span><span class="va">None</span>  <span class="co"># Remove a borda dos pontos para clareza</span></span>
+<span id="cb32-10"><a href="#cb32-10" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb32-11"><a href="#cb32-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-12"><a href="#cb32-12" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="ss">f'Visualização dos Clusters em 2D via PCA</span><span class="ch">\n</span><span class="ss">(Variância Total Explicada: </span><span class="sc">{</span>total_var<span class="sc">:.1f}</span><span class="ss">%)'</span>, size<span class="op">=</span><span class="dv">15</span>)</span>
+<span id="cb32-13"><a href="#cb32-13" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="ss">f'Componente Principal 1 (</span><span class="sc">{</span>var_explicada[<span class="dv">0</span>]<span class="op">*</span><span class="dv">100</span><span class="sc">:.1f}</span><span class="ss">% var)'</span>, size<span class="op">=</span><span class="dv">12</span>)</span>
+<span id="cb32-14"><a href="#cb32-14" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="ss">f'Componente Principal 2 (</span><span class="sc">{</span>var_explicada[<span class="dv">1</span>]<span class="op">*</span><span class="dv">100</span><span class="sc">:.1f}</span><span class="ss">% var)'</span>, size<span class="op">=</span><span class="dv">12</span>)</span>
+<span id="cb32-15"><a href="#cb32-15" aria-hidden="true" tabindex="-1"></a>plt.grid(<span class="va">True</span>, linestyle<span class="op">=</span><span class="st">'--'</span>, alpha<span class="op">=</span><span class="fl">0.5</span>)</span>
+<span id="cb32-16"><a href="#cb32-16" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="05_cluster_pda_files/figure-html/unnamed-chunk-18-33.png" class="img-fluid figure-img" width="1152"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="discussão" class="level2" data-number="5.5">
+<h2 data-number="5.5" class="anchored" data-anchor-id="discussão"><span class="header-section-number">5.5</span> Discussão</h2>
 <p>Ao final desta análise, é fundamental refletir sobre a escolha do número de clusters (<span class="math inline">\(k\)</span>). Embora o Método do Cotovelo aponte para <span class="math inline">\(k=4\)</span> como o ponto de eficiência estatística, no mundo real, essa decisão é frequentemente exógena ao modelo.</p>
 <section id="o-k-estatístico-vs.-o-k-de-negócio" class="level4">
 <h4 class="anchored" data-anchor-id="o-k-estatístico-vs.-o-k-de-negócio">O “K” Estatístico vs.&nbsp;O “K” de Negócio</h4>
@@ -2382,8 +2445,8 @@ forceTheme('sk-container-id-2');</script>
 </div>
 </section>
 </section>
-<section id="conclusão" class="level2" data-number="5.5">
-<h2 data-number="5.5" class="anchored" data-anchor-id="conclusão"><span class="header-section-number">5.5</span> Conclusão</h2>
+<section id="conclusão" class="level2" data-number="5.6">
+<h2 data-number="5.6" class="anchored" data-anchor-id="conclusão"><span class="header-section-number">5.6</span> Conclusão</h2>
 <p>Neste estudo, exploramos o comportamento de uma base de clientes do varejo utilizando o algoritmo <span class="math inline">\(K\)</span>-means para transformar dados transacionais e demográficos em segmentos acionáveis. O agrupamento bem-sucedido não é aquele que apenas minimiza a inércia, mas aquele que é operacionalizável. De nada adianta uma perfeição estatística se o time de marketing não possui recursos para gerenciar a complexidade de múltiplos segmentos. Portanto, ao implementar esses modelos na prática, deve-se sempre equilibrar a precisão do algoritmo com a capacibilidade de execução da empresa, garantindo que os insights gerados se convertam em decisões que tragam retorno real sobre o investimento.</p>
 
 
@@ -2797,8 +2860,8 @@ forceTheme('sk-container-id-2');</script>
       </a>          
   </div>
   <div class="nav-page nav-page-next">
-      <a href="./06_groceries.html" class="pagination-link" aria-label="06_regras_associacao">
-        <span class="nav-page-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">06_regras_associacao</span></span> <i class="bi bi-arrow-right-short"></i>
+      <a href="./06_groceries.html" class="pagination-link" aria-label="Estratégias de Cross-Selling em Mercado">
+        <span class="nav-page-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Estratégias de Cross-Selling em Mercado</span></span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>
