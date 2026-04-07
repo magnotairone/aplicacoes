@@ -76,7 +76,7 @@ Um lift maior que 1 indica que a regra tem uma associação positiva (os itens o
 Não queremos todas as regras possíveis (seriam milhões). Precisamos filtrar aquelas que têm relevância estatística e potencial de negócio.
 
 ```{r}
-# Gerando regras: Queremos algo que aconteça em pelo menos 0.1% das vendas
+# Gerando regras: Queresmos algo que aconteça em pelo menos 0.1% das vendas
 # e que tenha pelo menos 80% de chance de acontecer (Confiança)
 rules <- apriori(Groceries, parameter = list(sup = 0.001, conf = 0.8))
 ```
