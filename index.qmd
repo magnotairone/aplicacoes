@@ -1,3 +1,5 @@
 # Introdução {.unnumbered}
 
 Esta página apresenta aplicações de ciência de dados inspirados em casos reais.
+
+[ûltima atualização: `r format(Sys.Date(), "%d/%m/%Y")``.]
