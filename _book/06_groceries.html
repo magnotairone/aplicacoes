@@ -388,7 +388,7 @@ includes extended item information - examples:
 <p>O <em>lift</em> de uma regra é uma medida de quão mais frequentemente <span class="math inline">\(X\)</span> e <span class="math inline">\(Y\)</span> ocorrem juntos do que seria esperado se fossem independentes. Em termos simples, o lift é a razão entre a confiança da regra e a frequência absoluta de <span class="math inline">\(Y\)</span>. Um lift maior que 1 indica que a regra tem uma associação positiva (os itens ocorrem juntos com mais frequência do que o esperado ao acaso), enquanto um lift menor que 1 indica uma associação negativa (os itens ocorrem juntos com menos frequência do que o esperado ao acaso).</p>
 <p>Não queremos todas as regras possíveis (seriam milhões). Precisamos filtrar aquelas que têm relevância estatística e potencial de negócio.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Gerando regras: Queremos algo que aconteça em pelo menos 0.1% das vendas</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Gerando regras: Queresmos algo que aconteça em pelo menos 0.1% das vendas</span></span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="co"># e que tenha pelo menos 80% de chance de acontecer (Confiança)</span></span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>rules <span class="ot">&lt;-</span> <span class="fu">apriori</span>(Groceries, <span class="at">parameter =</span> <span class="fu">list</span>(<span class="at">sup =</span> <span class="fl">0.001</span>, <span class="at">conf =</span> <span class="fl">0.8</span>))</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
@@ -407,10 +407,10 @@ Algorithmic control:
 Absolute minimum support count: 9 
 
 set item appearances ...[0 item(s)] done [0.00s].
-set transactions ...[169 item(s), 9835 transaction(s)] done [0.00s].
+set transactions ...[169 item(s), 9835 transaction(s)] done [0.01s].
 sorting and recoding items ... [157 item(s)] done [0.00s].
 creating transaction tree ... done [0.00s].
-checking subsets of size 1 2 3 4 5 6 done [0.01s].
+checking subsets of size 1 2 3 4 5 6 done [0.03s].
 writing ... [410 rule(s)] done [0.00s].
 creating S4 object  ... done [0.00s].</code></pre>
 </div>
