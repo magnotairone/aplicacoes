@@ -255,10 +255,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <ul class="collapse">
   <li><a href="#preparação-dos-dados" id="toc-preparação-dos-dados" class="nav-link" data-scroll-target="#preparação-dos-dados"><span class="header-section-number">2.4.1</span> Preparação dos Dados</a></li>
   <li><a href="#treinamento-e-comparação-de-modelos" id="toc-treinamento-e-comparação-de-modelos" class="nav-link" data-scroll-target="#treinamento-e-comparação-de-modelos"><span class="header-section-number">2.4.2</span> Treinamento e Comparação de Modelos</a></li>
+  <li><a href="#exemplo-de-probabilidades-preditas-na-validação" id="toc-exemplo-de-probabilidades-preditas-na-validação" class="nav-link" data-scroll-target="#exemplo-de-probabilidades-preditas-na-validação"><span class="header-section-number">2.4.3</span> Exemplo de Probabilidades Preditas na Validação</a></li>
   </ul></li>
   <li><a href="#análise-de-performance-por-percentil" id="toc-análise-de-performance-por-percentil" class="nav-link" data-scroll-target="#análise-de-performance-por-percentil"><span class="header-section-number">2.5</span> Análise de Performance por Percentil</a></li>
   <li><a href="#impacto-financeiro-e-seleção-do-modelo" id="toc-impacto-financeiro-e-seleção-do-modelo" class="nav-link" data-scroll-target="#impacto-financeiro-e-seleção-do-modelo"><span class="header-section-number">2.6</span> Impacto Financeiro e Seleção do Modelo</a></li>
-  <li><a href="#próximos-passos" id="toc-próximos-passos" class="nav-link" data-scroll-target="#próximos-passos"><span class="header-section-number">2.7</span> Próximos Passos</a></li>
+  <li><a href="#otimização-do-ponto-de-corte-threshold" id="toc-otimização-do-ponto-de-corte-threshold" class="nav-link" data-scroll-target="#otimização-do-ponto-de-corte-threshold"><span class="header-section-number">2.7</span> Otimização do Ponto de Corte (Threshold)</a>
+  <ul class="collapse">
+  <li><a href="#o-que-essa-mudança-nos-mostra" id="toc-o-que-essa-mudança-nos-mostra" class="nav-link" data-scroll-target="#o-que-essa-mudança-nos-mostra"><span class="header-section-number">2.7.1</span> O que essa mudança nos mostra?</a></li>
+  </ul></li>
+  <li><a href="#próximos-passos" id="toc-próximos-passos" class="nav-link" data-scroll-target="#próximos-passos"><span class="header-section-number">2.8</span> Próximos Passos</a></li>
   </ul>
 </nav>
     </div>
@@ -724,21 +729,208 @@ Matriz de Confusão na validação:
 <!-- print(resultados[['Target_Real', 'Probabilidade', 'Pred_Binaria']].head(10)) -->
 <!-- ``` -->
 </section>
+<section id="exemplo-de-probabilidades-preditas-na-validação" class="level3" data-number="2.4.3">
+<h3 data-number="2.4.3" class="anchored" data-anchor-id="exemplo-de-probabilidades-preditas-na-validação"><span class="header-section-number">2.4.3</span> Exemplo de Probabilidades Preditas na Validação</h3>
+<p>Para entender como cada modelo avalia o risco de falha antes da aplicação de um ponto de corte (threshold), podemos observar as probabilidades estimadas para uma amostra de observações.</p>
+<p>Abaixo, selecionamos 20 observações aleatórias da base de validação para comparar o valor real da variável <code>Target</code> com a probabilidade de falha estimada por cada algoritmo:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb32"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Selecionando 10 observações de Target == 0 e 10 de Target == 1</span></span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>idx_class_0 <span class="op">=</span> y_val[y_val <span class="op">==</span> <span class="dv">0</span>].sample(n<span class="op">=</span><span class="dv">10</span>, random_state<span class="op">=</span><span class="dv">42</span>).index</span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>idx_class_1 <span class="op">=</span> y_val[y_val <span class="op">==</span> <span class="dv">1</span>].sample(n<span class="op">=</span><span class="dv">10</span>, random_state<span class="op">=</span><span class="dv">42</span>).index</span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Unindo os índices e embaralhando para não ficarem ordenados por classe</span></span>
+<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a>sample_indices <span class="op">=</span> idx_class_0.union(idx_class_1)</span>
+<span id="cb32-7"><a href="#cb32-7" aria-hidden="true" tabindex="-1"></a>np.random.seed(<span class="dv">42</span>)</span>
+<span id="cb32-8"><a href="#cb32-8" aria-hidden="true" tabindex="-1"></a>sample_indices <span class="op">=</span> np.random.choice(sample_indices, size<span class="op">=</span><span class="dv">20</span>, replace<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb32-9"><a href="#cb32-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-10"><a href="#cb32-10" aria-hidden="true" tabindex="-1"></a>df_amostra_probs <span class="op">=</span> pd.DataFrame({</span>
+<span id="cb32-11"><a href="#cb32-11" aria-hidden="true" tabindex="-1"></a>    <span class="st">'Target_Real'</span>: y_val.loc[sample_indices]</span>
+<span id="cb32-12"><a href="#cb32-12" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb32-13"><a href="#cb32-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-14"><a href="#cb32-14" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> nome, modelo <span class="kw">in</span> modelos.items():</span>
+<span id="cb32-15"><a href="#cb32-15" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Estimando a probabilidade de pertencer à classe 1 (falha)</span></span>
+<span id="cb32-16"><a href="#cb32-16" aria-hidden="true" tabindex="-1"></a>    probs <span class="op">=</span> modelo.predict_proba(X_val.loc[sample_indices])[:, <span class="dv">1</span>]</span>
+<span id="cb32-17"><a href="#cb32-17" aria-hidden="true" tabindex="-1"></a>    df_amostra_probs[<span class="ss">f'Prob_</span><span class="sc">{</span>nome<span class="sc">}</span><span class="ss">'</span>] <span class="op">=</span> np.<span class="bu">round</span>(probs, <span class="dv">4</span>)</span>
+<span id="cb32-18"><a href="#cb32-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-19"><a href="#cb32-19" aria-hidden="true" tabindex="-1"></a>df_amostra_probs <span class="op">=</span> df_amostra_probs.reset_index(drop<span class="op">=</span><span class="va">True</span>)</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="cell">
+<div class="cell-output-display">
+<table class="table table-striped table-hover table-condensed caption-top table-sm small">
+<caption>Amostra de 20 observações e suas probabilidades preditas</caption>
+<thead>
+<tr class="header">
+<th style="text-align: right;" data-quarto-table-cell-role="th">Target_Real</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Prob_Regressão Logística</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Prob_Random Forest</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Prob_KNN</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Prob_Redes Neurais</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0.0659</td>
+<td style="text-align: right;">0.13</td>
+<td style="text-align: right;">0.0</td>
+<td style="text-align: right;">1e-04</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0.0002</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">0.0</td>
+<td style="text-align: right;">0e+00</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0.0045</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">0.0</td>
+<td style="text-align: right;">0e+00</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0.0043</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">0.0</td>
+<td style="text-align: right;">0e+00</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0.6600</td>
+<td style="text-align: right;">0.67</td>
+<td style="text-align: right;">0.6</td>
+<td style="text-align: right;">3e-04</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0.1469</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">0.0</td>
+<td style="text-align: right;">0e+00</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0.2085</td>
+<td style="text-align: right;">0.58</td>
+<td style="text-align: right;">0.0</td>
+<td style="text-align: right;">1e-04</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0.0600</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">0.0</td>
+<td style="text-align: right;">0e+00</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0.0155</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">0.0</td>
+<td style="text-align: right;">0e+00</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0.0045</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">0.0</td>
+<td style="text-align: right;">0e+00</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0.0452</td>
+<td style="text-align: right;">0.62</td>
+<td style="text-align: right;">0.2</td>
+<td style="text-align: right;">0e+00</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0.1417</td>
+<td style="text-align: right;">0.66</td>
+<td style="text-align: right;">0.4</td>
+<td style="text-align: right;">3e-04</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0.0031</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">0.0</td>
+<td style="text-align: right;">0e+00</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0.0141</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">0.0</td>
+<td style="text-align: right;">0e+00</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0.5656</td>
+<td style="text-align: right;">0.35</td>
+<td style="text-align: right;">0.2</td>
+<td style="text-align: right;">2e-04</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0.0023</td>
+<td style="text-align: right;">0.75</td>
+<td style="text-align: right;">0.4</td>
+<td style="text-align: right;">0e+00</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0.0074</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">0.0</td>
+<td style="text-align: right;">0e+00</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0.8135</td>
+<td style="text-align: right;">0.83</td>
+<td style="text-align: right;">0.4</td>
+<td style="text-align: right;">2e-04</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0.0160</td>
+<td style="text-align: right;">0.00</td>
+<td style="text-align: right;">0.0</td>
+<td style="text-align: right;">0e+00</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0.3068</td>
+<td style="text-align: right;">0.68</td>
+<td style="text-align: right;">0.0</td>
+<td style="text-align: right;">2e-04</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<blockquote class="blockquote">
+<p>Note como diferentes modelos atribuem probabilidades distintas para a mesma observação. Definir um ponto de corte fixo (como <code>0.50</code>) determina diretamente se cada uma dessas probabilidades se tornará uma previsão de “Falha” (1) ou “Não Falha” (0).</p>
+</blockquote>
+</section>
 </section>
 <section id="análise-de-performance-por-percentil" class="level2" data-number="2.5">
 <h2 data-number="2.5" class="anchored" data-anchor-id="análise-de-performance-por-percentil"><span class="header-section-number">2.5</span> Análise de Performance por Percentil</h2>
 <p>Criando um dataframe para consolidar as probabilidades.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb32"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>df_probabilidades <span class="op">=</span> pd.DataFrame({<span class="st">'Target_Real'</span>: y_val})</span>
-<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> nome, modelo <span class="kw">in</span> modelos.items():</span>
-<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Treinando (garantindo que todos estão fitados)</span></span>
-<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a>  modelo.fit(X_train, y_train)</span>
-<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb32-7"><a href="#cb32-7" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Extraindo a probabilidade da classe 1 (falha)</span></span>
-<span id="cb32-8"><a href="#cb32-8" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Nota: Alguns modelos podem não ter predict_proba, mas os selecionados possuem.</span></span>
-<span id="cb32-9"><a href="#cb32-9" aria-hidden="true" tabindex="-1"></a>  df_probabilidades[<span class="ss">f'Prob_</span><span class="sc">{</span>nome<span class="sc">}</span><span class="ss">'</span>] <span class="op">=</span> modelo.predict_proba(X_val)[:, <span class="dv">1</span>]</span>
-<span id="cb32-10"><a href="#cb32-10" aria-hidden="true" tabindex="-1"></a>  <span class="bu">print</span>(<span class="st">"Primeras linhas do consolidado de probabilidades:"</span>)</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb33"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>df_probabilidades <span class="op">=</span> pd.DataFrame({<span class="st">'Target_Real'</span>: y_val})</span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> nome, modelo <span class="kw">in</span> modelos.items():</span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Treinando (garantindo que todos estão fitados)</span></span>
+<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a>  modelo.fit(X_train, y_train)</span>
+<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-7"><a href="#cb33-7" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Extraindo a probabilidade da classe 1 (falha)</span></span>
+<span id="cb33-8"><a href="#cb33-8" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Nota: Alguns modelos podem não ter predict_proba, mas os selecionados possuem.</span></span>
+<span id="cb33-9"><a href="#cb33-9" aria-hidden="true" tabindex="-1"></a>  df_probabilidades[<span class="ss">f'Prob_</span><span class="sc">{</span>nome<span class="sc">}</span><span class="ss">'</span>] <span class="op">=</span> modelo.predict_proba(X_val)[:, <span class="dv">1</span>]</span>
+<span id="cb33-10"><a href="#cb33-10" aria-hidden="true" tabindex="-1"></a>  <span class="bu">print</span>(<span class="st">"Primeras linhas do consolidado de probabilidades:"</span>)</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <style>#sk-container-id-1 {
   /* Definition of color scheme common for light and dark mode */
@@ -1678,7 +1870,7 @@ forceTheme('sk-container-id-1');</script>
 </div>
 </div>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb33"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(df_probabilidades.head())</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb34"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(df_probabilidades.head(n<span class="op">=</span><span class="dv">10</span>))</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="cell">
 <div class="cell-output-display">
@@ -1748,40 +1940,58 @@ forceTheme('sk-container-id-1');</script>
 </div>
 <p>Agora, vamos calcular a taxa de falha real para cada decil de probabilidade de cada modelo. Um modelo “bom de negócio” deve concentrar quase todas as falhas nos primeiros decis (maior probabilidade).</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb34"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> calcular_performance_decil(df, col_prob, col_target, nome_modelo):</span>
-<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Criando os decis</span></span>
-<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>  df_temp <span class="op">=</span> df[[col_target, col_prob]].copy()</span>
-<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Usamos rank para lidar com probabilidades repetidas (comum no KNN e RF)</span></span>
-<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a>  df_temp[<span class="st">'Decil'</span>] <span class="op">=</span> pd.qcut(df_temp[col_prob].rank(method<span class="op">=</span><span class="st">'first'</span>), <span class="dv">10</span>, labels<span class="op">=</span><span class="bu">range</span>(<span class="dv">10</span>, <span class="dv">0</span>, <span class="op">-</span><span class="dv">1</span>))</span>
-<span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Agrupando por decil</span></span>
-<span id="cb34-7"><a href="#cb34-7" aria-hidden="true" tabindex="-1"></a>  performance <span class="op">=</span> df_temp.groupby(<span class="st">'Decil'</span>, observed<span class="op">=</span><span class="va">True</span>).agg(</span>
-<span id="cb34-8"><a href="#cb34-8" aria-hidden="true" tabindex="-1"></a>      total_maquinas<span class="op">=</span>(col_target, <span class="st">'count'</span>),</span>
-<span id="cb34-9"><a href="#cb34-9" aria-hidden="true" tabindex="-1"></a>      falhas_reais<span class="op">=</span>(col_target, <span class="st">'sum'</span>)</span>
-<span id="cb34-10"><a href="#cb34-10" aria-hidden="true" tabindex="-1"></a>  ).reset_index()</span>
-<span id="cb34-11"><a href="#cb34-11" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb34-12"><a href="#cb34-12" aria-hidden="true" tabindex="-1"></a>  performance[<span class="st">'Taxa_Falha'</span>] <span class="op">=</span> performance[<span class="st">'falhas_reais'</span>] <span class="op">/</span> performance[<span class="st">'total_maquinas'</span>]</span>
-<span id="cb34-13"><a href="#cb34-13" aria-hidden="true" tabindex="-1"></a>  performance[<span class="st">'Modelo'</span>] <span class="op">=</span> nome_modelo</span>
-<span id="cb34-14"><a href="#cb34-14" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> performance</span>
-<span id="cb34-15"><a href="#cb34-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb34-16"><a href="#cb34-16" aria-hidden="true" tabindex="-1"></a>analise_decis_completa <span class="op">=</span> pd.concat([</span>
-<span id="cb34-17"><a href="#cb34-17" aria-hidden="true" tabindex="-1"></a>calcular_performance_decil(df_probabilidades, <span class="ss">f'Prob_</span><span class="sc">{</span>nome<span class="sc">}</span><span class="ss">'</span>, <span class="st">'Target_Real'</span>, nome)</span>
-<span id="cb34-18"><a href="#cb34-18" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> nome <span class="kw">in</span> modelos.keys()</span>
-<span id="cb34-19"><a href="#cb34-19" aria-hidden="true" tabindex="-1"></a>])</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb35"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> calcular_performance_decil(df, col_prob, col_target, nome_modelo):</span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Criando os decis</span></span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>  df_temp <span class="op">=</span> df[[col_target, col_prob]].copy()</span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Usamos rank para lidar com probabilidades repetidas (comum no KNN e RF)</span></span>
+<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a>  df_temp[<span class="st">'Decil'</span>] <span class="op">=</span> pd.qcut(df_temp[col_prob].rank(method<span class="op">=</span><span class="st">'first'</span>), <span class="dv">10</span>, labels<span class="op">=</span><span class="bu">range</span>(<span class="dv">10</span>, <span class="dv">0</span>, <span class="op">-</span><span class="dv">1</span>))</span>
+<span id="cb35-6"><a href="#cb35-6" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Agrupando por decil</span></span>
+<span id="cb35-7"><a href="#cb35-7" aria-hidden="true" tabindex="-1"></a>  performance <span class="op">=</span> df_temp.groupby(<span class="st">'Decil'</span>, observed<span class="op">=</span><span class="va">True</span>).agg(</span>
+<span id="cb35-8"><a href="#cb35-8" aria-hidden="true" tabindex="-1"></a>      total_maquinas<span class="op">=</span>(col_target, <span class="st">'count'</span>),</span>
+<span id="cb35-9"><a href="#cb35-9" aria-hidden="true" tabindex="-1"></a>      falhas_reais<span class="op">=</span>(col_target, <span class="st">'sum'</span>)</span>
+<span id="cb35-10"><a href="#cb35-10" aria-hidden="true" tabindex="-1"></a>  ).reset_index()</span>
+<span id="cb35-11"><a href="#cb35-11" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb35-12"><a href="#cb35-12" aria-hidden="true" tabindex="-1"></a>  performance[<span class="st">'Taxa_Falha'</span>] <span class="op">=</span> performance[<span class="st">'falhas_reais'</span>] <span class="op">/</span> performance[<span class="st">'total_maquinas'</span>]</span>
+<span id="cb35-13"><a href="#cb35-13" aria-hidden="true" tabindex="-1"></a>  performance[<span class="st">'Modelo'</span>] <span class="op">=</span> nome_modelo</span>
+<span id="cb35-14"><a href="#cb35-14" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> performance</span>
+<span id="cb35-15"><a href="#cb35-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-16"><a href="#cb35-16" aria-hidden="true" tabindex="-1"></a>analise_decis_completa <span class="op">=</span> pd.concat([</span>
+<span id="cb35-17"><a href="#cb35-17" aria-hidden="true" tabindex="-1"></a>calcular_performance_decil(df_probabilidades, <span class="ss">f'Prob_</span><span class="sc">{</span>nome<span class="sc">}</span><span class="ss">'</span>, <span class="st">'Target_Real'</span>, nome)</span>
+<span id="cb35-18"><a href="#cb35-18" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> nome <span class="kw">in</span> modelos.keys()</span>
+<span id="cb35-19"><a href="#cb35-19" aria-hidden="true" tabindex="-1"></a>])</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Visualização Comparativa</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb35"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize<span class="op">=</span>(<span class="dv">12</span>, <span class="dv">6</span>))</span>
-<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>sns.lineplot(data<span class="op">=</span>analise_decis_completa, x<span class="op">=</span><span class="st">'Decil'</span>, y<span class="op">=</span><span class="st">'Taxa_Falha'</span>, hue<span class="op">=</span><span class="st">'Modelo'</span>, marker<span class="op">=</span><span class="st">'o'</span>)</span>
-<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">'Capacidade de Ordenamento: Taxa de Falha Real por Decil'</span>)</span>
-<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">'Taxa de Falha Real (Hit Rate)'</span>)</span>
-<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">'Decil de Risco (1 = Mais Provável)'</span>)</span>
-<span id="cb35-6"><a href="#cb35-6" aria-hidden="true" tabindex="-1"></a>plt.gca().invert_xaxis() <span class="co"># Inverter para o Decil 10 (maior risco) ficar na esquerda</span></span>
-<span id="cb35-7"><a href="#cb35-7" aria-hidden="true" tabindex="-1"></a>plt.grid(<span class="va">True</span>, linestyle<span class="op">=</span><span class="st">'--'</span>, alpha<span class="op">=</span><span class="fl">0.7</span>)</span>
-<span id="cb35-8"><a href="#cb35-8" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb36"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize<span class="op">=</span>(<span class="dv">12</span>, <span class="dv">6</span>))</span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a><span class="co">#Gráfico de barras agrupadas por modelo em cada decil</span></span>
+<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a>sns.barplot(</span>
+<span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a>data<span class="op">=</span>analise_decis_completa,</span>
+<span id="cb36-6"><a href="#cb36-6" aria-hidden="true" tabindex="-1"></a>x<span class="op">=</span><span class="st">'Decil'</span>,</span>
+<span id="cb36-7"><a href="#cb36-7" aria-hidden="true" tabindex="-1"></a>y<span class="op">=</span><span class="st">'Taxa_Falha'</span>,</span>
+<span id="cb36-8"><a href="#cb36-8" aria-hidden="true" tabindex="-1"></a>hue<span class="op">=</span><span class="st">'Modelo'</span>,</span>
+<span id="cb36-9"><a href="#cb36-9" aria-hidden="true" tabindex="-1"></a>palette<span class="op">=</span><span class="st">'Set2'</span></span>
+<span id="cb36-10"><a href="#cb36-10" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb36-11"><a href="#cb36-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-12"><a href="#cb36-12" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">'Capacidade de Ordenamento: Taxa de Falha Real por Decil'</span>, fontsize<span class="op">=</span><span class="dv">14</span>, fontweight<span class="op">=</span><span class="st">'bold'</span>)</span>
+<span id="cb36-13"><a href="#cb36-13" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">'Taxa de Falha Real (Hit Rate)'</span>)</span>
+<span id="cb36-14"><a href="#cb36-14" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">'Decil de Risco (1 = Mais Provável)'</span>)</span>
+<span id="cb36-15"><a href="#cb36-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-16"><a href="#cb36-16" aria-hidden="true" tabindex="-1"></a><span class="co"># Inversão para o Decil 1 ficar à esquerda</span></span>
+<span id="cb36-17"><a href="#cb36-17" aria-hidden="true" tabindex="-1"></a>plt.gca().invert_xaxis()</span>
+<span id="cb36-18"><a href="#cb36-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-19"><a href="#cb36-19" aria-hidden="true" tabindex="-1"></a><span class="co"># Grid horizontal para facilitar a leitura dos valores das barras</span></span>
+<span id="cb36-20"><a href="#cb36-20" aria-hidden="true" tabindex="-1"></a>plt.grid(<span class="va">True</span>, axis<span class="op">=</span><span class="st">'y'</span>, linestyle<span class="op">=</span><span class="st">'--'</span>, alpha<span class="op">=</span><span class="fl">0.5</span>)</span>
+<span id="cb36-21"><a href="#cb36-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-22"><a href="#cb36-22" aria-hidden="true" tabindex="-1"></a><span class="co"># Legenda fora do gráfico para liberar espaço visual</span></span>
+<span id="cb36-23"><a href="#cb36-23" aria-hidden="true" tabindex="-1"></a>plt.legend(title<span class="op">=</span><span class="st">'Modelo'</span>, bbox_to_anchor<span class="op">=</span>(<span class="fl">1.02</span>, <span class="dv">1</span>), loc<span class="op">=</span><span class="st">'upper left'</span>, frameon<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb36-24"><a href="#cb36-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-25"><a href="#cb36-25" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb36-26"><a href="#cb36-26" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="02_classificacao_manutencao_preventiva_files/figure-html/unnamed-chunk-21-1.png" class="img-fluid figure-img" width="1152"></p>
+<p><img src="02_classificacao_manutencao_preventiva_files/figure-html/unnamed-chunk-24-3.png" class="img-fluid figure-img" width="1152"></p>
 </figure>
 </div>
 </div>
@@ -1791,33 +2001,33 @@ forceTheme('sk-container-id-1');</script>
 <h2 data-number="2.6" class="anchored" data-anchor-id="impacto-financeiro-e-seleção-do-modelo"><span class="header-section-number">2.6</span> Impacto Financeiro e Seleção do Modelo</h2>
 <p>A escolha do “Melhor Modelo” depende do custo do erro. Vamos calcular o impacto financeiro considerando que uma Quebra (Falso Negativo) custa 20x mais que uma Inspeção (Falso Positivo).</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb36"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> avaliar_custo_modelo(df_probs, col_target, modelos_dict, custo_fp<span class="op">=</span><span class="dv">500</span>, custo_fn<span class="op">=</span><span class="dv">10000</span>):</span>
-<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>  relatorio_custos <span class="op">=</span> []</span>
-<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> nome <span class="kw">in</span> modelos_dict.keys():</span>
-<span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Usando o corte padrão de 0.5 para comparação</span></span>
-<span id="cb36-6"><a href="#cb36-6" aria-hidden="true" tabindex="-1"></a>    preds <span class="op">=</span> (df_probs[<span class="ss">f'Prob_</span><span class="sc">{</span>nome<span class="sc">}</span><span class="ss">'</span>] <span class="op">&gt;=</span> <span class="fl">0.5</span>).astype(<span class="bu">int</span>)</span>
-<span id="cb36-7"><a href="#cb36-7" aria-hidden="true" tabindex="-1"></a>    cm <span class="op">=</span> confusion_matrix(df_probs[col_target], preds)</span>
-<span id="cb36-8"><a href="#cb36-8" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb36-9"><a href="#cb36-9" aria-hidden="true" tabindex="-1"></a>    fp <span class="op">=</span> cm[<span class="dv">0</span>, <span class="dv">1</span>]</span>
-<span id="cb36-10"><a href="#cb36-10" aria-hidden="true" tabindex="-1"></a>    fn <span class="op">=</span> cm[<span class="dv">1</span>, <span class="dv">0</span>]</span>
-<span id="cb36-11"><a href="#cb36-11" aria-hidden="true" tabindex="-1"></a>    custo_total <span class="op">=</span> (fp <span class="op">*</span> custo_fp) <span class="op">+</span> (fn <span class="op">*</span> custo_fn)</span>
-<span id="cb36-12"><a href="#cb36-12" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb36-13"><a href="#cb36-13" aria-hidden="true" tabindex="-1"></a>    relatorio_custos.append({</span>
-<span id="cb36-14"><a href="#cb36-14" aria-hidden="true" tabindex="-1"></a>        <span class="st">'Modelo'</span>: nome,</span>
-<span id="cb36-15"><a href="#cb36-15" aria-hidden="true" tabindex="-1"></a>        <span class="st">'Falsos Positivos'</span>: fp,</span>
-<span id="cb36-16"><a href="#cb36-16" aria-hidden="true" tabindex="-1"></a>        <span class="st">'Falsos Negativos'</span>: fn,</span>
-<span id="cb36-17"><a href="#cb36-17" aria-hidden="true" tabindex="-1"></a>        <span class="st">'Custo Total (R$)'</span>: custo_total</span>
-<span id="cb36-18"><a href="#cb36-18" aria-hidden="true" tabindex="-1"></a>    })</span>
-<span id="cb36-19"><a href="#cb36-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-20"><a href="#cb36-20" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> pd.DataFrame(relatorio_custos).sort_values(<span class="st">'Custo Total (R$)'</span>)</span>
-<span id="cb36-21"><a href="#cb36-21" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-22"><a href="#cb36-22" aria-hidden="true" tabindex="-1"></a>df_custos <span class="op">=</span> avaliar_custo_modelo(df_probabilidades, <span class="st">'Target_Real'</span>, modelos)</span>
-<span id="cb36-23"><a href="#cb36-23" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Relatório de Impacto Financeiro (Corte 0.50):"</span>)</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb37"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> avaliar_custo_modelo(df_probs, col_target, modelos_dict, custo_fp<span class="op">=</span><span class="dv">500</span>, custo_fn<span class="op">=</span><span class="dv">10000</span>):</span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>  relatorio_custos <span class="op">=</span> []</span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> nome <span class="kw">in</span> modelos_dict.keys():</span>
+<span id="cb37-5"><a href="#cb37-5" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Usando o corte padrão de 0.5 para comparação</span></span>
+<span id="cb37-6"><a href="#cb37-6" aria-hidden="true" tabindex="-1"></a>    preds <span class="op">=</span> (df_probs[<span class="ss">f'Prob_</span><span class="sc">{</span>nome<span class="sc">}</span><span class="ss">'</span>] <span class="op">&gt;=</span> <span class="fl">0.5</span>).astype(<span class="bu">int</span>)</span>
+<span id="cb37-7"><a href="#cb37-7" aria-hidden="true" tabindex="-1"></a>    cm <span class="op">=</span> confusion_matrix(df_probs[col_target], preds)</span>
+<span id="cb37-8"><a href="#cb37-8" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb37-9"><a href="#cb37-9" aria-hidden="true" tabindex="-1"></a>    fp <span class="op">=</span> cm[<span class="dv">0</span>, <span class="dv">1</span>]</span>
+<span id="cb37-10"><a href="#cb37-10" aria-hidden="true" tabindex="-1"></a>    fn <span class="op">=</span> cm[<span class="dv">1</span>, <span class="dv">0</span>]</span>
+<span id="cb37-11"><a href="#cb37-11" aria-hidden="true" tabindex="-1"></a>    custo_total <span class="op">=</span> (fp <span class="op">*</span> custo_fp) <span class="op">+</span> (fn <span class="op">*</span> custo_fn)</span>
+<span id="cb37-12"><a href="#cb37-12" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb37-13"><a href="#cb37-13" aria-hidden="true" tabindex="-1"></a>    relatorio_custos.append({</span>
+<span id="cb37-14"><a href="#cb37-14" aria-hidden="true" tabindex="-1"></a>        <span class="st">'Modelo'</span>: nome,</span>
+<span id="cb37-15"><a href="#cb37-15" aria-hidden="true" tabindex="-1"></a>        <span class="st">'Falsos Positivos'</span>: fp,</span>
+<span id="cb37-16"><a href="#cb37-16" aria-hidden="true" tabindex="-1"></a>        <span class="st">'Falsos Negativos'</span>: fn,</span>
+<span id="cb37-17"><a href="#cb37-17" aria-hidden="true" tabindex="-1"></a>        <span class="st">'Custo Total (R$)'</span>: custo_total</span>
+<span id="cb37-18"><a href="#cb37-18" aria-hidden="true" tabindex="-1"></a>    })</span>
+<span id="cb37-19"><a href="#cb37-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-20"><a href="#cb37-20" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> pd.DataFrame(relatorio_custos).sort_values(<span class="st">'Custo Total (R$)'</span>)</span>
+<span id="cb37-21"><a href="#cb37-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-22"><a href="#cb37-22" aria-hidden="true" tabindex="-1"></a>df_custos <span class="op">=</span> avaliar_custo_modelo(df_probabilidades, <span class="st">'Target_Real'</span>, modelos)</span>
+<span id="cb37-23"><a href="#cb37-23" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Relatório de Impacto Financeiro (Corte 0.50):"</span>)</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Relatório de Impacto Financeiro (Corte 0.50):</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb38"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(df_custos)</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb39"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(df_custos)</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>                Modelo  Falsos Positivos  Falsos Negativos  Custo Total (R$)
 1        Random Forest                 4                16            162000
@@ -1895,8 +2105,107 @@ forceTheme('sk-container-id-1');</script>
 </ul>
 <p>Em manutenção preditiva, preferimos modelos “barulhentos” (mais FPs) a modelos “míopes” (mais FNs). A precisão absoluta pode ser um péssimo negócio se o custo da omissão for elevado.</p>
 </section>
-<section id="próximos-passos" class="level2" data-number="2.7">
-<h2 data-number="2.7" class="anchored" data-anchor-id="próximos-passos"><span class="header-section-number">2.7</span> Próximos Passos</h2>
+<section id="otimização-do-ponto-de-corte-threshold" class="level2" data-number="2.7">
+<h2 data-number="2.7" class="anchored" data-anchor-id="otimização-do-ponto-de-corte-threshold"><span class="header-section-number">2.7</span> Otimização do Ponto de Corte (Threshold)</h2>
+<p>Até agora, utilizamos o corte padrão de <code>0.50</code> para classificar uma máquina como “em risco de falha”. No entanto, como o custo da quebra (R$ 10.000) é muito superior ao custo da inspeção (R$ 500), podemos ajustar o ponto de corte para priorizar a detecção de falhas.</p>
+<p>Vamos avaliar a <strong>Random Forest</strong> sob três thresholds diferentes:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb41"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Selecionando as probabilidades preditas pelo Random Forest na validação</span></span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>rf_model <span class="op">=</span> modelos[<span class="st">"Random Forest"</span>]</span>
+<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a>y_probs_rf <span class="op">=</span> rf_model.predict_proba(X_val)[:, <span class="dv">1</span>]</span>
+<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-5"><a href="#cb41-5" aria-hidden="true" tabindex="-1"></a>thresholds <span class="op">=</span> [<span class="fl">0.50</span>, <span class="fl">0.20</span>, <span class="fl">0.08</span>]</span>
+<span id="cb41-6"><a href="#cb41-6" aria-hidden="true" tabindex="-1"></a>resultados_threshold <span class="op">=</span> []</span>
+<span id="cb41-7"><a href="#cb41-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-8"><a href="#cb41-8" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> th <span class="kw">in</span> thresholds:</span>
+<span id="cb41-9"><a href="#cb41-9" aria-hidden="true" tabindex="-1"></a>    preds_th <span class="op">=</span> (y_probs_rf <span class="op">&gt;=</span> th).astype(<span class="bu">int</span>)</span>
+<span id="cb41-10"><a href="#cb41-10" aria-hidden="true" tabindex="-1"></a>    cm <span class="op">=</span> confusion_matrix(y_val, preds_th)</span>
+<span id="cb41-11"><a href="#cb41-11" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb41-12"><a href="#cb41-12" aria-hidden="true" tabindex="-1"></a>    vn, fp, fn, vp <span class="op">=</span> cm.ravel()</span>
+<span id="cb41-13"><a href="#cb41-13" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb41-14"><a href="#cb41-14" aria-hidden="true" tabindex="-1"></a>    custo_fp <span class="op">=</span> fp <span class="op">*</span> <span class="dv">500</span></span>
+<span id="cb41-15"><a href="#cb41-15" aria-hidden="true" tabindex="-1"></a>    custo_fn <span class="op">=</span> fn <span class="op">*</span> <span class="dv">10000</span></span>
+<span id="cb41-16"><a href="#cb41-16" aria-hidden="true" tabindex="-1"></a>    custo_total <span class="op">=</span> custo_fp <span class="op">+</span> custo_fn</span>
+<span id="cb41-17"><a href="#cb41-17" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb41-18"><a href="#cb41-18" aria-hidden="true" tabindex="-1"></a>    sensibilidade <span class="op">=</span> vp <span class="op">/</span> (vp <span class="op">+</span> fn) <span class="co"># Recall / Taxa de Detecção de Falhas</span></span>
+<span id="cb41-19"><a href="#cb41-19" aria-hidden="true" tabindex="-1"></a>    precisao <span class="op">=</span> vp <span class="op">/</span> (vp <span class="op">+</span> fp) <span class="cf">if</span> (vp <span class="op">+</span> fp) <span class="op">&gt;</span> <span class="dv">0</span> <span class="cf">else</span> <span class="dv">0</span></span>
+<span id="cb41-20"><a href="#cb41-20" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb41-21"><a href="#cb41-21" aria-hidden="true" tabindex="-1"></a>    resultados_threshold.append({</span>
+<span id="cb41-22"><a href="#cb41-22" aria-hidden="true" tabindex="-1"></a>        <span class="st">'Threshold'</span>: <span class="ss">f"</span><span class="sc">{</span>th<span class="sc">:.2f}</span><span class="ss">"</span>,</span>
+<span id="cb41-23"><a href="#cb41-23" aria-hidden="true" tabindex="-1"></a>        <span class="st">'Falsos Positivos (FP)'</span>: fp,</span>
+<span id="cb41-24"><a href="#cb41-24" aria-hidden="true" tabindex="-1"></a>        <span class="st">'Falsos Negativos (FN)'</span>: fn,</span>
+<span id="cb41-25"><a href="#cb41-25" aria-hidden="true" tabindex="-1"></a>        <span class="st">'Sensibilidade (Recall)'</span>: <span class="ss">f"</span><span class="sc">{</span>sensibilidade<span class="sc">:.2%}</span><span class="ss">"</span>,</span>
+<span id="cb41-26"><a href="#cb41-26" aria-hidden="true" tabindex="-1"></a>        <span class="st">'Precisão'</span>: <span class="ss">f"</span><span class="sc">{</span>precisao<span class="sc">:.2%}</span><span class="ss">"</span>,</span>
+<span id="cb41-27"><a href="#cb41-27" aria-hidden="true" tabindex="-1"></a>        <span class="st">'Custo FP (R$)'</span>: <span class="ss">f"R$ </span><span class="sc">{</span>custo_fp<span class="sc">:,.2f}</span><span class="ss">"</span>,</span>
+<span id="cb41-28"><a href="#cb41-28" aria-hidden="true" tabindex="-1"></a>        <span class="st">'Custo FN (R$)'</span>: <span class="ss">f"R$ </span><span class="sc">{</span>custo_fn<span class="sc">:,.2f}</span><span class="ss">"</span>,</span>
+<span id="cb41-29"><a href="#cb41-29" aria-hidden="true" tabindex="-1"></a>        <span class="st">'Custo Total (R$)'</span>: <span class="ss">f"R$ </span><span class="sc">{</span>custo_total<span class="sc">:,.2f}</span><span class="ss">"</span></span>
+<span id="cb41-30"><a href="#cb41-30" aria-hidden="true" tabindex="-1"></a>    })</span>
+<span id="cb41-31"><a href="#cb41-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-32"><a href="#cb41-32" aria-hidden="true" tabindex="-1"></a>df_thresholds <span class="op">=</span> pd.DataFrame(resultados_threshold)</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="cell">
+<div class="cell-output-display">
+<table class="table table-striped" style="margin-left: auto; margin-right: auto;">
+ <thead>
+  <tr>
+   <th style="text-align:left;"> Threshold </th>
+   <th style="text-align:right;"> Falsos Positivos (FP) </th>
+   <th style="text-align:right;"> Falsos Negativos (FN) </th>
+   <th style="text-align:left;"> Sensibilidade (Recall) </th>
+   <th style="text-align:left;"> Precisão </th>
+   <th style="text-align:left;"> Custo FP (R$) </th>
+   <th style="text-align:left;"> Custo FN (R$) </th>
+   <th style="text-align:left;"> Custo Total (R$) </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:left;"> 0.50 </td>
+   <td style="text-align:right;"> 4 </td>
+   <td style="text-align:right;"> 16 </td>
+   <td style="text-align:left;"> 65.96% </td>
+   <td style="text-align:left;"> 88.57% </td>
+   <td style="text-align:left;"> R$ 2,000.00 
+   
+</td><td style="text-align:left;"> R$ 160,000.00 </td>
+   <td style="text-align:left;"> R$ 162,000.00 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> 0.20 </td>
+   <td style="text-align:right;"> 22 </td>
+   <td style="text-align:right;"> 8 </td>
+   <td style="text-align:left;"> 82.98% </td>
+   <td style="text-align:left;"> 63.93% </td>
+   <td style="text-align:left;"> R$ 11,000.00 </td>
+   <td style="text-align:left;"> R$ 80,000.00 </td>
+   <td style="text-align:left;"> R$ 91,000.00 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> 0.08 </td>
+   <td style="text-align:right;"> 76 </td>
+   <td style="text-align:right;"> 4 </td>
+   <td style="text-align:left;"> 91.49% </td>
+   <td style="text-align:left;"> 36.13% </td>
+   <td style="text-align:left;"> R$ 38,000.00 </td>
+   <td style="text-align:left;"> R$ 40,000.00 </td>
+   <td style="text-align:left;"> R$ 78,000.00 </td>
+  </tr>
+
+
+</tbody></table>
+</div>
+</div>
+<section id="o-que-essa-mudança-nos-mostra" class="level3" data-number="2.7.1">
+<h3 data-number="2.7.1" class="anchored" data-anchor-id="o-que-essa-mudança-nos-mostra"><span class="header-section-number">2.7.1</span> O que essa mudança nos mostra?</h3>
+<ol type="1">
+<li><strong>Redução do Custo Total:</strong> Ao diminuir o threshold de <code>0.50</code> para <code>0.20</code>, aceitamos fazer mais inspeções desnecessárias (aumento nos Falsos Positivos), mas reduzimos drasticamente as quebras não detectadas (Falsos Negativos).</li>
+<li><strong>Trade-off Sensibilidade vs.&nbsp;Precisão:</strong> Conforme reduzimos o threshold, a <strong>Sensibilidade (Recall)</strong> aumenta (detectamos uma proporção maior das falhas reais), enquanto a <strong>Precisão</strong> cai (mais alarmes falsos).</li>
+<li><strong>Decisão Baseada em Custo:</strong> Em cenários onde o custo do erro tipo II (FN) é desproporcionalmente alto, ajustar o ponto de corte é uma estratégia simples e extremamente rentável para a operação.</li>
+</ol>
+</section>
+</section>
+<section id="próximos-passos" class="level2" data-number="2.8">
+<h2 data-number="2.8" class="anchored" data-anchor-id="próximos-passos"><span class="header-section-number">2.8</span> Próximos Passos</h2>
 <p>O modelo selecionado para implementação é a Random Forest. Como evolução desta análise, o próximo passo estratégico é:</p>
 <ul>
 <li>Otimização de Threshold: “Podemos ajustar o ponto de corte (threshold) da Random Forest para reduzir os 16 Falsos Negativos ainda mais, mesmo que o número de Falsos Positivos suba para 20 ou 30?”</li>

@@ -245,6 +245,44 @@ for nome, modelo in modelos.items():
 <!-- print(resultados[['Target_Real', 'Probabilidade', 'Pred_Binaria']].head(10)) -->
 <!-- ``` -->
 
+### Exemplo de Probabilidades Preditas na Validação
+
+Para entender como cada modelo avalia o risco de falha antes da aplicação de um ponto de corte (threshold), podemos observar as probabilidades estimadas para uma amostra de observações. 
+
+Abaixo, selecionamos 20 observações aleatórias da base de validação para comparar o valor real da variável `Target` com a probabilidade de falha estimada por cada algoritmo:
+
+```{python}
+# Selecionando 10 observações de Target == 0 e 10 de Target == 1
+idx_class_0 = y_val[y_val == 0].sample(n=10, random_state=42).index
+idx_class_1 = y_val[y_val == 1].sample(n=10, random_state=42).index
+
+# Unindo os índices e embaralhando para não ficarem ordenados por classe
+sample_indices = idx_class_0.union(idx_class_1)
+np.random.seed(42)
+sample_indices = np.random.choice(sample_indices, size=20, replace=False)
+
+df_amostra_probs = pd.DataFrame({
+    'Target_Real': y_val.loc[sample_indices]
+})
+
+for nome, modelo in modelos.items():
+    # Estimando a probabilidade de pertencer à classe 1 (falha)
+    probs = modelo.predict_proba(X_val.loc[sample_indices])[:, 1]
+    df_amostra_probs[f'Prob_{nome}'] = np.round(probs, 4)
+
+df_amostra_probs = df_amostra_probs.reset_index(drop=True)
+```
+
+``` {r}
+#| echo: false
+knitr::kable(py$df_amostra_probs, "html", caption = "Amostra de 20 observações e suas probabilidades preditas") |> 
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = FALSE)
+```
+
+> Note como diferentes modelos atribuem probabilidades distintas para a mesma observação. Definir um ponto de corte fixo (como `0.50`) determina diretamente se cada uma dessas probabilidades se tornará uma previsão de "Falha" (1) ou "Não Falha" (0).
+
+
+
 ## Análise de Performance por Percentil
 
 Criando um dataframe para consolidar as probabilidades.
@@ -265,7 +303,7 @@ for nome, modelo in modelos.items():
 
 ```{python}
 #| eval: false
-print(df_probabilidades.head())
+print(df_probabilidades.head(n=10))
 ```
 
 ```{r}
@@ -299,7 +337,7 @@ for nome in modelos.keys()
 
 Visualização Comparativa
 
-```{python}
+```{python echo=FALSE, include=FALSE}
 plt.figure(figsize=(12, 6))
 sns.lineplot(data=analise_decis_completa, x='Decil', y='Taxa_Falha', hue='Modelo', marker='o')
 plt.title('Capacidade de Ordenamento: Taxa de Falha Real por Decil')
@@ -309,6 +347,37 @@ plt.gca().invert_xaxis() # Inverter para o Decil 10 (maior risco) ficar na esque
 plt.grid(True, linestyle='--', alpha=0.7)
 plt.show()
 ```
+
+```{python}
+plt.figure(figsize=(12, 6))
+
+#Gráfico de barras agrupadas por modelo em cada decil
+sns.barplot(
+data=analise_decis_completa,
+x='Decil',
+y='Taxa_Falha',
+hue='Modelo',
+palette='Set2'
+)
+
+plt.title('Capacidade de Ordenamento: Taxa de Falha Real por Decil', fontsize=14, fontweight='bold')
+plt.ylabel('Taxa de Falha Real (Hit Rate)')
+plt.xlabel('Decil de Risco (1 = Mais Provável)')
+
+# Inversão para o Decil 1 ficar à esquerda
+plt.gca().invert_xaxis()
+
+# Grid horizontal para facilitar a leitura dos valores das barras
+plt.grid(True, axis='y', linestyle='--', alpha=0.5)
+
+# Legenda fora do gráfico para liberar espaço visual
+plt.legend(title='Modelo', bbox_to_anchor=(1.02, 1), loc='upper left', frameon=True)
+
+plt.tight_layout()
+plt.show()
+```
+
+
 
 ## Impacto Financeiro e Seleção do Modelo
 
@@ -371,6 +440,58 @@ Ser conservador demais e só "apontar o dedo" quando se tem certeza absoluta (ze
   
 
 Em manutenção preditiva, preferimos modelos "barulhentos" (mais FPs) a modelos "míopes" (mais FNs). A precisão absoluta pode ser um péssimo negócio se o custo da omissão for elevado.
+
+## Otimização do Ponto de Corte (Threshold)
+
+Até agora, utilizamos o corte padrão de `0.50` para classificar uma máquina como "em risco de falha". No entanto, como o custo da quebra (R\$ 10.000) é muito superior ao custo da inspeção (R\$ 500), podemos ajustar o ponto de corte para priorizar a detecção de falhas.
+
+Vamos avaliar a **Random Forest** sob três thresholds diferentes:
+
+```{python}
+# Selecionando as probabilidades preditas pelo Random Forest na validação
+rf_model = modelos["Random Forest"]
+y_probs_rf = rf_model.predict_proba(X_val)[:, 1]
+
+thresholds = [0.50, 0.20, 0.08]
+resultados_threshold = []
+
+for th in thresholds:
+    preds_th = (y_probs_rf >= th).astype(int)
+    cm = confusion_matrix(y_val, preds_th)
+    
+    vn, fp, fn, vp = cm.ravel()
+    
+    custo_fp = fp * 500
+    custo_fn = fn * 10000
+    custo_total = custo_fp + custo_fn
+    
+    sensibilidade = vp / (vp + fn) # Recall / Taxa de Detecção de Falhas
+    precisao = vp / (vp + fp) if (vp + fp) > 0 else 0
+    
+    resultados_threshold.append({
+        'Threshold': f"{th:.2f}",
+        'Falsos Positivos (FP)': fp,
+        'Falsos Negativos (FN)': fn,
+        'Sensibilidade (Recall)': f"{sensibilidade:.2%}",
+        'Precisão': f"{precisao:.2%}",
+        'Custo FP (R$)': f"R$ {custo_fp:,.2f}",
+        'Custo FN (R$)': f"R$ {custo_fn:,.2f}",
+        'Custo Total (R$)': f"R$ {custo_total:,.2f}"
+    })
+
+df_thresholds = pd.DataFrame(resultados_threshold)
+```
+
+```{r}
+#| echo: false
+knitr::kable(py$df_thresholds, "html") |> kable_styling("striped")
+```
+
+### O que essa mudança nos mostra?
+
+1. **Redução do Custo Total:** Ao diminuir o threshold de `0.50` para `0.20`, aceitamos fazer mais inspeções desnecessárias (aumento nos Falsos Positivos), mas reduzimos drasticamente as quebras não detectadas (Falsos Negativos).
+2. **Trade-off Sensibilidade vs. Precisão:** Conforme reduzimos o threshold, a **Sensibilidade (Recall)** aumenta (detectamos uma proporção maior das falhas reais), enquanto a **Precisão** cai (mais alarmes falsos).
+3. **Decisão Baseada em Custo:** Em cenários onde o custo do erro tipo II (FN) é desproporcionalmente alto, ajustar o ponto de corte é uma estratégia simples e extremamente rentável para a operação.
 
 ## Próximos Passos
 
