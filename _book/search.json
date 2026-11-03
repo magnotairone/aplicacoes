@@ -4,7 +4,7 @@
     "href": "index.html",
     "title": "Aplicações de Ciência de Dados",
     "section": "",
-    "text": "Introdução\nEsta página apresenta aplicações de ciência de dados inspirados em casos reais.\n[Última atualização: `r format(Sys.Date(), “%d/%m/%Y”)``.]",
+    "text": "Introdução\nEsta página apresenta aplicações práticas de ciência de dados inspirados em casos reais.\n[Última atualização: 03/11/2026.]",
     "crumbs": [
       "Introdução"
     ]

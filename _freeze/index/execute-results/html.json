@@ -1,0 +1,15 @@
+{
+  "hash": "572489c0229814c8f3789efc45f6480d",
+  "result": {
+    "engine": "knitr",
+    "markdown": "# Introdução {.unnumbered}\n\n\n\nEsta página apresenta aplicações práticas de ciência de dados inspirados em casos reais.\n\n[Última atualização: 03/11/2026.]\n",
+    "supporting": [],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": true
+  }
+}
