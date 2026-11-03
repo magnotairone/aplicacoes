@@ -1,5 +1,5 @@
 # Introdução {.unnumbered}
 
-Esta página apresenta aplicações de ciência de dados inspirados em casos reais.
+Esta página apresenta aplicações práticas de ciência de dados inspirados em casos reais.
 
 [Última atualização: `r format(Sys.Date(), "%d/%m/%Y")``.]
