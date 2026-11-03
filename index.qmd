@@ -2,4 +2,4 @@
 
 Esta página apresenta aplicações práticas de ciência de dados inspirados em casos reais.
 
-[Última atualização: `r format(Sys.Date(), "%d/%m/%Y")``.]
+[Última atualização: `r format(Sys.Date(), "%d/%m/%Y")`.]
