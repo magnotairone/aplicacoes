@@ -1,13 +1,17 @@
 ---
 output: html_document
-editor_options: 
+editor_options:
   chunk_output_type: console
 ---
 
 ```{r echo=FALSE}
 library(reticulate)
 library(kableExtra)
-use_python("C:/Users/m_tai/AppData/Local/Programs/Python/Python313/python.exe", required = TRUE)
+
+# Python local do autor (Windows). Em outros ambientes (ex.: GitHub Actions),
+# o reticulate usa o Python definido em RETICULATE_PYTHON ou no ambiente do projeto.
+python_local <- "C:/Users/m_tai/AppData/Local/Programs/Python/Python313/python.exe"
+if (file.exists(python_local)) use_python(python_local, required = TRUE)
 
 knitr::opts_chunk$set(
   warning = FALSE,
@@ -20,72 +24,90 @@ knitr::opts_chunk$set(
 
 No cenário atual do varejo, tratar todos os clientes de forma idêntica é uma estratégia ineficiente e dispendiosa. Cada consumidor possui hábitos de compra, preferências e frequências distintas. A Análise de Agrupamento (Clustering) surge como uma ferramenta estatística para transformar bases de dados brutas em inteligência de negócio, permitindo a identificação de padrões ocultos sem a necessidade de rótulos prévios (Aprendizado Não Supervisionado).
 
-O objetivo desta aula é aplicar o algoritmo K-Means para segmentar uma base de clientes de um mercado, permitindo que o gestor de marketing responda a perguntas como:
+O objetivo deste capítulo é aplicar o algoritmo K-Means para segmentar uma base de clientes de um mercado, permitindo que o gestor de marketing responda a perguntas como:
 
 - Quem são os nossos clientes "Premium" e como retê-los?
 
-- Quais clientes estão em risco de churn (abandono) e precisam de uma oferta de reativação?
+- Quais clientes estão pouco ativos e talvez precisem de uma oferta de reativação?
 
 - Como otimizar o orçamento de marketing focando nos grupos com maior potencial de retorno?
+
+Seguimos as etapas do CRISP-DM apresentadas na introdução do livro. Todo o trabalho é feito em **Python**.
+
+| Etapa do CRISP-DM | Onde aparece no capítulo |
+|---|---|
+| Entendimento do negócio | Esta introdução: as perguntas do gestor de marketing |
+| Entendimento dos dados | Dados disponíveis e análise exploratória |
+| Preparação dos dados | Padronização (Z-score) das variáveis |
+| Modelagem | Algoritmo k-médias e escolha de $k$ |
+| Avaliação | Perfil dos grupos, valor de cada grupo, cotovelo, silhouette e PCA |
+| Implantação | Uso prático da segmentação |
 
 ## Dados disponíveis
 
 Os dados disponíveis para esta análise contemplam 11 variáveis que podem ser agrupadas em três pilares fundamentais para a segmentação de clientes no varejo:
 
+<!-- TODO: informar a origem dos dados (ex.: base simulada para fins didáticos) e o período de referência. -->
+
 1. **Perfil Demográfico e de Crédito**
+
 Fornecem o contexto socioeconômico do cliente, fundamentais para entender o poder de compra e o risco.
 
-    - `idade`: Idade do cliente em anos.
-    
-    - `renda`: Renda mensal declarada ou estimada.
-    
-    - `score_serasa`: Indicador de comportamento financeiro e risco de crédito (essencial para ofertas de prazo ou cartões fidelidade).
+- `idade`: Idade do cliente em anos.
+
+- `renda`: Renda mensal declarada ou estimada.
+
+- `score_serasa`: Indicador de comportamento financeiro e risco de crédito (essencial para ofertas de prazo ou cartões fidelidade).
 
 2. **Comportamento de Compra (RFM)**
+
 Variáveis que capturam a Recência, Frequência e Valor (modelo RFM), o "coração" da análise de CRM.
 
-    - `dias_ult_compra` (Recência): Quantidade de dias desde a última transação. Clientes com valores baixos são ativos; valores altos indicam risco de abandono.
-    
-    - `interesse` (Frequência): Um proxy para a frequência de visita ao mercado.
-    
-    - `vlr_tran_total_6m` (Valor): Gasto acumulado no último semestre, indicando o LTV (Lifetime Value) recente do cliente.
+- `dias_ult_compra` (Recência): Quantidade de dias desde a última transação. Clientes com valores baixos são ativos; valores altos indicam menor atividade recente.
+
+<!-- TODO: descrever a escala de `interesse` (ex.: índice de 0 a 1? como é calculado?) -->
+- `interesse` (Frequência): Um proxy para a frequência de visita ao mercado.
+
+- `vlr_tran_total_6m` (Valor): Gasto acumulado no último semestre (o "M" de *monetary* do RFM). Mede o valor **recente** do cliente, e não o seu valor de vida (LTV), que exigiria uma visão de longo prazo e da margem de lucro.
 
 3. **Mix de Consumo (Categorias)**
+
 Permitem identificar as preferências e o estilo de vida do cliente (ex: o sommelier, o fã de churrasco, o focado em saúde). Todas as variáveis abaixo referem-se ao gasto acumulado nos últimos 6 meses:
 
-    - `gasto_vinho_6m`: Consumo na categoria de vinhos e espumantes.
-    
-    - `gasto_queijo_6m`: Consumo em queijos e laticínios finos.
-    
-    - `gasto_cerveja_6m`: Consumo em cervejas e bebidas de malte.
-    
-    - `gasto_flv_6m`: Gasto em Frutas, Legumes e Verduras (indica perfil focado em perecíveis e saudabilidade).
-    
-    - `gasto_mercearia_6m`: Gasto em itens de despensa (arroz, feijão, limpeza), o núcleo do consumo doméstico.
+<!-- TODO: confirmar se `vlr_tran_total_6m` inclui outras categorias além das cinco abaixo (a soma das categorias é bem menor que o total). -->
+
+- `gasto_vinho_6m`: Consumo na categoria de vinhos e espumantes.
+
+- `gasto_queijo_6m`: Consumo em queijos e laticínios finos.
+
+- `gasto_cerveja_6m`: Consumo em cervejas e bebidas de malte.
+
+- `gasto_flv_6m`: Gasto em Frutas, Legumes e Verduras (indica perfil focado em perecíveis e saudabilidade).
+
+- `gasto_mercearia_6m`: Gasto em itens de despensa (arroz, feijão, limpeza), o núcleo do consumo doméstico.
 
 ::: {.callout-tip title="Insight de Negócio"}
 A combinação dessas variáveis permitirá criar Personas. Por exemplo: um cliente com alto `gasto_vinho_6m` e alto `score_serasa` possui um perfil radicalmente diferente de um cliente com alto `gasto_flv_6m` e baixa `idade`. O K-Means nos ajudará a encontrar esses grupos de forma automatizada.
 :::
 
+::: {.callout-warning title="Dados pessoais e LGPD"}
+Usar dados demográficos e de crédito (como renda e score) para segmentar clientes e direcionar ofertas exige atenção à Lei Geral de Proteção de Dados (Lei nº 13.709/2018): é preciso ter base legal para o tratamento, informar o cliente sobre a finalidade e evitar que a segmentação leve a tratamentos discriminatórios.
+:::
 
-A análise será feita usando python. Começamos fazendo o carregamento das bibliotecas necessárias.
+A análise será feita usando Python. Começamos fazendo o carregamento das bibliotecas necessárias.
 
 ```{python}
 import numpy as np
 import pandas as pd
-
 from sklearn.cluster import KMeans
 from sklearn.decomposition import PCA
-
+from sklearn.metrics import silhouette_score
 import seaborn as sns
 import matplotlib.pyplot as plt
-
 import warnings
-warnings.filterwarnings("ignore")
+
+warnings.filterwarnings("ignore", category=FutureWarning)
 ```
-
-
-
 
 ```{python}
 df = pd.read_csv("data/clientes_mercado.csv")
@@ -100,7 +122,7 @@ Primeiro, verificamos o tamanho da nossa base para garantir que temos volume suf
 
 ```{python}
 n_linhas = df.shape[0]
-print(f"N~umero de linhas na base: {n_linhas}.")
+print(f"Número de linhas na base: {n_linhas}.")
 ```
 
 Em seguida, visualizamos uma amostra aleatória dos dados para validar a estrutura das colunas e o formato das informações (tipos de dados e preenchimento).
@@ -109,10 +131,10 @@ Em seguida, visualizamos uma amostra aleatória dos dados para validar a estrutu
 df.sample(10)
 ```
 
-A função describe() é fundamental para entender a distribuição de cada variável. Note os percentis extremos (1% e 99%): eles revelam a presença de clientes com comportamento muito fora da média, o que pode influenciar a posição dos centroides no K-Means.
+A função describe() é fundamental para entender a distribuição de cada variável. Note os percentis extremos (1% e 99%): eles revelam a presença de clientes com comportamento muito fora da média, o que pode influenciar a posição dos centroides no K-Means. Observe também se as variáveis de gasto por categoria têm muitos zeros: nem todo cliente compra em todas as categorias, o que torna as distribuições assimétricas, algo que o K-Means, baseado em distâncias, não trata bem.
 
 ```{python}
-print("Basic descriptive statistics:")
+print("Estatísticas descritivas básicas:")
 df.describe(percentiles = [.01, .1, .25, .5, .75, .9, .99])
 ```
 
@@ -126,7 +148,7 @@ correlation_matrix = df.corr()
 plt.figure(figsize=(10, 8))
 chart = sns.heatmap(correlation_matrix, annot=True, cmap="coolwarm")
 chart.set_xticklabels(chart.get_xticklabels(), rotation=45)
-plt.title("Correlation Matrix")
+plt.title("Matriz de correlação")
 plt.show()
 ```
 
@@ -135,21 +157,26 @@ Após uma visão geral, vale a pena isolar as variáveis que descrevem a dinâmi
 Este "trio" é a base do modelo RFM (Recency, Frequency, Monetary), uma das técnicas de segmentação mais clássicas do varejo. Esperamos ver aqui se clientes que compram com mais frequência (`interesse`) tendem a gastar mais (`vlr_tran_total_6m`) e se o tempo de inatividade (`dias_ult_compra`) tem uma correlação negativa com o valor total gasto.
 
 ```{python}
-cols_coorelation = ['interesse', 'dias_ult_compra', 'vlr_tran_total_6m']
-correlation_matrix = df[cols_coorelation].corr()
+cols_correlation = ['interesse', 'dias_ult_compra', 'vlr_tran_total_6m']
+
+correlation_matrix = df[cols_correlation].corr()
 
 plt.figure(figsize=(8, 6))
 chart = sns.heatmap(correlation_matrix, annot=True, cmap="coolwarm")
 chart.set_xticklabels(chart.get_xticklabels(), rotation=45)
-plt.title("Correlation Matrix")
+plt.title("Matriz de correlação (RFM)")
 plt.show()
 ```
 
 ::: {.callout-note title="O que observar?"}
-Observe que a correlação entre `dias_ult_compra` e `vlr_tran_total_6m` é de -0.6.
+Observe a correlação entre `dias_ult_compra` e `vlr_tran_total_6m`, de aproximadamente -0,6 (conforme o mapa de calor).
 
-Na prática, isso confirma que quanto maior o tempo que o cliente passa sem visitar o mercado (maior a recência), menor tende a ser o seu valor acumulado nos últimos 6 meses. Esse "esfriamento" do cliente é um sinal claro de churn (abandono). Para o gestor, esse número justifica investimentos em campanhas de win-back (re-engajamento) antes que o cliente ultrapasse uma determinada janela de dias sem compra.
+Ela indica que clientes que estão há mais tempo sem comprar tendem a ter gasto menos nos últimos 6 meses. Cuidado com a interpretação: as duas variáveis medem aspectos do mesmo comportamento (quem compra pouco tem, naturalmente, mais dias desde a última compra), e a correlação, por si só, não mostra que o cliente vai abandonar o mercado.
+
+Para o gestor, a recência é um bom **indicador de alerta** para campanhas de win-back (re-engajamento), mas a janela de dias deve ser calibrada pelo ciclo normal de compra dos clientes, e o abandono (*churn*) só pode ser confirmado observando o que acontece depois.
 :::
+
+Os códigos abaixo geram histogramas e boxplots de cada variável e gráficos de dispersão para cada par de variáveis. Eles não são executados aqui para não alongar o capítulo, mas podem ser úteis em sua própria análise.
 
 ```{python eval=FALSE}
 def divide_chunks(l, n):
@@ -164,14 +191,13 @@ l_cols = list(divide_chunks(cols, num_cols))
 
 for sub_cols in l_cols:
     fig, axes = plt.subplots(num_rows, num_cols, figsize=(15,5))
+
     for idx, col in enumerate(sub_cols):
         data = df
-
         ax_his = axes[0, idx]
         ax_box = axes[1, idx]
 
         ax_his.set_title(f"{col}")
-
         sns.histplot(data=data, x=col, bins = "doane", stat="percent", color="#fec868", common_norm=False, ax=ax_his)
         sns.boxplot(data=data, x=col, color = "#bdb2ff", flierprops={"marker": "x", "markersize": 0.001}, ax=ax_box)
 
@@ -179,23 +205,21 @@ for sub_cols in l_cols:
         ax_box.set_xlabel("")
 
     axes = axes.ravel(order = "F")
-    for j in range(len(sub_cols)*3, num_cols * num_rows):
+    for j in range(len(sub_cols) * num_rows, num_cols * num_rows):
         axes[j].axis("off")
-
 
     plt.tight_layout()
     plt.show()
 ```
 
 ```{python eval=FALSE}
-total_elementos =  (len(cols) * (len(cols) - 1)) // 2
-
+total_elementos = (len(cols) * (len(cols) - 1)) // 2
 num_cols = 5
 num_rows = int(np.ceil(total_elementos/num_cols))
 
 fig, axes = plt.subplots(num_rows, num_cols, figsize=(20, 30))
-idx_row_new, idx_col_new = 0, 0
 
+idx_row_new, idx_col_new = 0, 0
 df_sample = df.sample(200, random_state = 42)
 
 for i, col_i in enumerate(cols):
@@ -216,64 +240,70 @@ plt.show()
 
 Nesta etapa, aplicamos o algoritmo K-Means para agrupar nossos clientes. O objetivo é que a variância dentro de cada grupo seja a menor possível, enquanto a diferença entre os grupos seja maximizada.
 
-Conforme discutido anteriormente, a normalização é um passo crítico. Aqui, utilizamos o Z-score para garantir que variáveis como renda (na casa dos milhares) não dominem variáveis como interesse (unidades) apenas pela magnitude numérica.
+Como visto no capítulo anterior, a padronização é um passo crítico. Aqui, utilizamos o Z-score para garantir que variáveis como renda (na casa dos milhares) não dominem variáveis como interesse (unidades) apenas pela magnitude numérica.
+
+Guardamos a média e o desvio padrão de cada variável, pois serão necessários para classificar novos clientes no futuro. Mantemos **duas versões** dos dados: `df` (valores originais, usados para interpretar os grupos) e `df_norm` (valores padronizados, usados pelo K-Means, pelo cotovelo, pela silhouette e pelo PCA).
 
 ```{python}
-normalize = True
-df_cluster = df.copy()
+media = df.mean()
+desvio = df.std()
 
-if normalize:
-    df_cluster = (df_cluster - df_cluster.mean()) / df_cluster.std()
-    # df_cluster = (df_cluster - df_cluster.min()) / (df_cluster.max() - df_cluster.min()) ## min max
+df_norm = (df - media) / desvio
+# alternativa: min-max
+# df_norm = (df - df.min()) / (df.max() - df.min())
 ```
 
 ::: {.callout-note title="Hiperparâmetro k"}
-Inicialmente, fixamos $k=4$ com base em uma premissa de negócio (ex: perfis Bronze, Prata, Ouro e Diamante). Validaremos essa escolha tecnicamente ao final desta aula usando o Método do Cotovelo.
+Inicialmente, fixamos $k=4$ com base em uma premissa de negócio: um número de segmentos que o time de marketing consegue operar. Verificamos essa escolha tecnicamente ao final desta seção, usando o Método do Cotovelo e o coeficiente de silhouette.
 :::
 
-```{python}
-kmeans = KMeans(n_clusters = 4, random_state=42, init = 'k-means++', n_init = 1)
-kmeans.fit(df_cluster)
+O algoritmo é executado 10 vezes com inicializações diferentes (`n_init = 10`), e o melhor resultado é mantido. Como os rótulos numéricos que o K-Means atribui aos grupos são arbitrários (podem mudar de uma execução para outra), ordenamos os clusters pelo **gasto mediano em 6 meses**, do maior para o menor: o cluster A é sempre o de maior valor.
 
-predict = kmeans.predict(df_cluster)
-df_cluster["cluster"] = predict
-df_cluster["cluster"] = [chr(x+65) for x in df_cluster.cluster]
+```{python}
+kmeans = KMeans(n_clusters = 4, random_state=42, init = 'k-means++', n_init = 10)
+rotulos_brutos = kmeans.fit_predict(df_norm)
+
+gasto_mediano = df.groupby(rotulos_brutos)["vlr_tran_total_6m"].median().sort_values(ascending=False)
+mapa = {k: chr(65 + i) for i, k in enumerate(gasto_mediano.index)}
+
+df_cluster = df.copy()
+df_cluster["cluster"] = [mapa[k] for k in rotulos_brutos]
 ```
 
-Após a convergência do algoritmo, precisamos "dar nome aos bois". Para isso, desfazemos a normalização para observar as medianas reais de cada grupo e entender o volume de clientes em cada um.
+Após a convergência do algoritmo, precisamos "dar nome aos bois". Para isso, usamos os valores originais (não padronizados) para observar as medianas reais de cada grupo e entender o volume de clientes em cada um.
 
 ::: {.callout-tip title="Dica Analítica"}
 Observe o campo Count. Clusters muito pequenos (ex: menos de 5% da base) podem indicar nichos muito específicos ou até mesmo outliers que o algoritmo isolou.
 :::
 
 ```{python}
-df_cluster = df.copy()
-df_cluster["cluster"] = predict
-df_cluster["cluster"] = [chr(x+65) for x in df_cluster.cluster]
-
 df_cluster_info = df_cluster.groupby("cluster").median().reset_index()
+
 df_cluster_count = df_cluster.groupby("cluster").count()["idade"].reset_index()
 df_cluster_count.columns = ["cluster", "Count"]
 
 df_cluster_table = pd.merge(df_cluster_info, df_cluster_count, how="left", on="cluster")
 
 df_pivot = df_cluster_table.set_index('cluster').T
-
-print(df_pivot)
+print(df_pivot.round(1))
 ```
 
-
 Definição da função utilizada para construção dos gráficos spider.
+
 ```{python}
 def make_spider(df_plot, n_cols = None):
+    df_plot = df_plot.copy()  # evita alterar o data frame original
 
     num_col = df_plot.columns.difference(["cluster"])
-    if n_cols == None:
+
+    if n_cols is None:
         n_cols = df_plot['cluster'].unique().shape[0]
+
     df_plot[num_col] /= df_plot[num_col].max()
     df_plot = df_plot.fillna(0)
 
-    palette = plt.cm.get_cmap("Set2", len(df_plot.index))
+    # mesma paleta usada no gráfico do PCA
+    palette = sns.color_palette("Set2", len(df_plot.index))
 
     # number of variable
     categories = list(df_plot)[1:]
@@ -289,8 +319,7 @@ def make_spider(df_plot, n_cols = None):
     axes = axes.ravel()
 
     for idx, ax in enumerate(axes):
-        color = palette(idx)
-
+        color = palette[idx]
         row = df_plot.iloc[idx]
 
         # If you want the first axis to be on top: a
@@ -313,12 +342,13 @@ def make_spider(df_plot, n_cols = None):
         ax.fill(angles, values, color=color, alpha=0.4)
 
         # Add a title
-        ax.set_title(f"Persona {row['cluster']}", size=14, color=color, y=1.1)
+        ax.set_title(f"Cluster {row['cluster']}", size=14, color=color, y=1.1)
+
     plt.tight_layout()
     plt.show()
 ```
 
-Visualização dessas características com o gráfico spider.
+Visualização dessas características com o gráfico spider. Cada eixo é escalado pelo maior valor mediano entre os grupos.
 
 ```{python}
 make_spider(df_cluster_info)
@@ -326,51 +356,47 @@ make_spider(df_cluster_info)
 
 Com base na tabela e no gráfico acima, podemos desenhar o perfil comportamental de cada grupo. Esta etapa é fundamental para que o time de marketing saiba o que oferecer para quem.
 
-- Cluster A: O "Dormitório" ou Inativo
+<!-- TODO: após renderizar, conferir os números abaixo (vindos da versão anterior do capítulo) com a tabela de medianas. Os rótulos agora seguem a ordem do gasto mediano (A = maior). -->
 
-
-    - Perfil: É o maior grupo da base (30.000 clientes).
-
-    - Comportamento: Possui a menor renda, o menor score e o menor interesse. O dado mais crítico é a recência: 61 dias desde a última compra e um gasto semestral irrisório (R$ 158).
-    
-    - Estratégia: Este grupo representa um risco de churn ou clientes que só compram itens em promoção extrema.
-    
-    - Ação: Campanha de reativação com cupons de desconto agressivos para trazê-los de volta à loja.
-
-- Cluster B: O "Fiel do Dia a Dia" (Heavy User)
+- Cluster A: O "Fiel do Dia a Dia" (Heavy User)
 
     - Perfil: Renda moderada, mas o maior gasto total (R$ 2.466).
 
-    - Comportamento: É o cliente dos sonhos. Compra quase todo dia (recência de 4 dias) e abastece a dispensa (mercearia) e a feira (FLV) no seu mercado. Curiosamente, não gasta quase nada em vinhos.
-    
+    - Comportamento: É o cliente dos sonhos. Compra com muita frequência (mediana de 4 dias desde a última compra) e abastece a dispensa (mercearia) e a feira (FLV) no seu mercado. Curiosamente, não gasta quase nada em vinhos.
+
     - Estratégia: Manutenção de fidelidade.
-    
+
     - Ação: Programa de pontos ou "mimos" em categorias de perecíveis para garantir que ele não mude para o concorrente.
 
-- Cluster C: O "Sommelier" de Alta Renda
+- Cluster B: O "Sommelier" de Alta Renda
 
     - Perfil: A maior renda da base (R$ 7.166) e o melhor score Serasa.
 
-    - Comportamento: O gasto em vinhos é o mais alto disparado (R$ 110), enquanto o gasto em mercearia e FLV é baixo. Ele provavelmente compra itens específicos e caros, mas não faz a "compra do mês" no seu mercado.
-    
+    - Comportamento: O gasto em vinhos é o mais alto disparado (R$ 110), enquanto o gasto em mercearia e FLV é baixo. Ele provavelmente compra itens específicos e caros, mas não faz a "compra do mês" no seu mercado (esta é uma hipótese, que os dados não permitem confirmar).
+
     - Estratégia: Venda cruzada (Cross-sell) de itens premium.
-    
+
     - Ação: Convites para degustações, ofertas de queijos importados e produtos gourmet.
 
-- Cluster D: O "Consumidor Equilibrado" (Standard)
+- Cluster C: O "Consumidor Equilibrado" (Standard)
 
-    - Perfil: Renda e score intermediários.
+    - Perfil: Renda e score intermediários (abaixo do Sommelier, acima dos demais).
 
     - Comportamento: Tem um comportamento de compra mais espaçado (29 dias) e foca em Queijos, FLV e Mercearia. É o cliente que faz compras de reposição.
 
     - Estratégia: Aumento de frequência.
 
-    - Ação: Ofertas personalizadas via App para tentar diminuir o intervalo de 29 dias para 15 dias entre as compras.
+    - Ação: Ofertas personalizadas via App para tentar diminuir o intervalo entre as compras (por exemplo, de 29 para 15 dias, uma meta ilustrativa que deve ser calibrada com testes).
 
-::: {.callout-important title="Reflexão importante"}
-O **Cluster A** representa mais de 50% da base total. Vale a pena gastar a mesma energia de marketing com ele do que com o Cluster B, que gasta 15 vezes mais? Essa é a base da segmentação estratégica!
-:::
+- Cluster D: O "Inativo" ou Ocasional
 
+    - Perfil: É o maior grupo da base (30.000 clientes, metade do total).
+
+    - Comportamento: Possui a menor renda, o menor score e o menor interesse. O dado mais crítico é a recência: 61 dias desde a última compra e um gasto semestral irrisório (R$ 158).
+
+    - Estratégia: Estes clientes podem ser ex-clientes frequentes que estão se afastando ou clientes ocasionais que concentram suas compras em outro mercado. Os dados deste capítulo não permitem distinguir os dois casos: o abandono (*churn*) só pode ser confirmado acompanhando o que acontece com esses clientes depois.
+
+    - Ação: Testar uma campanha de reativação em pequena escala, com um grupo de controle para medir o efeito, antes de ampliá-la. Cupons agressivos só fazem sentido se o retorno esperado cobrir o custo, dado o baixo gasto atual do grupo.
 
 ```{python include=FALSE}
 # <!-- Interpretação dos grupos -->
@@ -387,14 +413,13 @@ l_cols = list(divide_chunks(cols, num_cols))
 for cluster in ["A", "B", "C", "D"]:
     for sub_cols in l_cols:
         fig, axes = plt.subplots(num_rows, num_cols, figsize=(15,5))
+
         for idx, col in enumerate(sub_cols):
             data = df_cluster[df_cluster["cluster"] == cluster]
-
             ax_his = axes[0, idx]
             ax_box = axes[1, idx]
 
             ax_his.set_title(f"{col} - {cluster}")
-
             sns.histplot(data=data, x=col, bins = "doane", stat="percent", color="#fec868", common_norm=False, ax=ax_his)
             sns.boxplot(data=data, x=col, color = "#bdb2ff", flierprops={"marker": "x", "markersize": 0.001}, ax=ax_box)
 
@@ -402,63 +427,102 @@ for cluster in ["A", "B", "C", "D"]:
             ax_box.set_xlabel("")
 
         axes = axes.ravel(order = "F")
-        for j in range(len(sub_cols)*3, num_cols * num_rows):
+        for j in range(len(sub_cols) * num_rows, num_cols * num_rows):
             axes[j].axis("off")
-
 
         plt.tight_layout()
         plt.show()
 ```
 
+### Quanto vale cada grupo?
+
+O tamanho de um grupo não diz quanto ele pesa no faturamento. A tabela abaixo compara a participação de cada cluster no total de clientes com a sua participação no gasto total dos últimos 6 meses.
+
+```{python}
+resumo = df_cluster.groupby("cluster").agg(
+    clientes=("idade", "size"),
+    gasto_total=("vlr_tran_total_6m", "sum"),
+    gasto_mediano=("vlr_tran_total_6m", "median")
+)
+
+resumo["% clientes"] = 100 * resumo["clientes"] / resumo["clientes"].sum()
+resumo["% do gasto"] = 100 * resumo["gasto_total"] / resumo["gasto_total"].sum()
+
+print(resumo.round(1))
+```
+
+<!-- TODO: após renderizar, comentar os números (ex.: "o cluster D reúne X% dos clientes, mas apenas Y% do gasto; o cluster A reúne X% dos clientes e Y% do gasto"). -->
+
+Essa comparação é fundamental para priorizar o orçamento de marketing: um grupo grande, mas de baixo gasto, pode ter um potencial de retorno menor do que um grupo pequeno de clientes de alto valor. Ao mesmo tempo, um grupo grande de baixo gasto pode ter mais espaço para crescer, e a decisão depende do custo e do efeito esperado de cada ação.
+
+::: {.callout-important title="Reflexão importante"}
+O **Cluster D** representa metade da base de clientes. Vale a pena gastar a mesma energia de marketing com ele do que com o Cluster A, que gasta cerca de 15 vezes mais por cliente? Essa é a base da segmentação estratégica!
+:::
+
 ### Escolha do melhor valor de $k$
 
-A escolha do número de grupos em uma análise de clustering não deve ser arbitrária. Para validarmos se $k=4$ é uma escolha tecnicamente robusta, utilizamos o Método do Cotovelo (Elbow Method).
+A escolha do número de grupos em uma análise de clustering não deve ser arbitrária. Para verificar se $k=4$ é razoável, usamos dois critérios, sempre calculados sobre os **dados padronizados** (os mesmos usados pelo K-Means):
 
-```{python, warnings=FALSE, message=FALSE}
-inertia = []
+- **Método do Cotovelo (Elbow Method):** a *inércia* (soma dos quadrados das distâncias entre cada cliente e o centroide do seu grupo) sempre diminui quando aumentamos $k$. Procuramos o ponto em que a queda deixa de ser acentuada e passa a ser marginal.
+- **Coeficiente de silhouette:** para cada cliente, compara a distância ao seu próprio grupo com a distância ao grupo vizinho mais próximo. Varia de -1 a 1, e valores maiores indicam grupos mais coesos e mais bem separados. Por custo computacional, é calculado em uma amostra de 10.000 clientes.
+
+```{python}
+inercia = []
+silhueta = []
 k_values = range(2, 8)
 
 for k in k_values:
-    kmeans = KMeans(n_clusters=k, random_state=42, init='k-means++', n_init=10) # n_init=10 para melhores resultados
-    kmeans.fit(df_cluster.drop(columns=['cluster'], errors='ignore')) # Certifica que a coluna 'cluster' não esteja presente se já foi adicionada
-    inertia.append(kmeans.inertia_)
+    km = KMeans(n_clusters=k, random_state=42, init='k-means++', n_init=10)
+    rotulos = km.fit_predict(df_norm)
+    inercia.append(km.inertia_)
+    silhueta.append(silhouette_score(df_norm, rotulos, sample_size=10000, random_state=42))
 
-plt.figure(figsize=(10, 6))
-plt.plot(k_values, inertia, marker='o')
-plt.title('Gráfico de Cotovelo para K-Means')
-plt.xlabel('Número de Clusters (k)')
-plt.ylabel('Inércia (Soma dos Quadrados Intra-Cluster)')
-plt.xticks(k_values)
-plt.grid(True)
+fig, axes = plt.subplots(1, 2, figsize=(14, 5))
+
+axes[0].plot(k_values, inercia, marker='o')
+axes[0].set_title('Método do Cotovelo')
+axes[0].set_xlabel('Número de Clusters (k)')
+axes[0].set_ylabel('Inércia (soma dos quadrados intra-cluster)')
+axes[0].set_xticks(list(k_values))
+axes[0].grid(True)
+
+axes[1].plot(k_values, silhueta, marker='o', color="#e76f51")
+axes[1].set_title('Coeficiente de silhouette')
+axes[1].set_xlabel('Número de Clusters (k)')
+axes[1].set_ylabel('Silhouette médio')
+axes[1].set_xticks(list(k_values))
+axes[1].grid(True)
+
+plt.tight_layout()
 plt.show()
+
+k_sil = list(k_values)[int(np.argmax(silhueta))]
+print(f"Maior silhouette: k = {k_sil}")
 ```
 
-A métrica no eixo $y$ do gráfico acima é a Inércia (ou _Within-Cluster Sum of Squares_), que mede a soma das distâncias quadráticas entre cada ponto e o centroide do seu cluster. À medida que aumentamos o número de clusters ($k$), a inércia inevitavelmente diminui, pois os grupos ficam menores e mais "apertados". O objetivo é encontrar o ponto onde o ganho de informação (a queda na inércia) deixa de ser drástico e passa a ser marginal.Interpretação dos ResultadosNo gráfico gerado, observamos uma queda acentuada de $k=2$ para $k=3$ e de $k=3$ para $k=4$. No entanto, após o 4, a curva suaviza significativamente (o declive se torna menor). Esse "cotovelo" no $k=4$ indica que adicionar um quinto ou sexto grupo não traria uma melhora substancial na coesão dos dados que justificasse a complexidade extra.
+<!-- TODO: após renderizar, confirmar se cotovelo e silhouette sustentam k = 4 e comentar o resultado (onde está o cotovelo? qual k maximiza a silhouette?). Se apontarem para outro valor, discutir a decisão. -->
+
+O cotovelo é um critério subjetivo, por isso o usamos junto com a silhouette. Se os dois critérios apontarem para valores diferentes, ou se nenhum deles indicar um ponto claro, a decisão final deve considerar também o que é operacionalmente viável para o negócio, como discutimos mais adiante.
 
 ## Visualização dos Clusters através do PCA
 
-O PCA (Análise de Componentes Principais) é uma técnica de redução de dimensionalidade que nos permite visualizar dados de alta dimensão em um espaço 2D ou 3D, preservando a maior parte da variância dos dados. Ao aplicar o PCA aos nossos dados normalizados, podemos plotar os clientes em um gráfico onde cada ponto representa um cliente e a cor indica a qual cluster ele pertence.
+O PCA (Análise de Componentes Principais) é uma técnica de redução de dimensionalidade que nos permite visualizar dados de alta dimensão em um espaço 2D, preservando a maior parte possível da variância dos dados. Ao aplicar o PCA aos nossos dados padronizados, podemos plotar os clientes em um gráfico onde cada ponto representa um cliente e a cor indica a qual cluster ele pertence.
 
-Por que PCA aqui? O K-Means calculou os clusters em um espaço de 11 dimensões. É impossível para o ser humano visualizar isso. O PCA projeta essas 11 dimensões em 2 novas (PC1 e PC2) que capturam a maior parte da separação entre os dados.
+Por que PCA aqui? O K-Means calculou os clusters em um espaço de 11 dimensões, que não conseguimos visualizar. O PCA projeta essas 11 dimensões em 2 novas (PC1 e PC2), que são as combinações das variáveis que capturam a maior variabilidade dos dados. Para que a projeção represente o mesmo espaço em que o K-Means trabalhou, o PCA é aplicado aos dados **padronizados**.
 
 ```{python}
-# 1. Preparação dos Dados para o PCA
-# Usamos os dados normalizados (df_cluster), mas removemos a coluna 'cluster' que acabamos de adicionar, pois o PCA só trabalha com variáveis numéricas.
-X = df_cluster.drop(columns=['cluster'], errors='ignore')
+# 1. Dados padronizados, os mesmos usados pelo K-Means (sem a coluna 'cluster')
+X = df_norm
 
-# 2. Inicialização e Ajuste do PCA
-# Queremos reduzir as 11 dimensões originais para apenas 2 componentes principais, permitindo a visualização em um gráfico de dispersão (X, Y).
+# 2. Inicialização e ajuste do PCA: 11 dimensões -> 2 componentes principais
 pca = PCA(n_components=2, random_state=42)
 pca_components = pca.fit_transform(X)
 
-# 3. Criação de um DataFrame para Visualização
-# Convertemos a matriz resultante do PCA em um DataFrame do Pandas
+# 3. DataFrame para visualização, com o cluster de cada cliente
 df_pca = pd.DataFrame(data=pca_components, columns=['PC1', 'PC2'])
-
-# Recuperamos a identificação do cluster (A, B, C, D) do DataFrame original para usar como legenda de cor no gráfico.
 df_pca['cluster'] = df_cluster['cluster'].values
 
-# 4. Cálculo da Variância Explicada
+# 4. Variância explicada
 var_explicada = pca.explained_variance_ratio_
 total_var = var_explicada.sum() * 100
 
@@ -466,17 +530,17 @@ print(f"Variância explicada pelo PC1: {var_explicada[0]*100:.2f}%")
 print(f"Variância explicada pelo PC2: {var_explicada[1]*100:.2f}%")
 print(f"Variância total explicada pelos dois componentes: {total_var:.2f}%")
 
-# 5. Visualização Gráfica com Seaborn
+# 5. Gráfico
 plt.figure(figsize=(12, 8))
 sns.scatterplot(
     x='PC1', y='PC2',
-    hue='cluster',  # Define a cor baseada no cluster
-    palette='Set2', # Mesma paleta usada no gráfico spider
+    hue='cluster',
+    hue_order=sorted(df_pca['cluster'].unique()),
+    palette='Set2',  # mesma paleta usada no gráfico spider
     data=df_pca,
-    alpha=0.3,      # Transparência para lidar com a sobreposição de pontos
-    edgecolor=None  # Remove a borda dos pontos para clareza
+    alpha=0.3,
+    edgecolor=None
 )
-
 plt.title(f'Visualização dos Clusters em 2D via PCA\n(Variância Total Explicada: {total_var:.1f}%)', size=15)
 plt.xlabel(f'Componente Principal 1 ({var_explicada[0]*100:.1f}% var)', size=12)
 plt.ylabel(f'Componente Principal 2 ({var_explicada[1]*100:.1f}% var)', size=12)
@@ -484,24 +548,54 @@ plt.grid(True, linestyle='--', alpha=0.5)
 plt.show()
 ```
 
+Para saber o que cada componente representa, veja o peso (*loading*) de cada variável original em PC1 e PC2: quanto maior o valor absoluto, maior a contribuição da variável.
+
+```{python}
+loadings = pd.DataFrame(pca.components_.T, index=cols, columns=['PC1', 'PC2'])
+print(loadings.round(2))
+```
+
+::: {.callout-note title="Como interpretar o gráfico"}
+Com 11 variáveis, dois componentes dificilmente explicam toda a variabilidade dos dados. A variância explicada (mostrada no título) indica o quanto da informação original foi preservada na projeção. Se ela for baixa, é esperado que alguns grupos pareçam se sobrepor no gráfico, e essa sobreposição visual não significa, por si só, que os clusters estejam mal separados nas 11 dimensões originais.
+:::
+
+## Uso prático da segmentação
+
+A última etapa do CRISP-DM é a **implantação**: transformar os grupos em ações. Alguns pontos práticos:
+
+- **Classificar novos clientes:** em vez de refazer o agrupamento, guardamos o modelo, a média, o desvio padrão e o mapa de rótulos, e usamos a mesma padronização para atribuir novos clientes a um dos grupos.
+- **Atualizar periodicamente:** os hábitos mudam. Recomenda-se refazer a segmentação de tempos em tempos e acompanhar se o tamanho e o perfil dos grupos permanecem estáveis.
+- **Medir o efeito das ações:** cada campanha por segmento deve ser testada com um grupo de controle, para saber se o resultado vem da ação ou do comportamento que o cliente já teria.
+
+```{python eval=FALSE}
+import joblib
+
+# guardar o necessário para classificar novos clientes
+artefatos = {"kmeans": kmeans, "media": media, "desvio": desvio, "mapa": mapa}
+joblib.dump(artefatos, "modelo_segmentacao.joblib")
+
+def classificar_clientes(novos, artefatos):
+    """`novos` é um DataFrame com as mesmas 11 colunas do treinamento."""
+    z = (novos[cols] - artefatos["media"]) / artefatos["desvio"]
+    rotulos = artefatos["kmeans"].predict(z)
+    return [artefatos["mapa"][k] for k in rotulos]
+```
 
 ## Discussão
 
-Ao final desta análise, é fundamental refletir sobre a escolha do número de clusters ($k$). Embora o Método do Cotovelo aponte para $k=4$ como o ponto de eficiência estatística, no mundo real, essa decisão é frequentemente exógena ao modelo.
+Ao final desta análise, é fundamental refletir sobre a escolha do número de clusters ($k$). Os critérios estatísticos (cotovelo e silhouette) são um guia, e não uma regra: no mundo real, essa decisão é frequentemente exógena ao modelo.
 
 #### O "K" Estatístico vs. O "K" de Negócio
 
 A escolha final do número de segmentos deve considerar o equilíbrio entre precisão e operacionalidade:
 
-- Capacidade de Execução: De que adianta identificar 10 clusters estatisticamente puros se o time de marketing só tem braço para criar 3 campanhas diferentes? Um modelo com muitos grupos pode se tornar ingereciável.
+- Capacidade de Execução: De que adianta identificar 10 clusters estatisticamente puros se o time de marketing só tem braço para criar 3 campanhas diferentes? Um modelo com muitos grupos pode se tornar difícil de gerenciar.
 
-- Custo de Implementação: Cada novo segmento exige personalização de catálogo, artes, cupons e logística. Se o ganho de inércia ao passar de $k=4$ para $k=5$ é marginal, o custo operacional de gerenciar esse quinto grupo provavelmente não se paga.
+- Custo de Implementação: Cada novo segmento exige personalização de catálogo, artes, cupons e logística. Se o ganho em inércia ao aumentar $k$ é marginal, o custo operacional de gerenciar um grupo adicional provavelmente não se paga.
 
 - Diferenciação Estratégica: O agrupamento só faz sentido se os grupos resultantes exigirem ações de negócio distintas. Se dois clusters identificados pelo algoritmo recebem a mesma oferta de "Desconto em Vinhos", eles deveriam, na prática, ser tratados como um único segmento.
 
-
-O algoritmo K-Means nos ofereceu um mapa, mas a navegação é feita pelo gestor. Identificamos que mais de 50% da nossa base (Cluster A) está "dormente". Este é um insight técnico com uma implicação estratégica massiva: o foco não deve ser em micro-segmentar quem já compra, mas em entender como reativar essa massa inativa.
-
+O algoritmo K-Means nos ofereceu um mapa, mas a navegação é feita pelo gestor. Identificamos que metade da nossa base (Cluster D) está pouco ativa. Este é um insight técnico com uma implicação estratégica relevante, mas que precisa ser lida junto com a tabela de valor de cada grupo: reativar esses clientes só compensa se o retorno esperado superar o custo da ação, e isso deve ser testado antes de ser ampliado.
 
 ::: {.callout-tip title="Desafio Próximo"}
 Como exercício de reflexão: se o orçamento de marketing fosse cortado pela metade, quais desses 4 clusters você deixaria de atender primeiro? Por quê?
@@ -509,5 +603,13 @@ Como exercício de reflexão: se o orçamento de marketing fosse cortado pela me
 
 ## Conclusão
 
-Neste estudo, exploramos o comportamento de uma base de clientes do varejo utilizando o algoritmo $K$-means para transformar dados transacionais e demográficos em segmentos acionáveis.
-O agrupamento bem-sucedido não é aquele que apenas minimiza a inércia, mas aquele que é operacionalizável. De nada adianta uma perfeição estatística se o time de marketing não possui recursos para gerenciar a complexidade de múltiplos segmentos. Portanto, ao implementar esses modelos na prática, deve-se sempre equilibrar a precisão do algoritmo com a capacibilidade de execução da empresa, garantindo que os insights gerados se convertam em decisões que tragam retorno real sobre o investimento.
+Neste estudo, exploramos o comportamento de uma base de clientes do varejo utilizando o algoritmo $K$-means para transformar dados transacionais e demográficos em segmentos acionáveis. Chegamos a quatro perfis (o fiel do dia a dia, o sommelier de alta renda, o consumidor equilibrado e o inativo ou ocasional) e discutimos uma ação diferente para cada um.
+
+O agrupamento bem-sucedido não é aquele que apenas minimiza a inércia, mas aquele que é operacionalizável. De nada adianta uma perfeição estatística se o time de marketing não possui recursos para gerenciar a complexidade de múltiplos segmentos. Portanto, ao implementar esses modelos na prática, deve-se sempre equilibrar a precisão do algoritmo com a capacidade de execução da empresa, garantindo que os insights gerados se convertam em decisões que tragam retorno real sobre o investimento.
+
+**Limitações:**
+
+* O K-Means assume grupos aproximadamente esféricos e é sensível a valores atípicos e a variáveis muito assimétricas ou com muitos zeros, como os gastos por categoria. Transformações (como o logaritmo) ou outros algoritmos podem ser alternativas.
+* Não avaliamos a estabilidade dos grupos (por exemplo, com outras sementes ou subamostras da base).
+* Os perfis são descritivos: eles não provam que uma ação específica terá o efeito esperado sobre cada grupo, o que só pode ser verificado com testes.
+* O uso de dados demográficos e de crédito exige atenção à LGPD.
