@@ -21,7 +21,27 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
-</style>
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
 
 
 <script src="site_libs/quarto-nav/quarto-nav.js"></script>
@@ -154,6 +174,12 @@ ul.task-list li input[type="checkbox"] {
  <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Aluguel de apartamentos na cidade de São Paulo</span></span></a>
   </div>
 </li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03a_anexo_regressao.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Um modelo otimizado para sugerir o aluguel</span></span></a>
+  </div>
+</li>
       </ul>
   </li>
         <li class="sidebar-item sidebar-item-section">
@@ -168,13 +194,13 @@ ul.task-list li input[type="checkbox"] {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./04_cluster_538.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Consumo de bebidas alcoólicas em diversos países</span></span></a>
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Consumo de bebidas alcoólicas em diversos países</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./05_cluster_pda.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Análise de agrupamento de clientes do mercado</span></span></a>
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Análise de agrupamento de clientes do mercado</span></span></a>
   </div>
 </li>
       </ul>
@@ -191,11 +217,17 @@ ul.task-list li input[type="checkbox"] {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./06_groceries.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Estratégias de Cross-Selling em Mercado</span></span></a>
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Estratégias de Cross-Selling em Mercado</span></span></a>
   </div>
 </li>
       </ul>
   </li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./references.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Referências</span></a>
+  </div>
+</li>
     </ul>
     </div>
 </nav>
@@ -206,7 +238,13 @@ ul.task-list li input[type="checkbox"] {
     <h2 id="toc-title">Índice</h2>
    
   <ul>
-  <li><a href="#introdução" id="toc-introdução" class="nav-link active" data-scroll-target="#introdução">Introdução</a></li>
+  <li><a href="#introdução" id="toc-introdução" class="nav-link active" data-scroll-target="#introdução">Introdução</a>
+  <ul class="collapse">
+  <li><a href="#o-processo-que-guia-as-análises-crisp-dm" id="toc-o-processo-que-guia-as-análises-crisp-dm" class="nav-link" data-scroll-target="#o-processo-que-guia-as-análises-crisp-dm">O processo que guia as análises: CRISP-DM</a></li>
+  <li><a href="#o-que-você-vai-encontrar" id="toc-o-que-você-vai-encontrar" class="nav-link" data-scroll-target="#o-que-você-vai-encontrar">O que você vai encontrar</a></li>
+  <li><a href="#código-em-r-e-em-python" id="toc-código-em-r-e-em-python" class="nav-link" data-scroll-target="#código-em-r-e-em-python">Código em R e em Python</a></li>
+  <li><a href="#sec-dados" id="toc-sec-dados" class="nav-link" data-scroll-target="#sec-dados">Dados e códigos</a></li>
+  </ul></li>
   </ul>
 </nav>
     </div>
@@ -246,10 +284,80 @@ ul.task-list li input[type="checkbox"] {
 
 <section id="introdução" class="level1 unnumbered">
 <h1 class="unnumbered">Introdução</h1>
-<p>Esta página apresenta aplicações práticas de ciência de dados inspirados em casos reais.</p>
-<p>[Última atualização: 03/11/2026.]</p>
+<p>Este livro apresenta aplicações práticas de ciência de dados inspiradas em casos reais, vistas sob a ótica de negócios. Em cada capítulo, partimos de um problema que uma empresa poderia enfrentar (prever a falha de uma máquina, precificar um imóvel, entender o perfil dos clientes, definir ações de venda cruzada) e mostramos, passo a passo, como os dados podem ajudar a resolvê-lo.</p>
+<p>O foco não está em apresentar uma técnica isolada, mas em mostrar <strong>como ela se encaixa em um projeto de ponta a ponta</strong>: da pergunta de negócio até o uso prático dos resultados.</p>
+<p>[Última atualização: 04/11/2026.]</p>
+<section id="o-processo-que-guia-as-análises-crisp-dm" class="level2">
+<h2 class="anchored" data-anchor-id="o-processo-que-guia-as-análises-crisp-dm">O processo que guia as análises: CRISP-DM</h2>
+<p>Projetos de ciência de dados bem-sucedidos raramente começam pelo algoritmo. Para organizar o trabalho, usamos ao longo do livro o <strong>CRISP-DM</strong> (<em>Cross-Industry Standard Process for Data Mining</em>), um processo criado no fim da década de 1990 por um consórcio de empresas e instituições europeias e que se tornou um dos referenciais mais usados em projetos de análise de dados <span class="citation" data-cites="chapman2000crispdm wirth2000crispdm">(<a href="references.html#ref-chapman2000crispdm" role="doc-biblioref">Chapman et al. 2000</a>; <a href="references.html#ref-wirth2000crispdm" role="doc-biblioref">Wirth e Hipp 2000</a>)</span>. Ele é neutro em relação a setor, ferramenta e técnica, o que o torna adequado para casos tão distintos quanto os deste livro.</p>
+<p>O CRISP-DM divide um projeto em seis fases:</p>
+<ol type="1">
+<li><strong>Entendimento do negócio</strong> (<em>business understanding</em>): definir o problema, os objetivos e os critérios de sucesso do ponto de vista do negócio, antes de olhar para os dados.</li>
+<li><strong>Entendimento dos dados</strong> (<em>data understanding</em>): coletar os dados disponíveis, descrevê-los, explorá-los e avaliar sua qualidade.</li>
+<li><strong>Preparação dos dados</strong> (<em>data preparation</em>): selecionar, limpar, transformar e integrar os dados, até chegar à base que será usada na modelagem.</li>
+<li><strong>Modelagem</strong> (<em>modeling</em>): escolher e aplicar técnicas estatísticas ou de aprendizado de máquina, ajustando seus parâmetros.</li>
+<li><strong>Avaliação</strong> (<em>evaluation</em>): verificar se os resultados são consistentes e, principalmente, se respondem ao objetivo de negócio definido no início.</li>
+<li><strong>Implantação</strong> (<em>deployment</em>): colocar os resultados em uso (um relatório, uma regra de decisão, um modelo em produção) e planejar seu monitoramento e manutenção.</li>
+</ol>
+<div id="fig-crispdm" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Diagrama circular do CRISP-DM, com as fases Entendimento do negócio, Entendimento dos dados, Preparação dos dados, Modelagem, Avaliação e Implantação, ao redor dos dados.">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-crispdm-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="images/crisp-dm.png" class="img-fluid figure-img" style="width:70.0%" alt="Diagrama circular do CRISP-DM, com as fases Entendimento do negócio, Entendimento dos dados, Preparação dos dados, Modelagem, Avaliação e Implantação, ao redor dos dados.">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-crispdm-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figura&nbsp;1: Fases do processo CRISP-DM. Fonte: Kenneth Jensen, via Wikimedia Commons, licença CC BY-SA 3.0.
+</figcaption>
+</figure>
+</div>
+<p>Como mostra o diagrama (<a href="#fig-crispdm" class="quarto-xref">Figura&nbsp;<span>1</span></a>), o processo <strong>não é uma sequência rígida</strong>. As setas indicam as dependências mais frequentes entre as fases, mas é comum voltar atrás: uma avaliação ruim pode levar a uma nova preparação dos dados, e o entendimento dos dados pode obrigar a rever o problema de negócio. O círculo externo lembra que o trabalho continua depois da implantação, pois os modelos precisam ser monitorados e atualizados.</p>
+<div class="callout callout-style-default callout-note callout-titled" title="Como o CRISP-DM aparece neste livro">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Nota</span>Como o CRISP-DM aparece neste livro
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Sempre que possível, os capítulos seguem a lógica do CRISP-DM: começam pelo problema de negócio, passam pela exploração e preparação dos dados, apresentam a modelagem e a avaliação e terminam discutindo o uso prático e as limitações dos resultados. Nem todos os capítulos enfatizam todas as fases. Em alguns, o destaque é a exploração dos dados, em outros a modelagem ou a interpretação dos resultados para o negócio.</p>
+</div>
+</div>
+</section>
+<section id="o-que-você-vai-encontrar" class="level2">
+<h2 class="anchored" data-anchor-id="o-que-você-vai-encontrar">O que você vai encontrar</h2>
+<p>Os capítulos são estudos de caso <strong>inspirados em situações reais</strong>. Eles usam bases de dados públicas ou simuladas, e cada capítulo indica a origem dos dados e suas limitações. Os resultados, portanto, ilustram o uso das técnicas e não devem ser tomados como conclusões sobre os mercados ou setores retratados.</p>
+<!-- | Capítulo | Tema | Tipo de análise | Linguagem | -->
+<!-- |:--|:--|:--|:--| -->
+<!-- | 1 | Atrasos em voos | Análise descritiva | R | -->
+<!-- | 2 | Manutenção preditiva | Classificação | Python | -->
+<!-- | 3 | Aluguel de apartamentos | Regressão | R | -->
+<!-- | 4 | Consumo de bebidas alcoólicas | Agrupamento | R | -->
+<!-- | 5 | Clientes de um mercado | Agrupamento | Python | -->
+<!-- | 6 | Estratégias de cross-selling | Regras de associação | R | -->
+</section>
+<section id="código-em-r-e-em-python" class="level2">
+<h2 class="anchored" data-anchor-id="código-em-r-e-em-python">Código em R e em Python</h2>
+<p>Todas as análises são acompanhadas do <strong>código completo</strong>, que pode ser copiado e executado. Ele aparece ora em <strong>R</strong>, ora em <strong>Python</strong>, justamente para mostrar como os mesmos conceitos e etapas do processo se aplicam nas duas linguagens, que são as mais usadas em ciência de dados. A escolha em cada capítulo busca apenas variar os exemplos. As técnicas apresentadas podem ser reproduzidas em qualquer uma das duas.</p>
+<p>Este material não é um curso de programação. Alguma familiaridade com R ou Python ajuda a acompanhar o código, mas a narrativa de cada capítulo foi escrita para ser compreendida também por quem quer focar no raciocínio analítico e nas decisões de negócio.</p>
+</section>
+<section id="sec-dados" class="level2">
+<h2 class="anchored" data-anchor-id="sec-dados">Dados e códigos</h2>
+<p>Os códigos-fonte deste livro estão disponíveis no <a href="https://github.com/magnotairone/aplicacoes">repositório do projeto no GitHub</a>, e as bases de dados utilizadas nos capítulos estão reunidas nesta <a href="https://tinyurl.com/3f8ez3hz">pasta pública</a>.</p>
+<p>Para reproduzir as análises, baixe os arquivos da pasta e salve-os em um diretório chamado <code>data</code>, no mesmo local em que estiver o código. Os códigos leem os arquivos a partir desse diretório (por exemplo, <code>data/sao-paulo-properties-april-2019.csv</code>).</p>
+<!-- ## Referências desta introdução -->
+<!-- O CRISP-DM é descrito em detalhe no guia original [@chapman2000crispdm]. Para uma leitura voltada a gestores e profissionais de negócio, que usa o mesmo raciocínio de ligar problema de negócio, dados e decisão, veja @provost2013data. -->
 
 
+<div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list" style="display: none">
+<div id="ref-chapman2000crispdm" class="csl-entry" role="listitem">
+Chapman, Pete, Julian Clinton, Randy Kerber, Thomas Khabaza, Thomas Reinartz, Colin Shearer, e Rüdiger Wirth. 2000. <span>“<span>CRISP-DM</span> 1.0: Step-by-step data mining guide”</span>. SPSS Inc.
+</div>
+<div id="ref-wirth2000crispdm" class="csl-entry" role="listitem">
+Wirth, Rüdiger, e Jochen Hipp. 2000. <span>“<span>CRISP-DM</span>: Towards a standard process model for data mining”</span>. Em <em>Proceedings of the 4th International Conference on the Practical Applications of Knowledge Discovery and Data Mining</em>, 29–39.
+</div>
+</div>
+</section>
 </section>
 
 </main> <!-- /main -->

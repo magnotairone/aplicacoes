@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>5&nbsp; Análise de agrupamento de clientes do mercado – Aplicações de Ciência de Dados</title>
+<title>6&nbsp; Análise de agrupamento de clientes do mercado – Aplicações de Ciência de Dados</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -147,7 +147,7 @@ window.Quarto = {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Alternar barra lateral" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./04_cluster_538.html">Agrupamento</a></li><li class="breadcrumb-item"><a href="./05_cluster_pda.html"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Análise de agrupamento de clientes do mercado</span></a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./04_cluster_538.html">Agrupamento</a></li><li class="breadcrumb-item"><a href="./05_cluster_pda.html"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Análise de agrupamento de clientes do mercado</span></a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Alternar barra lateral" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="Procurar" onclick="window.quartoOpenSearch();">
@@ -218,6 +218,12 @@ window.Quarto = {
  <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Aluguel de apartamentos na cidade de São Paulo</span></span></a>
   </div>
 </li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03a_anexo_regressao.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Um modelo otimizado para sugerir o aluguel</span></span></a>
+  </div>
+</li>
       </ul>
   </li>
         <li class="sidebar-item sidebar-item-section">
@@ -232,13 +238,13 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./04_cluster_538.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Consumo de bebidas alcoólicas em diversos países</span></span></a>
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Consumo de bebidas alcoólicas em diversos países</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./05_cluster_pda.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Análise de agrupamento de clientes do mercado</span></span></a>
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Análise de agrupamento de clientes do mercado</span></span></a>
   </div>
 </li>
       </ul>
@@ -255,11 +261,17 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./06_groceries.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Estratégias de Cross-Selling em Mercado</span></span></a>
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Estratégias de Cross-Selling em Mercado</span></span></a>
   </div>
 </li>
       </ul>
   </li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./references.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Referências</span></a>
+  </div>
+</li>
     </ul>
     </div>
 </nav>
@@ -270,24 +282,24 @@ window.Quarto = {
     <h2 id="toc-title">Índice</h2>
    
   <ul>
-  <li><a href="#dados-disponíveis" id="toc-dados-disponíveis" class="nav-link active" data-scroll-target="#dados-disponíveis"><span class="header-section-number">5.1</span> Dados disponíveis</a></li>
-  <li><a href="#análise-exploratória-de-dados" id="toc-análise-exploratória-de-dados" class="nav-link" data-scroll-target="#análise-exploratória-de-dados"><span class="header-section-number">5.2</span> Análise Exploratória de Dados</a></li>
-  <li><a href="#algoritmo-k-médias" id="toc-algoritmo-k-médias" class="nav-link" data-scroll-target="#algoritmo-k-médias"><span class="header-section-number">5.3</span> Algoritmo k-médias</a>
+  <li><a href="#dados-disponíveis" id="toc-dados-disponíveis" class="nav-link active" data-scroll-target="#dados-disponíveis"><span class="header-section-number">6.1</span> Dados disponíveis</a></li>
+  <li><a href="#análise-exploratória-de-dados" id="toc-análise-exploratória-de-dados" class="nav-link" data-scroll-target="#análise-exploratória-de-dados"><span class="header-section-number">6.2</span> Análise Exploratória de Dados</a></li>
+  <li><a href="#algoritmo-k-médias" id="toc-algoritmo-k-médias" class="nav-link" data-scroll-target="#algoritmo-k-médias"><span class="header-section-number">6.3</span> Algoritmo k-médias</a>
   <ul class="collapse">
-  <li><a href="#escolha-do-melhor-valor-de-k" id="toc-escolha-do-melhor-valor-de-k" class="nav-link" data-scroll-target="#escolha-do-melhor-valor-de-k"><span class="header-section-number">5.3.1</span> Escolha do melhor valor de <span class="math inline">\(k\)</span></a></li>
+  <li><a href="#escolha-do-melhor-valor-de-k" id="toc-escolha-do-melhor-valor-de-k" class="nav-link" data-scroll-target="#escolha-do-melhor-valor-de-k"><span class="header-section-number">6.3.1</span> Escolha do melhor valor de <span class="math inline">\(k\)</span></a></li>
   </ul></li>
-  <li><a href="#visualização-dos-clusters-através-do-pca" id="toc-visualização-dos-clusters-através-do-pca" class="nav-link" data-scroll-target="#visualização-dos-clusters-através-do-pca"><span class="header-section-number">5.4</span> Visualização dos Clusters através do PCA</a></li>
-  <li><a href="#discussão" id="toc-discussão" class="nav-link" data-scroll-target="#discussão"><span class="header-section-number">5.5</span> Discussão</a></li>
-  <li><a href="#conclusão" id="toc-conclusão" class="nav-link" data-scroll-target="#conclusão"><span class="header-section-number">5.6</span> Conclusão</a></li>
+  <li><a href="#visualização-dos-clusters-através-do-pca" id="toc-visualização-dos-clusters-através-do-pca" class="nav-link" data-scroll-target="#visualização-dos-clusters-através-do-pca"><span class="header-section-number">6.4</span> Visualização dos Clusters através do PCA</a></li>
+  <li><a href="#discussão" id="toc-discussão" class="nav-link" data-scroll-target="#discussão"><span class="header-section-number">6.5</span> Discussão</a></li>
+  <li><a href="#conclusão" id="toc-conclusão" class="nav-link" data-scroll-target="#conclusão"><span class="header-section-number">6.6</span> Conclusão</a></li>
   </ul>
 </nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
-<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./04_cluster_538.html">Agrupamento</a></li><li class="breadcrumb-item"><a href="./05_cluster_pda.html"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Análise de agrupamento de clientes do mercado</span></a></li></ol></nav>
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./04_cluster_538.html">Agrupamento</a></li><li class="breadcrumb-item"><a href="./05_cluster_pda.html"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Análise de agrupamento de clientes do mercado</span></a></li></ol></nav>
 <div class="quarto-title">
-<h1 class="title"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Análise de agrupamento de clientes do mercado</span></h1>
+<h1 class="title"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Análise de agrupamento de clientes do mercado</span></h1>
 </div>
 
 
@@ -311,8 +323,8 @@ window.Quarto = {
 <li><p>Quais clientes estão em risco de churn (abandono) e precisam de uma oferta de reativação?</p></li>
 <li><p>Como otimizar o orçamento de marketing focando nos grupos com maior potencial de retorno?</p></li>
 </ul>
-<section id="dados-disponíveis" class="level2" data-number="5.1">
-<h2 data-number="5.1" class="anchored" data-anchor-id="dados-disponíveis"><span class="header-section-number">5.1</span> Dados disponíveis</h2>
+<section id="dados-disponíveis" class="level2" data-number="6.1">
+<h2 data-number="6.1" class="anchored" data-anchor-id="dados-disponíveis"><span class="header-section-number">6.1</span> Dados disponíveis</h2>
 <p>Os dados disponíveis para esta análise contemplam 11 variáveis que podem ser agrupadas em três pilares fundamentais para a segmentação de clientes no varejo:</p>
 <ol type="1">
 <li><p><strong>Perfil Demográfico e de Crédito</strong> Fornecem o contexto socioeconômico do cliente, fundamentais para entender o poder de compra e o risco.</p>
@@ -368,8 +380,8 @@ window.Quarto = {
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>cols <span class="op">=</span> <span class="bu">list</span>(df.columns)</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
-<section id="análise-exploratória-de-dados" class="level2" data-number="5.2">
-<h2 data-number="5.2" class="anchored" data-anchor-id="análise-exploratória-de-dados"><span class="header-section-number">5.2</span> Análise Exploratória de Dados</h2>
+<section id="análise-exploratória-de-dados" class="level2" data-number="6.2">
+<h2 data-number="6.2" class="anchored" data-anchor-id="análise-exploratória-de-dados"><span class="header-section-number">6.2</span> Análise Exploratória de Dados</h2>
 <p>Antes de aplicarmos qualquer algoritmo de agrupamento, precisamos conhecer a “matéria-prima” do nosso estudo. A análise exploratória nos ajuda a entender a dimensão dos dados, identificar valores atípicos (outliers) e observar como as variáveis de consumo se relacionam entre si.</p>
 <p>Primeiro, verificamos o tamanho da nossa base para garantir que temos volume suficiente para uma segmentação estatisticamente relevante.</p>
 <div class="cell">
@@ -533,8 +545,8 @@ max       53.000000   9435.970000  ...    436.980000          631.680000
 <span id="cb14-22"><a href="#cb14-22" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
-<section id="algoritmo-k-médias" class="level2" data-number="5.3">
-<h2 data-number="5.3" class="anchored" data-anchor-id="algoritmo-k-médias"><span class="header-section-number">5.3</span> Algoritmo k-médias</h2>
+<section id="algoritmo-k-médias" class="level2" data-number="6.3">
+<h2 data-number="6.3" class="anchored" data-anchor-id="algoritmo-k-médias"><span class="header-section-number">6.3</span> Algoritmo k-médias</h2>
 <p>Nesta etapa, aplicamos o algoritmo K-Means para agrupar nossos clientes. O objetivo é que a variância dentro de cada grupo seja a menor possível, enquanto a diferença entre os grupos seja maximizada.</p>
 <p>Conforme discutido anteriormente, a normalização é um passo crítico. Aqui, utilizamos o Z-score para garantir que variáveis como renda (na casa dos milhares) não dominem variáveis como interesse (unidades) apenas pela magnitude numérica.</p>
 <div class="cell">
@@ -1521,8 +1533,8 @@ Count               30000.000  9987.00  9253.00  10760.000</code></pre>
 <p>O <strong>Cluster A</strong> representa mais de 50% da base total. Vale a pena gastar a mesma energia de marketing com ele do que com o Cluster B, que gasta 15 vezes mais? Essa é a base da segmentação estratégica!</p>
 </div>
 </div>
-<section id="escolha-do-melhor-valor-de-k" class="level3" data-number="5.3.1">
-<h3 data-number="5.3.1" class="anchored" data-anchor-id="escolha-do-melhor-valor-de-k"><span class="header-section-number">5.3.1</span> Escolha do melhor valor de <span class="math inline">\(k\)</span></h3>
+<section id="escolha-do-melhor-valor-de-k" class="level3" data-number="6.3.1">
+<h3 data-number="6.3.1" class="anchored" data-anchor-id="escolha-do-melhor-valor-de-k"><span class="header-section-number">6.3.1</span> Escolha do melhor valor de <span class="math inline">\(k\)</span></h3>
 <p>A escolha do número de grupos em uma análise de clustering não deve ser arbitrária. Para validarmos se <span class="math inline">\(k=4\)</span> é uma escolha tecnicamente robusta, utilizamos o Método do Cotovelo (Elbow Method).</p>
 <div class="cell" data-warnings="false">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>inertia <span class="op">=</span> []</span>
@@ -2356,8 +2368,8 @@ forceTheme('sk-container-id-2');</script>
 <p>A métrica no eixo <span class="math inline">\(y\)</span> do gráfico acima é a Inércia (ou <em>Within-Cluster Sum of Squares</em>), que mede a soma das distâncias quadráticas entre cada ponto e o centroide do seu cluster. À medida que aumentamos o número de clusters (<span class="math inline">\(k\)</span>), a inércia inevitavelmente diminui, pois os grupos ficam menores e mais “apertados”. O objetivo é encontrar o ponto onde o ganho de informação (a queda na inércia) deixa de ser drástico e passa a ser marginal.Interpretação dos ResultadosNo gráfico gerado, observamos uma queda acentuada de <span class="math inline">\(k=2\)</span> para <span class="math inline">\(k=3\)</span> e de <span class="math inline">\(k=3\)</span> para <span class="math inline">\(k=4\)</span>. No entanto, após o 4, a curva suaviza significativamente (o declive se torna menor). Esse “cotovelo” no <span class="math inline">\(k=4\)</span> indica que adicionar um quinto ou sexto grupo não traria uma melhora substancial na coesão dos dados que justificasse a complexidade extra.</p>
 </section>
 </section>
-<section id="visualização-dos-clusters-através-do-pca" class="level2" data-number="5.4">
-<h2 data-number="5.4" class="anchored" data-anchor-id="visualização-dos-clusters-através-do-pca"><span class="header-section-number">5.4</span> Visualização dos Clusters através do PCA</h2>
+<section id="visualização-dos-clusters-através-do-pca" class="level2" data-number="6.4">
+<h2 data-number="6.4" class="anchored" data-anchor-id="visualização-dos-clusters-através-do-pca"><span class="header-section-number">6.4</span> Visualização dos Clusters através do PCA</h2>
 <p>O PCA (Análise de Componentes Principais) é uma técnica de redução de dimensionalidade que nos permite visualizar dados de alta dimensão em um espaço 2D ou 3D, preservando a maior parte da variância dos dados. Ao aplicar o PCA aos nossos dados normalizados, podemos plotar os clientes em um gráfico onde cada ponto representa um cliente e a cor indica a qual cluster ele pertence.</p>
 <p>Por que PCA aqui? O K-Means calculou os clusters em um espaço de 11 dimensões. É impossível para o ser humano visualizar isso. O PCA projeta essas 11 dimensões em 2 novas (PC1 e PC2) que capturam a maior parte da separação entre os dados.</p>
 <div class="cell">
@@ -2418,8 +2430,8 @@ forceTheme('sk-container-id-2');</script>
 </div>
 </div>
 </section>
-<section id="discussão" class="level2" data-number="5.5">
-<h2 data-number="5.5" class="anchored" data-anchor-id="discussão"><span class="header-section-number">5.5</span> Discussão</h2>
+<section id="discussão" class="level2" data-number="6.5">
+<h2 data-number="6.5" class="anchored" data-anchor-id="discussão"><span class="header-section-number">6.5</span> Discussão</h2>
 <p>Ao final desta análise, é fundamental refletir sobre a escolha do número de clusters (<span class="math inline">\(k\)</span>). Embora o Método do Cotovelo aponte para <span class="math inline">\(k=4\)</span> como o ponto de eficiência estatística, no mundo real, essa decisão é frequentemente exógena ao modelo.</p>
 <section id="o-k-estatístico-vs.-o-k-de-negócio" class="level4">
 <h4 class="anchored" data-anchor-id="o-k-estatístico-vs.-o-k-de-negócio">O “K” Estatístico vs.&nbsp;O “K” de Negócio</h4>
@@ -2445,8 +2457,8 @@ forceTheme('sk-container-id-2');</script>
 </div>
 </section>
 </section>
-<section id="conclusão" class="level2" data-number="5.6">
-<h2 data-number="5.6" class="anchored" data-anchor-id="conclusão"><span class="header-section-number">5.6</span> Conclusão</h2>
+<section id="conclusão" class="level2" data-number="6.6">
+<h2 data-number="6.6" class="anchored" data-anchor-id="conclusão"><span class="header-section-number">6.6</span> Conclusão</h2>
 <p>Neste estudo, exploramos o comportamento de uma base de clientes do varejo utilizando o algoritmo <span class="math inline">\(K\)</span>-means para transformar dados transacionais e demográficos em segmentos acionáveis. O agrupamento bem-sucedido não é aquele que apenas minimiza a inércia, mas aquele que é operacionalizável. De nada adianta uma perfeição estatística se o time de marketing não possui recursos para gerenciar a complexidade de múltiplos segmentos. Portanto, ao implementar esses modelos na prática, deve-se sempre equilibrar a precisão do algoritmo com a capacibilidade de execução da empresa, garantindo que os insights gerados se convertam em decisões que tragam retorno real sobre o investimento.</p>
 
 
@@ -2856,12 +2868,12 @@ forceTheme('sk-container-id-2');</script>
 <nav class="page-navigation">
   <div class="nav-page nav-page-previous">
       <a href="./04_cluster_538.html" class="pagination-link" aria-label="Consumo de bebidas alcoólicas em diversos países">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Consumo de bebidas alcoólicas em diversos países</span></span>
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Consumo de bebidas alcoólicas em diversos países</span></span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">
       <a href="./06_groceries.html" class="pagination-link" aria-label="Estratégias de Cross-Selling em Mercado">
-        <span class="nav-page-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Estratégias de Cross-Selling em Mercado</span></span> <i class="bi bi-arrow-right-short"></i>
+        <span class="nav-page-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Estratégias de Cross-Selling em Mercado</span></span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>
