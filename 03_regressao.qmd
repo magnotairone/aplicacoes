@@ -21,7 +21,18 @@ Duas perguntas guiam a análise:
 1. **Descritiva:** como o aluguel varia entre as regiões da cidade e de acordo com a metragem, a quantidade de quartos, as vagas de garagem e o condomínio?
 2. **Preditiva:** é possível prever o valor do aluguel de um imóvel dadas as suas características? Com que margem de erro?
 
-Comparamos três abordagens (regressão linear, árvore de decisão e floresta aleatória) e, ao final, discutimos o que o erro do modelo significa em termos práticos.
+Neste capítulo percorremos, de ponta a ponta, o **pipeline de construção de um modelo preditivo**, seguindo as etapas do **CRISP-DM** (*Cross-Industry Standard Process for Data Mining*). Todo o trabalho neste capítulo é feito em **R**, com pacotes como `tidyverse`, `rsample`, `rpart` e `randomForest`.
+
+| Etapa do CRISP-DM | Onde aparece no capítulo |
+|---|---|
+| Entendimento do negócio (*business understanding*) | Esta introdução: o problema e as perguntas que queremos responder |
+| Entendimento dos dados (*data understanding*) | Análise descritiva inicial |
+| Preparação dos dados (*data preparation*) | Limpeza das coordenadas, tratamento de categorias raras e separação em treinamento, validação e teste |
+| Modelagem (*modeling*) | Regressão linear, árvore de decisão e floresta aleatória |
+| Avaliação (*evaluation*) | Comparação na validação, erro de generalização no teste e importância das variáveis |
+| Implantação (*deployment*) | Uso prático e implantação do modelo |
+
+Na prática, essas etapas não são estritamente sequenciais: é comum voltar à preparação dos dados depois de avaliar um modelo, por exemplo. Aqui, por clareza, apresentamos cada uma em sequência.
 
 Este conjunto de dados contém aproximadamente 13,6 mil anúncios de imóveis para venda e aluguel na cidade de São Paulo, Brasil. Os dados são provenientes de várias fontes, especialmente sites classificados de imóveis.
 
@@ -474,15 +485,11 @@ Após a limpeza, restam `r nrow(dados_aluguel)` anúncios de aluguel, divididos 
 Nesta análise, abordaremos três modelos: regressão linear, árvore de decisão e floresta aleatória.
 
 Os dados já foram divididos em conjuntos de treinamento, validação e teste.
-
 Cada um dos três modelos será treinado utilizando o conjunto de treinamento.
-
 As métricas de erro serão calculadas usando o conjunto de validação.
-
 Com isso, poderemos selecionar o melhor modelo, aquele que apresentar o menor erro no conjunto de validação.
 
 Após a escolha do melhor modelo, iremos reestimá-lo utilizando todos os dados dos conjuntos de treinamento e validação combinados.
-
 Em seguida, avaliaremos o erro deste modelo final no conjunto de teste, fornecendo uma boa estimativa do erro de generalização esperado para este modelo em novos dados.
 
 A coluna `id` serve apenas para identificar cada anúncio e **não deve ser usada como variável preditora**. Por isso, ela é removida do conjunto usado para ajustar os modelos.
@@ -663,7 +670,7 @@ if (knitr::is_html_output()){
 Para comparar os modelos, usamos duas métricas, ambas na mesma unidade do aluguel (reais):
 
 - **Erro quadrático médio (EQM)** e sua raiz, a **REQM** (RMSE): penaliza mais os erros grandes.
-- **Erro absoluto médio (EAM)**: é a média dos erros em valor absoluto e tem uma leitura direta para um gestor: "em média, o modelo erra X reais para mais ou para menos".
+- **Erro absoluto médio (MAE)**: é a média dos erros em valor absoluto e tem uma leitura direta para um gestor: "em média, o modelo erra X reais para mais ou para menos".
 
 Incluímos também um **modelo de referência (baseline)**, que prevê para todos os imóveis a média do aluguel no treinamento. Ele serve de régua mínima: um modelo só é útil se for claramente melhor do que isso.
 
@@ -672,7 +679,7 @@ calcular_metricas <- function(df) {
   df |> 
     summarise(eqm = mean((y_obs - y_pred)^2),
               reqm = sqrt(eqm),
-              eam = mean(abs(y_obs - y_pred)))
+              MAE = mean(abs(y_obs - y_pred)))
 }
 
 df_baseline <- tibble(id = dados_validacao$id,
@@ -689,7 +696,7 @@ tabela_metricas_val <- bind_rows(df_pred, df_baseline) |>
 ```{r echo=FALSE}
 generate_table(tabela_metricas_val |> 
   mutate(across(where(is.numeric), ~ round(.x, 2))) |> 
-  rename(Modelo = modelo, EQM = eqm, REQM = reqm, EAM = eam))
+  rename(Modelo = modelo, EQM = eqm, REQM = reqm, MAE = MAE))
 ```
 
 ```{r include=FALSE}
@@ -706,7 +713,7 @@ rf_val   <- tabela_metricas_val |> filter(modelo == "floresta aleatória")
 base_val <- tabela_metricas_val |> filter(modelo == "baseline (média)")
 ```
 
-O modelo com menor erro no conjunto de validação foi a **`r melhor_modelo`**, com REQM de `r fmt_brl(rf_val$reqm)` e EAM de `r fmt_brl(rf_val$eam)`. Para comparação, o baseline, que prevê sempre a média, tem REQM de `r fmt_brl(base_val$reqm)` e EAM de `r fmt_brl(base_val$eam)`.
+O modelo com menor erro no conjunto de validação foi a **`r melhor_modelo`**, com REQM de `r fmt_brl(rf_val$reqm)` e MAE de `r fmt_brl(rf_val$MAE)`. Para comparação, o baseline, que prevê sempre a média, tem REQM de `r fmt_brl(base_val$reqm)` e MAE de `r fmt_brl(base_val$MAE)`.
 
 Veja de forma gráfica os valores da REQM.
 
@@ -765,7 +772,7 @@ Os resultados estão apresentados na tabela abaixo.
 ```{r echo=FALSE}
 generate_table(tabela_metricas_teste |> 
   mutate(across(where(is.numeric), ~ round(.x, 2))) |> 
-  rename(Modelo = modelo, EQM = eqm, REQM = reqm, EAM = eam))
+  rename(Modelo = modelo, EQM = eqm, REQM = reqm, MAE = MAE))
 ```
 
 ```{r include=FALSE}
@@ -774,9 +781,9 @@ base_teste <- tabela_metricas_teste |> filter(modelo == "baseline (média)")
 mediana_aluguel <- median(dados_teste$price)
 ```
 
-De acordo com nossas estimativas, em novos imóveis a floresta aleatória erra, em média, cerca de **`r fmt_brl(rf_teste$eam)`** (EAM), com REQM de `r fmt_brl(rf_teste$reqm)`. Para dar uma ideia de escala, o aluguel mediano no conjunto de teste é de `r fmt_brl(mediana_aluguel)`, de modo que o erro absoluto médio equivale a cerca de `r round(100 * rf_teste$eam / mediana_aluguel)`% desse valor. O baseline tem EAM de `r fmt_brl(base_teste$eam)`.
+De acordo com nossas estimativas, em novos imóveis a floresta aleatória erra, em média, cerca de **`r fmt_brl(rf_teste$MAE)`** (MAE), com REQM de `r fmt_brl(rf_teste$reqm)`. Para dar uma ideia de escala, o aluguel mediano no conjunto de teste é de `r fmt_brl(mediana_aluguel)`, de modo que o erro absoluto médio equivale a cerca de `r round(100 * rf_teste$MAE / mediana_aluguel)`% desse valor. O baseline tem MAE de `r fmt_brl(base_teste$MAE)`.
 
-Quando a REQM é bem maior do que o EAM, isso indica que há alguns erros muito grandes, tipicamente em imóveis de alto padrão, que são raros e difíceis de prever.
+Quando a REQM é bem maior do que o MAE, isso indica que há alguns erros muito grandes, tipicamente em imóveis de alto padrão, que são raros e difíceis de prever.
 
 ## Importância das Variáveis
 
@@ -794,12 +801,22 @@ imp_df <- tibble(variavel = rownames(imp), importancia = imp[, 1]) |>
 
 ggplot(imp_df, aes(x = importancia, y = reorder(variavel, importancia))) +
   geom_col() +
-  labs(x = "Importância por permutação (% de aumento do EQM)", y = NULL)
+  labs(x = "Aumento do EQM ao permutar a variável (R$²)", y = NULL)
 ```
 
-Neste ajuste, as variáveis de maior importância foram `r paste(imp_df$variavel[1:3], collapse = ", ")`, e a de menor importância foi `r imp_df$variavel[nrow(imp_df)]`.
+<!-- Neste ajuste, as variáveis de maior importância foram `r paste(imp_df$variavel[1:3], collapse = ", ")`, e a de menor importância foi `r imp_df$variavel[nrow(imp_df)]`. -->
 
-<!-- TODO: após renderizar, comentar aqui a ordem observada (ex.: tamanho, condomínio e localização no topo?) e relacioná-la ao que se espera do mercado imobiliário. -->
+O gráfico mostra que o modelo depende, acima de tudo, do **tamanho do imóvel**: a importância de `size` é mais que o dobro da da segunda colocada, `rooms`. Na sequência aparecem `longitude` e `condo`, praticamente empatadas, depois `latitude`, `suites` e `parking`. Por fim, `toilets`, `furnished`, `swimming_pool`, `elevator` e `new` contribuem pouco ou quase nada. Como o eixo está em unidades de EQM (R$²), o que importa é a comparação entre as barras, e não o valor absoluto de cada uma.
+
+Relacionando com o que se espera do mercado imobiliário:
+
+* **Metragem:** é coerente que o tamanho seja o principal determinante do aluguel, já que ele define diretamente o espaço que está sendo alugado.
+* **Localização:** `longitude` e `latitude` aparecem separadas, mas descrevem uma única informação (onde o imóvel está). Somadas, ficam em um patamar semelhante ao de `rooms` e acima do de `condo`, o que é consistente com o peso da localização na formação de preços em uma cidade tão heterogênea quanto São Paulo. Essa soma é apenas um indicativo, pois a importância conjunta das duas variáveis não é exatamente a soma das individuais.
+* **Condomínio:** funciona como um indicador do padrão do prédio (serviços, áreas comuns, infraestrutura), e por isso carrega informação que vai além do tamanho.
+* **Número de quartos:** aparecer em segundo lugar merece cautela. `rooms` é fortemente correlacionada com `size`, `suites` e `toilets`, e, ao embaralhar seus valores, o teste de permutação cria combinações pouco realistas (como um imóvel de 30 m² com cinco quartos), que aumentam o erro do modelo de forma artificial. Parte dessa importância pode refletir esse efeito, e não um peso próprio dos quartos no preço.
+* **Itens de baixa importância:** `swimming_pool`, `furnished`, `elevator` e `new` pouco alteram a previsão. Isso não significa que não influenciem o aluguel. Esses atributos podem ser redundantes com outras variáveis (prédios com piscina e elevador tendem a ter condomínio mais alto, por exemplo) ou variar pouco nos dados.
+
+Do ponto de vista prático, o resultado indica que, para estimar bem um aluguel, o mais importante é ter informações confiáveis sobre **metragem, localização e condomínio**. Atributos adicionais, como piscina ou elevador, acrescentam pouco ao modelo depois que essas informações já estão disponíveis.
 
 **Cuidados ao interpretar:**
 
@@ -845,15 +862,60 @@ g1 + g2
 g3 + g4
 ```
 
-<!-- TODO: após renderizar, descrever o formato de cada curva (crescente? com patamares? saturação?). -->
+Os quatro gráficos mostram o preço predito médio quando apenas a variável em questão varia (valores aproximados, lidos do gráfico):
+
+* **`size`:** a curva é crescente e é a de maior amplitude, indo de cerca de R$ 2.500 (imóveis pequenos) a cerca de R$ 15.500 em torno de 450 m². O trecho mais inclinado fica entre 200 e 450 m². Depois de 500 m² a curva fica plana, o que reflete a falta de dados nessa faixa e a incapacidade da floresta de extrapolar, e não um limite real do preço.
+* **`condo`:** o preço predito cresce de forma geral com o condomínio, de cerca de R$ 3.000 a R$ 7.300 (por volta de R$ 6.000 de condomínio), e depois se estabiliza em torno de R$ 7.000. Há uma pequena queda no início da curva, provavelmente associada a anúncios com condomínio zero ou muito baixo. O patamar final se deve novamente à escassez de dados em valores altos.
+* **`parking`:** o preço cresce de forma gradual com o número de vagas, de cerca de R$ 3.000 (0 ou 1 vaga) a cerca de R$ 4.300 (7 ou mais), com ganhos que diminuem nas faixas mais altas. A diferença entre 0 e 1 vaga é praticamente nula. Imóveis com muitas vagas são raros, então o final da curva é pouco confiável.
+* **`rooms`:** o padrão **não é monotônico**: de 1 a 3 quartos o preço predito é praticamente o mesmo (cerca de R$ 3.100 a R$ 3.250), com um pico em 4 quartos (cerca de R$ 4.400) e valor intermediário em 5 ou mais.
+
+**Interpretação:** `size` é, de longe, a variável de maior efeito (amplitude de cerca de R$ 13 mil, contra cerca de R$ 4 mil em `condo` e R$ 1.300 em `parking` e `rooms`), o que é coerente com o ranking de importância. O comportamento de `rooms` indica que o número de quartos, isoladamente, explica pouco do preço quando a metragem já é conhecida. O pico em 4 quartos provavelmente reflete imóveis amplos e de alto padrão nessa categoria, e não um efeito próprio dos quartos.
 
 Ao ler os PDPs, lembre-se de que a floresta não extrapola: fora da faixa de valores observados nos dados de treinamento, a curva tende a ficar plana. Além disso, como as variáveis são correlacionadas, o PDP pode incluir combinações pouco realistas (por exemplo, um imóvel de 30 m² com condomínio de luxo).
 
+## Uso prático e implantação do modelo
+
+A última etapa do CRISP-DM é a **implantação** (*deployment*): colocar o modelo para apoiar uma decisão real. Um modelo só gera valor quando alguém o usa.
+
+**Para que serve este modelo.** Com o erro que estimamos no teste (MAE de `r fmt_brl(rf_teste$MAE)`, cerca de `r round(100 * rf_teste$MAE / mediana_aluguel)`% do aluguel mediano), o modelo é adequado como **apoio à decisão**, por exemplo para:
+
+* sugerir uma faixa de preço a quem está cadastrando um imóvel;
+* sinalizar anúncios muito acima ou abaixo do esperado para imóveis semelhantes;
+* dar uma referência rápida para negociação.
+
+Ele **não é adequado** para fixar o preço final de um imóvel, já que o erro típico ainda é relevante e há imóveis, sobretudo os de alto padrão, em que o erro é bem maior.
+
+**Qual modelo usar.** A floresta aleatória foi a mais precisa, mas é a menos transparente. Quando é preciso justificar o valor a um cliente (por exemplo, "quanto vale cada vaga ou cada m² adicional"), a regressão linear, mais simples e interpretável, pode ser preferível, mesmo com erro maior. A escolha depende do que importa mais para o negócio: precisão ou transparência.
+
+**Como seria o uso em R.** O modelo final pode ser salvo e carregado para gerar previsões para novos imóveis. O novo imóvel precisa ter as mesmas variáveis do treinamento, com as categorias nos mesmos níveis.
+
+```{r eval=FALSE}
+# salvar o modelo treinado
+saveRDS(mod_floresta_final, "modelo_aluguel_rf.rds")
+
+# em outra sessão: carregar e prever para um novo imóvel
+modelo <- readRDS("modelo_aluguel_rf.rds")
+
+novo_imovel <- tibble(
+  condo = 700, size = 65, suites = 1, parking = 1,
+  elevator = 1, new = 0,
+  latitude = -23.56, longitude = -46.65,
+  rooms = factor("2", levels = levels(treino_final$rooms)),
+  toilets = factor("2", levels = levels(treino_final$toilets)),
+  furnished = factor("0", levels = levels(treino_final$furnished)),
+  swimming_pool = factor("0", levels = levels(treino_final$swimming_pool))
+)
+
+predict(modelo, novo_imovel)
+```
+
+**Manutenção do modelo.** O mercado imobiliário muda, e um modelo treinado com dados de abril de 2019 perde precisão com o tempo. Em produção, seria preciso monitorar o erro do modelo comparando previsões com aluguéis efetivamente praticados, e retreiná-lo periodicamente com dados atualizados.
+
 ## Conclusão
 
-Neste estudo, exploramos `r nrow(dados_aluguel)` anúncios de aluguel de apartamentos na cidade de São Paulo (abril de 2019), buscando construir um modelo preditivo para estimar o valor do aluguel com base nas características do imóvel. Experimentamos três modelos diferentes (regressão linear, árvore de decisão e floresta aleatória) e observamos que a floresta aleatória apresentou o melhor desempenho no conjunto de validação, com REQM de `r fmt_brl(rf_val$reqm)` contra `r fmt_brl(base_val$reqm)` do baseline que prevê sempre a média. No conjunto de teste, o erro absoluto médio estimado é de `r fmt_brl(rf_teste$eam)`, cerca de `r round(100 * rf_teste$eam / mediana_aluguel)`% do aluguel mediano.
+Neste estudo, percorremos as etapas de construção de um modelo preditivo para o aluguel de apartamentos na cidade de São Paulo, a partir de `r nrow(dados_aluguel)` anúncios de abril de 2019. Comparamos três modelos (regressão linear, árvore de decisão e floresta aleatória), e a floresta aleatória apresentou o melhor desempenho no conjunto de validação, com REQM de `r fmt_brl(rf_val$reqm)` contra `r fmt_brl(base_val$reqm)` do baseline que prevê sempre a média. No conjunto de teste, o erro absoluto médio estimado é de `r fmt_brl(rf_teste$eam)`, cerca de `r round(100 * rf_teste$eam / mediana_aluguel)`% do aluguel mediano.
 
-**O que isso significa na prática:** um modelo com esse nível de erro é adequado como **apoio à decisão**, por exemplo para sugerir uma faixa de preço ou sinalizar anúncios muito fora do esperado, mas não para fixar o preço final de um imóvel. Para essa decisão, a regressão linear, mais simples e fácil de explicar, pode ser preferível quando a transparência é prioridade, enquanto a floresta aleatória é a melhor escolha quando o objetivo é a precisão. É importante considerar a **complexidade do modelo** e a **interpretabilidade dos resultados** ao tomar decisões finais sobre a implementação prática.
+A análise de importância e os gráficos de dependência parcial indicam que o tamanho do imóvel é o principal determinante do aluguel, seguido pela localização e pelo condomínio.
 
 **Limitações:**
 
@@ -864,3 +926,7 @@ Neste estudo, exploramos `r nrow(dados_aluguel)` anúncios de aluguel de apartam
 * Anúncios com coordenadas inválidas foram descartados (`r round(100 * n_removidos / n_antes_filtro, 1)`% dos anúncios de aluguel).
 
 **Próximos passos:** modelar o logaritmo do preço, ajustar hiperparâmetros com validação cruzada, avaliar o erro por faixa de preço (o modelo erra mais nos imóveis caros?) e incluir o distrito como variável explicativa.
+
+
+agora eu gostaria de uma proposta do que seria um anexo a este capitulo: SERIA UM ANEXO DO CAPITULO
+pra fazer o melhor modelo possivel, tratando a variavel district alem da localizacao lat long (ja que existe muita desigualdade em bairros vizinhos em sp - talvez agrupar alguns distritos) e tunando hiperparametro para ter um modelo otimo para sugerir preco de aluguel de um novo imovel. me de o qmd desse anexo e seja suscinto nas explicacoes.

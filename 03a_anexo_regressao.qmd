@@ -1,0 +1,215 @@
+---
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r include=FALSE}
+knitr::opts_chunk$set(
+  warning = FALSE,
+  message = FALSE,
+  echo = TRUE
+)
+```
+
+# Um modelo otimizado para sugerir o aluguel
+
+No capítulo anterior, a floresta aleatória usou apenas latitude e longitude para representar a localização, parâmetros padrão e o preço na escala original. Este anexo implementa os "próximos passos" daquele capítulo para chegar a um modelo mais próximo do que seria usado em produção:
+
+1. **Distrito** como variável, agrupando os distritos pequenos e codificando cada um pelo seu nível de preço.
+2. **Logaritmo do preço** como variável resposta, o que reduz o peso dos imóveis muito caros.
+3. **Ajuste de hiperparâmetros** com validação cruzada, comparando floresta aleatória e XGBoost.
+4. Uma função que **sugere o aluguel de um novo imóvel**, com uma faixa de valores.
+
+::: {.callout-note}
+Este anexo usa o pacote `tidymodels`, mais adequado a esse tipo de fluxo. O ajuste dos modelos pode levar alguns minutos.
+:::
+
+## Dados e variáveis
+
+Repetimos a limpeza do capítulo (apenas aluguel, coordenadas dentro do município) e mantemos o distrito. Criamos duas variáveis novas que não dependem do preço: a **distância ao centro** (Praça da Sé) e o **condomínio por m²**, um indicador do padrão do prédio.
+
+```{r}
+library(tidyverse)
+library(janitor)
+library(tidymodels)
+library(embed)
+
+distancia_centro <- function(lat, lon, lat0 = -23.5505, lon0 = -46.6333) {
+  # aproximação plana, suficiente para a escala da cidade (em km)
+  sqrt(((lat - lat0) * 111)^2 + ((lon - lon0) * 111 * cos(lat0 * pi / 180))^2)
+}
+
+brl <- function(x) paste0("R$ ", formatC(x, format = "f", digits = 0,
+                                         big.mark = ".", decimal.mark = ","))
+
+dados_aluguel <- read_csv("data/sao-paulo-properties-april-2019.csv") |> 
+  clean_names() |> 
+  filter(negotiation_type == "rent",
+         longitude <= -46.36531, longitude >= -46.82619,
+         latitude <= -23.35629, latitude >= -24.00826) |> 
+  mutate(distrito = factor(str_squish(str_remove(district, "/.*$"))),
+         dist_centro_km = distancia_centro(latitude, longitude),
+         condo_m2 = condo / pmax(size, 1),
+         preco_log = log(price)) |> 
+  select(-negotiation_type, -property_type, -district)
+```
+
+## Divisão dos dados e validação cruzada
+
+Usamos a mesma semente e a mesma estratificação do capítulo, de modo que o conjunto de teste deve ser o mesmo e os erros sejam comparáveis. O conjunto de treinamento é dividido em 5 partes (*folds*) para a validação cruzada, que substitui o conjunto de validação do capítulo.
+
+```{r}
+set.seed(123)
+split <- initial_split(dados_aluguel, prop = 0.8, strata = price)
+
+treino <- training(split) |> select(-price)   # price não pode ser preditora
+teste  <- testing(split)                      # mantém price para avaliar em reais
+
+cv <- vfold_cv(treino, v = 5, strata = preco_log)
+```
+
+## Pré-processamento
+
+A receita abaixo trata o distrito em duas etapas: distritos com menos de 1% dos imóveis são agrupados em "outros", e cada distrito restante é substituído pelo **logaritmo médio do preço** observado nele (codificação por alvo). Isso permite capturar a desigualdade entre bairros vizinhos, sem criar dezenas de colunas. Como a receita é reestimada dentro de cada *fold*, o preço do imóvel avaliado não vaza para a própria codificação.
+
+```{r}
+receita <- recipe(preco_log ~ ., data = treino) |> 
+  step_other(distrito, threshold = 0.01, other = "outros") |> 
+  step_lencode_glm(distrito, outcome = vars(preco_log)) |> 
+  step_zv(all_predictors())
+```
+
+## Modelos e ajuste de hiperparâmetros
+
+Comparamos duas famílias de modelos, cada uma com 20 combinações de hiperparâmetros sorteadas de forma espaço-preenchedora. O critério é o RMSE do log do preço na validação cruzada.
+
+```{r cache=TRUE}
+rf_spec <- rand_forest(mtry = tune(), min_n = tune(), trees = 500) |> 
+  set_engine("ranger") |> 
+  set_mode("regression")
+
+xgb_spec <- boost_tree(tree_depth = tune(), learn_rate = tune(), 
+                       min_n = tune(), trees = 500) |> 
+  set_engine("xgboost") |> 
+  set_mode("regression")
+
+# faixa mais realista para a taxa de aprendizado e a profundidade
+xgb_params <- extract_parameter_set_dials(xgb_spec) |> 
+  update(learn_rate = learn_rate(range = c(-2.5, -0.5)),
+         tree_depth = tree_depth(range = c(3L, 10L)))
+
+set.seed(123)
+resultados <- workflow_set(preproc = list(receita = receita),
+                           models = list(rf = rf_spec, xgb = xgb_spec)) |> 
+  option_add(param_info = xgb_params, id = "receita_xgb") |> 
+  workflow_map("tune_grid", resamples = cv, grid = 20,
+               metrics = metric_set(rmse), seed = 123, verbose = FALSE)
+
+rank_results(resultados, select_best = TRUE) |> 
+  select(wflow_id, rmse = mean, erro_padrao = std_err, rank) |> 
+  knitr::kable(digits = 4)
+```
+
+```{r}
+melhor_id <- rank_results(resultados, select_best = TRUE) |> 
+  slice(1) |> 
+  pull(wflow_id)
+
+modelo_vencedor <- if_else(str_detect(melhor_id, "xgb"), 
+                           "XGBoost", "floresta aleatória (ranger)")
+
+melhores_params <- resultados |> 
+  extract_workflow_set_result(melhor_id) |> 
+  select_best(metric = "rmse")
+
+wf_final <- resultados |> 
+  extract_workflow(melhor_id) |> 
+  finalize_workflow(melhores_params)
+
+melhores_params
+```
+
+O melhor modelo na validação cruzada foi o **`r modelo_vencedor`**, com os hiperparâmetros acima.
+
+## Avaliação no conjunto de teste
+
+Ajustamos o modelo vencedor em todo o conjunto de treinamento e avaliamos no teste, voltando para a escala em **reais**. Para comparar, ajustamos também uma versão simplificada da floresta do capítulo (sem distrito, sem ajuste de hiperparâmetros, preço na escala original).
+
+```{r}
+library(randomForest)
+
+ajuste_final <- fit(wf_final, data = treino)
+
+resultado_teste <- teste |> 
+  mutate(previsto = exp(predict(ajuste_final, teste)$.pred))
+
+# referência: floresta do capítulo (versão simplificada)
+cols_cap <- c("price", "condo", "size", "rooms", "toilets", "suites", "parking",
+              "elevator", "furnished", "swimming_pool", "new", 
+              "latitude", "longitude")
+set.seed(123)
+rf_cap <- randomForest(price ~ ., data = training(split) |> select(all_of(cols_cap)))
+pred_cap <- predict(rf_cap, teste)
+
+metricas_reais <- function(obs, pred) {
+  tibble(REQM = sqrt(mean((obs - pred)^2)),
+         MAE = mean(abs(obs - pred)),
+         `Erro % mediano` = 100 * median(abs(obs - pred) / obs))
+}
+
+comparacao <- bind_rows(
+  "Capítulo anterior (floresta, sem distrito)" = metricas_reais(teste$price, pred_cap),
+  "Modelo otimizado" = metricas_reais(resultado_teste$price, 
+                                              resultado_teste$previsto),
+  .id = "Modelo"
+)
+
+knitr::kable(comparacao, digits = 1)
+```
+
+O erro absoluto médio (MAE) passou de `r brl(comparacao$MAE[1])` para `r brl(comparacao$MAE[2])`, e o erro percentual mediano, de `r round(comparacao$"Erro % mediano"[1], 1)`% para `r round(comparacao$"Erro % mediano"[2], 1)`%. O erro percentual mediano é uma medida direta para o negócio: em metade dos imóveis, a sugestão erra menos do que esse percentual do aluguel real.
+
+## Sugerindo o aluguel de um novo imóvel
+
+Para o uso em produção, o modelo é reajustado com **todos** os dados. Além do valor sugerido, é útil informar uma **faixa**: usamos a razão entre o aluguel observado e o previsto nas previsões da validação cruzada (cada imóvel previsto por um modelo que não o viu) e tomamos os percentis 10 e 90.
+
+```{r}
+modelo_producao <- fit(wf_final, data = dados_aluguel |> select(-price))
+
+oof <- fit_resamples(wf_final, resamples = cv,
+                     control = control_resamples(save_pred = TRUE)) |> 
+  collect_predictions()
+
+faixa <- quantile(exp(oof$preco_log - oof$.pred), probs = c(0.10, 0.90))
+
+sugerir_aluguel <- function(novo) {
+  novo <- novo |> 
+    mutate(distrito = factor(distrito, levels = levels(dados_aluguel$distrito)),
+           dist_centro_km = distancia_centro(latitude, longitude),
+           condo_m2 = condo / pmax(size, 1))
+  p <- exp(predict(modelo_producao, novo)$.pred)
+  tibble(sugerido = p, minimo = p * faixa[[1]], maximo = p * faixa[[2]])
+}
+```
+
+Exemplo de uso (o nome do distrito deve existir na base):
+
+```{r}
+novo_imovel <- tibble(distrito = "Pinheiros", size = 65, condo = 700,
+                      rooms = 2, toilets = 2, suites = 1, parking = 1,
+                      elevator = 1, furnished = 0, swimming_pool = 0, new = 0,
+                      latitude = -23.567, longitude = -46.693)
+
+sugerir_aluguel(novo_imovel) |> 
+  mutate(across(everything(), brl)) |> 
+  knitr::kable()
+```
+
+A faixa indica que, em 80% dos imóveis da validação cruzada, o aluguel anunciado ficou entre `r round(faixa[[1]], 2)` e `r round(faixa[[2]], 2)` vezes o valor previsto.
+
+## Cuidados
+
+* Os dados são de abril de 2019 e de preços **anunciados**. Para uso real, é preciso treinar com dados atuais e monitorar o erro ao longo do tempo.
+* A faixa é empírica e pressupõe que o novo imóvel se pareça com os da base. Para imóveis atípicos (muito grandes, de altíssimo padrão), o erro tende a ser maior.
+* A sugestão deve apoiar a decisão de quem define o preço, e não substituí-la.
