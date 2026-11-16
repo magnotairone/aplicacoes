@@ -286,11 +286,13 @@ window.Quarto = {
   <li><a href="#análise-exploratória-de-dados" id="toc-análise-exploratória-de-dados" class="nav-link" data-scroll-target="#análise-exploratória-de-dados"><span class="header-section-number">6.2</span> Análise Exploratória de Dados</a></li>
   <li><a href="#algoritmo-k-médias" id="toc-algoritmo-k-médias" class="nav-link" data-scroll-target="#algoritmo-k-médias"><span class="header-section-number">6.3</span> Algoritmo k-médias</a>
   <ul class="collapse">
-  <li><a href="#escolha-do-melhor-valor-de-k" id="toc-escolha-do-melhor-valor-de-k" class="nav-link" data-scroll-target="#escolha-do-melhor-valor-de-k"><span class="header-section-number">6.3.1</span> Escolha do melhor valor de <span class="math inline">\(k\)</span></a></li>
+  <li><a href="#quanto-vale-cada-grupo" id="toc-quanto-vale-cada-grupo" class="nav-link" data-scroll-target="#quanto-vale-cada-grupo"><span class="header-section-number">6.3.1</span> Quanto vale cada grupo?</a></li>
+  <li><a href="#escolha-do-melhor-valor-de-k" id="toc-escolha-do-melhor-valor-de-k" class="nav-link" data-scroll-target="#escolha-do-melhor-valor-de-k"><span class="header-section-number">6.3.2</span> Escolha do melhor valor de <span class="math inline">\(k\)</span></a></li>
   </ul></li>
   <li><a href="#visualização-dos-clusters-através-do-pca" id="toc-visualização-dos-clusters-através-do-pca" class="nav-link" data-scroll-target="#visualização-dos-clusters-através-do-pca"><span class="header-section-number">6.4</span> Visualização dos Clusters através do PCA</a></li>
-  <li><a href="#discussão" id="toc-discussão" class="nav-link" data-scroll-target="#discussão"><span class="header-section-number">6.5</span> Discussão</a></li>
-  <li><a href="#conclusão" id="toc-conclusão" class="nav-link" data-scroll-target="#conclusão"><span class="header-section-number">6.6</span> Conclusão</a></li>
+  <li><a href="#uso-prático-da-segmentação" id="toc-uso-prático-da-segmentação" class="nav-link" data-scroll-target="#uso-prático-da-segmentação"><span class="header-section-number">6.5</span> Uso prático da segmentação</a></li>
+  <li><a href="#discussão" id="toc-discussão" class="nav-link" data-scroll-target="#discussão"><span class="header-section-number">6.6</span> Discussão</a></li>
+  <li><a href="#conclusão" id="toc-conclusão" class="nav-link" data-scroll-target="#conclusão"><span class="header-section-number">6.7</span> Conclusão</a></li>
   </ul>
 </nav>
     </div>
@@ -317,37 +319,88 @@ window.Quarto = {
 
 
 <p>No cenário atual do varejo, tratar todos os clientes de forma idêntica é uma estratégia ineficiente e dispendiosa. Cada consumidor possui hábitos de compra, preferências e frequências distintas. A Análise de Agrupamento (Clustering) surge como uma ferramenta estatística para transformar bases de dados brutas em inteligência de negócio, permitindo a identificação de padrões ocultos sem a necessidade de rótulos prévios (Aprendizado Não Supervisionado).</p>
-<p>O objetivo desta aula é aplicar o algoritmo K-Means para segmentar uma base de clientes de um mercado, permitindo que o gestor de marketing responda a perguntas como:</p>
+<p>O objetivo deste capítulo é aplicar o algoritmo K-Means para segmentar uma base de clientes de um mercado, permitindo que o gestor de marketing responda a perguntas como:</p>
 <ul>
 <li><p>Quem são os nossos clientes “Premium” e como retê-los?</p></li>
-<li><p>Quais clientes estão em risco de churn (abandono) e precisam de uma oferta de reativação?</p></li>
+<li><p>Quais clientes estão pouco ativos e talvez precisem de uma oferta de reativação?</p></li>
 <li><p>Como otimizar o orçamento de marketing focando nos grupos com maior potencial de retorno?</p></li>
 </ul>
+<p>Seguimos as etapas do CRISP-DM apresentadas na introdução do livro. Todo o trabalho é feito em <strong>Python</strong>.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Etapa do CRISP-DM</th>
+<th>Onde aparece no capítulo</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Entendimento do negócio</td>
+<td>Esta introdução: as perguntas do gestor de marketing</td>
+</tr>
+<tr class="even">
+<td>Entendimento dos dados</td>
+<td>Dados disponíveis e análise exploratória</td>
+</tr>
+<tr class="odd">
+<td>Preparação dos dados</td>
+<td>Padronização (Z-score) das variáveis</td>
+</tr>
+<tr class="even">
+<td>Modelagem</td>
+<td>Algoritmo k-médias e escolha de <span class="math inline">\(k\)</span></td>
+</tr>
+<tr class="odd">
+<td>Avaliação</td>
+<td>Perfil dos grupos, valor de cada grupo, cotovelo, silhouette e PCA</td>
+</tr>
+<tr class="even">
+<td>Implantação</td>
+<td>Uso prático da segmentação</td>
+</tr>
+</tbody>
+</table>
 <section id="dados-disponíveis" class="level2" data-number="6.1">
 <h2 data-number="6.1" class="anchored" data-anchor-id="dados-disponíveis"><span class="header-section-number">6.1</span> Dados disponíveis</h2>
 <p>Os dados disponíveis para esta análise contemplam 11 variáveis que podem ser agrupadas em três pilares fundamentais para a segmentação de clientes no varejo:</p>
+<!-- TODO: informar a origem dos dados (ex.: base simulada para fins didáticos) e o período de referência. -->
 <ol type="1">
-<li><p><strong>Perfil Demográfico e de Crédito</strong> Fornecem o contexto socioeconômico do cliente, fundamentais para entender o poder de compra e o risco.</p>
+<li><strong>Perfil Demográfico e de Crédito</strong></li>
+</ol>
+<p>Fornecem o contexto socioeconômico do cliente, fundamentais para entender o poder de compra e o risco.</p>
 <ul>
 <li><p><code>idade</code>: Idade do cliente em anos.</p></li>
-<li><p><code>renda</code>: Renda mensal declarada ou estimada.</p></li>
+<li><p><code>renda</code>: Renda mensal declarada.</p></li>
 <li><p><code>score_serasa</code>: Indicador de comportamento financeiro e risco de crédito (essencial para ofertas de prazo ou cartões fidelidade).</p></li>
-</ul></li>
-<li><p><strong>Comportamento de Compra (RFM)</strong> Variáveis que capturam a Recência, Frequência e Valor (modelo RFM), o “coração” da análise de CRM.</p>
+</ul>
+<ol start="2" type="1">
+<li><strong>Comportamento de Compra (RFM)</strong></li>
+</ol>
+<p>Variáveis que capturam a Recência, Frequência e Valor (modelo RFM), o “coração” da análise de CRM.</p>
 <ul>
-<li><p><code>dias_ult_compra</code> (Recência): Quantidade de dias desde a última transação. Clientes com valores baixos são ativos; valores altos indicam risco de abandono.</p></li>
+<li><code>dias_ult_compra</code> (Recência): Quantidade de dias desde a última transação. Clientes com valores baixos são ativos; valores altos indicam menor atividade recente.</li>
+</ul>
+<!-- TODO: descrever a escala de `interesse` (ex.: índice de 0 a 1? como é calculado?) -->
+<ul>
 <li><p><code>interesse</code> (Frequência): Um proxy para a frequência de visita ao mercado.</p></li>
-<li><p><code>vlr_tran_total_6m</code> (Valor): Gasto acumulado no último semestre, indicando o LTV (Lifetime Value) recente do cliente.</p></li>
-</ul></li>
-<li><p><strong>Mix de Consumo (Categorias)</strong> Permitem identificar as preferências e o estilo de vida do cliente (ex: o sommelier, o fã de churrasco, o focado em saúde). Todas as variáveis abaixo referem-se ao gasto acumulado nos últimos 6 meses:</p>
+<li><p><code>vlr_tran_total_6m</code> (Valor): Gasto acumulado no último semestre (o “M” de <em>monetary</em> do RFM). Mede o valor <strong>recente</strong> do cliente, e não o seu valor de vida (LTV), que exigiria uma visão de longo prazo e da margem de lucro.</p></li>
+</ul>
+<ol start="3" type="1">
+<li><strong>Mix de Consumo (Categorias)</strong></li>
+</ol>
+<p>Permitem identificar as preferências e o estilo de vida do cliente (ex: o sommelier, o fã de churrasco, o focado em saúde). Todas as variáveis abaixo referem-se ao gasto acumulado nos últimos 6 meses:</p>
+<!-- TODO: confirmar se `vlr_tran_total_6m` inclui outras categorias além das cinco abaixo (a soma das categorias é bem menor que o total). -->
 <ul>
 <li><p><code>gasto_vinho_6m</code>: Consumo na categoria de vinhos e espumantes.</p></li>
 <li><p><code>gasto_queijo_6m</code>: Consumo em queijos e laticínios finos.</p></li>
 <li><p><code>gasto_cerveja_6m</code>: Consumo em cervejas e bebidas de malte.</p></li>
 <li><p><code>gasto_flv_6m</code>: Gasto em Frutas, Legumes e Verduras (indica perfil focado em perecíveis e saudabilidade).</p></li>
 <li><p><code>gasto_mercearia_6m</code>: Gasto em itens de despensa (arroz, feijão, limpeza), o núcleo do consumo doméstico.</p></li>
-</ul></li>
-</ol>
+</ul>
 <div class="callout callout-style-default callout-tip callout-titled" title="Insight de Negócio">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -361,19 +414,31 @@ window.Quarto = {
 <p>A combinação dessas variáveis permitirá criar Personas. Por exemplo: um cliente com alto <code>gasto_vinho_6m</code> e alto <code>score_serasa</code> possui um perfil radicalmente diferente de um cliente com alto <code>gasto_flv_6m</code> e baixa <code>idade</code>. O K-Means nos ajudará a encontrar esses grupos de forma automatizada.</p>
 </div>
 </div>
-<p>A análise será feita usando python. Começamos fazendo o carregamento das bibliotecas necessárias.</p>
+<div class="callout callout-style-default callout-warning callout-titled" title="Dados pessoais e LGPD">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Aviso</span>Dados pessoais e LGPD
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Usar dados demográficos e de crédito (como renda e score) para segmentar clientes e direcionar ofertas exige atenção à Lei Geral de Proteção de Dados (Lei nº 13.709/2018): é preciso ter base legal para o tratamento, informar o cliente sobre a finalidade e evitar que a segmentação leve a tratamentos discriminatórios.</p>
+</div>
+</div>
+<p>A análise será feita usando Python. Começamos fazendo o carregamento das bibliotecas necessárias.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.cluster <span class="im">import</span> KMeans</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.decomposition <span class="im">import</span> PCA</span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> seaborn <span class="im">as</span> sns</span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.cluster <span class="im">import</span> KMeans</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.decomposition <span class="im">import</span> PCA</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> silhouette_score</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> seaborn <span class="im">as</span> sns</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> warnings</span>
 <span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> warnings</span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>warnings.filterwarnings(<span class="st">"ignore"</span>)</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>warnings.filterwarnings(<span class="st">"ignore"</span>, category<span class="op">=</span><span class="pp">FutureWarning</span>)</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_csv(<span class="st">"data/clientes_mercado.csv"</span>)</span>
@@ -386,9 +451,9 @@ window.Quarto = {
 <p>Primeiro, verificamos o tamanho da nossa base para garantir que temos volume suficiente para uma segmentação estatisticamente relevante.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>n_linhas <span class="op">=</span> df.shape[<span class="dv">0</span>]</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"N~umero de linhas na base: </span><span class="sc">{</span>n_linhas<span class="sc">}</span><span class="ss">."</span>)</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Número de linhas na base: </span><span class="sc">{</span>n_linhas<span class="sc">}</span><span class="ss">."</span>)</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>N~umero de linhas na base: 60000.</code></pre>
+<pre><code>Número de linhas na base: 60000.</code></pre>
 </div>
 </div>
 <p>Em seguida, visualizamos uma amostra aleatória dos dados para validar a estrutura das colunas e o formato das informações (tipos de dados e preenchimento).</p>
@@ -396,25 +461,25 @@ window.Quarto = {
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>df.sample(<span class="dv">10</span>)</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>       idade    renda  ...  gasto_flv_6m  gasto_mercearia_6m
-27433     45  3969.65  ...        138.41              248.00
-21745     43  7599.63  ...         10.45               61.06
-47671     43  3948.80  ...         69.08               62.73
-30046     47  4737.41  ...         76.61               18.48
-51435     42  3590.90  ...          5.00               29.32
-1299      41  2873.06  ...          0.00               29.69
-32967     41  3418.86  ...          5.75               14.94
-12510     41  3947.19  ...         10.85                0.00
-32349     47  2762.79  ...          7.05                0.00
-27238     46  2708.31  ...          6.06                0.00
+27282     45  2868.38  ...          0.00               35.06
+20366     45  7404.62  ...         23.05                5.30
+33685     44  7784.02  ...         62.39               48.11
+57538     41  4222.93  ...          7.40                0.00
+16451     44  4863.31  ...         48.07               25.31
+32735     44  5593.71  ...         71.10               15.40
+51869     43  3324.03  ...          2.13                0.00
+34045     44  2985.97  ...          9.09                0.00
+53107     42  2782.22  ...         13.01                1.27
+43420     40  2811.68  ...          0.00                0.00
 
 [10 rows x 11 columns]</code></pre>
 </div>
 </div>
-<p>A função describe() é fundamental para entender a distribuição de cada variável. Note os percentis extremos (1% e 99%): eles revelam a presença de clientes com comportamento muito fora da média, o que pode influenciar a posição dos centroides no K-Means.</p>
+<p>A função describe() é fundamental para entender a distribuição de cada variável. Note os percentis extremos (1% e 99%): eles revelam a presença de clientes com comportamento muito fora da média, o que pode influenciar a posição dos centroides no K-Means. Observe também se as variáveis de gasto por categoria têm muitos zeros: nem todo cliente compra em todas as categorias, o que torna as distribuições assimétricas, algo que o K-Means, baseado em distâncias, não trata bem.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Basic descriptive statistics:"</span>)</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Estatísticas descritivas básicas:"</span>)</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Basic descriptive statistics:</code></pre>
+<pre><code>Estatísticas descritivas básicas:</code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>df.describe(percentiles <span class="op">=</span> [<span class="fl">.01</span>, <span class="fl">.1</span>, <span class="fl">.25</span>, <span class="fl">.5</span>, <span class="fl">.75</span>, <span class="fl">.9</span>, <span class="fl">.99</span>])</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
@@ -443,7 +508,7 @@ max       53.000000   9435.970000  ...    436.980000          631.680000
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize<span class="op">=</span>(<span class="dv">10</span>, <span class="dv">8</span>))</span>
 <span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>chart <span class="op">=</span> sns.heatmap(correlation_matrix, annot<span class="op">=</span><span class="va">True</span>, cmap<span class="op">=</span><span class="st">"coolwarm"</span>)</span>
 <span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>chart.set_xticklabels(chart.get_xticklabels(), rotation<span class="op">=</span><span class="dv">45</span>)</span>
-<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">"Correlation Matrix"</span>)</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">"Matriz de correlação"</span>)</span>
 <span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
@@ -456,14 +521,15 @@ max       53.000000   9435.970000  ...    436.980000          631.680000
 <p>Após uma visão geral, vale a pena isolar as variáveis que descrevem a dinâmica de engajamento do cliente: Interesse (frequência), Recência (dias desde a última compra) e Valor (gasto total).</p>
 <p>Este “trio” é a base do modelo RFM (Recency, Frequency, Monetary), uma das técnicas de segmentação mais clássicas do varejo. Esperamos ver aqui se clientes que compram com mais frequência (<code>interesse</code>) tendem a gastar mais (<code>vlr_tran_total_6m</code>) e se o tempo de inatividade (<code>dias_ult_compra</code>) tem uma correlação negativa com o valor total gasto.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>cols_coorelation <span class="op">=</span> [<span class="st">'interesse'</span>, <span class="st">'dias_ult_compra'</span>, <span class="st">'vlr_tran_total_6m'</span>]</span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>correlation_matrix <span class="op">=</span> df[cols_coorelation].corr()</span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize<span class="op">=</span>(<span class="dv">8</span>, <span class="dv">6</span>))</span>
-<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>chart <span class="op">=</span> sns.heatmap(correlation_matrix, annot<span class="op">=</span><span class="va">True</span>, cmap<span class="op">=</span><span class="st">"coolwarm"</span>)</span>
-<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>chart.set_xticklabels(chart.get_xticklabels(), rotation<span class="op">=</span><span class="dv">45</span>)</span>
-<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">"Correlation Matrix"</span>)</span>
-<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>cols_correlation <span class="op">=</span> [<span class="st">'interesse'</span>, <span class="st">'dias_ult_compra'</span>, <span class="st">'vlr_tran_total_6m'</span>]</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>correlation_matrix <span class="op">=</span> df[cols_correlation].corr()</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize<span class="op">=</span>(<span class="dv">8</span>, <span class="dv">6</span>))</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>chart <span class="op">=</span> sns.heatmap(correlation_matrix, annot<span class="op">=</span><span class="va">True</span>, cmap<span class="op">=</span><span class="st">"coolwarm"</span>)</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>chart.set_xticklabels(chart.get_xticklabels(), rotation<span class="op">=</span><span class="dv">45</span>)</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">"Matriz de correlação (RFM)"</span>)</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -482,10 +548,12 @@ max       53.000000   9435.970000  ...    436.980000          631.680000
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>Observe que a correlação entre <code>dias_ult_compra</code> e <code>vlr_tran_total_6m</code> é de -0.6.</p>
-<p>Na prática, isso confirma que quanto maior o tempo que o cliente passa sem visitar o mercado (maior a recência), menor tende a ser o seu valor acumulado nos últimos 6 meses. Esse “esfriamento” do cliente é um sinal claro de churn (abandono). Para o gestor, esse número justifica investimentos em campanhas de win-back (re-engajamento) antes que o cliente ultrapasse uma determinada janela de dias sem compra.</p>
+<p>Observe a correlação entre <code>dias_ult_compra</code> e <code>vlr_tran_total_6m</code>, de aproximadamente -0,6 (conforme o mapa de calor).</p>
+<p>Ela indica que clientes que estão há mais tempo sem comprar tendem a ter gasto menos nos últimos 6 meses. Cuidado com a interpretação: as duas variáveis medem aspectos do mesmo comportamento (quem compra pouco tem, naturalmente, mais dias desde a última compra), e a correlação, por si só, não mostra que o cliente vai abandonar o mercado.</p>
+<p>Para o gestor, a recência é um bom <strong>indicador de alerta</strong> para campanhas de win-back (re-engajamento), mas a janela de dias deve ser calibrada pelo ciclo normal de compra dos clientes, e o abandono (<em>churn</em>) só pode ser confirmado observando o que acontece depois.</p>
 </div>
 </div>
+<p>Os códigos abaixo geram histogramas e boxplots de cada variável e gráficos de dispersão para cada par de variáveis. Eles não são executados aqui para não alongar o capítulo, mas podem ser úteis em sua própria análise.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> divide_chunks(l, n):</span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">0</span>, <span class="bu">len</span>(l), n):</span>
@@ -499,63 +567,62 @@ max       53.000000   9435.970000  ...    436.980000          631.680000
 <span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> sub_cols <span class="kw">in</span> l_cols:</span>
 <span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>    fig, axes <span class="op">=</span> plt.subplots(num_rows, num_cols, figsize<span class="op">=</span>(<span class="dv">15</span>,<span class="dv">5</span>))</span>
-<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> idx, col <span class="kw">in</span> <span class="bu">enumerate</span>(sub_cols):</span>
-<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>        data <span class="op">=</span> df</span>
-<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> idx, col <span class="kw">in</span> <span class="bu">enumerate</span>(sub_cols):</span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>        data <span class="op">=</span> df</span>
 <span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a>        ax_his <span class="op">=</span> axes[<span class="dv">0</span>, idx]</span>
 <span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a>        ax_box <span class="op">=</span> axes[<span class="dv">1</span>, idx]</span>
 <span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a>        ax_his.set_title(<span class="ss">f"</span><span class="sc">{</span>col<span class="sc">}</span><span class="ss">"</span>)</span>
-<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a>        sns.histplot(data<span class="op">=</span>data, x<span class="op">=</span>col, bins <span class="op">=</span> <span class="st">"doane"</span>, stat<span class="op">=</span><span class="st">"percent"</span>, color<span class="op">=</span><span class="st">"#fec868"</span>, common_norm<span class="op">=</span><span class="va">False</span>, ax<span class="op">=</span>ax_his)</span>
-<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a>        sns.boxplot(data<span class="op">=</span>data, x<span class="op">=</span>col, color <span class="op">=</span> <span class="st">"#bdb2ff"</span>, flierprops<span class="op">=</span>{<span class="st">"marker"</span>: <span class="st">"x"</span>, <span class="st">"markersize"</span>: <span class="fl">0.001</span>}, ax<span class="op">=</span>ax_box)</span>
-<span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-24"><a href="#cb13-24" aria-hidden="true" tabindex="-1"></a>        ax_his.set_xlabel(<span class="st">""</span>)</span>
-<span id="cb13-25"><a href="#cb13-25" aria-hidden="true" tabindex="-1"></a>        ax_box.set_xlabel(<span class="st">""</span>)</span>
-<span id="cb13-26"><a href="#cb13-26" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-27"><a href="#cb13-27" aria-hidden="true" tabindex="-1"></a>    axes <span class="op">=</span> axes.ravel(order <span class="op">=</span> <span class="st">"F"</span>)</span>
-<span id="cb13-28"><a href="#cb13-28" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> j <span class="kw">in</span> <span class="bu">range</span>(<span class="bu">len</span>(sub_cols)<span class="op">*</span><span class="dv">3</span>, num_cols <span class="op">*</span> num_rows):</span>
-<span id="cb13-29"><a href="#cb13-29" aria-hidden="true" tabindex="-1"></a>        axes[j].axis(<span class="st">"off"</span>)</span>
-<span id="cb13-30"><a href="#cb13-30" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-31"><a href="#cb13-31" aria-hidden="true" tabindex="-1"></a>    plt.tight_layout()</span>
-<span id="cb13-32"><a href="#cb13-32" aria-hidden="true" tabindex="-1"></a>    plt.show()</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a>        sns.histplot(data<span class="op">=</span>data, x<span class="op">=</span>col, bins <span class="op">=</span> <span class="st">"doane"</span>, stat<span class="op">=</span><span class="st">"percent"</span>, color<span class="op">=</span><span class="st">"#fec868"</span>, common_norm<span class="op">=</span><span class="va">False</span>, ax<span class="op">=</span>ax_his)</span>
+<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a>        sns.boxplot(data<span class="op">=</span>data, x<span class="op">=</span>col, color <span class="op">=</span> <span class="st">"#bdb2ff"</span>, flierprops<span class="op">=</span>{<span class="st">"marker"</span>: <span class="st">"x"</span>, <span class="st">"markersize"</span>: <span class="fl">0.001</span>}, ax<span class="op">=</span>ax_box)</span>
+<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a>        ax_his.set_xlabel(<span class="st">""</span>)</span>
+<span id="cb13-24"><a href="#cb13-24" aria-hidden="true" tabindex="-1"></a>        ax_box.set_xlabel(<span class="st">""</span>)</span>
+<span id="cb13-25"><a href="#cb13-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-26"><a href="#cb13-26" aria-hidden="true" tabindex="-1"></a>    axes <span class="op">=</span> axes.ravel(order <span class="op">=</span> <span class="st">"F"</span>)</span>
+<span id="cb13-27"><a href="#cb13-27" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> j <span class="kw">in</span> <span class="bu">range</span>(<span class="bu">len</span>(sub_cols) <span class="op">*</span> num_rows, num_cols <span class="op">*</span> num_rows):</span>
+<span id="cb13-28"><a href="#cb13-28" aria-hidden="true" tabindex="-1"></a>        axes[j].axis(<span class="st">"off"</span>)</span>
+<span id="cb13-29"><a href="#cb13-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-30"><a href="#cb13-30" aria-hidden="true" tabindex="-1"></a>    plt.tight_layout()</span>
+<span id="cb13-31"><a href="#cb13-31" aria-hidden="true" tabindex="-1"></a>    plt.show()</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>total_elementos <span class="op">=</span>  (<span class="bu">len</span>(cols) <span class="op">*</span> (<span class="bu">len</span>(cols) <span class="op">-</span> <span class="dv">1</span>)) <span class="op">//</span> <span class="dv">2</span></span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>num_cols <span class="op">=</span> <span class="dv">5</span></span>
-<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>num_rows <span class="op">=</span> <span class="bu">int</span>(np.ceil(total_elementos<span class="op">/</span>num_cols))</span>
-<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(num_rows, num_cols, figsize<span class="op">=</span>(<span class="dv">20</span>, <span class="dv">30</span>))</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>total_elementos <span class="op">=</span> (<span class="bu">len</span>(cols) <span class="op">*</span> (<span class="bu">len</span>(cols) <span class="op">-</span> <span class="dv">1</span>)) <span class="op">//</span> <span class="dv">2</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>num_cols <span class="op">=</span> <span class="dv">5</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>num_rows <span class="op">=</span> <span class="bu">int</span>(np.ceil(total_elementos<span class="op">/</span>num_cols))</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(num_rows, num_cols, figsize<span class="op">=</span>(<span class="dv">20</span>, <span class="dv">30</span>))</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>idx_row_new, idx_col_new <span class="op">=</span> <span class="dv">0</span>, <span class="dv">0</span></span>
-<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>df_sample <span class="op">=</span> df.sample(<span class="dv">200</span>, random_state <span class="op">=</span> <span class="dv">42</span>)</span>
-<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i, col_i <span class="kw">in</span> <span class="bu">enumerate</span>(cols):</span>
-<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> j, col_j <span class="kw">in</span> <span class="bu">enumerate</span>(cols):</span>
-<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> i <span class="op">&lt;</span> j:</span>
-<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>            ax <span class="op">=</span> axes[idx_row_new, idx_col_new]</span>
-<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>            sns.scatterplot(data<span class="op">=</span>df_sample, x<span class="op">=</span>col_i, y<span class="op">=</span>col_j, color<span class="op">=</span><span class="st">"#bdb2ff"</span>, ax<span class="op">=</span>ax)</span>
-<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>            idx_col_new <span class="op">+=</span> <span class="dv">1</span></span>
-<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> idx_col_new <span class="op">==</span> (num_cols):</span>
-<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a>                idx_row_new <span class="op">+=</span> <span class="dv">1</span></span>
-<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a>                idx_col_new <span class="op">=</span> <span class="dv">0</span></span>
-<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
-<span id="cb14-22"><a href="#cb14-22" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>df_sample <span class="op">=</span> df.sample(<span class="dv">200</span>, random_state <span class="op">=</span> <span class="dv">42</span>)</span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i, col_i <span class="kw">in</span> <span class="bu">enumerate</span>(cols):</span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> j, col_j <span class="kw">in</span> <span class="bu">enumerate</span>(cols):</span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> i <span class="op">&lt;</span> j:</span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>            ax <span class="op">=</span> axes[idx_row_new, idx_col_new]</span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>            sns.scatterplot(data<span class="op">=</span>df_sample, x<span class="op">=</span>col_i, y<span class="op">=</span>col_j, color<span class="op">=</span><span class="st">"#bdb2ff"</span>, ax<span class="op">=</span>ax)</span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>            idx_col_new <span class="op">+=</span> <span class="dv">1</span></span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> idx_col_new <span class="op">==</span> (num_cols):</span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a>                idx_row_new <span class="op">+=</span> <span class="dv">1</span></span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a>                idx_col_new <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
 <section id="algoritmo-k-médias" class="level2" data-number="6.3">
 <h2 data-number="6.3" class="anchored" data-anchor-id="algoritmo-k-médias"><span class="header-section-number">6.3</span> Algoritmo k-médias</h2>
 <p>Nesta etapa, aplicamos o algoritmo K-Means para agrupar nossos clientes. O objetivo é que a variância dentro de cada grupo seja a menor possível, enquanto a diferença entre os grupos seja maximizada.</p>
-<p>Conforme discutido anteriormente, a normalização é um passo crítico. Aqui, utilizamos o Z-score para garantir que variáveis como renda (na casa dos milhares) não dominem variáveis como interesse (unidades) apenas pela magnitude numérica.</p>
+<p>Como visto no capítulo anterior, a padronização é um passo crítico. Aqui, utilizamos o Z-score para garantir que variáveis como renda (na casa dos milhares) não dominem variáveis como interesse (unidades) apenas pela magnitude numérica.</p>
+<p>Guardamos a média e o desvio padrão de cada variável, pois serão necessários para classificar novos clientes no futuro. Mantemos <strong>duas versões</strong> dos dados: <code>df</code> (valores originais, usados para interpretar os grupos) e <code>df_norm</code> (valores padronizados, usados pelo K-Means, pelo cotovelo, pela silhouette e pelo PCA).</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>normalize <span class="op">=</span> <span class="va">True</span></span>
-<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>df_cluster <span class="op">=</span> df.copy()</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>media <span class="op">=</span> df.mean()</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>desvio <span class="op">=</span> df.std()</span>
 <span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> normalize:</span>
-<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>    df_cluster <span class="op">=</span> (df_cluster <span class="op">-</span> df_cluster.mean()) <span class="op">/</span> df_cluster.std()</span>
-<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>    <span class="co"># df_cluster = (df_cluster - df_cluster.min()) / (df_cluster.max() - df_cluster.min()) ## min max</span></span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>df_norm <span class="op">=</span> (df <span class="op">-</span> media) <span class="op">/</span> desvio</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a><span class="co"># alternativa: min-max</span></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a><span class="co"># df_norm = (df - df.min()) / (df.max() - df.min())</span></span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="callout callout-style-default callout-note callout-titled" title="Hiperparâmetro k">
 <div class="callout-header d-flex align-content-center">
@@ -567,820 +634,21 @@ max       53.000000   9435.970000  ...    436.980000          631.680000
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>Inicialmente, fixamos <span class="math inline">\(k=4\)</span> com base em uma premissa de negócio (ex: perfis Bronze, Prata, Ouro e Diamante). Validaremos essa escolha tecnicamente ao final desta aula usando o Método do Cotovelo.</p>
+<p>Inicialmente, fixamos <span class="math inline">\(k=4\)</span> com base em uma premissa de negócio: um número de segmentos que o time de marketing consegue operar. Verificamos essa escolha tecnicamente ao final desta seção, usando o Método do Cotovelo e o coeficiente de silhouette.</p>
 </div>
 </div>
+<p>O algoritmo é executado 10 vezes com inicializações diferentes (<code>n_init = 10</code>), e o melhor resultado é mantido. Como os rótulos numéricos que o K-Means atribui aos grupos são arbitrários (podem mudar de uma execução para outra), ordenamos os clusters pelo <strong>gasto mediano em 6 meses</strong>, do maior para o menor: o cluster A é sempre o de maior valor.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>kmeans <span class="op">=</span> KMeans(n_clusters <span class="op">=</span> <span class="dv">4</span>, random_state<span class="op">=</span><span class="dv">42</span>, init <span class="op">=</span> <span class="st">'k-means++'</span>, n_init <span class="op">=</span> <span class="dv">1</span>)</span>
-<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>kmeans.fit(df_cluster)</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output-display">
-<style>#sk-container-id-1 {
-  /* Definition of color scheme common for light and dark mode */
-  --sklearn-color-text: #000;
-  --sklearn-color-text-muted: #666;
-  --sklearn-color-line: gray;
-  /* Definition of color scheme for unfitted estimators */
-  --sklearn-color-unfitted-level-0: #fff5e6;
-  --sklearn-color-unfitted-level-1: #f6e4d2;
-  --sklearn-color-unfitted-level-2: #ffe0b3;
-  --sklearn-color-unfitted-level-3: chocolate;
-  /* Definition of color scheme for fitted estimators */
-  --sklearn-color-fitted-level-0: #f0f8ff;
-  --sklearn-color-fitted-level-1: #d4ebff;
-  --sklearn-color-fitted-level-2: #b3dbfd;
-  --sklearn-color-fitted-level-3: cornflowerblue;
-}
-
-#sk-container-id-1.light {
-  /* Specific color for light theme */
-  --sklearn-color-text-on-default-background: black;
-  --sklearn-color-background: white;
-  --sklearn-color-border-box: black;
-  --sklearn-color-icon: #696969;
-}
-
-#sk-container-id-1.dark {
-  --sklearn-color-text-on-default-background: white;
-  --sklearn-color-background: #111;
-  --sklearn-color-border-box: white;
-  --sklearn-color-icon: #878787;
-}
-
-#sk-container-id-1 {
-  color: var(--sklearn-color-text);
-}
-
-#sk-container-id-1 pre {
-  padding: 0;
-}
-
-#sk-container-id-1 input.sk-hidden--visually {
-  border: 0;
-  clip: rect(1px 1px 1px 1px);
-  clip: rect(1px, 1px, 1px, 1px);
-  height: 1px;
-  margin: -1px;
-  overflow: hidden;
-  padding: 0;
-  position: absolute;
-  width: 1px;
-}
-
-#sk-container-id-1 div.sk-dashed-wrapped {
-  border: 1px dashed var(--sklearn-color-line);
-  margin: 0 0.4em 0.5em 0.4em;
-  box-sizing: border-box;
-  padding-bottom: 0.4em;
-  background-color: var(--sklearn-color-background);
-}
-
-#sk-container-id-1 div.sk-container {
-  /* jupyter's `normalize.less` sets `[hidden] { display: none; }`
-     but bootstrap.min.css set `[hidden] { display: none !important; }`
-     so we also need the `!important` here to be able to override the
-     default hidden behavior on the sphinx rendered scikit-learn.org.
-     See: https://github.com/scikit-learn/scikit-learn/issues/21755 */
-  display: inline-block !important;
-  position: relative;
-}
-
-#sk-container-id-1 div.sk-text-repr-fallback {
-  display: none;
-}
-
-div.sk-parallel-item,
-div.sk-serial,
-div.sk-item {
-  /* draw centered vertical line to link estimators */
-  background-image: linear-gradient(var(--sklearn-color-text-on-default-background), var(--sklearn-color-text-on-default-background));
-  background-size: 2px 100%;
-  background-repeat: no-repeat;
-  background-position: center center;
-}
-
-/* Parallel-specific style estimator block */
-
-#sk-container-id-1 div.sk-parallel-item::after {
-  content: "";
-  width: 100%;
-  border-bottom: 2px solid var(--sklearn-color-text-on-default-background);
-  flex-grow: 1;
-}
-
-#sk-container-id-1 div.sk-parallel {
-  display: flex;
-  align-items: stretch;
-  justify-content: center;
-  background-color: var(--sklearn-color-background);
-  position: relative;
-}
-
-#sk-container-id-1 div.sk-parallel-item {
-  display: flex;
-  flex-direction: column;
-}
-
-#sk-container-id-1 div.sk-parallel-item:first-child::after {
-  align-self: flex-end;
-  width: 50%;
-}
-
-#sk-container-id-1 div.sk-parallel-item:last-child::after {
-  align-self: flex-start;
-  width: 50%;
-}
-
-#sk-container-id-1 div.sk-parallel-item:only-child::after {
-  width: 0;
-}
-
-/* Serial-specific style estimator block */
-
-#sk-container-id-1 div.sk-serial {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  background-color: var(--sklearn-color-background);
-  padding-right: 1em;
-  padding-left: 1em;
-}
-
-
-/* Toggleable style: style used for estimator/Pipeline/ColumnTransformer box that is
-clickable and can be expanded/collapsed.
-- Pipeline and ColumnTransformer use this feature and define the default style
-- Estimators will overwrite some part of the style using the `sk-estimator` class
-*/
-
-/* Pipeline and ColumnTransformer style (default) */
-
-#sk-container-id-1 div.sk-toggleable {
-  /* Default theme specific background. It is overwritten whether we have a
-  specific estimator or a Pipeline/ColumnTransformer */
-  background-color: var(--sklearn-color-background);
-}
-
-/* Toggleable label */
-#sk-container-id-1 label.sk-toggleable__label {
-  cursor: pointer;
-  display: flex;
-  width: 100%;
-  margin-bottom: 0;
-  padding: 0.5em;
-  box-sizing: border-box;
-  text-align: center;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5em;
-}
-
-#sk-container-id-1 label.sk-toggleable__label .caption {
-  font-size: 0.6rem;
-  font-weight: lighter;
-  color: var(--sklearn-color-text-muted);
-}
-
-#sk-container-id-1 label.sk-toggleable__label-arrow:before {
-  /* Arrow on the left of the label */
-  content: "▸";
-  float: left;
-  margin-right: 0.25em;
-  color: var(--sklearn-color-icon);
-}
-
-#sk-container-id-1 label.sk-toggleable__label-arrow:hover:before {
-  color: var(--sklearn-color-text);
-}
-
-/* Toggleable content - dropdown */
-
-#sk-container-id-1 div.sk-toggleable__content {
-  display: none;
-  text-align: left;
-  /* unfitted */
-  background-color: var(--sklearn-color-unfitted-level-0);
-}
-
-#sk-container-id-1 div.sk-toggleable__content.fitted {
-  /* fitted */
-  background-color: var(--sklearn-color-fitted-level-0);
-}
-
-#sk-container-id-1 div.sk-toggleable__content pre {
-  margin: 0.2em;
-  border-radius: 0.25em;
-  color: var(--sklearn-color-text);
-  /* unfitted */
-  background-color: var(--sklearn-color-unfitted-level-0);
-}
-
-#sk-container-id-1 div.sk-toggleable__content.fitted pre {
-  /* unfitted */
-  background-color: var(--sklearn-color-fitted-level-0);
-}
-
-#sk-container-id-1 input.sk-toggleable__control:checked~div.sk-toggleable__content {
-  /* Expand drop-down */
-  display: block;
-  width: 100%;
-  overflow: visible;
-}
-
-#sk-container-id-1 input.sk-toggleable__control:checked~label.sk-toggleable__label-arrow:before {
-  content: "▾";
-}
-
-/* Pipeline/ColumnTransformer-specific style */
-
-#sk-container-id-1 div.sk-label input.sk-toggleable__control:checked~label.sk-toggleable__label {
-  color: var(--sklearn-color-text);
-  background-color: var(--sklearn-color-unfitted-level-2);
-}
-
-#sk-container-id-1 div.sk-label.fitted input.sk-toggleable__control:checked~label.sk-toggleable__label {
-  background-color: var(--sklearn-color-fitted-level-2);
-}
-
-/* Estimator-specific style */
-
-/* Colorize estimator box */
-#sk-container-id-1 div.sk-estimator input.sk-toggleable__control:checked~label.sk-toggleable__label {
-  /* unfitted */
-  background-color: var(--sklearn-color-unfitted-level-2);
-}
-
-#sk-container-id-1 div.sk-estimator.fitted input.sk-toggleable__control:checked~label.sk-toggleable__label {
-  /* fitted */
-  background-color: var(--sklearn-color-fitted-level-2);
-}
-
-#sk-container-id-1 div.sk-label label.sk-toggleable__label,
-#sk-container-id-1 div.sk-label label {
-  /* The background is the default theme color */
-  color: var(--sklearn-color-text-on-default-background);
-}
-
-/* On hover, darken the color of the background */
-#sk-container-id-1 div.sk-label:hover label.sk-toggleable__label {
-  color: var(--sklearn-color-text);
-  background-color: var(--sklearn-color-unfitted-level-2);
-}
-
-/* Label box, darken color on hover, fitted */
-#sk-container-id-1 div.sk-label.fitted:hover label.sk-toggleable__label.fitted {
-  color: var(--sklearn-color-text);
-  background-color: var(--sklearn-color-fitted-level-2);
-}
-
-/* Estimator label */
-
-#sk-container-id-1 div.sk-label label {
-  font-family: monospace;
-  font-weight: bold;
-  line-height: 1.2em;
-}
-
-#sk-container-id-1 div.sk-label-container {
-  text-align: center;
-}
-
-/* Estimator-specific */
-#sk-container-id-1 div.sk-estimator {
-  font-family: monospace;
-  border: 1px dotted var(--sklearn-color-border-box);
-  border-radius: 0.25em;
-  box-sizing: border-box;
-  margin-bottom: 0.5em;
-  /* unfitted */
-  background-color: var(--sklearn-color-unfitted-level-0);
-}
-
-#sk-container-id-1 div.sk-estimator.fitted {
-  /* fitted */
-  background-color: var(--sklearn-color-fitted-level-0);
-}
-
-/* on hover */
-#sk-container-id-1 div.sk-estimator:hover {
-  /* unfitted */
-  background-color: var(--sklearn-color-unfitted-level-2);
-}
-
-#sk-container-id-1 div.sk-estimator.fitted:hover {
-  /* fitted */
-  background-color: var(--sklearn-color-fitted-level-2);
-}
-
-/* Specification for estimator info (e.g. "i" and "?") */
-
-/* Common style for "i" and "?" */
-
-.sk-estimator-doc-link,
-a:link.sk-estimator-doc-link,
-a:visited.sk-estimator-doc-link {
-  float: right;
-  font-size: smaller;
-  line-height: 1em;
-  font-family: monospace;
-  background-color: var(--sklearn-color-unfitted-level-0);
-  border-radius: 1em;
-  height: 1em;
-  width: 1em;
-  text-decoration: none !important;
-  margin-left: 0.5em;
-  text-align: center;
-  /* unfitted */
-  border: var(--sklearn-color-unfitted-level-3) 1pt solid;
-  color: var(--sklearn-color-unfitted-level-3);
-}
-
-.sk-estimator-doc-link.fitted,
-a:link.sk-estimator-doc-link.fitted,
-a:visited.sk-estimator-doc-link.fitted {
-  /* fitted */
-  background-color: var(--sklearn-color-fitted-level-0);
-  border: var(--sklearn-color-fitted-level-3) 1pt solid;
-  color: var(--sklearn-color-fitted-level-3);
-}
-
-/* On hover */
-div.sk-estimator:hover .sk-estimator-doc-link:hover,
-.sk-estimator-doc-link:hover,
-div.sk-label-container:hover .sk-estimator-doc-link:hover,
-.sk-estimator-doc-link:hover {
-  /* unfitted */
-  background-color: var(--sklearn-color-unfitted-level-3);
-  border: var(--sklearn-color-fitted-level-0) 1pt solid;
-  color: var(--sklearn-color-unfitted-level-0);
-  text-decoration: none;
-}
-
-div.sk-estimator.fitted:hover .sk-estimator-doc-link.fitted:hover,
-.sk-estimator-doc-link.fitted:hover,
-div.sk-label-container:hover .sk-estimator-doc-link.fitted:hover,
-.sk-estimator-doc-link.fitted:hover {
-  /* fitted */
-  background-color: var(--sklearn-color-fitted-level-3);
-  border: var(--sklearn-color-fitted-level-0) 1pt solid;
-  color: var(--sklearn-color-fitted-level-0);
-  text-decoration: none;
-}
-
-/* Span, style for the box shown on hovering the info icon */
-.sk-estimator-doc-link span {
-  display: none;
-  z-index: 9999;
-  position: relative;
-  font-weight: normal;
-  right: .2ex;
-  padding: .5ex;
-  margin: .5ex;
-  width: min-content;
-  min-width: 20ex;
-  max-width: 50ex;
-  color: var(--sklearn-color-text);
-  box-shadow: 2pt 2pt 4pt #999;
-  /* unfitted */
-  background: var(--sklearn-color-unfitted-level-0);
-  border: .5pt solid var(--sklearn-color-unfitted-level-3);
-}
-
-.sk-estimator-doc-link.fitted span {
-  /* fitted */
-  background: var(--sklearn-color-fitted-level-0);
-  border: var(--sklearn-color-fitted-level-3);
-}
-
-.sk-estimator-doc-link:hover span {
-  display: block;
-}
-
-/* "?"-specific style due to the `<a>` HTML tag */
-
-#sk-container-id-1 a.estimator_doc_link {
-  float: right;
-  font-size: 1rem;
-  line-height: 1em;
-  font-family: monospace;
-  background-color: var(--sklearn-color-unfitted-level-0);
-  border-radius: 1rem;
-  height: 1rem;
-  width: 1rem;
-  text-decoration: none;
-  /* unfitted */
-  color: var(--sklearn-color-unfitted-level-1);
-  border: var(--sklearn-color-unfitted-level-1) 1pt solid;
-}
-
-#sk-container-id-1 a.estimator_doc_link.fitted {
-  /* fitted */
-  background-color: var(--sklearn-color-fitted-level-0);
-  border: var(--sklearn-color-fitted-level-1) 1pt solid;
-  color: var(--sklearn-color-fitted-level-1);
-}
-
-/* On hover */
-#sk-container-id-1 a.estimator_doc_link:hover {
-  /* unfitted */
-  background-color: var(--sklearn-color-unfitted-level-3);
-  color: var(--sklearn-color-background);
-  text-decoration: none;
-}
-
-#sk-container-id-1 a.estimator_doc_link.fitted:hover {
-  /* fitted */
-  background-color: var(--sklearn-color-fitted-level-3);
-}
-
-.estimator-table {
-    font-family: monospace;
-}
-
-.estimator-table summary {
-    padding: .5rem;
-    cursor: pointer;
-}
-
-.estimator-table summary::marker {
-    font-size: 0.7rem;
-}
-
-.estimator-table details[open] {
-    padding-left: 0.1rem;
-    padding-right: 0.1rem;
-    padding-bottom: 0.3rem;
-}
-
-.estimator-table .parameters-table {
-    margin-left: auto !important;
-    margin-right: auto !important;
-    margin-top: 0;
-}
-
-.estimator-table .parameters-table tr:nth-child(odd) {
-    background-color: #fff;
-}
-
-.estimator-table .parameters-table tr:nth-child(even) {
-    background-color: #f6f6f6;
-}
-
-.estimator-table .parameters-table tr:hover {
-    background-color: #e0e0e0;
-}
-
-.estimator-table table td {
-    border: 1px solid rgba(106, 105, 104, 0.232);
-}
-
-/*
-    `table td`is set in notebook with right text-align.
-    We need to overwrite it.
-*/
-.estimator-table table td.param {
-    text-align: left;
-    position: relative;
-    padding: 0;
-}
-
-.user-set td {
-    color:rgb(255, 94, 0);
-    text-align: left !important;
-}
-
-.user-set td.value {
-    color:rgb(255, 94, 0);
-    background-color: transparent;
-}
-
-.default td {
-    color: black;
-    text-align: left !important;
-}
-
-.user-set td i,
-.default td i {
-    color: black;
-}
-
-/*
-    Styles for parameter documentation links
-    We need styling for visited so jupyter doesn't overwrite it
-*/
-a.param-doc-link,
-a.param-doc-link:link,
-a.param-doc-link:visited {
-    text-decoration: underline dashed;
-    text-underline-offset: .3em;
-    color: inherit;
-    display: block;
-    padding: .5em;
-}
-
-/* "hack" to make the entire area of the cell containing the link clickable */
-a.param-doc-link::before {
-    position: absolute;
-    content: "";
-    inset: 0;
-}
-
-.param-doc-description {
-    display: none;
-    position: absolute;
-    z-index: 9999;
-    left: 0;
-    padding: .5ex;
-    margin-left: 1.5em;
-    color: var(--sklearn-color-text);
-    box-shadow: .3em .3em .4em #999;
-    width: max-content;
-    text-align: left;
-    max-height: 10em;
-    overflow-y: auto;
-
-    /* unfitted */
-    background: var(--sklearn-color-unfitted-level-0);
-    border: thin solid var(--sklearn-color-unfitted-level-3);
-}
-
-/* Fitted state for parameter tooltips */
-.fitted .param-doc-description {
-    /* fitted */
-    background: var(--sklearn-color-fitted-level-0);
-    border: thin solid var(--sklearn-color-fitted-level-3);
-}
-
-.param-doc-link:hover .param-doc-description {
-    display: block;
-}
-
-.copy-paste-icon {
-    background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0NDggNTEyIj48IS0tIUZvbnQgQXdlc29tZSBGcmVlIDYuNy4yIGJ5IEBmb250YXdlc29tZSAtIGh0dHBzOi8vZm9udGF3ZXNvbWUuY29tIExpY2Vuc2UgLSBodHRwczovL2ZvbnRhd2Vzb21lLmNvbS9saWNlbnNlL2ZyZWUgQ29weXJpZ2h0IDIwMjUgRm9udGljb25zLCBJbmMuLS0+PHBhdGggZD0iTTIwOCAwTDMzMi4xIDBjMTIuNyAwIDI0LjkgNS4xIDMzLjkgMTQuMWw2Ny45IDY3LjljOSA5IDE0LjEgMjEuMiAxNC4xIDMzLjlMNDQ4IDMzNmMwIDI2LjUtMjEuNSA0OC00OCA0OGwtMTkyIDBjLTI2LjUgMC00OC0yMS41LTQ4LTQ4bDAtMjg4YzAtMjYuNSAyMS41LTQ4IDQ4LTQ4ek00OCAxMjhsODAgMCAwIDY0LTY0IDAgMCAyNTYgMTkyIDAgMC0zMiA2NCAwIDAgNDhjMCAyNi41LTIxLjUgNDgtNDggNDhMNDggNTEyYy0yNi41IDAtNDgtMjEuNS00OC00OEwwIDE3NmMwLTI2LjUgMjEuNS00OCA0OC00OHoiLz48L3N2Zz4=);
-    background-repeat: no-repeat;
-    background-size: 14px 14px;
-    background-position: 0;
-    display: inline-block;
-    width: 14px;
-    height: 14px;
-    cursor: pointer;
-}
-</style><div id="sk-container-id-1" class="sk-top-container"><div class="sk-text-repr-fallback"><pre>KMeans(n_clusters=4, n_init=1, random_state=42)</pre><b>In a Jupyter environment, please rerun this cell to show the HTML representation or trust the notebook. <br>On GitHub, the HTML representation is unable to render, please try loading this page with nbviewer.org.</b></div><div class="sk-container" hidden=""><div class="sk-item"><div class="sk-estimator fitted sk-toggleable"><input class="sk-toggleable__control sk-hidden--visually" id="sk-estimator-id-1" type="checkbox" checked=""><label for="sk-estimator-id-1" class="sk-toggleable__label fitted sk-toggleable__label-arrow"><div><div>KMeans</div></div><div><a class="sk-estimator-doc-link fitted" rel="noreferrer" target="_blank" href="https://scikit-learn.org/1.8/modules/generated/sklearn.cluster.KMeans.html">?<span>Documentation for KMeans</span></a><span class="sk-estimator-doc-link fitted">i<span>Fitted</span></span></div></label><div class="sk-toggleable__content fitted" data-param-prefix="">
-        <div class="estimator-table">
-            <details>
-                <summary>Parameters</summary>
-                
-<table class="parameters-table caption-top table table-sm table-striped small">
-<colgroup>
-<col style="width: 33%">
-<col style="width: 33%">
-<col style="width: 33%">
-</colgroup>
-<tbody>
-<tr class="user-set odd">
-<td><em></em></td>
-<td class="param"><a href="https://scikit-learn.org/1.8/modules/generated/sklearn.cluster.KMeans.html#:~:text=n_clusters,-int%2C%20default%3D8" class="param-doc-link" rel="noreferrer" target="_blank">n_clusters <span class="param-doc-description">n_clusters: int, default=8<br>
-<br>
-The number of clusters to form as well as the number of<br>
-centroids to generate.<br>
-<br>
-For an example of how to choose an optimal value for `n_clusters` refer to<br>
-:ref:`sphx_glr_auto_examples_cluster_plot_kmeans_silhouette_analysis.py`.</span></a></td>
-<td class="value">4</td>
-</tr>
-<tr class="default even">
-<td><em></em></td>
-<td class="param"><a href="https://scikit-learn.org/1.8/modules/generated/sklearn.cluster.KMeans.html#:~:text=init,-%7B%27k-means%2B%2B%27%2C%20%27random%27%7D%2C%20callable%20or%20array-like%20of%20shape%20%20%20%20%20%20%20%20%20%20%20%20%20%28n_clusters%2C%20n_features%29%2C%20default%3D%27k-means%2B%2B%27" class="param-doc-link" rel="noreferrer" target="_blank">init <span class="param-doc-description">init: {'k-means++', 'random'}, callable or array-like of shape (n_clusters, n_features), default='k-means++'<br>
-<br>
-Method for initialization:<br>
-<br>
-* 'k-means++' : selects initial cluster centroids using sampling based on an empirical probability distribution of the points' contribution to the overall inertia. This technique speeds up convergence. The algorithm implemented is "greedy k-means++". It differs from the vanilla k-means++ by making several trials at each sampling step and choosing the best centroid among them.<br>
-<br>
-* 'random': choose `n_clusters` observations (rows) at random from data for the initial centroids.<br>
-<br>
-* If an array is passed, it should be of shape (n_clusters, n_features) and gives the initial centers.<br>
-<br>
-* If a callable is passed, it should take arguments X, n_clusters and a random state and return an initialization.<br>
-<br>
-For an example of how to use the different `init` strategies, see<br>
-:ref:`sphx_glr_auto_examples_cluster_plot_kmeans_digits.py`.<br>
-<br>
-For an evaluation of the impact of initialization, see the example<br>
-:ref:`sphx_glr_auto_examples_cluster_plot_kmeans_stability_low_dim_dense.py`.</span></a></td>
-<td class="value">'k-means++'</td>
-</tr>
-<tr class="user-set odd">
-<td><em></em></td>
-<td class="param"><a href="https://scikit-learn.org/1.8/modules/generated/sklearn.cluster.KMeans.html#:~:text=n_init,-%27auto%27%20or%20int%2C%20default%3D%27auto%27" class="param-doc-link" rel="noreferrer" target="_blank">n_init <span class="param-doc-description">n_init: 'auto' or int, default='auto'<br>
-<br>
-Number of times the k-means algorithm is run with different centroid<br>
-seeds. The final results is the best output of `n_init` consecutive runs<br>
-in terms of inertia. Several runs are recommended for sparse<br>
-high-dimensional problems (see :ref:`kmeans_sparse_high_dim`).<br>
-<br>
-When `n_init='auto'`, the number of runs depends on the value of init:<br>
-10 if using `init='random'` or `init` is a callable;<br>
-1 if using `init='k-means++'` or `init` is an array-like.<br>
-<br>
-.. versionadded:: 1.2<br>
-Added 'auto' option for `n_init`.<br>
-<br>
-.. versionchanged:: 1.4<br>
-Default value for `n_init` changed to `'auto'`.</span></a></td>
-<td class="value">1</td>
-</tr>
-<tr class="default even">
-<td><em></em></td>
-<td class="param"><a href="https://scikit-learn.org/1.8/modules/generated/sklearn.cluster.KMeans.html#:~:text=max_iter,-int%2C%20default%3D300" class="param-doc-link" rel="noreferrer" target="_blank">max_iter <span class="param-doc-description">max_iter: int, default=300<br>
-<br>
-Maximum number of iterations of the k-means algorithm for a<br>
-single run.</span></a></td>
-<td class="value">300</td>
-</tr>
-<tr class="default odd">
-<td><em></em></td>
-<td class="param"><a href="https://scikit-learn.org/1.8/modules/generated/sklearn.cluster.KMeans.html#:~:text=tol,-float%2C%20default%3D1e-4" class="param-doc-link" rel="noreferrer" target="_blank">tol <span class="param-doc-description">tol: float, default=1e-4<br>
-<br>
-Relative tolerance with regards to Frobenius norm of the difference<br>
-in the cluster centers of two consecutive iterations to declare<br>
-convergence.</span></a></td>
-<td class="value">0.0001</td>
-</tr>
-<tr class="default even">
-<td><em></em></td>
-<td class="param"><a href="https://scikit-learn.org/1.8/modules/generated/sklearn.cluster.KMeans.html#:~:text=verbose,-int%2C%20default%3D0" class="param-doc-link" rel="noreferrer" target="_blank">verbose <span class="param-doc-description">verbose: int, default=0<br>
-<br>
-Verbosity mode.</span></a></td>
-<td class="value">0</td>
-</tr>
-<tr class="user-set odd">
-<td><em></em></td>
-<td class="param"><a href="https://scikit-learn.org/1.8/modules/generated/sklearn.cluster.KMeans.html#:~:text=random_state,-int%2C%20RandomState%20instance%20or%20None%2C%20default%3DNone" class="param-doc-link" rel="noreferrer" target="_blank">random_state <span class="param-doc-description">random_state: int, RandomState instance or None, default=None<br>
-<br>
-Determines random number generation for centroid initialization. Use<br>
-an int to make the randomness deterministic.<br>
-See :term:`Glossary <random_state>`.</random_state></span></a></td>
-<td class="value">42</td>
-</tr>
-<tr class="default even">
-<td><em></em></td>
-<td class="param"><a href="https://scikit-learn.org/1.8/modules/generated/sklearn.cluster.KMeans.html#:~:text=copy_x,-bool%2C%20default%3DTrue" class="param-doc-link" rel="noreferrer" target="_blank">copy_x <span class="param-doc-description">copy_x: bool, default=True<br>
-<br>
-When pre-computing distances it is more numerically accurate to center<br>
-the data first. If copy_x is True (default), then the original data is<br>
-not modified. If False, the original data is modified, and put back<br>
-before the function returns, but small numerical differences may be<br>
-introduced by subtracting and then adding the data mean. Note that if<br>
-the original data is not C-contiguous, a copy will be made even if<br>
-copy_x is False. If the original data is sparse, but not in CSR format,<br>
-a copy will be made even if copy_x is False.</span></a></td>
-<td class="value">True</td>
-</tr>
-<tr class="default odd">
-<td><em></em></td>
-<td class="param"><a href="https://scikit-learn.org/1.8/modules/generated/sklearn.cluster.KMeans.html#:~:text=algorithm,-%7B%22lloyd%22%2C%20%22elkan%22%7D%2C%20default%3D%22lloyd%22" class="param-doc-link" rel="noreferrer" target="_blank">algorithm <span class="param-doc-description">algorithm: {"lloyd", "elkan"}, default="lloyd"<br>
-<br>
-K-means algorithm to use. The classical EM-style algorithm is `"lloyd"`.<br>
-The `"elkan"` variation can be more efficient on some datasets with<br>
-well-defined clusters, by using the triangle inequality. However it's<br>
-more memory intensive due to the allocation of an extra array of shape<br>
-`(n_samples, n_clusters)`.<br>
-<br>
-.. versionchanged:: 0.18<br>
-Added Elkan algorithm<br>
-<br>
-.. versionchanged:: 1.1<br>
-Renamed "full" to "lloyd", and deprecated "auto" and "full".<br>
-Changed "auto" to use "lloyd" instead of "elkan".</span></a></td>
-<td class="value">'lloyd'</td>
-</tr>
-</tbody>
-</table>
-
-            </details>
-        </div>
-    </div></div></div></div></div><script>function copyToClipboard(text, element) {
-    // Get the parameter prefix from the closest toggleable content
-    const toggleableContent = element.closest('.sk-toggleable__content');
-    const paramPrefix = toggleableContent ? toggleableContent.dataset.paramPrefix : '';
-    const fullParamName = paramPrefix ? `${paramPrefix}${text}` : text;
-
-    const originalStyle = element.style;
-    const computedStyle = window.getComputedStyle(element);
-    const originalWidth = computedStyle.width;
-    const originalHTML = element.innerHTML.replace('Copied!', '');
-
-    navigator.clipboard.writeText(fullParamName)
-        .then(() => {
-            element.style.width = originalWidth;
-            element.style.color = 'green';
-            element.innerHTML = "Copied!";
-
-            setTimeout(() => {
-                element.innerHTML = originalHTML;
-                element.style = originalStyle;
-            }, 2000);
-        })
-        .catch(err => {
-            console.error('Failed to copy:', err);
-            element.style.color = 'red';
-            element.innerHTML = "Failed!";
-            setTimeout(() => {
-                element.innerHTML = originalHTML;
-                element.style = originalStyle;
-            }, 2000);
-        });
-    return false;
-}
-
-document.querySelectorAll('.copy-paste-icon').forEach(function(element) {
-    const toggleableContent = element.closest('.sk-toggleable__content');
-    const paramPrefix = toggleableContent ? toggleableContent.dataset.paramPrefix : '';
-    const paramName = element.parentElement.nextElementSibling
-        .textContent.trim().split(' ')[0];
-    const fullParamName = paramPrefix ? `${paramPrefix}${paramName}` : paramName;
-
-    element.setAttribute('title', fullParamName);
-});
-
-
-/**
- * Adapted from Skrub
- * https://github.com/skrub-data/skrub/blob/403466d1d5d4dc76a7ef569b3f8228db59a31dc3/skrub/_reporting/_data/templates/report.js#L789
- * @returns "light" or "dark"
- */
-function detectTheme(element) {
-    const body = document.querySelector('body');
-
-    // Check VSCode theme
-    const themeKindAttr = body.getAttribute('data-vscode-theme-kind');
-    const themeNameAttr = body.getAttribute('data-vscode-theme-name');
-
-    if (themeKindAttr && themeNameAttr) {
-        const themeKind = themeKindAttr.toLowerCase();
-        const themeName = themeNameAttr.toLowerCase();
-
-        if (themeKind.includes("dark") || themeName.includes("dark")) {
-            return "dark";
-        }
-        if (themeKind.includes("light") || themeName.includes("light")) {
-            return "light";
-        }
-    }
-
-    // Check Jupyter theme
-    if (body.getAttribute('data-jp-theme-light') === 'false') {
-        return 'dark';
-    } else if (body.getAttribute('data-jp-theme-light') === 'true') {
-        return 'light';
-    }
-
-    // Guess based on a parent element's color
-    const color = window.getComputedStyle(element.parentNode, null).getPropertyValue('color');
-    const match = color.match(/^rgb\s*\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)\s*$/i);
-    if (match) {
-        const [r, g, b] = [
-            parseFloat(match[1]),
-            parseFloat(match[2]),
-            parseFloat(match[3])
-        ];
-
-        // https://en.wikipedia.org/wiki/HSL_and_HSV#Lightness
-        const luma = 0.299 * r + 0.587 * g + 0.114 * b;
-
-        if (luma > 180) {
-            // If the text is very bright we have a dark theme
-            return 'dark';
-        }
-        if (luma < 75) {
-            // If the text is very dark we have a light theme
-            return 'light';
-        }
-        // Otherwise fall back to the next heuristic.
-    }
-
-    // Fallback to system preference
-    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-}
-
-
-function forceTheme(elementId) {
-    const estimatorElement = document.querySelector(`#${elementId}`);
-    if (estimatorElement === null) {
-        console.error(`Element with id ${elementId} not found.`);
-    } else {
-        const theme = detectTheme(estimatorElement);
-        estimatorElement.classList.add(theme);
-    }
-}
-
-forceTheme('sk-container-id-1');</script>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>kmeans <span class="op">=</span> KMeans(n_clusters <span class="op">=</span> <span class="dv">4</span>, random_state<span class="op">=</span><span class="dv">42</span>, init <span class="op">=</span> <span class="st">'k-means++'</span>, n_init <span class="op">=</span> <span class="dv">10</span>)</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>rotulos_brutos <span class="op">=</span> kmeans.fit_predict(df_norm)</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>gasto_mediano <span class="op">=</span> df.groupby(rotulos_brutos)[<span class="st">"vlr_tran_total_6m"</span>].median().sort_values(ascending<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>mapa <span class="op">=</span> {k: <span class="bu">chr</span>(<span class="dv">65</span> <span class="op">+</span> i) <span class="cf">for</span> i, k <span class="kw">in</span> <span class="bu">enumerate</span>(gasto_mediano.index)}</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>df_cluster <span class="op">=</span> df.copy()</span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>df_cluster[<span class="st">"cluster"</span>] <span class="op">=</span> [mapa[k] <span class="cf">for</span> k <span class="kw">in</span> rotulos_brutos]</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>predict <span class="op">=</span> kmeans.predict(df_cluster)</span>
-<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>df_cluster[<span class="st">"cluster"</span>] <span class="op">=</span> predict</span>
-<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>df_cluster[<span class="st">"cluster"</span>] <span class="op">=</span> [<span class="bu">chr</span>(x<span class="op">+</span><span class="dv">65</span>) <span class="cf">for</span> x <span class="kw">in</span> df_cluster.cluster]</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<p>Após a convergência do algoritmo, precisamos “dar nome aos bois”. Para isso, desfazemos a normalização para observar as medianas reais de cada grupo e entender o volume de clientes em cada um.</p>
+<p>Após a convergência do algoritmo, precisamos “dar nome aos bois”. Para isso, usamos os valores originais (não padronizados) para observar as medianas reais de cada grupo e entender o volume de clientes em cada um.</p>
 <div class="callout callout-style-default callout-tip callout-titled" title="Dica Analítica">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -1395,92 +663,92 @@ forceTheme('sk-container-id-1');</script>
 </div>
 </div>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>df_cluster <span class="op">=</span> df.copy()</span>
-<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>df_cluster[<span class="st">"cluster"</span>] <span class="op">=</span> predict</span>
-<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>df_cluster[<span class="st">"cluster"</span>] <span class="op">=</span> [<span class="bu">chr</span>(x<span class="op">+</span><span class="dv">65</span>) <span class="cf">for</span> x <span class="kw">in</span> df_cluster.cluster]</span>
-<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>df_cluster_info <span class="op">=</span> df_cluster.groupby(<span class="st">"cluster"</span>).median().reset_index()</span>
-<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>df_cluster_count <span class="op">=</span> df_cluster.groupby(<span class="st">"cluster"</span>).count()[<span class="st">"idade"</span>].reset_index()</span>
-<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>df_cluster_count.columns <span class="op">=</span> [<span class="st">"cluster"</span>, <span class="st">"Count"</span>]</span>
-<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>df_cluster_table <span class="op">=</span> pd.merge(df_cluster_info, df_cluster_count, how<span class="op">=</span><span class="st">"left"</span>, on<span class="op">=</span><span class="st">"cluster"</span>)</span>
-<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a>df_pivot <span class="op">=</span> df_cluster_table.set_index(<span class="st">'cluster'</span>).T</span>
-<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(df_pivot)</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>df_cluster_info <span class="op">=</span> df_cluster.groupby(<span class="st">"cluster"</span>).median().reset_index()</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>df_cluster_count <span class="op">=</span> df_cluster.groupby(<span class="st">"cluster"</span>).count()[<span class="st">"idade"</span>].reset_index()</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>df_cluster_count.columns <span class="op">=</span> [<span class="st">"cluster"</span>, <span class="st">"Count"</span>]</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>df_cluster_table <span class="op">=</span> pd.merge(df_cluster_info, df_cluster_count, how<span class="op">=</span><span class="st">"left"</span>, on<span class="op">=</span><span class="st">"cluster"</span>)</span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>df_pivot <span class="op">=</span> df_cluster_table.set_index(<span class="st">'cluster'</span>).T</span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(df_pivot.<span class="bu">round</span>(<span class="dv">1</span>))</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>cluster                     A        B        C          D
-idade                  42.000    48.00    43.00     44.000
-renda                2983.460  3656.19  7166.71   5236.255
-score_serasa          557.595   630.60   783.80    758.835
-interesse               0.650     1.00     1.00      1.000
-dias_ult_compra        61.000     4.00    22.00     29.000
-vlr_tran_total_6m     158.165  2466.23   829.32    555.570
-gasto_vinho_6m          0.000     0.55   110.76      0.000
-gasto_queijo_6m         0.000    17.89     0.00     23.915
-gasto_cerveja_6m        0.010    28.95    14.11      0.180
-gasto_flv_6m            1.240   219.50    47.20     44.975
-gasto_mercearia_6m      1.810   232.10    42.58     41.020
-Count               30000.000  9987.00  9253.00  10760.000</code></pre>
+<pre><code>cluster                  A        B        C        D
+idade                 48.0     44.0     42.0     42.0
+renda               3656.3   6165.5   3191.8   2654.2
+score_serasa         630.6    770.6    573.9    518.8
+interesse              1.0      1.0      0.7      0.0
+dias_ult_compra        4.0     26.0     53.0    181.0
+vlr_tran_total_6m   2466.2    673.8    206.1      0.1
+gasto_vinho_6m         0.6      2.0      0.0      0.0
+gasto_queijo_6m       17.9     12.6      0.0      0.0
+gasto_cerveja_6m      28.6      2.1      0.1      0.0
+gasto_flv_6m         219.4     46.0      4.6      0.0
+gasto_mercearia_6m   232.0     41.7      7.6      0.0
+Count               9998.0  19989.0  20013.0  10000.0</code></pre>
 </div>
 </div>
 <p>Definição da função utilizada para construção dos gráficos spider.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> make_spider(df_plot, n_cols <span class="op">=</span> <span class="va">None</span>):</span>
-<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>    num_col <span class="op">=</span> df_plot.columns.difference([<span class="st">"cluster"</span>])</span>
-<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> n_cols <span class="op">==</span> <span class="va">None</span>:</span>
-<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>        n_cols <span class="op">=</span> df_plot[<span class="st">'cluster'</span>].unique().shape[<span class="dv">0</span>]</span>
-<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>    df_plot[num_col] <span class="op">/=</span> df_plot[num_col].<span class="bu">max</span>()</span>
-<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>    df_plot <span class="op">=</span> df_plot.fillna(<span class="dv">0</span>)</span>
-<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>    palette <span class="op">=</span> plt.cm.get_cmap(<span class="st">"Set2"</span>, <span class="bu">len</span>(df_plot.index))</span>
-<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a>    <span class="co"># number of variable</span></span>
-<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a>    categories <span class="op">=</span> <span class="bu">list</span>(df_plot)[<span class="dv">1</span>:]</span>
-<span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a>    N <span class="op">=</span> <span class="bu">len</span>(categories)</span>
-<span id="cb20-14"><a href="#cb20-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-15"><a href="#cb20-15" aria-hidden="true" tabindex="-1"></a>    <span class="co"># What will be the angle of each axis in the plot? (we divide the plot / number of variable)</span></span>
-<span id="cb20-16"><a href="#cb20-16" aria-hidden="true" tabindex="-1"></a>    angles <span class="op">=</span> [n <span class="op">/</span> <span class="bu">float</span>(N) <span class="op">*</span> <span class="dv">2</span> <span class="op">*</span> np.pi <span class="cf">for</span> n <span class="kw">in</span> <span class="bu">range</span>(N)]</span>
-<span id="cb20-17"><a href="#cb20-17" aria-hidden="true" tabindex="-1"></a>    angles <span class="op">+=</span> angles[:<span class="dv">1</span>]</span>
-<span id="cb20-18"><a href="#cb20-18" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-19"><a href="#cb20-19" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Initialise the spider plot</span></span>
-<span id="cb20-20"><a href="#cb20-20" aria-hidden="true" tabindex="-1"></a>    my_dpi <span class="op">=</span> <span class="dv">96</span></span>
-<span id="cb20-21"><a href="#cb20-21" aria-hidden="true" tabindex="-1"></a>    fig, axes <span class="op">=</span> plt.subplots(df_plot.shape[<span class="dv">0</span>] <span class="op">//</span> n_cols, n_cols, figsize<span class="op">=</span>(<span class="dv">1500</span><span class="op">/</span>my_dpi, <span class="dv">1500</span><span class="op">/</span>my_dpi), dpi<span class="op">=</span>my_dpi, subplot_kw<span class="op">=</span>{<span class="st">"projection"</span> : <span class="st">"polar"</span>})</span>
-<span id="cb20-22"><a href="#cb20-22" aria-hidden="true" tabindex="-1"></a>    axes <span class="op">=</span> axes.ravel()</span>
-<span id="cb20-23"><a href="#cb20-23" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-24"><a href="#cb20-24" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> idx, ax <span class="kw">in</span> <span class="bu">enumerate</span>(axes):</span>
-<span id="cb20-25"><a href="#cb20-25" aria-hidden="true" tabindex="-1"></a>        color <span class="op">=</span> palette(idx)</span>
-<span id="cb20-26"><a href="#cb20-26" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-27"><a href="#cb20-27" aria-hidden="true" tabindex="-1"></a>        row <span class="op">=</span> df_plot.iloc[idx]</span>
-<span id="cb20-28"><a href="#cb20-28" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-29"><a href="#cb20-29" aria-hidden="true" tabindex="-1"></a>        <span class="co"># If you want the first axis to be on top: a</span></span>
-<span id="cb20-30"><a href="#cb20-30" aria-hidden="true" tabindex="-1"></a>        ax.set_theta_offset(np.pi <span class="op">/</span> <span class="dv">2</span>)</span>
-<span id="cb20-31"><a href="#cb20-31" aria-hidden="true" tabindex="-1"></a>        ax.set_theta_direction(<span class="op">-</span><span class="dv">1</span>)</span>
-<span id="cb20-32"><a href="#cb20-32" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-33"><a href="#cb20-33" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Draw one axe per variable + add labels labels yet</span></span>
-<span id="cb20-34"><a href="#cb20-34" aria-hidden="true" tabindex="-1"></a>        ax.set_xticks(angles[:<span class="op">-</span><span class="dv">1</span>], categories, color<span class="op">=</span><span class="st">'grey'</span>, size<span class="op">=</span><span class="dv">7</span>)</span>
-<span id="cb20-35"><a href="#cb20-35" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-36"><a href="#cb20-36" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Draw ylabels</span></span>
-<span id="cb20-37"><a href="#cb20-37" aria-hidden="true" tabindex="-1"></a>        ax.set_rlabel_position(<span class="dv">0</span>)</span>
-<span id="cb20-38"><a href="#cb20-38" aria-hidden="true" tabindex="-1"></a>        ax.set_yticks([<span class="fl">0.33</span>,<span class="fl">0.66</span>,<span class="fl">0.99</span>], [<span class="st">"0.3"</span>,<span class="st">"0.6"</span>,<span class="st">"1"</span>], color<span class="op">=</span><span class="st">"grey"</span>, size<span class="op">=</span><span class="dv">10</span>)</span>
-<span id="cb20-39"><a href="#cb20-39" aria-hidden="true" tabindex="-1"></a>        ax.set_ylim(<span class="dv">0</span>, <span class="dv">1</span>)</span>
-<span id="cb20-40"><a href="#cb20-40" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-41"><a href="#cb20-41" aria-hidden="true" tabindex="-1"></a>        <span class="co"># pegando valores</span></span>
-<span id="cb20-42"><a href="#cb20-42" aria-hidden="true" tabindex="-1"></a>        values <span class="op">=</span> row.drop(<span class="st">"cluster"</span>).values.flatten().tolist()</span>
-<span id="cb20-43"><a href="#cb20-43" aria-hidden="true" tabindex="-1"></a>        values <span class="op">+=</span> values[:<span class="dv">1</span>]</span>
-<span id="cb20-44"><a href="#cb20-44" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-45"><a href="#cb20-45" aria-hidden="true" tabindex="-1"></a>        ax.plot(angles, values, color<span class="op">=</span>color, linewidth<span class="op">=</span><span class="fl">1.5</span>, linestyle<span class="op">=</span><span class="st">'solid'</span>)</span>
-<span id="cb20-46"><a href="#cb20-46" aria-hidden="true" tabindex="-1"></a>        ax.fill(angles, values, color<span class="op">=</span>color, alpha<span class="op">=</span><span class="fl">0.4</span>)</span>
-<span id="cb20-47"><a href="#cb20-47" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-48"><a href="#cb20-48" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Add a title</span></span>
-<span id="cb20-49"><a href="#cb20-49" aria-hidden="true" tabindex="-1"></a>        ax.set_title(<span class="ss">f"Persona </span><span class="sc">{</span>row[<span class="st">'cluster'</span>]<span class="sc">}</span><span class="ss">"</span>, size<span class="op">=</span><span class="dv">14</span>, color<span class="op">=</span>color, y<span class="op">=</span><span class="fl">1.1</span>)</span>
-<span id="cb20-50"><a href="#cb20-50" aria-hidden="true" tabindex="-1"></a>    plt.tight_layout()</span>
-<span id="cb20-51"><a href="#cb20-51" aria-hidden="true" tabindex="-1"></a>    plt.show()</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> make_spider(df_plot, n_cols <span class="op">=</span> <span class="va">None</span>):</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>    df_plot <span class="op">=</span> df_plot.copy()  <span class="co"># evita alterar o data frame original</span></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>    num_col <span class="op">=</span> df_plot.columns.difference([<span class="st">"cluster"</span>])</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> n_cols <span class="kw">is</span> <span class="va">None</span>:</span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>        n_cols <span class="op">=</span> df_plot[<span class="st">'cluster'</span>].unique().shape[<span class="dv">0</span>]</span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>    df_plot[num_col] <span class="op">/=</span> df_plot[num_col].<span class="bu">max</span>()</span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a>    df_plot <span class="op">=</span> df_plot.fillna(<span class="dv">0</span>)</span>
+<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a>    <span class="co"># mesma paleta usada no gráfico do PCA</span></span>
+<span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a>    palette <span class="op">=</span> sns.color_palette(<span class="st">"Set2"</span>, <span class="bu">len</span>(df_plot.index))</span>
+<span id="cb19-14"><a href="#cb19-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-15"><a href="#cb19-15" aria-hidden="true" tabindex="-1"></a>    <span class="co"># number of variable</span></span>
+<span id="cb19-16"><a href="#cb19-16" aria-hidden="true" tabindex="-1"></a>    categories <span class="op">=</span> <span class="bu">list</span>(df_plot)[<span class="dv">1</span>:]</span>
+<span id="cb19-17"><a href="#cb19-17" aria-hidden="true" tabindex="-1"></a>    N <span class="op">=</span> <span class="bu">len</span>(categories)</span>
+<span id="cb19-18"><a href="#cb19-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-19"><a href="#cb19-19" aria-hidden="true" tabindex="-1"></a>    <span class="co"># What will be the angle of each axis in the plot? (we divide the plot / number of variable)</span></span>
+<span id="cb19-20"><a href="#cb19-20" aria-hidden="true" tabindex="-1"></a>    angles <span class="op">=</span> [n <span class="op">/</span> <span class="bu">float</span>(N) <span class="op">*</span> <span class="dv">2</span> <span class="op">*</span> np.pi <span class="cf">for</span> n <span class="kw">in</span> <span class="bu">range</span>(N)]</span>
+<span id="cb19-21"><a href="#cb19-21" aria-hidden="true" tabindex="-1"></a>    angles <span class="op">+=</span> angles[:<span class="dv">1</span>]</span>
+<span id="cb19-22"><a href="#cb19-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-23"><a href="#cb19-23" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Initialise the spider plot</span></span>
+<span id="cb19-24"><a href="#cb19-24" aria-hidden="true" tabindex="-1"></a>    my_dpi <span class="op">=</span> <span class="dv">96</span></span>
+<span id="cb19-25"><a href="#cb19-25" aria-hidden="true" tabindex="-1"></a>    fig, axes <span class="op">=</span> plt.subplots(df_plot.shape[<span class="dv">0</span>] <span class="op">//</span> n_cols, n_cols, figsize<span class="op">=</span>(<span class="dv">1500</span><span class="op">/</span>my_dpi, <span class="dv">1500</span><span class="op">/</span>my_dpi), dpi<span class="op">=</span>my_dpi, subplot_kw<span class="op">=</span>{<span class="st">"projection"</span> : <span class="st">"polar"</span>})</span>
+<span id="cb19-26"><a href="#cb19-26" aria-hidden="true" tabindex="-1"></a>    axes <span class="op">=</span> axes.ravel()</span>
+<span id="cb19-27"><a href="#cb19-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-28"><a href="#cb19-28" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> idx, ax <span class="kw">in</span> <span class="bu">enumerate</span>(axes):</span>
+<span id="cb19-29"><a href="#cb19-29" aria-hidden="true" tabindex="-1"></a>        color <span class="op">=</span> palette[idx]</span>
+<span id="cb19-30"><a href="#cb19-30" aria-hidden="true" tabindex="-1"></a>        row <span class="op">=</span> df_plot.iloc[idx]</span>
+<span id="cb19-31"><a href="#cb19-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-32"><a href="#cb19-32" aria-hidden="true" tabindex="-1"></a>        <span class="co"># If you want the first axis to be on top: a</span></span>
+<span id="cb19-33"><a href="#cb19-33" aria-hidden="true" tabindex="-1"></a>        ax.set_theta_offset(np.pi <span class="op">/</span> <span class="dv">2</span>)</span>
+<span id="cb19-34"><a href="#cb19-34" aria-hidden="true" tabindex="-1"></a>        ax.set_theta_direction(<span class="op">-</span><span class="dv">1</span>)</span>
+<span id="cb19-35"><a href="#cb19-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-36"><a href="#cb19-36" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Draw one axe per variable + add labels labels yet</span></span>
+<span id="cb19-37"><a href="#cb19-37" aria-hidden="true" tabindex="-1"></a>        ax.set_xticks(angles[:<span class="op">-</span><span class="dv">1</span>], categories, color<span class="op">=</span><span class="st">'grey'</span>, size<span class="op">=</span><span class="dv">7</span>)</span>
+<span id="cb19-38"><a href="#cb19-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-39"><a href="#cb19-39" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Draw ylabels</span></span>
+<span id="cb19-40"><a href="#cb19-40" aria-hidden="true" tabindex="-1"></a>        ax.set_rlabel_position(<span class="dv">0</span>)</span>
+<span id="cb19-41"><a href="#cb19-41" aria-hidden="true" tabindex="-1"></a>        ax.set_yticks([<span class="fl">0.33</span>,<span class="fl">0.66</span>,<span class="fl">0.99</span>], [<span class="st">"0.3"</span>,<span class="st">"0.6"</span>,<span class="st">"1"</span>], color<span class="op">=</span><span class="st">"grey"</span>, size<span class="op">=</span><span class="dv">10</span>)</span>
+<span id="cb19-42"><a href="#cb19-42" aria-hidden="true" tabindex="-1"></a>        ax.set_ylim(<span class="dv">0</span>, <span class="dv">1</span>)</span>
+<span id="cb19-43"><a href="#cb19-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-44"><a href="#cb19-44" aria-hidden="true" tabindex="-1"></a>        <span class="co"># pegando valores</span></span>
+<span id="cb19-45"><a href="#cb19-45" aria-hidden="true" tabindex="-1"></a>        values <span class="op">=</span> row.drop(<span class="st">"cluster"</span>).values.flatten().tolist()</span>
+<span id="cb19-46"><a href="#cb19-46" aria-hidden="true" tabindex="-1"></a>        values <span class="op">+=</span> values[:<span class="dv">1</span>]</span>
+<span id="cb19-47"><a href="#cb19-47" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-48"><a href="#cb19-48" aria-hidden="true" tabindex="-1"></a>        ax.plot(angles, values, color<span class="op">=</span>color, linewidth<span class="op">=</span><span class="fl">1.5</span>, linestyle<span class="op">=</span><span class="st">'solid'</span>)</span>
+<span id="cb19-49"><a href="#cb19-49" aria-hidden="true" tabindex="-1"></a>        ax.fill(angles, values, color<span class="op">=</span>color, alpha<span class="op">=</span><span class="fl">0.4</span>)</span>
+<span id="cb19-50"><a href="#cb19-50" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-51"><a href="#cb19-51" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Add a title</span></span>
+<span id="cb19-52"><a href="#cb19-52" aria-hidden="true" tabindex="-1"></a>        ax.set_title(<span class="ss">f"Cluster </span><span class="sc">{</span>row[<span class="st">'cluster'</span>]<span class="sc">}</span><span class="ss">"</span>, size<span class="op">=</span><span class="dv">14</span>, color<span class="op">=</span>color, y<span class="op">=</span><span class="fl">1.1</span>)</span>
+<span id="cb19-53"><a href="#cb19-53" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-54"><a href="#cb19-54" aria-hidden="true" tabindex="-1"></a>    plt.tight_layout()</span>
+<span id="cb19-55"><a href="#cb19-55" aria-hidden="true" tabindex="-1"></a>    plt.show()</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<p>Visualização dessas características com o gráfico spider.</p>
+<p>Visualização dessas características com o gráfico spider. Cada eixo é escalado pelo maior valor mediano entre os grupos.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>make_spider(df_cluster_info)</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>make_spider(df_cluster_info)</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -1490,36 +758,63 @@ Count               30000.000  9987.00  9253.00  10760.000</code></pre>
 </div>
 </div>
 <p>Com base na tabela e no gráfico acima, podemos desenhar o perfil comportamental de cada grupo. Esta etapa é fundamental para que o time de marketing saiba o que oferecer para quem.</p>
+<!-- TODO: após renderizar, conferir os números abaixo (vindos da versão anterior do capítulo) com a tabela de medianas. Os rótulos agora seguem a ordem do gasto mediano (A = maior). -->
 <ul>
-<li><p>Cluster A: O “Dormitório” ou Inativo</p>
+<li><strong>Cluster A: O “Fiel do Dia a Dia” (<em>Heavy User</em>) — 9.998 clientes (16,7%)</strong>
 <ul>
-<li><p>Perfil: É o maior grupo da base (30.000 clientes).</p></li>
-<li><p>Comportamento: Possui a menor renda, o menor score e o menor interesse. O dado mais crítico é a recência: 61 dias desde a última compra e um gasto semestral irrisório (R$ 158).</p></li>
-<li><p>Estratégia: Este grupo representa um risco de churn ou clientes que só compram itens em promoção extrema.</p></li>
-<li><p>Ação: Campanha de reativação com cupons de desconto agressivos para trazê-los de volta à loja.</p></li>
+<li><strong>Perfil:</strong> Renda moderada (mediana de R$ 3.656) e bom score de crédito (631), mas é quem gera o maior faturamento semestral (R$ 2.466).</li>
+<li><strong>Comportamento:</strong> É o cliente mais engajado da base. Compra com altíssima frequência (mediana de 4 dias desde a última compra, interesse 1,0) e concentra suas compras de abastecimento no mercado, liderando com folga os gastos em mercearia (R$ 232), FLV (R$ 219), cerveja (R$ 29) e queijos (R$ 18). Curiosamente, quase não consome vinhos (mediana de R$ 0,60).</li>
+<li><strong>Estratégia:</strong> Manutenção de fidelidade e blindagem contra a concorrência.</li>
+<li><strong>Ação:</strong> Programa de pontos ou benefícios em perecíveis (FLV) para manter a recorrência semanal.</li>
 </ul></li>
-<li><p>Cluster B: O “Fiel do Dia a Dia” (Heavy User)</p>
+<li><strong>Cluster B: O “Alta Renda Seletivo” — 19.989 clientes (33,3%)</strong>
 <ul>
-<li><p>Perfil: Renda moderada, mas o maior gasto total (R$ 2.466).</p></li>
-<li><p>Comportamento: É o cliente dos sonhos. Compra quase todo dia (recência de 4 dias) e abastece a dispensa (mercearia) e a feira (FLV) no seu mercado. Curiosamente, não gasta quase nada em vinhos.</p></li>
-<li><p>Estratégia: Manutenção de fidelidade.</p></li>
-<li><p>Ação: Programa de pontos ou “mimos” em categorias de perecíveis para garantir que ele não mude para o concorrente.</p></li>
+<li><strong>Perfil:</strong> Possui o maior poder aquisitivo da base (renda mediana de R$ 6.166) e o melhor score Serasa (771), mas gasta quase quatro vezes menos que o Cluster A (R$ 674 no semestre).</li>
+<li><strong>Comportamento:</strong> Faz compras mensais (recência mediana de 26 dias) e mantêm alto interesse (1,0), mas não realiza a “compra do mês” no supermercado — seus gastos medianos em mercearia (R$ 42) e FLV (R$ 46) são modestos. Embora a mediana de vinhos seja baixa (R$ 2), este é o único grupo onde o consumo de vinhos e queijos finos puxa a média da categoria para cima (como visto no gráfico de radar), indicando um subgrupo relevante de consumidores <em>gourmet</em>.</li>
+<li><strong>Estratégia:</strong> Aumento de <em>share of wallet</em> e venda cruzada (<em>cross-sell</em>) de itens de maior margem.</li>
+<li><strong>Ação:</strong> Ofertas direcionadas de adega, queijos especiais e produtos importados para capturar uma fatia maior do seu orçamento.</li>
 </ul></li>
-<li><p>Cluster C: O “Sommelier” de Alta Renda</p>
+<li><strong>Cluster C: O “Consumidor Esporádico” — 20.013 clientes (33,4%)</strong>
 <ul>
-<li><p>Perfil: A maior renda da base (R$ 7.166) e o melhor score Serasa.</p></li>
-<li><p>Comportamento: O gasto em vinhos é o mais alto disparado (R$ 110), enquanto o gasto em mercearia e FLV é baixo. Ele provavelmente compra itens específicos e caros, mas não faz a “compra do mês” no seu mercado.</p></li>
-<li><p>Estratégia: Venda cruzada (Cross-sell) de itens premium.</p></li>
-<li><p>Ação: Convites para degustações, ofertas de queijos importados e produtos gourmet.</p></li>
+<li><strong>Perfil:</strong> Renda (R$ 3.192) e score (574) intermediários, dividindo com o Cluster B o posto de maior grupo da base.</li>
+<li><strong>Comportamento:</strong> Apresenta engajamento moderado a baixo (interesse 0,7) e compras bastante espaçadas (mediana de 53 dias sem comprar). O gasto semestral é baixo (R$ 206), restrito a compras pontuais de mercearia (R$ 7,60) e FLV (R$ 4,60), com gasto mediano nulo em bebidas alcoólicas e queijos.</li>
+<li><strong>Estratégia:</strong> Aumento de frequência e construção de hábito.</li>
+<li><strong>Ação:</strong> Campanhas via aplicativo com gatilhos de recorrência (ex.: descontos progressivos na segunda visita do mês) para reduzir o intervalo de 53 dias.</li>
 </ul></li>
-<li><p>Cluster D: O “Consumidor Equilibrado” (Standard)</p>
+<li><strong>Cluster D: O “Inativo” (<em>Churn</em> / Hibernando) — 10.000 clientes (16,7%)</strong>
 <ul>
-<li><p>Perfil: Renda e score intermediários.</p></li>
-<li><p>Comportamento: Tem um comportamento de compra mais espaçado (29 dias) e foca em Queijos, FLV e Mercearia. É o cliente que faz compras de reposição.</p></li>
-<li><p>Estratégia: Aumento de frequência.</p></li>
-<li><p>Ação: Ofertas personalizadas via App para tentar diminuir o intervalo de 29 dias para 15 dias entre as compras.</p></li>
+<li><strong>Perfil:</strong> Menor renda (R$ 2.654), menor score Serasa (519) e interesse zerado (0,0).</li>
+<li><strong>Comportamento:</strong> Grupo em estado crítico de inatividade. A mediana de recência é de 181 dias (cerca de seis meses sem transacionar), resultando em gasto mediano praticamente nulo no último semestre (R$ 0,10 no total e R$ 0,00 em todas as categorias). Os dados transversais não permitem afirmar se são ex-clientes perdidos para a concorrência ou cadastros de compra única.</li>
+<li><strong>Estratégia:</strong> Reativação seletiva e de baixo custo (evitando subsidiar clientes sem potencial de retorno).</li>
+<li><strong>Ação:</strong> Testar uma campanha automatizada de reativação (e-mail/push) com grupo de controle antes de investir em cupons agressivos.</li>
 </ul></li>
 </ul>
+<section id="quanto-vale-cada-grupo" class="level3" data-number="6.3.1">
+<h3 data-number="6.3.1" class="anchored" data-anchor-id="quanto-vale-cada-grupo"><span class="header-section-number">6.3.1</span> Quanto vale cada grupo?</h3>
+<p>O tamanho de um grupo não diz quanto ele pesa no faturamento. A tabela abaixo compara a participação de cada cluster no total de clientes com a sua participação no gasto total dos últimos 6 meses.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>resumo <span class="op">=</span> df_cluster.groupby(<span class="st">"cluster"</span>).agg(</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>    clientes<span class="op">=</span>(<span class="st">"idade"</span>, <span class="st">"size"</span>),</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>    gasto_total<span class="op">=</span>(<span class="st">"vlr_tran_total_6m"</span>, <span class="st">"sum"</span>),</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>    gasto_mediano<span class="op">=</span>(<span class="st">"vlr_tran_total_6m"</span>, <span class="st">"median"</span>)</span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>resumo[<span class="st">"</span><span class="sc">% c</span><span class="st">lientes"</span>] <span class="op">=</span> <span class="dv">100</span> <span class="op">*</span> resumo[<span class="st">"clientes"</span>] <span class="op">/</span> resumo[<span class="st">"clientes"</span>].<span class="bu">sum</span>()</span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>resumo[<span class="st">"</span><span class="sc">% d</span><span class="st">o gasto"</span>] <span class="op">=</span> <span class="dv">100</span> <span class="op">*</span> resumo[<span class="st">"gasto_total"</span>] <span class="op">/</span> resumo[<span class="st">"gasto_total"</span>].<span class="bu">sum</span>()</span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(resumo.<span class="bu">round</span>(<span class="dv">1</span>))</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>         clientes  gasto_total  gasto_mediano  % clientes  % do gasto
+cluster                                                              
+A            9998   24653246.8         2466.2        16.7        57.7
+B           19989   13766820.6          673.8        33.3        32.2
+C           20013    4219462.0          206.1        33.4         9.9
+D           10000      58432.8            0.1        16.7         0.1</code></pre>
+</div>
+</div>
+<p>Os números revelam uma forte concentração de receita: o Cluster A reúne apenas 16,7% dos clientes (9.998 pessoas), mas responde por 57,7% de todo o faturamento do semestre (cerca de R$ 24,65 milhões). Juntos, os clusters A e B representam exatos 50,0% da base e geram 89,9% da receita total.</p>
+<p>No extremo oposto, o Cluster D também representa 16,7% dos clientes (10.000 pessoas), mas contribui com irrisórios 0,1% do gasto total (cerca de R$ 58 mil no semestre inteiro, com mediana de R$ 0,10). Já o Cluster C, embora seja o maior grupo em volume de cadastros (33,4%), entrega menos de um décimo do faturamento (9,9%).</p>
+<p>Essa comparação é fundamental para priorizar o orçamento de marketing: um grupo grande, mas de baixo gasto (como o Cluster C), pode ter um potencial de retorno imediato menor do que um grupo pequeno de clientes de alto valor (como o Cluster A). Ao mesmo tempo, um grupo volumoso de gasto moderado a baixo pode ter mais espaço para crescer, e a decisão depende do custo e do efeito esperado de cada ação.</p>
 <div class="callout callout-style-default callout-important callout-titled" title="Reflexão importante">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -1530,892 +825,111 @@ Count               30000.000  9987.00  9253.00  10760.000</code></pre>
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>O <strong>Cluster A</strong> representa mais de 50% da base total. Vale a pena gastar a mesma energia de marketing com ele do que com o Cluster B, que gasta 15 vezes mais? Essa é a base da segmentação estratégica!</p>
+<p>Os clusters A e D têm praticamente o mesmo tamanho (cerca de 10 mil clientes cada, ou 16,7% da base), mas o Cluster A gera mais de 420 vezes o faturamento do Cluster D! Vale a pena investir a mesma verba e energia de marketing nos dois grupos, ou devemos proteger intensamente o Cluster A enquanto usamos canais automatizados de baixo custo para tentar reativar o D? Essa é a base da segmentação estratégica!</p>
 </div>
 </div>
-<section id="escolha-do-melhor-valor-de-k" class="level3" data-number="6.3.1">
-<h3 data-number="6.3.1" class="anchored" data-anchor-id="escolha-do-melhor-valor-de-k"><span class="header-section-number">6.3.1</span> Escolha do melhor valor de <span class="math inline">\(k\)</span></h3>
-<p>A escolha do número de grupos em uma análise de clustering não deve ser arbitrária. Para validarmos se <span class="math inline">\(k=4\)</span> é uma escolha tecnicamente robusta, utilizamos o Método do Cotovelo (Elbow Method).</p>
-<div class="cell" data-warnings="false">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>inertia <span class="op">=</span> []</span>
-<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>k_values <span class="op">=</span> <span class="bu">range</span>(<span class="dv">2</span>, <span class="dv">8</span>)</span>
-<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> k <span class="kw">in</span> k_values:</span>
-<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>    kmeans <span class="op">=</span> KMeans(n_clusters<span class="op">=</span>k, random_state<span class="op">=</span><span class="dv">42</span>, init<span class="op">=</span><span class="st">'k-means++'</span>, n_init<span class="op">=</span><span class="dv">10</span>) <span class="co"># n_init=10 para melhores resultados</span></span>
-<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>    kmeans.fit(df_cluster.drop(columns<span class="op">=</span>[<span class="st">'cluster'</span>], errors<span class="op">=</span><span class="st">'ignore'</span>)) <span class="co"># Certifica que a coluna 'cluster' não esteja presente se já foi adicionada</span></span>
-<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>    inertia.append(kmeans.inertia_)</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output-display">
-<style>#sk-container-id-2 {
-  /* Definition of color scheme common for light and dark mode */
-  --sklearn-color-text: #000;
-  --sklearn-color-text-muted: #666;
-  --sklearn-color-line: gray;
-  /* Definition of color scheme for unfitted estimators */
-  --sklearn-color-unfitted-level-0: #fff5e6;
-  --sklearn-color-unfitted-level-1: #f6e4d2;
-  --sklearn-color-unfitted-level-2: #ffe0b3;
-  --sklearn-color-unfitted-level-3: chocolate;
-  /* Definition of color scheme for fitted estimators */
-  --sklearn-color-fitted-level-0: #f0f8ff;
-  --sklearn-color-fitted-level-1: #d4ebff;
-  --sklearn-color-fitted-level-2: #b3dbfd;
-  --sklearn-color-fitted-level-3: cornflowerblue;
-}
-
-#sk-container-id-2.light {
-  /* Specific color for light theme */
-  --sklearn-color-text-on-default-background: black;
-  --sklearn-color-background: white;
-  --sklearn-color-border-box: black;
-  --sklearn-color-icon: #696969;
-}
-
-#sk-container-id-2.dark {
-  --sklearn-color-text-on-default-background: white;
-  --sklearn-color-background: #111;
-  --sklearn-color-border-box: white;
-  --sklearn-color-icon: #878787;
-}
-
-#sk-container-id-2 {
-  color: var(--sklearn-color-text);
-}
-
-#sk-container-id-2 pre {
-  padding: 0;
-}
-
-#sk-container-id-2 input.sk-hidden--visually {
-  border: 0;
-  clip: rect(1px 1px 1px 1px);
-  clip: rect(1px, 1px, 1px, 1px);
-  height: 1px;
-  margin: -1px;
-  overflow: hidden;
-  padding: 0;
-  position: absolute;
-  width: 1px;
-}
-
-#sk-container-id-2 div.sk-dashed-wrapped {
-  border: 1px dashed var(--sklearn-color-line);
-  margin: 0 0.4em 0.5em 0.4em;
-  box-sizing: border-box;
-  padding-bottom: 0.4em;
-  background-color: var(--sklearn-color-background);
-}
-
-#sk-container-id-2 div.sk-container {
-  /* jupyter's `normalize.less` sets `[hidden] { display: none; }`
-     but bootstrap.min.css set `[hidden] { display: none !important; }`
-     so we also need the `!important` here to be able to override the
-     default hidden behavior on the sphinx rendered scikit-learn.org.
-     See: https://github.com/scikit-learn/scikit-learn/issues/21755 */
-  display: inline-block !important;
-  position: relative;
-}
-
-#sk-container-id-2 div.sk-text-repr-fallback {
-  display: none;
-}
-
-div.sk-parallel-item,
-div.sk-serial,
-div.sk-item {
-  /* draw centered vertical line to link estimators */
-  background-image: linear-gradient(var(--sklearn-color-text-on-default-background), var(--sklearn-color-text-on-default-background));
-  background-size: 2px 100%;
-  background-repeat: no-repeat;
-  background-position: center center;
-}
-
-/* Parallel-specific style estimator block */
-
-#sk-container-id-2 div.sk-parallel-item::after {
-  content: "";
-  width: 100%;
-  border-bottom: 2px solid var(--sklearn-color-text-on-default-background);
-  flex-grow: 1;
-}
-
-#sk-container-id-2 div.sk-parallel {
-  display: flex;
-  align-items: stretch;
-  justify-content: center;
-  background-color: var(--sklearn-color-background);
-  position: relative;
-}
-
-#sk-container-id-2 div.sk-parallel-item {
-  display: flex;
-  flex-direction: column;
-}
-
-#sk-container-id-2 div.sk-parallel-item:first-child::after {
-  align-self: flex-end;
-  width: 50%;
-}
-
-#sk-container-id-2 div.sk-parallel-item:last-child::after {
-  align-self: flex-start;
-  width: 50%;
-}
-
-#sk-container-id-2 div.sk-parallel-item:only-child::after {
-  width: 0;
-}
-
-/* Serial-specific style estimator block */
-
-#sk-container-id-2 div.sk-serial {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  background-color: var(--sklearn-color-background);
-  padding-right: 1em;
-  padding-left: 1em;
-}
-
-
-/* Toggleable style: style used for estimator/Pipeline/ColumnTransformer box that is
-clickable and can be expanded/collapsed.
-- Pipeline and ColumnTransformer use this feature and define the default style
-- Estimators will overwrite some part of the style using the `sk-estimator` class
-*/
-
-/* Pipeline and ColumnTransformer style (default) */
-
-#sk-container-id-2 div.sk-toggleable {
-  /* Default theme specific background. It is overwritten whether we have a
-  specific estimator or a Pipeline/ColumnTransformer */
-  background-color: var(--sklearn-color-background);
-}
-
-/* Toggleable label */
-#sk-container-id-2 label.sk-toggleable__label {
-  cursor: pointer;
-  display: flex;
-  width: 100%;
-  margin-bottom: 0;
-  padding: 0.5em;
-  box-sizing: border-box;
-  text-align: center;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5em;
-}
-
-#sk-container-id-2 label.sk-toggleable__label .caption {
-  font-size: 0.6rem;
-  font-weight: lighter;
-  color: var(--sklearn-color-text-muted);
-}
-
-#sk-container-id-2 label.sk-toggleable__label-arrow:before {
-  /* Arrow on the left of the label */
-  content: "▸";
-  float: left;
-  margin-right: 0.25em;
-  color: var(--sklearn-color-icon);
-}
-
-#sk-container-id-2 label.sk-toggleable__label-arrow:hover:before {
-  color: var(--sklearn-color-text);
-}
-
-/* Toggleable content - dropdown */
-
-#sk-container-id-2 div.sk-toggleable__content {
-  display: none;
-  text-align: left;
-  /* unfitted */
-  background-color: var(--sklearn-color-unfitted-level-0);
-}
-
-#sk-container-id-2 div.sk-toggleable__content.fitted {
-  /* fitted */
-  background-color: var(--sklearn-color-fitted-level-0);
-}
-
-#sk-container-id-2 div.sk-toggleable__content pre {
-  margin: 0.2em;
-  border-radius: 0.25em;
-  color: var(--sklearn-color-text);
-  /* unfitted */
-  background-color: var(--sklearn-color-unfitted-level-0);
-}
-
-#sk-container-id-2 div.sk-toggleable__content.fitted pre {
-  /* unfitted */
-  background-color: var(--sklearn-color-fitted-level-0);
-}
-
-#sk-container-id-2 input.sk-toggleable__control:checked~div.sk-toggleable__content {
-  /* Expand drop-down */
-  display: block;
-  width: 100%;
-  overflow: visible;
-}
-
-#sk-container-id-2 input.sk-toggleable__control:checked~label.sk-toggleable__label-arrow:before {
-  content: "▾";
-}
-
-/* Pipeline/ColumnTransformer-specific style */
-
-#sk-container-id-2 div.sk-label input.sk-toggleable__control:checked~label.sk-toggleable__label {
-  color: var(--sklearn-color-text);
-  background-color: var(--sklearn-color-unfitted-level-2);
-}
-
-#sk-container-id-2 div.sk-label.fitted input.sk-toggleable__control:checked~label.sk-toggleable__label {
-  background-color: var(--sklearn-color-fitted-level-2);
-}
-
-/* Estimator-specific style */
-
-/* Colorize estimator box */
-#sk-container-id-2 div.sk-estimator input.sk-toggleable__control:checked~label.sk-toggleable__label {
-  /* unfitted */
-  background-color: var(--sklearn-color-unfitted-level-2);
-}
-
-#sk-container-id-2 div.sk-estimator.fitted input.sk-toggleable__control:checked~label.sk-toggleable__label {
-  /* fitted */
-  background-color: var(--sklearn-color-fitted-level-2);
-}
-
-#sk-container-id-2 div.sk-label label.sk-toggleable__label,
-#sk-container-id-2 div.sk-label label {
-  /* The background is the default theme color */
-  color: var(--sklearn-color-text-on-default-background);
-}
-
-/* On hover, darken the color of the background */
-#sk-container-id-2 div.sk-label:hover label.sk-toggleable__label {
-  color: var(--sklearn-color-text);
-  background-color: var(--sklearn-color-unfitted-level-2);
-}
-
-/* Label box, darken color on hover, fitted */
-#sk-container-id-2 div.sk-label.fitted:hover label.sk-toggleable__label.fitted {
-  color: var(--sklearn-color-text);
-  background-color: var(--sklearn-color-fitted-level-2);
-}
-
-/* Estimator label */
-
-#sk-container-id-2 div.sk-label label {
-  font-family: monospace;
-  font-weight: bold;
-  line-height: 1.2em;
-}
-
-#sk-container-id-2 div.sk-label-container {
-  text-align: center;
-}
-
-/* Estimator-specific */
-#sk-container-id-2 div.sk-estimator {
-  font-family: monospace;
-  border: 1px dotted var(--sklearn-color-border-box);
-  border-radius: 0.25em;
-  box-sizing: border-box;
-  margin-bottom: 0.5em;
-  /* unfitted */
-  background-color: var(--sklearn-color-unfitted-level-0);
-}
-
-#sk-container-id-2 div.sk-estimator.fitted {
-  /* fitted */
-  background-color: var(--sklearn-color-fitted-level-0);
-}
-
-/* on hover */
-#sk-container-id-2 div.sk-estimator:hover {
-  /* unfitted */
-  background-color: var(--sklearn-color-unfitted-level-2);
-}
-
-#sk-container-id-2 div.sk-estimator.fitted:hover {
-  /* fitted */
-  background-color: var(--sklearn-color-fitted-level-2);
-}
-
-/* Specification for estimator info (e.g. "i" and "?") */
-
-/* Common style for "i" and "?" */
-
-.sk-estimator-doc-link,
-a:link.sk-estimator-doc-link,
-a:visited.sk-estimator-doc-link {
-  float: right;
-  font-size: smaller;
-  line-height: 1em;
-  font-family: monospace;
-  background-color: var(--sklearn-color-unfitted-level-0);
-  border-radius: 1em;
-  height: 1em;
-  width: 1em;
-  text-decoration: none !important;
-  margin-left: 0.5em;
-  text-align: center;
-  /* unfitted */
-  border: var(--sklearn-color-unfitted-level-3) 1pt solid;
-  color: var(--sklearn-color-unfitted-level-3);
-}
-
-.sk-estimator-doc-link.fitted,
-a:link.sk-estimator-doc-link.fitted,
-a:visited.sk-estimator-doc-link.fitted {
-  /* fitted */
-  background-color: var(--sklearn-color-fitted-level-0);
-  border: var(--sklearn-color-fitted-level-3) 1pt solid;
-  color: var(--sklearn-color-fitted-level-3);
-}
-
-/* On hover */
-div.sk-estimator:hover .sk-estimator-doc-link:hover,
-.sk-estimator-doc-link:hover,
-div.sk-label-container:hover .sk-estimator-doc-link:hover,
-.sk-estimator-doc-link:hover {
-  /* unfitted */
-  background-color: var(--sklearn-color-unfitted-level-3);
-  border: var(--sklearn-color-fitted-level-0) 1pt solid;
-  color: var(--sklearn-color-unfitted-level-0);
-  text-decoration: none;
-}
-
-div.sk-estimator.fitted:hover .sk-estimator-doc-link.fitted:hover,
-.sk-estimator-doc-link.fitted:hover,
-div.sk-label-container:hover .sk-estimator-doc-link.fitted:hover,
-.sk-estimator-doc-link.fitted:hover {
-  /* fitted */
-  background-color: var(--sklearn-color-fitted-level-3);
-  border: var(--sklearn-color-fitted-level-0) 1pt solid;
-  color: var(--sklearn-color-fitted-level-0);
-  text-decoration: none;
-}
-
-/* Span, style for the box shown on hovering the info icon */
-.sk-estimator-doc-link span {
-  display: none;
-  z-index: 9999;
-  position: relative;
-  font-weight: normal;
-  right: .2ex;
-  padding: .5ex;
-  margin: .5ex;
-  width: min-content;
-  min-width: 20ex;
-  max-width: 50ex;
-  color: var(--sklearn-color-text);
-  box-shadow: 2pt 2pt 4pt #999;
-  /* unfitted */
-  background: var(--sklearn-color-unfitted-level-0);
-  border: .5pt solid var(--sklearn-color-unfitted-level-3);
-}
-
-.sk-estimator-doc-link.fitted span {
-  /* fitted */
-  background: var(--sklearn-color-fitted-level-0);
-  border: var(--sklearn-color-fitted-level-3);
-}
-
-.sk-estimator-doc-link:hover span {
-  display: block;
-}
-
-/* "?"-specific style due to the `<a>` HTML tag */
-
-#sk-container-id-2 a.estimator_doc_link {
-  float: right;
-  font-size: 1rem;
-  line-height: 1em;
-  font-family: monospace;
-  background-color: var(--sklearn-color-unfitted-level-0);
-  border-radius: 1rem;
-  height: 1rem;
-  width: 1rem;
-  text-decoration: none;
-  /* unfitted */
-  color: var(--sklearn-color-unfitted-level-1);
-  border: var(--sklearn-color-unfitted-level-1) 1pt solid;
-}
-
-#sk-container-id-2 a.estimator_doc_link.fitted {
-  /* fitted */
-  background-color: var(--sklearn-color-fitted-level-0);
-  border: var(--sklearn-color-fitted-level-1) 1pt solid;
-  color: var(--sklearn-color-fitted-level-1);
-}
-
-/* On hover */
-#sk-container-id-2 a.estimator_doc_link:hover {
-  /* unfitted */
-  background-color: var(--sklearn-color-unfitted-level-3);
-  color: var(--sklearn-color-background);
-  text-decoration: none;
-}
-
-#sk-container-id-2 a.estimator_doc_link.fitted:hover {
-  /* fitted */
-  background-color: var(--sklearn-color-fitted-level-3);
-}
-
-.estimator-table {
-    font-family: monospace;
-}
-
-.estimator-table summary {
-    padding: .5rem;
-    cursor: pointer;
-}
-
-.estimator-table summary::marker {
-    font-size: 0.7rem;
-}
-
-.estimator-table details[open] {
-    padding-left: 0.1rem;
-    padding-right: 0.1rem;
-    padding-bottom: 0.3rem;
-}
-
-.estimator-table .parameters-table {
-    margin-left: auto !important;
-    margin-right: auto !important;
-    margin-top: 0;
-}
-
-.estimator-table .parameters-table tr:nth-child(odd) {
-    background-color: #fff;
-}
-
-.estimator-table .parameters-table tr:nth-child(even) {
-    background-color: #f6f6f6;
-}
-
-.estimator-table .parameters-table tr:hover {
-    background-color: #e0e0e0;
-}
-
-.estimator-table table td {
-    border: 1px solid rgba(106, 105, 104, 0.232);
-}
-
-/*
-    `table td`is set in notebook with right text-align.
-    We need to overwrite it.
-*/
-.estimator-table table td.param {
-    text-align: left;
-    position: relative;
-    padding: 0;
-}
-
-.user-set td {
-    color:rgb(255, 94, 0);
-    text-align: left !important;
-}
-
-.user-set td.value {
-    color:rgb(255, 94, 0);
-    background-color: transparent;
-}
-
-.default td {
-    color: black;
-    text-align: left !important;
-}
-
-.user-set td i,
-.default td i {
-    color: black;
-}
-
-/*
-    Styles for parameter documentation links
-    We need styling for visited so jupyter doesn't overwrite it
-*/
-a.param-doc-link,
-a.param-doc-link:link,
-a.param-doc-link:visited {
-    text-decoration: underline dashed;
-    text-underline-offset: .3em;
-    color: inherit;
-    display: block;
-    padding: .5em;
-}
-
-/* "hack" to make the entire area of the cell containing the link clickable */
-a.param-doc-link::before {
-    position: absolute;
-    content: "";
-    inset: 0;
-}
-
-.param-doc-description {
-    display: none;
-    position: absolute;
-    z-index: 9999;
-    left: 0;
-    padding: .5ex;
-    margin-left: 1.5em;
-    color: var(--sklearn-color-text);
-    box-shadow: .3em .3em .4em #999;
-    width: max-content;
-    text-align: left;
-    max-height: 10em;
-    overflow-y: auto;
-
-    /* unfitted */
-    background: var(--sklearn-color-unfitted-level-0);
-    border: thin solid var(--sklearn-color-unfitted-level-3);
-}
-
-/* Fitted state for parameter tooltips */
-.fitted .param-doc-description {
-    /* fitted */
-    background: var(--sklearn-color-fitted-level-0);
-    border: thin solid var(--sklearn-color-fitted-level-3);
-}
-
-.param-doc-link:hover .param-doc-description {
-    display: block;
-}
-
-.copy-paste-icon {
-    background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA0NDggNTEyIj48IS0tIUZvbnQgQXdlc29tZSBGcmVlIDYuNy4yIGJ5IEBmb250YXdlc29tZSAtIGh0dHBzOi8vZm9udGF3ZXNvbWUuY29tIExpY2Vuc2UgLSBodHRwczovL2ZvbnRhd2Vzb21lLmNvbS9saWNlbnNlL2ZyZWUgQ29weXJpZ2h0IDIwMjUgRm9udGljb25zLCBJbmMuLS0+PHBhdGggZD0iTTIwOCAwTDMzMi4xIDBjMTIuNyAwIDI0LjkgNS4xIDMzLjkgMTQuMWw2Ny45IDY3LjljOSA5IDE0LjEgMjEuMiAxNC4xIDMzLjlMNDQ4IDMzNmMwIDI2LjUtMjEuNSA0OC00OCA0OGwtMTkyIDBjLTI2LjUgMC00OC0yMS41LTQ4LTQ4bDAtMjg4YzAtMjYuNSAyMS41LTQ4IDQ4LTQ4ek00OCAxMjhsODAgMCAwIDY0LTY0IDAgMCAyNTYgMTkyIDAgMC0zMiA2NCAwIDAgNDhjMCAyNi41LTIxLjUgNDgtNDggNDhMNDggNTEyYy0yNi41IDAtNDgtMjEuNS00OC00OEwwIDE3NmMwLTI2LjUgMjEuNS00OCA0OC00OHoiLz48L3N2Zz4=);
-    background-repeat: no-repeat;
-    background-size: 14px 14px;
-    background-position: 0;
-    display: inline-block;
-    width: 14px;
-    height: 14px;
-    cursor: pointer;
-}
-</style><div id="sk-container-id-2" class="sk-top-container"><div class="sk-text-repr-fallback"><pre>KMeans(n_clusters=7, n_init=10, random_state=42)</pre><b>In a Jupyter environment, please rerun this cell to show the HTML representation or trust the notebook. <br>On GitHub, the HTML representation is unable to render, please try loading this page with nbviewer.org.</b></div><div class="sk-container" hidden=""><div class="sk-item"><div class="sk-estimator fitted sk-toggleable"><input class="sk-toggleable__control sk-hidden--visually" id="sk-estimator-id-2" type="checkbox" checked=""><label for="sk-estimator-id-2" class="sk-toggleable__label fitted sk-toggleable__label-arrow"><div><div>KMeans</div></div><div><a class="sk-estimator-doc-link fitted" rel="noreferrer" target="_blank" href="https://scikit-learn.org/1.8/modules/generated/sklearn.cluster.KMeans.html">?<span>Documentation for KMeans</span></a><span class="sk-estimator-doc-link fitted">i<span>Fitted</span></span></div></label><div class="sk-toggleable__content fitted" data-param-prefix="">
-        <div class="estimator-table">
-            <details>
-                <summary>Parameters</summary>
-                
-<table class="parameters-table caption-top table table-sm table-striped small">
-<colgroup>
-<col style="width: 33%">
-<col style="width: 33%">
-<col style="width: 33%">
-</colgroup>
-<tbody>
-<tr class="user-set odd">
-<td><em></em></td>
-<td class="param"><a href="https://scikit-learn.org/1.8/modules/generated/sklearn.cluster.KMeans.html#:~:text=n_clusters,-int%2C%20default%3D8" class="param-doc-link" rel="noreferrer" target="_blank">n_clusters <span class="param-doc-description">n_clusters: int, default=8<br>
-<br>
-The number of clusters to form as well as the number of<br>
-centroids to generate.<br>
-<br>
-For an example of how to choose an optimal value for `n_clusters` refer to<br>
-:ref:`sphx_glr_auto_examples_cluster_plot_kmeans_silhouette_analysis.py`.</span></a></td>
-<td class="value">7</td>
-</tr>
-<tr class="default even">
-<td><em></em></td>
-<td class="param"><a href="https://scikit-learn.org/1.8/modules/generated/sklearn.cluster.KMeans.html#:~:text=init,-%7B%27k-means%2B%2B%27%2C%20%27random%27%7D%2C%20callable%20or%20array-like%20of%20shape%20%20%20%20%20%20%20%20%20%20%20%20%20%28n_clusters%2C%20n_features%29%2C%20default%3D%27k-means%2B%2B%27" class="param-doc-link" rel="noreferrer" target="_blank">init <span class="param-doc-description">init: {'k-means++', 'random'}, callable or array-like of shape (n_clusters, n_features), default='k-means++'<br>
-<br>
-Method for initialization:<br>
-<br>
-* 'k-means++' : selects initial cluster centroids using sampling based on an empirical probability distribution of the points' contribution to the overall inertia. This technique speeds up convergence. The algorithm implemented is "greedy k-means++". It differs from the vanilla k-means++ by making several trials at each sampling step and choosing the best centroid among them.<br>
-<br>
-* 'random': choose `n_clusters` observations (rows) at random from data for the initial centroids.<br>
-<br>
-* If an array is passed, it should be of shape (n_clusters, n_features) and gives the initial centers.<br>
-<br>
-* If a callable is passed, it should take arguments X, n_clusters and a random state and return an initialization.<br>
-<br>
-For an example of how to use the different `init` strategies, see<br>
-:ref:`sphx_glr_auto_examples_cluster_plot_kmeans_digits.py`.<br>
-<br>
-For an evaluation of the impact of initialization, see the example<br>
-:ref:`sphx_glr_auto_examples_cluster_plot_kmeans_stability_low_dim_dense.py`.</span></a></td>
-<td class="value">'k-means++'</td>
-</tr>
-<tr class="user-set odd">
-<td><em></em></td>
-<td class="param"><a href="https://scikit-learn.org/1.8/modules/generated/sklearn.cluster.KMeans.html#:~:text=n_init,-%27auto%27%20or%20int%2C%20default%3D%27auto%27" class="param-doc-link" rel="noreferrer" target="_blank">n_init <span class="param-doc-description">n_init: 'auto' or int, default='auto'<br>
-<br>
-Number of times the k-means algorithm is run with different centroid<br>
-seeds. The final results is the best output of `n_init` consecutive runs<br>
-in terms of inertia. Several runs are recommended for sparse<br>
-high-dimensional problems (see :ref:`kmeans_sparse_high_dim`).<br>
-<br>
-When `n_init='auto'`, the number of runs depends on the value of init:<br>
-10 if using `init='random'` or `init` is a callable;<br>
-1 if using `init='k-means++'` or `init` is an array-like.<br>
-<br>
-.. versionadded:: 1.2<br>
-Added 'auto' option for `n_init`.<br>
-<br>
-.. versionchanged:: 1.4<br>
-Default value for `n_init` changed to `'auto'`.</span></a></td>
-<td class="value">10</td>
-</tr>
-<tr class="default even">
-<td><em></em></td>
-<td class="param"><a href="https://scikit-learn.org/1.8/modules/generated/sklearn.cluster.KMeans.html#:~:text=max_iter,-int%2C%20default%3D300" class="param-doc-link" rel="noreferrer" target="_blank">max_iter <span class="param-doc-description">max_iter: int, default=300<br>
-<br>
-Maximum number of iterations of the k-means algorithm for a<br>
-single run.</span></a></td>
-<td class="value">300</td>
-</tr>
-<tr class="default odd">
-<td><em></em></td>
-<td class="param"><a href="https://scikit-learn.org/1.8/modules/generated/sklearn.cluster.KMeans.html#:~:text=tol,-float%2C%20default%3D1e-4" class="param-doc-link" rel="noreferrer" target="_blank">tol <span class="param-doc-description">tol: float, default=1e-4<br>
-<br>
-Relative tolerance with regards to Frobenius norm of the difference<br>
-in the cluster centers of two consecutive iterations to declare<br>
-convergence.</span></a></td>
-<td class="value">0.0001</td>
-</tr>
-<tr class="default even">
-<td><em></em></td>
-<td class="param"><a href="https://scikit-learn.org/1.8/modules/generated/sklearn.cluster.KMeans.html#:~:text=verbose,-int%2C%20default%3D0" class="param-doc-link" rel="noreferrer" target="_blank">verbose <span class="param-doc-description">verbose: int, default=0<br>
-<br>
-Verbosity mode.</span></a></td>
-<td class="value">0</td>
-</tr>
-<tr class="user-set odd">
-<td><em></em></td>
-<td class="param"><a href="https://scikit-learn.org/1.8/modules/generated/sklearn.cluster.KMeans.html#:~:text=random_state,-int%2C%20RandomState%20instance%20or%20None%2C%20default%3DNone" class="param-doc-link" rel="noreferrer" target="_blank">random_state <span class="param-doc-description">random_state: int, RandomState instance or None, default=None<br>
-<br>
-Determines random number generation for centroid initialization. Use<br>
-an int to make the randomness deterministic.<br>
-See :term:`Glossary <random_state>`.</random_state></span></a></td>
-<td class="value">42</td>
-</tr>
-<tr class="default even">
-<td><em></em></td>
-<td class="param"><a href="https://scikit-learn.org/1.8/modules/generated/sklearn.cluster.KMeans.html#:~:text=copy_x,-bool%2C%20default%3DTrue" class="param-doc-link" rel="noreferrer" target="_blank">copy_x <span class="param-doc-description">copy_x: bool, default=True<br>
-<br>
-When pre-computing distances it is more numerically accurate to center<br>
-the data first. If copy_x is True (default), then the original data is<br>
-not modified. If False, the original data is modified, and put back<br>
-before the function returns, but small numerical differences may be<br>
-introduced by subtracting and then adding the data mean. Note that if<br>
-the original data is not C-contiguous, a copy will be made even if<br>
-copy_x is False. If the original data is sparse, but not in CSR format,<br>
-a copy will be made even if copy_x is False.</span></a></td>
-<td class="value">True</td>
-</tr>
-<tr class="default odd">
-<td><em></em></td>
-<td class="param"><a href="https://scikit-learn.org/1.8/modules/generated/sklearn.cluster.KMeans.html#:~:text=algorithm,-%7B%22lloyd%22%2C%20%22elkan%22%7D%2C%20default%3D%22lloyd%22" class="param-doc-link" rel="noreferrer" target="_blank">algorithm <span class="param-doc-description">algorithm: {"lloyd", "elkan"}, default="lloyd"<br>
-<br>
-K-means algorithm to use. The classical EM-style algorithm is `"lloyd"`.<br>
-The `"elkan"` variation can be more efficient on some datasets with<br>
-well-defined clusters, by using the triangle inequality. However it's<br>
-more memory intensive due to the allocation of an extra array of shape<br>
-`(n_samples, n_clusters)`.<br>
-<br>
-.. versionchanged:: 0.18<br>
-Added Elkan algorithm<br>
-<br>
-.. versionchanged:: 1.1<br>
-Renamed "full" to "lloyd", and deprecated "auto" and "full".<br>
-Changed "auto" to use "lloyd" instead of "elkan".</span></a></td>
-<td class="value">'lloyd'</td>
-</tr>
-</tbody>
-</table>
-
-            </details>
-        </div>
-    </div></div></div></div></div><script>function copyToClipboard(text, element) {
-    // Get the parameter prefix from the closest toggleable content
-    const toggleableContent = element.closest('.sk-toggleable__content');
-    const paramPrefix = toggleableContent ? toggleableContent.dataset.paramPrefix : '';
-    const fullParamName = paramPrefix ? `${paramPrefix}${text}` : text;
-
-    const originalStyle = element.style;
-    const computedStyle = window.getComputedStyle(element);
-    const originalWidth = computedStyle.width;
-    const originalHTML = element.innerHTML.replace('Copied!', '');
-
-    navigator.clipboard.writeText(fullParamName)
-        .then(() => {
-            element.style.width = originalWidth;
-            element.style.color = 'green';
-            element.innerHTML = "Copied!";
-
-            setTimeout(() => {
-                element.innerHTML = originalHTML;
-                element.style = originalStyle;
-            }, 2000);
-        })
-        .catch(err => {
-            console.error('Failed to copy:', err);
-            element.style.color = 'red';
-            element.innerHTML = "Failed!";
-            setTimeout(() => {
-                element.innerHTML = originalHTML;
-                element.style = originalStyle;
-            }, 2000);
-        });
-    return false;
-}
-
-document.querySelectorAll('.copy-paste-icon').forEach(function(element) {
-    const toggleableContent = element.closest('.sk-toggleable__content');
-    const paramPrefix = toggleableContent ? toggleableContent.dataset.paramPrefix : '';
-    const paramName = element.parentElement.nextElementSibling
-        .textContent.trim().split(' ')[0];
-    const fullParamName = paramPrefix ? `${paramPrefix}${paramName}` : paramName;
-
-    element.setAttribute('title', fullParamName);
-});
-
-
-/**
- * Adapted from Skrub
- * https://github.com/skrub-data/skrub/blob/403466d1d5d4dc76a7ef569b3f8228db59a31dc3/skrub/_reporting/_data/templates/report.js#L789
- * @returns "light" or "dark"
- */
-function detectTheme(element) {
-    const body = document.querySelector('body');
-
-    // Check VSCode theme
-    const themeKindAttr = body.getAttribute('data-vscode-theme-kind');
-    const themeNameAttr = body.getAttribute('data-vscode-theme-name');
-
-    if (themeKindAttr && themeNameAttr) {
-        const themeKind = themeKindAttr.toLowerCase();
-        const themeName = themeNameAttr.toLowerCase();
-
-        if (themeKind.includes("dark") || themeName.includes("dark")) {
-            return "dark";
-        }
-        if (themeKind.includes("light") || themeName.includes("light")) {
-            return "light";
-        }
-    }
-
-    // Check Jupyter theme
-    if (body.getAttribute('data-jp-theme-light') === 'false') {
-        return 'dark';
-    } else if (body.getAttribute('data-jp-theme-light') === 'true') {
-        return 'light';
-    }
-
-    // Guess based on a parent element's color
-    const color = window.getComputedStyle(element.parentNode, null).getPropertyValue('color');
-    const match = color.match(/^rgb\s*\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)\s*$/i);
-    if (match) {
-        const [r, g, b] = [
-            parseFloat(match[1]),
-            parseFloat(match[2]),
-            parseFloat(match[3])
-        ];
-
-        // https://en.wikipedia.org/wiki/HSL_and_HSV#Lightness
-        const luma = 0.299 * r + 0.587 * g + 0.114 * b;
-
-        if (luma > 180) {
-            // If the text is very bright we have a dark theme
-            return 'dark';
-        }
-        if (luma < 75) {
-            // If the text is very dark we have a light theme
-            return 'light';
-        }
-        // Otherwise fall back to the next heuristic.
-    }
-
-    // Fallback to system preference
-    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-}
-
-
-function forceTheme(elementId) {
-    const estimatorElement = document.querySelector(`#${elementId}`);
-    if (estimatorElement === null) {
-        console.error(`Element with id ${elementId} not found.`);
-    } else {
-        const theme = detectTheme(estimatorElement);
-        estimatorElement.classList.add(theme);
-    }
-}
-
-forceTheme('sk-container-id-2');</script>
-</div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize<span class="op">=</span>(<span class="dv">10</span>, <span class="dv">6</span>))</span>
-<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>plt.plot(k_values, inertia, marker<span class="op">=</span><span class="st">'o'</span>)</span>
-<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">'Gráfico de Cotovelo para K-Means'</span>)</span>
-<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">'Número de Clusters (k)'</span>)</span>
-<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">'Inércia (Soma dos Quadrados Intra-Cluster)'</span>)</span>
-<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>plt.xticks(k_values)</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>([&lt;matplotlib.axis.XTick object at 0x00000245F7F63250&gt;, &lt;matplotlib.axis.XTick object at 0x00000245F7FE16D0&gt;, &lt;matplotlib.axis.XTick object at 0x00000245F7FE1E50&gt;, &lt;matplotlib.axis.XTick object at 0x00000245F7FE25D0&gt;, &lt;matplotlib.axis.XTick object at 0x00000245F7FE2D50&gt;, &lt;matplotlib.axis.XTick object at 0x00000245F7FE34D0&gt;], [Text(2, 0, '2'), Text(3, 0, '3'), Text(4, 0, '4'), Text(5, 0, '5'), Text(6, 0, '6'), Text(7, 0, '7')])</code></pre>
-</div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>plt.grid(<span class="va">True</span>)</span>
-<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="escolha-do-melhor-valor-de-k" class="level3" data-number="6.3.2">
+<h3 data-number="6.3.2" class="anchored" data-anchor-id="escolha-do-melhor-valor-de-k"><span class="header-section-number">6.3.2</span> Escolha do melhor valor de <span class="math inline">\(k\)</span></h3>
+<p>A escolha do número de grupos em uma análise de clustering não deve ser arbitrária. Para verificar se <span class="math inline">\(k=4\)</span> é razoável, usamos dois critérios, sempre calculados sobre os <strong>dados padronizados</strong> (os mesmos usados pelo K-Means):</p>
+<ul>
+<li><strong>Método do Cotovelo (Elbow Method):</strong> a <em>inércia</em> (soma dos quadrados das distâncias entre cada cliente e o centroide do seu grupo) sempre diminui quando aumentamos <span class="math inline">\(k\)</span>. Procuramos o ponto em que a queda deixa de ser acentuada e passa a ser marginal.</li>
+<li><strong>Coeficiente de silhouette:</strong> para cada cliente, compara a distância ao seu próprio grupo com a distância ao grupo vizinho mais próximo. Varia de -1 a 1, e valores maiores indicam grupos mais coesos e mais bem separados. Por custo computacional, é calculado em uma amostra de 10.000 clientes.</li>
+</ul>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>inercia <span class="op">=</span> []</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>silhueta <span class="op">=</span> []</span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>k_values <span class="op">=</span> <span class="bu">range</span>(<span class="dv">2</span>, <span class="dv">8</span>)</span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> k <span class="kw">in</span> k_values:</span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>    km <span class="op">=</span> KMeans(n_clusters<span class="op">=</span>k, random_state<span class="op">=</span><span class="dv">42</span>, init<span class="op">=</span><span class="st">'k-means++'</span>, n_init<span class="op">=</span><span class="dv">10</span>)</span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>    rotulos <span class="op">=</span> km.fit_predict(df_norm)</span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>    inercia.append(km.inertia_)</span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a>    silhueta.append(silhouette_score(df_norm, rotulos, sample_size<span class="op">=</span><span class="dv">10000</span>, random_state<span class="op">=</span><span class="dv">42</span>))</span>
+<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="dv">14</span>, <span class="dv">5</span>))</span>
+<span id="cb23-12"><a href="#cb23-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-13"><a href="#cb23-13" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].plot(k_values, inercia, marker<span class="op">=</span><span class="st">'o'</span>)</span>
+<span id="cb23-14"><a href="#cb23-14" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].set_title(<span class="st">'Método do Cotovelo'</span>)</span>
+<span id="cb23-15"><a href="#cb23-15" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].set_xlabel(<span class="st">'Número de Clusters (k)'</span>)</span>
+<span id="cb23-16"><a href="#cb23-16" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].set_ylabel(<span class="st">'Inércia (soma dos quadrados intra-cluster)'</span>)</span>
+<span id="cb23-17"><a href="#cb23-17" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].set_xticks(<span class="bu">list</span>(k_values))</span>
+<span id="cb23-18"><a href="#cb23-18" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>].grid(<span class="va">True</span>)</span>
+<span id="cb23-19"><a href="#cb23-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-20"><a href="#cb23-20" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].plot(k_values, silhueta, marker<span class="op">=</span><span class="st">'o'</span>, color<span class="op">=</span><span class="st">"#e76f51"</span>)</span>
+<span id="cb23-21"><a href="#cb23-21" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].set_title(<span class="st">'Coeficiente de silhouette'</span>)</span>
+<span id="cb23-22"><a href="#cb23-22" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].set_xlabel(<span class="st">'Número de Clusters (k)'</span>)</span>
+<span id="cb23-23"><a href="#cb23-23" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].set_ylabel(<span class="st">'Silhouette médio'</span>)</span>
+<span id="cb23-24"><a href="#cb23-24" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].set_xticks(<span class="bu">list</span>(k_values))</span>
+<span id="cb23-25"><a href="#cb23-25" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>].grid(<span class="va">True</span>)</span>
+<span id="cb23-26"><a href="#cb23-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-27"><a href="#cb23-27" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb23-28"><a href="#cb23-28" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="05_cluster_pda_files/figure-html/unnamed-chunk-17-31.png" class="img-fluid figure-img" width="960"></p>
+<p><img src="05_cluster_pda_files/figure-html/unnamed-chunk-18-31.png" class="img-fluid figure-img" width="1344"></p>
 </figure>
 </div>
 </div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>k_sil <span class="op">=</span> <span class="bu">list</span>(k_values)[<span class="bu">int</span>(np.argmax(silhueta))]</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Maior silhouette: k = </span><span class="sc">{</span>k_sil<span class="sc">}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Maior silhouette: k = 6</code></pre>
 </div>
-<p>A métrica no eixo <span class="math inline">\(y\)</span> do gráfico acima é a Inércia (ou <em>Within-Cluster Sum of Squares</em>), que mede a soma das distâncias quadráticas entre cada ponto e o centroide do seu cluster. À medida que aumentamos o número de clusters (<span class="math inline">\(k\)</span>), a inércia inevitavelmente diminui, pois os grupos ficam menores e mais “apertados”. O objetivo é encontrar o ponto onde o ganho de informação (a queda na inércia) deixa de ser drástico e passa a ser marginal.Interpretação dos ResultadosNo gráfico gerado, observamos uma queda acentuada de <span class="math inline">\(k=2\)</span> para <span class="math inline">\(k=3\)</span> e de <span class="math inline">\(k=3\)</span> para <span class="math inline">\(k=4\)</span>. No entanto, após o 4, a curva suaviza significativamente (o declive se torna menor). Esse “cotovelo” no <span class="math inline">\(k=4\)</span> indica que adicionar um quinto ou sexto grupo não traria uma melhora substancial na coesão dos dados que justificasse a complexidade extra.</p>
+</div>
+<!-- O cotovelo é um critério subjetivo, por isso o usamos junto com a silhouette. Se os dois critérios apontarem para valores diferentes, ou se nenhum deles indicar um ponto claro, a decisão final deve considerar também o que é operacionalmente viável para o negócio, como discutimos mais adiante. -->
+<p>Analisando os gráficos gerados para <span class="math inline">\(k\)</span> variando de 2 a 7, observamos que:</p>
+<ul>
+<li>No <strong>Método do Cotovelo</strong>, a inércia cai abruptamente de <span class="math inline">\(k=2\)</span> (~403 mil) para <span class="math inline">\(k=3\)</span> (~257 mil), mantém um ritmo forte de redução até <strong><span class="math inline">\(k=5\)</span></strong> (~146 mil) e passa a diminuir de forma mais suave a partir daí.</li>
+<li>No <strong>Coeficiente de silhouette</strong>, a qualidade da separação cresce até atingir seu pico em <strong><span class="math inline">\(k=5\)</span></strong> (0,511) e <strong><span class="math inline">\(k=6\)</span></strong> (0,512), recuando em <span class="math inline">\(k=7\)</span> (0,498).</li>
+</ul>
+<p>Embora as métricas puramente estatísticas sugiram que dividir a base em 5 grupos traria uma separação ligeiramente mais nítida, <strong><span class="math inline">\(k=4\)</span> já entrega um coeficiente de silhouette bastante sólido (0,478)</strong> — muito superior ao de <span class="math inline">\(k=2\)</span> (0,398) — e garante grupos grandes o suficiente para serem acionados na prática. Em projetos reais de ciência de dados, o cotovelo é um critério subjetivo e nem sempre coincide com o máximo da silhouette; por isso, a decisão final equilibra rigor estatístico com a <strong>viabilidade operacional</strong> do time de marketing (gerenciar 4 personas distintas é mais ágil do que criar 5 ou 6 réguas de relacionamento), como discutimos mais adiante.</p>
 </section>
 </section>
 <section id="visualização-dos-clusters-através-do-pca" class="level2" data-number="6.4">
 <h2 data-number="6.4" class="anchored" data-anchor-id="visualização-dos-clusters-através-do-pca"><span class="header-section-number">6.4</span> Visualização dos Clusters através do PCA</h2>
-<p>O PCA (Análise de Componentes Principais) é uma técnica de redução de dimensionalidade que nos permite visualizar dados de alta dimensão em um espaço 2D ou 3D, preservando a maior parte da variância dos dados. Ao aplicar o PCA aos nossos dados normalizados, podemos plotar os clientes em um gráfico onde cada ponto representa um cliente e a cor indica a qual cluster ele pertence.</p>
-<p>Por que PCA aqui? O K-Means calculou os clusters em um espaço de 11 dimensões. É impossível para o ser humano visualizar isso. O PCA projeta essas 11 dimensões em 2 novas (PC1 e PC2) que capturam a maior parte da separação entre os dados.</p>
+<p>O PCA (Análise de Componentes Principais) é uma técnica de redução de dimensionalidade que nos permite visualizar dados de alta dimensão em um espaço 2D, preservando a maior parte possível da variância dos dados. Ao aplicar o PCA aos nossos dados padronizados, podemos plotar os clientes em um gráfico onde cada ponto representa um cliente e a cor indica a qual cluster ele pertence.</p>
+<p>Por que PCA aqui? O K-Means calculou os clusters em um espaço de 11 dimensões, que não conseguimos visualizar. O PCA projeta essas 11 dimensões em 2 novas (PC1 e PC2), que são as combinações das variáveis que capturam a maior variabilidade dos dados. Para que a projeção represente o mesmo espaço em que o K-Means trabalhou, o PCA é aplicado aos dados <strong>padronizados</strong>.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 1. Preparação dos Dados para o PCA</span></span>
-<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Usamos os dados normalizados (df_cluster), mas removemos a coluna 'cluster' que acabamos de adicionar, pois o PCA só trabalha com variáveis numéricas.</span></span>
-<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> df_cluster.drop(columns<span class="op">=</span>[<span class="st">'cluster'</span>], errors<span class="op">=</span><span class="st">'ignore'</span>)</span>
-<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a><span class="co"># 2. Inicialização e Ajuste do PCA</span></span>
-<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Queremos reduzir as 11 dimensões originais para apenas 2 componentes principais, permitindo a visualização em um gráfico de dispersão (X, Y).</span></span>
-<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a>pca <span class="op">=</span> PCA(n_components<span class="op">=</span><span class="dv">2</span>, random_state<span class="op">=</span><span class="dv">42</span>)</span>
-<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a>pca_components <span class="op">=</span> pca.fit_transform(X)</span>
-<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a><span class="co"># 3. Criação de um DataFrame para Visualização</span></span>
-<span id="cb26-11"><a href="#cb26-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Convertemos a matriz resultante do PCA em um DataFrame do Pandas</span></span>
-<span id="cb26-12"><a href="#cb26-12" aria-hidden="true" tabindex="-1"></a>df_pca <span class="op">=</span> pd.DataFrame(data<span class="op">=</span>pca_components, columns<span class="op">=</span>[<span class="st">'PC1'</span>, <span class="st">'PC2'</span>])</span>
-<span id="cb26-13"><a href="#cb26-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-14"><a href="#cb26-14" aria-hidden="true" tabindex="-1"></a><span class="co"># Recuperamos a identificação do cluster (A, B, C, D) do DataFrame original para usar como legenda de cor no gráfico.</span></span>
-<span id="cb26-15"><a href="#cb26-15" aria-hidden="true" tabindex="-1"></a>df_pca[<span class="st">'cluster'</span>] <span class="op">=</span> df_cluster[<span class="st">'cluster'</span>].values</span>
-<span id="cb26-16"><a href="#cb26-16" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-17"><a href="#cb26-17" aria-hidden="true" tabindex="-1"></a><span class="co"># 4. Cálculo da Variância Explicada</span></span>
-<span id="cb26-18"><a href="#cb26-18" aria-hidden="true" tabindex="-1"></a>var_explicada <span class="op">=</span> pca.explained_variance_ratio_</span>
-<span id="cb26-19"><a href="#cb26-19" aria-hidden="true" tabindex="-1"></a>total_var <span class="op">=</span> var_explicada.<span class="bu">sum</span>() <span class="op">*</span> <span class="dv">100</span></span>
-<span id="cb26-20"><a href="#cb26-20" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-21"><a href="#cb26-21" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Variância explicada pelo PC1: </span><span class="sc">{</span>var_explicada[<span class="dv">0</span>]<span class="op">*</span><span class="dv">100</span><span class="sc">:.2f}</span><span class="ss">%"</span>)</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 1. Dados padronizados, os mesmos usados pelo K-Means (sem a coluna 'cluster')</span></span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> df_norm</span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a><span class="co"># 2. Inicialização e ajuste do PCA: 11 dimensões -&gt; 2 componentes principais</span></span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>pca <span class="op">=</span> PCA(n_components<span class="op">=</span><span class="dv">2</span>, random_state<span class="op">=</span><span class="dv">42</span>)</span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>pca_components <span class="op">=</span> pca.fit_transform(X)</span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a><span class="co"># 3. DataFrame para visualização, com o cluster de cada cliente</span></span>
+<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a>df_pca <span class="op">=</span> pd.DataFrame(data<span class="op">=</span>pca_components, columns<span class="op">=</span>[<span class="st">'PC1'</span>, <span class="st">'PC2'</span>])</span>
+<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a>df_pca[<span class="st">'cluster'</span>] <span class="op">=</span> df_cluster[<span class="st">'cluster'</span>].values</span>
+<span id="cb26-11"><a href="#cb26-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-12"><a href="#cb26-12" aria-hidden="true" tabindex="-1"></a><span class="co"># 4. Variância explicada</span></span>
+<span id="cb26-13"><a href="#cb26-13" aria-hidden="true" tabindex="-1"></a>var_explicada <span class="op">=</span> pca.explained_variance_ratio_</span>
+<span id="cb26-14"><a href="#cb26-14" aria-hidden="true" tabindex="-1"></a>total_var <span class="op">=</span> var_explicada.<span class="bu">sum</span>() <span class="op">*</span> <span class="dv">100</span></span>
+<span id="cb26-15"><a href="#cb26-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-16"><a href="#cb26-16" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Variância explicada pelo PC1: </span><span class="sc">{</span>var_explicada[<span class="dv">0</span>]<span class="op">*</span><span class="dv">100</span><span class="sc">:.2f}</span><span class="ss">%"</span>)</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Variância explicada pelo PC1: 78.16%</code></pre>
+<pre><code>Variância explicada pelo PC1: 47.47%</code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb28"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Variância explicada pelo PC2: </span><span class="sc">{</span>var_explicada[<span class="dv">1</span>]<span class="op">*</span><span class="dv">100</span><span class="sc">:.2f}</span><span class="ss">%"</span>)</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Variância explicada pelo PC2: 19.63%</code></pre>
+<pre><code>Variância explicada pelo PC2: 22.75%</code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Variância total explicada pelos dois componentes: </span><span class="sc">{</span>total_var<span class="sc">:.2f}</span><span class="ss">%"</span>)</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Variância total explicada pelos dois componentes: 97.79%</code></pre>
+<pre><code>Variância total explicada pelos dois componentes: 70.22%</code></pre>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb32"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 5. Visualização Gráfica com Seaborn</span></span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb32"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 5. Gráfico</span></span>
 <span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize<span class="op">=</span>(<span class="dv">12</span>, <span class="dv">8</span>))</span>
 <span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>sns.scatterplot(</span>
 <span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>    x<span class="op">=</span><span class="st">'PC1'</span>, y<span class="op">=</span><span class="st">'PC2'</span>,</span>
-<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a>    hue<span class="op">=</span><span class="st">'cluster'</span>,  <span class="co"># Define a cor baseada no cluster</span></span>
-<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a>    palette<span class="op">=</span><span class="st">'Set2'</span>, <span class="co"># Mesma paleta usada no gráfico spider</span></span>
-<span id="cb32-7"><a href="#cb32-7" aria-hidden="true" tabindex="-1"></a>    data<span class="op">=</span>df_pca,</span>
-<span id="cb32-8"><a href="#cb32-8" aria-hidden="true" tabindex="-1"></a>    alpha<span class="op">=</span><span class="fl">0.3</span>,      <span class="co"># Transparência para lidar com a sobreposição de pontos</span></span>
-<span id="cb32-9"><a href="#cb32-9" aria-hidden="true" tabindex="-1"></a>    edgecolor<span class="op">=</span><span class="va">None</span>  <span class="co"># Remove a borda dos pontos para clareza</span></span>
-<span id="cb32-10"><a href="#cb32-10" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb32-11"><a href="#cb32-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a>    hue<span class="op">=</span><span class="st">'cluster'</span>,</span>
+<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a>    hue_order<span class="op">=</span><span class="bu">sorted</span>(df_pca[<span class="st">'cluster'</span>].unique()),</span>
+<span id="cb32-7"><a href="#cb32-7" aria-hidden="true" tabindex="-1"></a>    palette<span class="op">=</span><span class="st">'Set2'</span>,  <span class="co"># mesma paleta usada no gráfico spider</span></span>
+<span id="cb32-8"><a href="#cb32-8" aria-hidden="true" tabindex="-1"></a>    data<span class="op">=</span>df_pca,</span>
+<span id="cb32-9"><a href="#cb32-9" aria-hidden="true" tabindex="-1"></a>    alpha<span class="op">=</span><span class="fl">0.3</span>,</span>
+<span id="cb32-10"><a href="#cb32-10" aria-hidden="true" tabindex="-1"></a>    edgecolor<span class="op">=</span><span class="va">None</span></span>
+<span id="cb32-11"><a href="#cb32-11" aria-hidden="true" tabindex="-1"></a>)</span>
 <span id="cb32-12"><a href="#cb32-12" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="ss">f'Visualização dos Clusters em 2D via PCA</span><span class="ch">\n</span><span class="ss">(Variância Total Explicada: </span><span class="sc">{</span>total_var<span class="sc">:.1f}</span><span class="ss">%)'</span>, size<span class="op">=</span><span class="dv">15</span>)</span>
 <span id="cb32-13"><a href="#cb32-13" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="ss">f'Componente Principal 1 (</span><span class="sc">{</span>var_explicada[<span class="dv">0</span>]<span class="op">*</span><span class="dv">100</span><span class="sc">:.1f}</span><span class="ss">% var)'</span>, size<span class="op">=</span><span class="dv">12</span>)</span>
 <span id="cb32-14"><a href="#cb32-14" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="ss">f'Componente Principal 2 (</span><span class="sc">{</span>var_explicada[<span class="dv">1</span>]<span class="op">*</span><span class="dv">100</span><span class="sc">:.1f}</span><span class="ss">% var)'</span>, size<span class="op">=</span><span class="dv">12</span>)</span>
@@ -2424,24 +938,78 @@ forceTheme('sk-container-id-2');</script>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="05_cluster_pda_files/figure-html/unnamed-chunk-18-33.png" class="img-fluid figure-img" width="1152"></p>
+<p><img src="05_cluster_pda_files/figure-html/unnamed-chunk-19-33.png" class="img-fluid figure-img" width="1152"></p>
 </figure>
 </div>
 </div>
 </div>
+<p>Para saber o que cada componente representa, veja o peso (<em>loading</em>) de cada variável original em PC1 e PC2: quanto maior o valor absoluto, maior a contribuição da variável.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb33"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>loadings <span class="op">=</span> pd.DataFrame(pca.components_.T, index<span class="op">=</span>cols, columns<span class="op">=</span>[<span class="st">'PC1'</span>, <span class="st">'PC2'</span>])</span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(loadings.<span class="bu">round</span>(<span class="dv">2</span>))</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                     PC1   PC2
+idade               0.34 -0.19
+renda               0.22  0.49
+score_serasa        0.28  0.43
+interesse           0.38  0.18
+dias_ult_compra    -0.37 -0.12
+vlr_tran_total_6m   0.38 -0.24
+gasto_vinho_6m      0.14  0.43
+gasto_queijo_6m     0.27 -0.06
+gasto_cerveja_6m    0.13 -0.26
+gasto_flv_6m        0.34 -0.29
+gasto_mercearia_6m  0.32 -0.31</code></pre>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled" title="Como interpretar o gráfico">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Nota</span>Como interpretar o gráfico
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Com 11 variáveis, dois componentes dificilmente explicam toda a variabilidade dos dados. A variância explicada (mostrada no título) indica o quanto da informação original foi preservada na projeção. Se ela for baixa, é esperado que alguns grupos pareçam se sobrepor no gráfico, e essa sobreposição visual não significa, por si só, que os clusters estejam mal separados nas 11 dimensões originais.</p>
+</div>
+</div>
 </section>
-<section id="discussão" class="level2" data-number="6.5">
-<h2 data-number="6.5" class="anchored" data-anchor-id="discussão"><span class="header-section-number">6.5</span> Discussão</h2>
-<p>Ao final desta análise, é fundamental refletir sobre a escolha do número de clusters (<span class="math inline">\(k\)</span>). Embora o Método do Cotovelo aponte para <span class="math inline">\(k=4\)</span> como o ponto de eficiência estatística, no mundo real, essa decisão é frequentemente exógena ao modelo.</p>
+<section id="uso-prático-da-segmentação" class="level2" data-number="6.5">
+<h2 data-number="6.5" class="anchored" data-anchor-id="uso-prático-da-segmentação"><span class="header-section-number">6.5</span> Uso prático da segmentação</h2>
+<p>A última etapa do CRISP-DM é a <strong>implantação</strong>: transformar os grupos em ações. Alguns pontos práticos:</p>
+<ul>
+<li><strong>Classificar novos clientes:</strong> em vez de refazer o agrupamento, guardamos o modelo, a média, o desvio padrão e o mapa de rótulos, e usamos a mesma padronização para atribuir novos clientes a um dos grupos.</li>
+<li><strong>Atualizar periodicamente:</strong> os hábitos mudam. Recomenda-se refazer a segmentação de tempos em tempos e acompanhar se o tamanho e o perfil dos grupos permanecem estáveis.</li>
+<li><strong>Medir o efeito das ações:</strong> cada campanha por segmento deve ser testada com um grupo de controle, para saber se o resultado vem da ação ou do comportamento que o cliente já teria.</li>
+</ul>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb35"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> joblib</span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a><span class="co"># guardar o necessário para classificar novos clientes</span></span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a>artefatos <span class="op">=</span> {<span class="st">"kmeans"</span>: kmeans, <span class="st">"media"</span>: media, <span class="st">"desvio"</span>: desvio, <span class="st">"mapa"</span>: mapa}</span>
+<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a>joblib.dump(artefatos, <span class="st">"modelo_segmentacao.joblib"</span>)</span>
+<span id="cb35-6"><a href="#cb35-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-7"><a href="#cb35-7" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> classificar_clientes(novos, artefatos):</span>
+<span id="cb35-8"><a href="#cb35-8" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""`novos` é um DataFrame com as mesmas 11 colunas do treinamento."""</span></span>
+<span id="cb35-9"><a href="#cb35-9" aria-hidden="true" tabindex="-1"></a>    z <span class="op">=</span> (novos[cols] <span class="op">-</span> artefatos[<span class="st">"media"</span>]) <span class="op">/</span> artefatos[<span class="st">"desvio"</span>]</span>
+<span id="cb35-10"><a href="#cb35-10" aria-hidden="true" tabindex="-1"></a>    rotulos <span class="op">=</span> artefatos[<span class="st">"kmeans"</span>].predict(z)</span>
+<span id="cb35-11"><a href="#cb35-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> [artefatos[<span class="st">"mapa"</span>][k] <span class="cf">for</span> k <span class="kw">in</span> rotulos]</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="discussão" class="level2" data-number="6.6">
+<h2 data-number="6.6" class="anchored" data-anchor-id="discussão"><span class="header-section-number">6.6</span> Discussão</h2>
+<p>Ao final desta análise, é fundamental refletir sobre a escolha do número de clusters (<span class="math inline">\(k\)</span>). Os critérios estatísticos (cotovelo e silhouette) são um guia, e não uma regra: no mundo real, essa decisão é frequentemente exógena ao modelo.</p>
 <section id="o-k-estatístico-vs.-o-k-de-negócio" class="level4">
 <h4 class="anchored" data-anchor-id="o-k-estatístico-vs.-o-k-de-negócio">O “K” Estatístico vs.&nbsp;O “K” de Negócio</h4>
 <p>A escolha final do número de segmentos deve considerar o equilíbrio entre precisão e operacionalidade:</p>
 <ul>
-<li><p>Capacidade de Execução: De que adianta identificar 10 clusters estatisticamente puros se o time de marketing só tem braço para criar 3 campanhas diferentes? Um modelo com muitos grupos pode se tornar ingereciável.</p></li>
-<li><p>Custo de Implementação: Cada novo segmento exige personalização de catálogo, artes, cupons e logística. Se o ganho de inércia ao passar de <span class="math inline">\(k=4\)</span> para <span class="math inline">\(k=5\)</span> é marginal, o custo operacional de gerenciar esse quinto grupo provavelmente não se paga.</p></li>
+<li><p>Capacidade de Execução: De que adianta identificar 10 clusters estatisticamente puros se o time de marketing só tem braço para criar 3 campanhas diferentes? Um modelo com muitos grupos pode se tornar difícil de gerenciar.</p></li>
+<li><p>Custo de Implementação: Cada novo segmento exige personalização de catálogo, artes, cupons e logística. Se o ganho em inércia ao aumentar <span class="math inline">\(k\)</span> é marginal, o custo operacional de gerenciar um grupo adicional provavelmente não se paga.</p></li>
 <li><p>Diferenciação Estratégica: O agrupamento só faz sentido se os grupos resultantes exigirem ações de negócio distintas. Se dois clusters identificados pelo algoritmo recebem a mesma oferta de “Desconto em Vinhos”, eles deveriam, na prática, ser tratados como um único segmento.</p></li>
 </ul>
-<p>O algoritmo K-Means nos ofereceu um mapa, mas a navegação é feita pelo gestor. Identificamos que mais de 50% da nossa base (Cluster A) está “dormente”. Este é um insight técnico com uma implicação estratégica massiva: o foco não deve ser em micro-segmentar quem já compra, mas em entender como reativar essa massa inativa.</p>
+<p>O algoritmo K-Means nos ofereceu um mapa, mas a navegação é feita pelo gestor. Identificamos que metade da nossa base (Cluster D) está pouco ativa. Este é um insight técnico com uma implicação estratégica relevante, mas que precisa ser lida junto com a tabela de valor de cada grupo: reativar esses clientes só compensa se o retorno esperado superar o custo da ação, e isso deve ser testado antes de ser ampliado.</p>
 <div class="callout callout-style-default callout-tip callout-titled" title="Desafio Próximo">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -2457,9 +1025,17 @@ forceTheme('sk-container-id-2');</script>
 </div>
 </section>
 </section>
-<section id="conclusão" class="level2" data-number="6.6">
-<h2 data-number="6.6" class="anchored" data-anchor-id="conclusão"><span class="header-section-number">6.6</span> Conclusão</h2>
-<p>Neste estudo, exploramos o comportamento de uma base de clientes do varejo utilizando o algoritmo <span class="math inline">\(K\)</span>-means para transformar dados transacionais e demográficos em segmentos acionáveis. O agrupamento bem-sucedido não é aquele que apenas minimiza a inércia, mas aquele que é operacionalizável. De nada adianta uma perfeição estatística se o time de marketing não possui recursos para gerenciar a complexidade de múltiplos segmentos. Portanto, ao implementar esses modelos na prática, deve-se sempre equilibrar a precisão do algoritmo com a capacibilidade de execução da empresa, garantindo que os insights gerados se convertam em decisões que tragam retorno real sobre o investimento.</p>
+<section id="conclusão" class="level2" data-number="6.7">
+<h2 data-number="6.7" class="anchored" data-anchor-id="conclusão"><span class="header-section-number">6.7</span> Conclusão</h2>
+<p>Neste estudo, exploramos o comportamento de uma base de clientes do varejo utilizando o algoritmo <span class="math inline">\(K\)</span>-means para transformar dados transacionais e demográficos em segmentos acionáveis. Chegamos a quatro perfis (o fiel do dia a dia, o sommelier de alta renda, o consumidor equilibrado e o inativo ou ocasional) e discutimos uma ação diferente para cada um.</p>
+<p>O agrupamento bem-sucedido não é aquele que apenas minimiza a inércia, mas aquele que é operacionalizável. De nada adianta uma perfeição estatística se o time de marketing não possui recursos para gerenciar a complexidade de múltiplos segmentos. Portanto, ao implementar esses modelos na prática, deve-se sempre equilibrar a precisão do algoritmo com a capacidade de execução da empresa, garantindo que os insights gerados se convertam em decisões que tragam retorno real sobre o investimento.</p>
+<p><strong>Limitações:</strong></p>
+<ul>
+<li>O K-Means assume grupos aproximadamente esféricos e é sensível a valores atípicos e a variáveis muito assimétricas ou com muitos zeros, como os gastos por categoria. Transformações (como o logaritmo) ou outros algoritmos podem ser alternativas.</li>
+<li>Não avaliamos a estabilidade dos grupos (por exemplo, com outras sementes ou subamostras da base).</li>
+<li>Os perfis são descritivos: eles não provam que uma ação específica terá o efeito esperado sobre cada grupo, o que só pode ser verificado com testes.</li>
+<li>O uso de dados demográficos e de crédito exige atenção à LGPD.</li>
+</ul>
 
 
 </section>
