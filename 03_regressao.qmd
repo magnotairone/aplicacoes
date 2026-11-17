@@ -926,7 +926,3 @@ A análise de importância e os gráficos de dependência parcial indicam que o 
 * Anúncios com coordenadas inválidas foram descartados (`r round(100 * n_removidos / n_antes_filtro, 1)`% dos anúncios de aluguel).
 
 **Próximos passos:** modelar o logaritmo do preço, ajustar hiperparâmetros com validação cruzada, avaliar o erro por faixa de preço (o modelo erra mais nos imóveis caros?) e incluir o distrito como variável explicativa.
-
-
-agora eu gostaria de uma proposta do que seria um anexo a este capitulo: SERIA UM ANEXO DO CAPITULO
-pra fazer o melhor modelo possivel, tratando a variavel district alem da localizacao lat long (ja que existe muita desigualdade em bairros vizinhos em sp - talvez agrupar alguns distritos) e tunando hiperparametro para ter um modelo otimo para sugerir preco de aluguel de um novo imovel. me de o qmd desse anexo e seja suscinto nas explicacoes.

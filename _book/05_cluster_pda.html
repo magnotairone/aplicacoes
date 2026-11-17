@@ -461,16 +461,16 @@ window.Quarto = {
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>df.sample(<span class="dv">10</span>)</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>       idade    renda  ...  gasto_flv_6m  gasto_mercearia_6m
-27282     45  2868.38  ...          0.00               35.06
-20366     45  7404.62  ...         23.05                5.30
-33685     44  7784.02  ...         62.39               48.11
-57538     41  4222.93  ...          7.40                0.00
-16451     44  4863.31  ...         48.07               25.31
-32735     44  5593.71  ...         71.10               15.40
-51869     43  3324.03  ...          2.13                0.00
-34045     44  2985.97  ...          9.09                0.00
-53107     42  2782.22  ...         13.01                1.27
-43420     40  2811.68  ...          0.00                0.00
+12303     41  3678.48  ...          0.00                1.02
+8596      43  5963.56  ...         60.43               34.20
+8065      48  3467.92  ...        190.75              250.85
+41274     40  4196.40  ...          9.47               17.77
+51105     40  3590.78  ...          0.00                0.00
+42751     46  7263.46  ...          9.06               24.25
+40981     45  4325.06  ...          2.87                0.00
+6023      41  2524.68  ...          1.01                0.00
+74        44  3237.05  ...          7.50                1.68
+59846     44  4143.21  ...         23.54               29.97
 
 [10 rows x 11 columns]</code></pre>
 </div>
@@ -758,7 +758,6 @@ Count               9998.0  19989.0  20013.0  10000.0</code></pre>
 </div>
 </div>
 <p>Com base na tabela e no gráfico acima, podemos desenhar o perfil comportamental de cada grupo. Esta etapa é fundamental para que o time de marketing saiba o que oferecer para quem.</p>
-<!-- TODO: após renderizar, conferir os números abaixo (vindos da versão anterior do capítulo) com a tabela de medianas. Os rótulos agora seguem a ordem do gasto mediano (A = maior). -->
 <ul>
 <li><strong>Cluster A: O “Fiel do Dia a Dia” (<em>Heavy User</em>) — 9.998 clientes (16,7%)</strong>
 <ul>
@@ -1009,7 +1008,7 @@ gasto_mercearia_6m  0.32 -0.31</code></pre>
 <li><p>Custo de Implementação: Cada novo segmento exige personalização de catálogo, artes, cupons e logística. Se o ganho em inércia ao aumentar <span class="math inline">\(k\)</span> é marginal, o custo operacional de gerenciar um grupo adicional provavelmente não se paga.</p></li>
 <li><p>Diferenciação Estratégica: O agrupamento só faz sentido se os grupos resultantes exigirem ações de negócio distintas. Se dois clusters identificados pelo algoritmo recebem a mesma oferta de “Desconto em Vinhos”, eles deveriam, na prática, ser tratados como um único segmento.</p></li>
 </ul>
-<p>O algoritmo K-Means nos ofereceu um mapa, mas a navegação é feita pelo gestor. Identificamos que metade da nossa base (Cluster D) está pouco ativa. Este é um insight técnico com uma implicação estratégica relevante, mas que precisa ser lida junto com a tabela de valor de cada grupo: reativar esses clientes só compensa se o retorno esperado superar o custo da ação, e isso deve ser testado antes de ser ampliado.</p>
+<p>O algoritmo K-Means nos ofereceu um mapa, mas a navegação é feita pelo gestor. Identificamos que metade da nossa base está dividida entre clientes esporádicos (<strong>Cluster C</strong>, 33,4%) e inativos (<strong>Cluster D</strong>, 16,7%), respondendo juntos por apenas 10% do faturamento. Este é um insight técnico com uma implicação estratégica relevante, mas que precisa ser lido junto com a tabela de valor de cada grupo: reativar ou estimular esses clientes só compensa se o retorno esperado superar o custo da ação, e isso deve ser testado antes de ser ampliado.</p>
 <div class="callout callout-style-default callout-tip callout-titled" title="Desafio Próximo">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -1027,7 +1026,7 @@ gasto_mercearia_6m  0.32 -0.31</code></pre>
 </section>
 <section id="conclusão" class="level2" data-number="6.7">
 <h2 data-number="6.7" class="anchored" data-anchor-id="conclusão"><span class="header-section-number">6.7</span> Conclusão</h2>
-<p>Neste estudo, exploramos o comportamento de uma base de clientes do varejo utilizando o algoritmo <span class="math inline">\(K\)</span>-means para transformar dados transacionais e demográficos em segmentos acionáveis. Chegamos a quatro perfis (o fiel do dia a dia, o sommelier de alta renda, o consumidor equilibrado e o inativo ou ocasional) e discutimos uma ação diferente para cada um.</p>
+<p>Neste estudo, exploramos o comportamento de uma base de clientes do varejo utilizando o algoritmo <span class="math inline">\(K\)</span>-means para transformar dados transacionais e demográficos em segmentos acionáveis. Chegamos a quatro perfis (o fiel do dia a dia, o alta renda seletivo, o consumidor esporádico e o inativo) e discutimos uma ação diferente para cada um.</p>
 <p>O agrupamento bem-sucedido não é aquele que apenas minimiza a inércia, mas aquele que é operacionalizável. De nada adianta uma perfeição estatística se o time de marketing não possui recursos para gerenciar a complexidade de múltiplos segmentos. Portanto, ao implementar esses modelos na prática, deve-se sempre equilibrar a precisão do algoritmo com a capacidade de execução da empresa, garantindo que os insights gerados se convertam em decisões que tragam retorno real sobre o investimento.</p>
 <p><strong>Limitações:</strong></p>
 <ul>
