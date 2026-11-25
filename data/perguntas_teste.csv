@@ -1,0 +1,17 @@
+pergunta,topico,pagina_inicial,pagina_final
+"Como dividir o gráfico em vários painéis, um para cada valor de uma variável?",facet_wrap,63,65
+Como fazer um boxplot e mostrar os valores atípicos?,geom_boxplot,79,85
+Como salvar um gráfico em um arquivo PNG com largura e altura definidas?,ggsave,193,196
+Como mudar o título do gráfico e os rótulos dos eixos?,labs,225,226
+Como usar uma paleta de cores do ColorBrewer?,scale_colour_brewer,256,259
+Como mudar a posição da legenda para baixo do gráfico?,theme,331,341
+Como adicionar uma reta de regressão linear a um gráfico de dispersão?,geom_smooth,175,181
+Como colocar o eixo y em escala logarítmica?,scale_continuous,281,285
+Como colocar as barras lado a lado em vez de empilhadas?,position_dodge,239,241
+Como definir os limites mínimo e máximo do eixo x?,lims,233,235
+Como usar um tema com fundo branco e linhas de grade cinzas?,ggtheme,196,199
+Como adicionar uma linha horizontal de referência ao gráfico?,geom_abline,66,69
+Como fazer um gráfico de pizza?,coord_polar,47,49
+Como evitar que pontos sobrepostos fiquem escondidos uns atrás dos outros?,geom_jitter,128,131
+Como escolher manualmente a cor de cada categoria?,scale_manual,295,299
+Como fazer um gráfico de violino?,geom_violin,183,188
