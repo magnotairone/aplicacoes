@@ -1,53 +1,59 @@
----
-output: html_document
-editor_options: 
-  chunk_output_type: console
----
-
 # Análise de Manutenção Preditiva
 
-```{r echo=FALSE}
+```{r}
+#| include: false
 library(reticulate)
 library(kableExtra)
-use_python("C:/Users/m_tai/AppData/Local/Programs/Python/Python313/python.exe", required = TRUE)
+
+# O Python é configurado fora do .qmd (variável RETICULATE_PYTHON no .Renviron do projeto),
+# para o capítulo renderizar em qualquer máquina.
+
+tabela <- function(df, caption = NULL) {
+  knitr::kable(df, "html", caption = caption) |>
+    kable_styling(bootstrap_options = c("striped", "hover", "condensed"),
+                  full_width = FALSE)
+}
 ```
 
-Este case aborda a análise de dados e construção de modelos de classificação para um problema de **Manutenção Preditiva**. 
-O objetivo é prever se um equipamento apresentará falha (**Target**) com base em sensores operacionais.
+Uma indústria quer decidir quais equipamentos inspecionar **antes** que quebrem. Inspecionar sem necessidade custa pouco, mas uma quebra inesperada custa muito: o equilíbrio entre os dois erros é o centro do problema. Este capítulo constrói modelos de classificação que estimam a probabilidade de falha de um equipamento a partir de sensores operacionais e transforma essa probabilidade em uma regra de decisão.
 
-## Configuração e Importação de Dados
+Três perguntas guiam a análise:
 
-Primeiro, importamos as bibliotecas necessárias e carregamos o dataset, **predictive_maintainance** que está relacionado à manutenção preditiva em um ambiente industrial.
-Cada linha representa uma observação de um equipamento, com várias variáveis registradas:
+1. **Descritiva:** com que frequência ocorrem falhas e quais condições de operação estão associadas a elas?
+2. **Preditiva:** é possível antecipar uma falha a partir dos sensores? Quão melhor isso é do que não usar modelo algum?
+3. **Decisão:** sabendo que uma quebra custa muito mais do que uma inspeção, a partir de qual probabilidade vale a pena inspecionar?
 
-- **UDI**: Identificador único para cada observação.
-- **Product ID**: Identificador do produto associado à observação.
-- **Type**: Tipo do produto ou equipamento.
-- **Air temperature [K]**: Temperatura do ar em Kelvin durante a operação.
-- **Process temperature [K]**: Temperatura do processo em Kelvin durante a operação.
-- **Rotational speed [rpm]**: Velocidade de rotação em rotações por minuto (RPM).
-- **Torque [Nm]**: Torque aplicado durante o processo, medido em Newton-metros (Nm).
-- **Tool wear [min]**: Tempo de desgaste da ferramenta, em minutos.
-- **Target**: Variável alvo, indicando se ocorreu alguma falha ou não.
-- **Failure Type**: Tipo de falha, se houver.
+Seguimos as etapas do **CRISP-DM**, como nos demais capítulos de modelagem:
 
-```{python}
-import pandas as pd
-import seaborn as sns
-import numpy as np
-import matplotlib.pyplot as plt
-from sklearn.model_selection import train_test_split
-from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import accuracy_score, confusion_matrix
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.neighbors import KNeighborsClassifier
-from sklearn.neural_network import MLPClassifier
-```
+| Etapa do CRISP-DM | Onde aparece no capítulo |
+|---|---|
+| Entendimento do negócio | Esta introdução |
+| Entendimento dos dados | Dados e Análise descritiva |
+| Preparação dos dados | Preparação dos dados e Separação dos dados |
+| Modelagem | Modelos |
+| Avaliação | Avaliação na validação, Impacto financeiro, Escolha do limiar e Erro de generalização |
+| Implantação | Uso prático e implantação |
 
-Carregamento do dataset (ajuste o caminho conforme sua máquina).
+O trabalho é feito em **Python** (`pandas`, `scikit-learn`, `seaborn`), com R apenas para formatar as tabelas.
+
+## Dados
+
+O conjunto de dados é o *Predictive Maintenance Dataset* (AI4I 2020, repositório UCI), uma base **sintética** que imita o comportamento de máquinas em um ambiente industrial. Cada linha é uma observação de um equipamento:
+
+- **UDI**: identificador único da observação.
+- **Product ID**: identificador do produto (a letra inicial coincide com `Type`).
+- **Type**: qualidade do produto (L, M ou H).
+- **Air temperature [K]**: temperatura do ar durante a operação.
+- **Process temperature [K]**: temperatura do processo.
+- **Rotational speed [rpm]**: velocidade de rotação.
+- **Torque [Nm]**: torque aplicado.
+- **Tool wear [min]**: tempo de desgaste da ferramenta.
+- **Target**: variável alvo, 1 se ocorreu falha e 0 caso contrário.
+- **Failure Type**: tipo da falha, quando há.
 
 ```{python}
 #| eval: false
+import pandas as pd
 
 data = pd.read_csv('data/predictive_maintenance.csv')
 data.head(10)
@@ -55,446 +61,567 @@ data.head(10)
 
 ```{python}
 #| echo: false
+import pandas as pd
+import numpy as np
+import seaborn as sns
+import matplotlib.pyplot as plt
+
 data = pd.read_csv('data/predictive_maintenance.csv')
 ```
 
 ```{r}
 #| echo: false
-knitr::kable(head(py$data), "html") |> kable_styling("striped")
+tabela(head(py$data, 10))
 ```
 
+::: {.callout-warning title="Dados e limitações"}
+- A base é **sintética**: os padrões encontrados aqui valem para a forma como ela foi gerada e não necessariamente para uma fábrica real.
+- Não há ordem temporal entre as observações, então não é possível avaliar o modelo "no futuro".
+- Os custos usados na decisão (inspeção e quebra) são **hipotéticos**, escolhidos para ilustrar o raciocínio. Em um projeto real, devem vir da área de manutenção.
+- A variável `Failure Type` só é conhecida **depois** da falha, por isso não pode ser usada como preditora (veja a seção seguinte).
+:::
 
-## Avaliação Inicial e Análise Descritiva
+## Análise descritiva
 
-Vamos entender o tamanho da base, a presença de valores nulos e a distribuição da variável alvo.
+Começamos pelo tamanho da base, valores faltantes e duplicatas.
 
 ```{python}
+num = {}  # números que serão citados no texto
+
+def fmt_int(x):
+    return f"{int(round(x)):,}".replace(",", ".")
+
+def brl(x):
+    return "R$ " + fmt_int(x)
+
+def pct(x, d=1):
+    return f"{100 * x:.{d}f}".replace(".", ",") + "%"
+
+num['n_obs'] = fmt_int(data.shape[0])
+num['n_var'] = fmt_int(data.shape[1])
+
 print("Número de observações:", data.shape[0])
 print("Número de variáveis:", data.shape[1])
-
-# Checagem de valores faltantes
-print("\nValores faltantes no dataset:\n", data.isnull().sum())
-
-# Checagem de duplicatas
-print("\nObservações duplicadas no dataset:", data.duplicated().sum())
+print("\nValores faltantes:\n", data.isnull().sum())
+print("\nObservações duplicadas:", data.duplicated().sum())
 ```
 
-
-## Análise Descritiva
-
-Primeiramente, avaliamos a frequência da variável alvo.
+A base tem `r py$num$n_obs` observações e `r py$num$n_var` variáveis. Agora, a frequência da variável alvo e das variáveis categóricas.
 
 ```{python}
-# Frequência da variável Target
 target_counts = data['Target'].value_counts()
-target_percentage = data['Target'].value_counts(normalize=True) * 100
-print("\nFrequência da variável Target:\n", target_counts)
-print("\nPorcentagem da variável Target:\n", target_percentage)
+target_pct = data['Target'].value_counts(normalize=True) * 100
+print("Frequência de Target:\n", target_counts)
+print("\nPorcentagem de Target:\n", target_pct.round(2))
+
+print("\nFrequência de Type:\n", data['Type'].value_counts())
+print("\nFrequência de Failure Type:\n", data['Failure Type'].value_counts())
+
+num['n_falhas'] = fmt_int(target_counts[1])
+num['pct_falhas'] = pct(target_pct[1] / 100)
+num['pct_nao_falhas'] = pct(target_pct[0] / 100)
 ```
 
-Frequência das variáveis categóricas.
+Apenas `r py$num$pct_falhas` das observações são falhas (`r py$num$n_falhas` casos). Isso tem uma consequência importante: um "modelo" que **sempre** diz "não há falha" já acerta `r py$num$pct_nao_falhas` das observações. Por isso, **acurácia sozinha não serve** para avaliar os modelos deste capítulo, e vamos compará-los a essa referência ao longo do texto.
+
+Estatísticas descritivas das variáveis numéricas:
 
 ```{python}
-# Frequência da variável Type
-print("Frequência da variável Type:\n", data['Type'].value_counts())
-print("\nFrequência da variável Failure Type:\n", data['Failure Type'].value_counts())
-```
+num_cols = ['Air temperature [K]', 'Process temperature [K]',
+            'Rotational speed [rpm]', 'Torque [Nm]', 'Tool wear [min]']
+cat_cols = ['Type']
 
-Estatísticas descritivas das variáveis numéricas.
-
-```{python}
-print("Estatísticas descritivas das variáveis numéricas:\n", data.describe())
-```
-
-
-### Relação das Variáveis com a Target
-
-
-A matriz de correlação nos ajuda a identificar quais variáveis numéricas possuem maior relação com a ocorrência de falhas.
-
-```{python}
-numeric_data = data.select_dtypes(include=np.number)
-correlation_matrix = numeric_data.corr()
-
-plt.figure(figsize=(12, 8))
-sns.heatmap(correlation_matrix, annot=True, cmap='coolwarm')
-plt.title('Matriz de Correlação')
-plt.show()
-```
-
-Relação entre a variável Type e a variável Target.
-
-```{python}
-media_target_por_type = data.groupby('Type')['Target'].mean()
-print("Média de Target por classe de Type:\n", media_target_por_type)
-
-media_target_por_type = data.groupby('Failure Type')['Target'].mean()
-print("\n\nMédia de Target por classe de Failure Type:\n", media_target_por_type)
-```
-
-
-```{python}
-#| echo: false
-#| include: false
-# media_target_por_type = data.groupby('Product ID')['Target'].mean()
-# print("\n\nMédia de Target por classe de Product ID:\n", media_target_por_type)
-```
-
-## Construção do Modelo Preditivo
-
-### Preparação dos Dados
-
-Para o modelo, precisamos remover identificadores e transformar variáveis categóricas (como o tipo do produto) em variáveis numéricas (*dummies*).
-
-Removendo identificadores e colunas de diagnóstico posterior
-
-```{python}
-data_model = data.drop(['UDI', 'Failure Type', 'Product ID'], axis=1)
-```
-
-Transformando variáveis categóricas em dummies
-
-```{python}
-data_model = pd.get_dummies(data_model, drop_first=True)
-```
-
-Definição das variávei explicativas (features) e da variável alvo (target).
-
-```{python}
-# Definição de X e y
-variaveis_explicativas = ['Air temperature [K]', 'Process temperature [K]', 
-                          'Rotational speed [rpm]', 'Torque [Nm]', 'Tool wear [min]']
-X = data_model[variaveis_explicativas]
-y = data_model['Target']
-```
-
-Divisão em treino (85%) e validação (15%).
-
-```{python}
-X_train, X_val, y_train, y_val = train_test_split(X, y, test_size=0.15, random_state=42)
-```
-
-### Treinamento e Comparação de Modelos
-
-Vamos testar quatro algoritmos diferentes: Regressão Logística, Random Forest, KNN e Redes Neurais.
-
-```{python modelos}
-# Inicialização dos modelos
-modelos = {
-    "Regressão Logística": LogisticRegression(),
-    "Random Forest": RandomForestClassifier(random_state=42),
-    "KNN": KNeighborsClassifier(),
-    "Redes Neurais": MLPClassifier(random_state=42)
-}
-
-# Função de avaliação para automatizar o processo
-def avaliar_modelo(nome, model, X_train, y_train, X_val, y_val):
-    # O modelo é treinado aqui
-    model.fit(X_train, y_train)
-    # Predições
-    y_pred_train = model.predict(X_train)
-    y_pred_val = model.predict(X_val)
-    
-    # Cálculo das métricas de Acurácia
-    acuracia_train = accuracy_score(y_train, y_pred_train)
-    acuracia_val = accuracy_score(y_val, y_pred_val)
-    
-    # Matrizes de Confusão
-    cm_train = confusion_matrix(y_train, y_pred_train)
-    cm_val = confusion_matrix(y_val, y_pred_val)
-    
-    # Cálculo de % de Falsos Positivos e Negativos sobre o TOTAL da amostra
-    # (Refletindo a lógica exata do seu notebook original)
-    fp_train = (cm_train[0, 1] / (sum(cm_train[0]) + sum(cm_train[1])))
-    fn_train = (cm_train[1, 0] / (sum(cm_train[0]) + sum(cm_train[1])))
-    
-    fp_val = (cm_val[0, 1] / (sum(cm_val[0]) + sum(cm_val[1])))
-    fn_val = (cm_val[1, 0] / (sum(cm_val[0]) + sum(cm_val[1])))
-    
-    # Saída formatada para a aula
-    print(f"--- {nome} ---")
-    print(f"Acurácia no treino: {acuracia_train:.4f}")
-    print(f"Acurácia na validação: {acuracia_val:.4f}")
-    print(f"Matriz de Confusão no treino:\n{cm_train}")
-    print(f"Matriz de Confusão na validação:\n{cm_val}")
-    print(f"% de Falsos Positivos no treino: {fp_train:.4%}")
-    print(f"% de Falsos Negativos no treino: {fn_train:.4%}")
-    print(f"% de Falsos Positivos na validação: {fp_val:.4%}")
-    print(f"% de Falsos Negativos na validação: {fn_val:.4%}")
-    print("\n" + "="*30 + "\n")
-
-for nome, modelo in modelos.items():
-    avaliar_modelo(nome, modelo, X_train, y_train, X_val, y_val)
-```
-
-<!-- ## Análise de Probabilidades (Regressão Logística) -->
-
-<!-- Em negócios, muitas vezes o corte de 0.50 não é o ideal. Vamos observar as probabilidades geradas. -->
-
-<!-- ```{python} -->
-<!-- model_lr = LogisticRegression() -->
-<!-- model_lr.fit(X_train, y_train) -->
-<!-- y_pred_proba = model_lr.predict_proba(X_val)[:, 1] -->
-
-<!-- resultados = X_val.copy() -->
-<!-- resultados['Target_Real'] = y_val -->
-<!-- resultados['Probabilidade'] = y_pred_proba -->
-<!-- resultados['Pred_Binaria'] = model_lr.predict(X_val) -->
-
-<!-- print("Exemplo das probabilidades preditas:") -->
-<!-- print(resultados[['Target_Real', 'Probabilidade', 'Pred_Binaria']].head(10)) -->
-<!-- ``` -->
-
-### Exemplo de Probabilidades Preditas na Validação
-
-Para entender como cada modelo avalia o risco de falha antes da aplicação de um ponto de corte (threshold), podemos observar as probabilidades estimadas para uma amostra de observações. 
-
-Abaixo, selecionamos 20 observações aleatórias da base de validação para comparar o valor real da variável `Target` com a probabilidade de falha estimada por cada algoritmo:
-
-```{python}
-# Selecionando 10 observações de Target == 0 e 10 de Target == 1
-idx_class_0 = y_val[y_val == 0].sample(n=10, random_state=42).index
-idx_class_1 = y_val[y_val == 1].sample(n=10, random_state=42).index
-
-# Unindo os índices e embaralhando para não ficarem ordenados por classe
-sample_indices = idx_class_0.union(idx_class_1)
-np.random.seed(42)
-sample_indices = np.random.choice(sample_indices, size=20, replace=False)
-
-df_amostra_probs = pd.DataFrame({
-    'Target_Real': y_val.loc[sample_indices]
-})
-
-for nome, modelo in modelos.items():
-    # Estimando a probabilidade de pertencer à classe 1 (falha)
-    probs = modelo.predict_proba(X_val.loc[sample_indices])[:, 1]
-    df_amostra_probs[f'Prob_{nome}'] = np.round(probs, 4)
-
-df_amostra_probs = df_amostra_probs.reset_index(drop=True)
-```
-
-``` {r}
-#| echo: false
-knitr::kable(py$df_amostra_probs, "html", caption = "Amostra de 20 observações e suas probabilidades preditas") |> 
-  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = FALSE)
-```
-
-> Note como diferentes modelos atribuem probabilidades distintas para a mesma observação. Definir um ponto de corte fixo (como `0.50`) determina diretamente se cada uma dessas probabilidades se tornará uma previsão de "Falha" (1) ou "Não Falha" (0).
-
-
-
-## Análise de Performance por Percentil
-
-Criando um dataframe para consolidar as probabilidades.
-
-```{python}
-df_probabilidades = pd.DataFrame({'Target_Real': y_val})
-
-for nome, modelo in modelos.items():
-# Treinando (garantindo que todos estão fitados)
-  modelo.fit(X_train, y_train)
-
-  # Extraindo a probabilidade da classe 1 (falha)
-  # Nota: Alguns modelos podem não ter predict_proba, mas os selecionados possuem.
-  df_probabilidades[f'Prob_{nome}'] = modelo.predict_proba(X_val)[:, 1]
-  print("Primeras linhas do consolidado de probabilidades:")
-```
-
-
-```{python}
-#| eval: false
-print(df_probabilidades.head(n=10))
+desc = data[num_cols].describe().T.round(2).reset_index()
+desc = desc.rename(columns={'index': 'Variável'})
 ```
 
 ```{r}
 #| echo: false
-knitr::kable(head(py$df_probabilidades), "html") |> kable_styling("striped") 
+tabela(py$desc)
 ```
 
-Agora, vamos calcular a taxa de falha real para cada decil de probabilidade de cada modelo. Um modelo "bom de negócio" deve concentrar quase todas as falhas nos primeiros decis (maior probabilidade).
+### Relação das variáveis com a falha
+
+Em vez de uma matriz de correlação, olhamos diretamente a **taxa de falha** em cada faixa de cada variável (dividida em quintis). Isso é mais informativo do que um coeficiente de correlação, porque a relação entre sensores e falha costuma **não ser linear**: falhas podem ocorrer tanto com valores muito baixos quanto muito altos.
 
 ```{python}
-def calcular_performance_decil(df, col_prob, col_target, nome_modelo):
-  # Criando os decis
-  df_temp = df[[col_target, col_prob]].copy()
-  # Usamos rank para lidar com probabilidades repetidas (comum no KNN e RF)
-  df_temp['Decil'] = pd.qcut(df_temp[col_prob].rank(method='first'), 10, labels=range(10, 0, -1))
-  # Agrupando por decil
-  performance = df_temp.groupby('Decil', observed=True).agg(
-      total_maquinas=(col_target, 'count'),
-      falhas_reais=(col_target, 'sum')
-  ).reset_index()
-  
-  performance['Taxa_Falha'] = performance['falhas_reais'] / performance['total_maquinas']
-  performance['Modelo'] = nome_modelo
-  return performance
+taxa_geral = data['Target'].mean() * 100
 
-analise_decis_completa = pd.concat([
-calcular_performance_decil(df_probabilidades, f'Prob_{nome}', 'Target_Real', nome)
-for nome in modelos.keys()
-])
-```
+fig, axes = plt.subplots(2, 3, figsize=(13, 7))
+axes = axes.ravel()
 
-Visualização Comparativa
+for ax, col in zip(axes, num_cols):
+    faixa = pd.qcut(data[col], 5, duplicates='drop')
+    taxa = data.groupby(faixa, observed=True)['Target'].mean() * 100
+    ax.bar(range(len(taxa)), taxa.values, color='steelblue')
+    ax.set_xticks(range(len(taxa)))
+    ax.set_xticklabels([f"{i.left:.0f}–{i.right:.0f}" for i in taxa.index],
+                       rotation=30, fontsize=8)
+    ax.axhline(taxa_geral, color='red', linestyle='--', linewidth=1)
+    ax.set_title(col, fontsize=10)
+    ax.set_ylabel('% de falhas')
 
-```{python echo=FALSE, include=FALSE}
-plt.figure(figsize=(12, 6))
-sns.lineplot(data=analise_decis_completa, x='Decil', y='Taxa_Falha', hue='Modelo', marker='o')
-plt.title('Capacidade de Ordenamento: Taxa de Falha Real por Decil')
-plt.ylabel('Taxa de Falha Real (Hit Rate)')
-plt.xlabel('Decil de Risco (1 = Mais Provável)')
-plt.gca().invert_xaxis() # Inverter para o Decil 10 (maior risco) ficar na esquerda
-plt.grid(True, linestyle='--', alpha=0.7)
-plt.show()
-```
+taxa_type = data.groupby('Type')['Target'].mean().reindex(['L', 'M', 'H']) * 100
+axes[5].bar(taxa_type.index, taxa_type.values, color='steelblue')
+axes[5].axhline(taxa_geral, color='red', linestyle='--', linewidth=1)
+axes[5].set_title('Type', fontsize=10)
+axes[5].set_ylabel('% de falhas')
 
-```{python}
-plt.figure(figsize=(12, 6))
-
-#Gráfico de barras agrupadas por modelo em cada decil
-sns.barplot(
-data=analise_decis_completa,
-x='Decil',
-y='Taxa_Falha',
-hue='Modelo',
-palette='Set2'
-)
-
-plt.title('Capacidade de Ordenamento: Taxa de Falha Real por Decil', fontsize=14, fontweight='bold')
-plt.ylabel('Taxa de Falha Real (Hit Rate)')
-plt.xlabel('Decil de Risco (1 = Mais Provável)')
-
-# Inversão para o Decil 1 ficar à esquerda
-plt.gca().invert_xaxis()
-
-# Grid horizontal para facilitar a leitura dos valores das barras
-plt.grid(True, axis='y', linestyle='--', alpha=0.5)
-
-# Legenda fora do gráfico para liberar espaço visual
-plt.legend(title='Modelo', bbox_to_anchor=(1.02, 1), loc='upper left', frameon=True)
-
+plt.suptitle('Taxa de falha por faixa de cada variável (linha vermelha = taxa geral)')
 plt.tight_layout()
 plt.show()
 ```
 
-
-
-## Impacto Financeiro e Seleção do Modelo
-
-A escolha do "Melhor Modelo" depende do custo do erro. Vamos calcular o impacto financeiro considerando que uma Quebra (Falso Negativo) custa 20x mais que uma Inspeção (Falso Positivo).
+Faixas em que a barra passa bem acima da linha vermelha concentram mais falhas. Veja também a mediana de cada sensor entre máquinas com e sem falha:
 
 ```{python}
-def avaliar_custo_modelo(df_probs, col_target, modelos_dict, custo_fp=500, custo_fn=10000):
-  relatorio_custos = []
-  
-  for nome in modelos_dict.keys():
-    # Usando o corte padrão de 0.5 para comparação
-    preds = (df_probs[f'Prob_{nome}'] >= 0.5).astype(int)
-    cm = confusion_matrix(df_probs[col_target], preds)
-    
-    fp = cm[0, 1]
-    fn = cm[1, 0]
-    custo_total = (fp * custo_fp) + (fn * custo_fn)
-    
-    relatorio_custos.append({
+tab_med = data.groupby('Target')[num_cols].median().T.round(1).reset_index()
+tab_med.columns = ['Variável', 'Mediana (sem falha)', 'Mediana (com falha)']
+```
+
+```{r}
+#| echo: false
+tabela(py$tab_med)
+```
+
+#### Por que `Failure Type` fica de fora
+
+`Failure Type` descreve a falha que **já aconteceu**. Usá-la para prever a falha seria vazamento de informação (*data leakage*): o modelo "saberia" a resposta por construção.
+
+```{python}
+tab_ft = (pd.crosstab(data['Failure Type'], data['Target'])
+            .rename(columns={0: 'Target = 0', 1: 'Target = 1'})
+            .rename_axis(columns=None)
+            .reset_index())
+
+n_incons = int(((data['Target'] == 1) & (data['Failure Type'] == 'No Failure')).sum()
+               + ((data['Target'] == 0) & (data['Failure Type'] != 'No Failure')).sum())
+num['n_incons'] = fmt_int(n_incons)
+```
+
+```{r}
+#| echo: false
+tabela(py$tab_ft)
+```
+
+Note ainda que há `r py$num$n_incons` registros em que `Target` e `Failure Type` não concordam (por exemplo, falha registrada sem tipo de falha). Em um projeto real, isso seria levado a quem gerou os dados. Aqui mantemos `Target` como está.
+
+## Preparação dos dados
+
+Removemos os identificadores (`UDI`, `Product ID`) e `Failure Type`. As variáveis explicativas são os cinco sensores e o `Type`.
+
+```{python}
+X = data[num_cols + cat_cols]
+y = data['Target']
+```
+
+As etapas de transformação (padronização dos sensores e *dummies* para `Type`) **não** são feitas aqui, mas dentro de um `Pipeline` junto com cada modelo. Assim elas são aprendidas só com o treino e reaplicadas automaticamente a dados novos, o que evita vazamento e simplifica a implantação.
+
+::: {.callout-tip title="Por que padronizar?"}
+Regressão logística, KNN e redes neurais são sensíveis à escala das variáveis: sem padronização, `Rotational speed` (na casa dos milhares) domina `Tool wear` (dezenas) e o treinamento fica instável. Florestas aleatórias não dependem da escala, mas usá-las no mesmo pipeline não prejudica.
+:::
+
+### Separação dos dados
+
+Dividimos em **treino (64%)**, **validação (16%)** e **teste (20%)**, de forma **estratificada pela variável alvo**. Como as falhas são raras, a estratificação garante que os três conjuntos tenham a mesma proporção de falhas.
+
+```{python}
+from sklearn.model_selection import train_test_split
+
+X_trval, X_test, y_trval, y_test = train_test_split(
+    X, y, test_size=0.20, stratify=y, random_state=42)
+
+X_train, X_val, y_train, y_val = train_test_split(
+    X_trval, y_trval, test_size=0.20, stratify=y_trval, random_state=42)
+
+tab_split = pd.DataFrame({
+    'Conjunto': ['Treino', 'Validação', 'Teste'],
+    'Observações': [len(y_train), len(y_val), len(y_test)],
+    'Falhas': [int(y_train.sum()), int(y_val.sum()), int(y_test.sum())],
+})
+tab_split['% de falhas'] = (100 * tab_split['Falhas'] / tab_split['Observações']).round(2)
+
+num['n_falhas_val'] = fmt_int(y_val.sum())
+num['n_falhas_test'] = fmt_int(y_test.sum())
+```
+
+```{r}
+#| echo: false
+tabela(py$tab_split)
+```
+
+A validação tem apenas `r py$num$n_falhas_val` falhas e o teste, `r py$num$n_falhas_test`. Com tão poucos casos positivos, as métricas variam bastante de uma amostra para outra, e isso deve ser lembrado ao comparar modelos próximos.
+
+## Modelos
+
+Comparamos quatro algoritmos: regressão logística, floresta aleatória, KNN e rede neural. Todos entram em um pipeline com padronização dos sensores. Incluímos também um **modelo de referência (baseline)** que prevê sempre a classe mais frequente ("sem falha"), a régua mínima que qualquer modelo precisa superar.
+
+```{python}
+from sklearn.base import clone
+from sklearn.compose import ColumnTransformer
+from sklearn.dummy import DummyClassifier
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.linear_model import LogisticRegression
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.neural_network import MLPClassifier
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import OneHotEncoder, StandardScaler
+
+preproc = ColumnTransformer([
+    ('num', StandardScaler(), num_cols),
+    ('cat', OneHotEncoder(drop='first'), cat_cols),
+])
+
+def montar_pipeline(modelo):
+    return Pipeline([('prep', clone(preproc)), ('modelo', modelo)])
+
+modelos = {
+    "Regressão Logística": montar_pipeline(LogisticRegression(max_iter=1000)),
+    "Random Forest": montar_pipeline(RandomForestClassifier(random_state=42)),
+    "KNN": montar_pipeline(KNeighborsClassifier()),
+    "Redes Neurais": montar_pipeline(MLPClassifier(max_iter=500, random_state=42)),
+}
+
+baseline = DummyClassifier(strategy='most_frequent')
+baseline.fit(X_train, y_train)
+
+for nome, m in modelos.items():
+    m.fit(X_train, y_train)
+```
+
+### Avaliação na validação
+
+Todos os modelos estimam uma **probabilidade de falha**. Para virar uma previsão ("falha" ou "não falha"), é preciso um ponto de corte; começamos com o padrão de 0,50. Como a classe positiva é rara, usamos métricas que olham para ela:
+
+- **Precisão:** dos alarmes emitidos, quantos eram falhas reais.
+- **Recall (sensibilidade):** das falhas reais, quantas o modelo detectou.
+- **F1:** média harmônica entre precisão e recall.
+- **AUC-ROC e AUC-PR:** medem a qualidade do **ranqueamento** das probabilidades, sem depender do corte. A AUC-PR é a mais informativa com classes raras; o baseline tem AUC-PR igual à proporção de falhas.
+
+```{python}
+from sklearn.metrics import (accuracy_score, average_precision_score,
+                             confusion_matrix, f1_score, precision_score,
+                             recall_score, roc_auc_score)
+
+def calcular_metricas(nome, modelo, X_, y_, limiar=0.5):
+    prob = modelo.predict_proba(X_)[:, 1]
+    pred = (prob >= limiar).astype(int)
+    tn, fp, fn, tp = confusion_matrix(y_, pred, labels=[0, 1]).ravel()
+    return {
         'Modelo': nome,
-        'Falsos Positivos': fp,
-        'Falsos Negativos': fn,
-        'Custo Total (R$)': custo_total
-    })
+        'Acurácia': accuracy_score(y_, pred),
+        'Precisão': precision_score(y_, pred, zero_division=0),
+        'Recall': recall_score(y_, pred, zero_division=0),
+        'F1': f1_score(y_, pred, zero_division=0),
+        'AUC-ROC': roc_auc_score(y_, prob),
+        'AUC-PR': average_precision_score(y_, prob),
+        'FP': fp,
+        'FN': fn,
+    }
 
-  return pd.DataFrame(relatorio_custos).sort_values('Custo Total (R$)')
+linhas = [calcular_metricas("Baseline (sempre 'sem falha')", baseline, X_val, y_val)]
+linhas += [calcular_metricas(nome, m, X_val, y_val) for nome, m in modelos.items()]
+tab_metricas = pd.DataFrame(linhas).round(3)
 
-df_custos = avaliar_custo_modelo(df_probabilidades, 'Target_Real', modelos)
-print("Relatório de Impacto Financeiro (Corte 0.50):")
-print(df_custos)
+num['acc_base'] = pct(tab_metricas.loc[0, 'Acurácia'])
+melhor_prauc = tab_metricas.iloc[1:].sort_values('AUC-PR', ascending=False).iloc[0]
+num['melhor_prauc'] = melhor_prauc['Modelo']
+num['valor_prauc'] = f"{melhor_prauc['AUC-PR']:.2f}".replace(".", ",")
+num['prauc_base'] = f"{tab_metricas.loc[0, 'AUC-PR']:.2f}".replace(".", ",")
 ```
 
 ```{r}
 #| echo: false
-knitr::kable(py$df_custos, "html") |> kable_styling("striped")
+tabela(py$tab_metricas, "Métricas na validação (corte = 0,50)")
 ```
 
+O baseline atinge `r py$num$acc_base` de acurácia sem detectar nenhuma falha (recall igual a zero). Isso mostra por que a acurácia engana. Pela AUC-PR, o melhor ranqueamento na validação foi o de **`r py$num$melhor_prauc`** (`r py$num$valor_prauc`, contra `r py$num$prauc_base` do baseline).
 
-Ao atribuirmos valores monetários aos erros — R\$ 500,00 para uma inspeção desnecessária (FP) e R\$ 10.000,00 para uma quebra catastrófica (FN) — a hierarquia dos modelos muda:
+### Probabilidades preditas: um exemplo
 
-- **O modelo vencedor: Random Forest**
-
-  - Com um custo total de R$ 162.000, este modelo é o mais eficiente para a operação.
-  - Sua vantagem reside na baixa taxa de Falsos Negativos (16), provando que cada falha evitada compensa financeiramente até 20 inspeções preventivas sem falha.
-  - O Random Forest conseguiu o melhor equilíbrio entre sensibilidade e precisão.
-
-- **A Armadilha das Redes Neurais (O "Modelo Limpinho")**
-
-  - Embora tenha apresentado 0 Falsos Positivos (precisão perfeita nos alarmes - não "jogar dinheiro fora" com inspeções inúteis), é o pior cenário financeiro (R$ 470.000).
-
-  - Isso demonstra que o conservadorismo extremo do modelo ignora muitas quebras reais (47 Falsos Negativos), custando caro para a operação.
-
-Apesar de não "jogar dinheiro fora" com inspeções inúteis, ele é o pior modelo financeiramente (R$ 470.000).
-
-Ser conservador demais e só "apontar o dedo" quando se tem certeza absoluta (zero FPs) pode custar uma fortuna em quebras não detectadas (47 Falsos Negativos). Precisão absoluta pode ser um péssimo negócio.
-
-- **Regressão Logística vs. KNN**
-
-  - A Regressão Logística é R$ 29.000 mais barata que o KNN, pois capturou 3 falhas a mais, mesmo gerando 2 alarmes falsos adicionais.
-  
-
-Em manutenção preditiva, preferimos modelos "barulhentos" (mais FPs) a modelos "míopes" (mais FNs). A precisão absoluta pode ser um péssimo negócio se o custo da omissão for elevado.
-
-## Otimização do Ponto de Corte (Threshold)
-
-Até agora, utilizamos o corte padrão de `0.50` para classificar uma máquina como "em risco de falha". No entanto, como o custo da quebra (R\$ 10.000) é muito superior ao custo da inspeção (R\$ 500), podemos ajustar o ponto de corte para priorizar a detecção de falhas.
-
-Vamos avaliar a **Random Forest** sob três thresholds diferentes:
+Para ver como cada modelo avalia o risco antes do ponto de corte, sorteamos 10 máquinas com falha e 10 sem falha na validação e comparamos as probabilidades estimadas.
 
 ```{python}
-# Selecionando as probabilidades preditas pelo Random Forest na validação
-rf_model = modelos["Random Forest"]
-y_probs_rf = rf_model.predict_proba(X_val)[:, 1]
+idx = pd.concat([
+    y_val[y_val == 0].sample(n=10, random_state=42),
+    y_val[y_val == 1].sample(n=10, random_state=42),
+]).sample(frac=1, random_state=42).index
 
-thresholds = [0.50, 0.20, 0.08]
-resultados_threshold = []
-
-for th in thresholds:
-    preds_th = (y_probs_rf >= th).astype(int)
-    cm = confusion_matrix(y_val, preds_th)
-    
-    vn, fp, fn, vp = cm.ravel()
-    
-    custo_fp = fp * 500
-    custo_fn = fn * 10000
-    custo_total = custo_fp + custo_fn
-    
-    sensibilidade = vp / (vp + fn) # Recall / Taxa de Detecção de Falhas
-    precisao = vp / (vp + fp) if (vp + fp) > 0 else 0
-    
-    resultados_threshold.append({
-        'Threshold': f"{th:.2f}",
-        'Falsos Positivos (FP)': fp,
-        'Falsos Negativos (FN)': fn,
-        'Sensibilidade (Recall)': f"{sensibilidade:.2%}",
-        'Precisão': f"{precisao:.2%}",
-        'Custo FP (R$)': f"R$ {custo_fp:,.2f}",
-        'Custo FN (R$)': f"R$ {custo_fn:,.2f}",
-        'Custo Total (R$)': f"R$ {custo_total:,.2f}"
-    })
-
-df_thresholds = pd.DataFrame(resultados_threshold)
+df_amostra = pd.DataFrame({'Target_Real': y_val.loc[idx]})
+for nome, m in modelos.items():
+    df_amostra[f'Prob_{nome}'] = np.round(m.predict_proba(X_val.loc[idx])[:, 1], 4)
+df_amostra = df_amostra.reset_index(drop=True)
 ```
 
 ```{r}
 #| echo: false
-knitr::kable(py$df_thresholds, "html") |> kable_styling("striped")
+tabela(py$df_amostra, "Amostra de 20 observações e suas probabilidades preditas")
 ```
 
-### O que essa mudança nos mostra?
+Modelos diferentes atribuem probabilidades diferentes à mesma máquina. Definir o ponto de corte é o que transforma cada uma dessas probabilidades em "inspecionar" ou "não inspecionar".
 
-1. **Redução do Custo Total:** Ao diminuir o threshold de `0.50` para `0.20`, aceitamos fazer mais inspeções desnecessárias (aumento nos Falsos Positivos), mas reduzimos drasticamente as quebras não detectadas (Falsos Negativos).
-2. **Trade-off Sensibilidade vs. Precisão:** Conforme reduzimos o threshold, a **Sensibilidade (Recall)** aumenta (detectamos uma proporção maior das falhas reais), enquanto a **Precisão** cai (mais alarmes falsos).
-3. **Decisão Baseada em Custo:** Em cenários onde o custo do erro tipo II (FN) é desproporcionalmente alto, ajustar o ponto de corte é uma estratégia simples e extremamente rentável para a operação.
+### Capacidade de ordenar o risco (decis)
 
-## Próximos Passos
+Em manutenção, nem sempre dá para inspecionar tudo: é comum ter uma fila de prioridade. Ordenamos as máquinas da validação da maior para a menor probabilidade, dividimos em 10 grupos (decis) e calculamos a taxa de falha real em cada um. Um bom modelo concentra as falhas nos primeiros decis.
 
-O modelo selecionado para implementação é a Random Forest. Como evolução desta análise, o próximo passo estratégico é:
+```{python}
+df_prob = pd.DataFrame({'Target_Real': y_val})
+for nome, m in modelos.items():
+    df_prob[f'Prob_{nome}'] = m.predict_proba(X_val)[:, 1]
 
-- Otimização de Threshold: "Podemos ajustar o ponto de corte (threshold) da Random Forest para reduzir os 16 Falsos Negativos ainda mais, mesmo que o número de Falsos Positivos suba para 20 ou 30?"
+def performance_decil(df, col_prob, nome):
+    d = df[['Target_Real', col_prob]].copy()
+    # decil 1 = 10% das máquinas com maior probabilidade de falha
+    d['Decil'] = pd.qcut(d[col_prob].rank(method='first', ascending=False),
+                         10, labels=range(1, 11)).astype(int)
+    out = (d.groupby('Decil')
+             .agg(total=('Target_Real', 'count'), falhas=('Target_Real', 'sum'))
+             .reset_index())
+    out['Taxa_Falha'] = out['falhas'] / out['total']
+    out['Modelo'] = nome
+    return out
+
+analise_decis = pd.concat([performance_decil(df_prob, f'Prob_{n}', n) for n in modelos])
+
+plt.figure(figsize=(12, 6))
+sns.barplot(data=analise_decis, x='Decil', y='Taxa_Falha', hue='Modelo', palette='Set2')
+plt.axhline(y_val.mean(), color='red', linestyle='--', linewidth=1, label='Taxa geral')
+plt.title('Taxa de falha real por decil de risco', fontsize=14, fontweight='bold')
+plt.ylabel('Taxa de falha real')
+plt.xlabel('Decil de risco (1 = maior probabilidade de falha)')
+plt.grid(True, axis='y', linestyle='--', alpha=0.5)
+plt.legend(title='Modelo', bbox_to_anchor=(1.02, 1), loc='upper left')
+plt.tight_layout()
+plt.show()
+
+captura = (analise_decis[analise_decis['Decil'] <= 2]
+           .groupby('Modelo')['falhas'].sum() / y_val.sum())
+captura = (captura.mul(100).round(1).rename('% das falhas nos 20% de maior risco')
+           .reset_index())
+```
+
+```{r}
+#| echo: false
+tabela(py$captura)
+```
+
+Inspecionando apenas os 20% de máquinas de maior risco, o modelo captura a parcela das falhas mostrada na tabela. Um sorteio aleatório capturaria cerca de 20%.
+
+## Impacto financeiro e escolha do limiar
+
+A escolha do melhor modelo depende do custo de cada erro. Vamos supor, de forma ilustrativa, que:
+
+- uma **inspeção desnecessária** (falso positivo, FP) custa **R$ 500**;
+- uma **quebra não detectada** (falso negativo, FN) custa **R$ 10.000**, ou seja, 20 vezes mais.
+
+```{python}
+CUSTO_FP, CUSTO_FN = 500, 10000
+
+def custo_total(y_, prob, limiar):
+    pred = (prob >= limiar).astype(int)
+    tn, fp, fn, tp = confusion_matrix(y_, pred, labels=[0, 1]).ravel()
+    return fp * CUSTO_FP + fn * CUSTO_FN, fp, fn, tp
+
+# Referências de negócio: nunca alertar e inspecionar tudo
+custo_nunca = int(y_val.sum()) * CUSTO_FN
+custo_tudo = int((y_val == 0).sum()) * CUSTO_FP
+
+linhas = []
+for nome in modelos:
+    c, fp, fn, tp = custo_total(y_val, df_prob[f'Prob_{nome}'], 0.5)
+    linhas.append({'Modelo': nome, 'FP': fp, 'FN': fn, 'Custo total (R$)': c})
+df_custos = pd.DataFrame(linhas)
+df_custos = pd.concat([df_custos, pd.DataFrame([
+    {'Modelo': 'Referência: nunca alertar', 'FP': 0, 'FN': int(y_val.sum()),
+     'Custo total (R$)': custo_nunca},
+    {'Modelo': 'Referência: inspecionar tudo', 'FP': int((y_val == 0).sum()), 'FN': 0,
+     'Custo total (R$)': custo_tudo},
+])]).sort_values('Custo total (R$)').reset_index(drop=True)
+
+so_modelos = df_custos[df_custos['Modelo'].isin(modelos)]
+num['melhor_050'] = so_modelos.iloc[0]['Modelo']
+num['custo_min_050'] = brl(so_modelos.iloc[0]['Custo total (R$)'])
+num['pior_050'] = so_modelos.iloc[-1]['Modelo']
+num['custo_pior_050'] = brl(so_modelos.iloc[-1]['Custo total (R$)'])
+num['custo_nunca'] = brl(custo_nunca)
+num['custo_tudo'] = brl(custo_tudo)
+```
+
+```{r}
+#| echo: false
+tabela(py$df_custos, "Custo na validação com corte de 0,50")
+```
+
+Com o corte padrão, o modelo de menor custo foi **`r py$num$melhor_050`** (`r py$num$custo_min_050`) e o de maior custo foi `r py$num$pior_050` (`r py$num$custo_pior_050`). Para comparação, nunca alertar custaria `r py$num$custo_nunca` e inspecionar todas as máquinas, `r py$num$custo_tudo`.
+
+Note que o ranking por **custo** pode ser diferente do ranking por **acurácia**. Um modelo muito conservador, que só alerta quando tem quase certeza (poucos FP), pode ter acurácia alta e ainda assim sair caro por deixar passar muitas quebras (muitos FN). Em manutenção preditiva, em geral é preferível um modelo "barulhento" (mais inspeções desnecessárias) a um "míope" (mais quebras não detectadas).
+
+### Escolha do limiar
+
+O corte de 0,50 supõe que os dois erros custam o mesmo, o que não é o caso. Se as probabilidades fossem bem calibradas, valeria a pena inspecionar sempre que a probabilidade de falha $p$ superasse
+
+$$
+\frac{c_{FP}}{c_{FP} + c_{FN}} = \frac{500}{500 + 10000} \approx 0{,}048.
+$$
+
+Como as probabilidades dos modelos nem sempre são bem calibradas, procuramos o limiar empiricamente: testamos limiares de 0,01 a 0,99 **na validação** e ficamos com o que minimiza o custo de cada modelo.
+
+```{python}
+limiares = np.round(np.arange(0.01, 1.00, 0.01), 2)
+
+curvas, linhas = [], []
+for nome in modelos:
+    prob = df_prob[f'Prob_{nome}']
+    custos = [custo_total(y_val, prob, t)[0] for t in limiares]
+    curvas.append(pd.DataFrame({'Limiar': limiares, 'Custo': custos, 'Modelo': nome}))
+
+    t_otimo = limiares[int(np.argmin(custos))]
+    c, fp, fn, tp = custo_total(y_val, prob, t_otimo)
+    c050 = custo_total(y_val, prob, 0.5)[0]
+    linhas.append({
+        'Modelo': nome,
+        'Limiar ótimo': t_otimo,
+        'FP': fp, 'FN': fn,
+        'Recall': round(tp / (tp + fn), 3),
+        'Precisão': round(tp / (tp + fp), 3) if (tp + fp) > 0 else 0.0,
+        'Custo com corte 0,50 (R$)': c050,
+        'Custo com limiar ótimo (R$)': c,
+    })
+
+df_curvas = pd.concat(curvas)
+df_limiares = pd.DataFrame(linhas).sort_values('Custo com limiar ótimo (R$)').reset_index(drop=True)
+
+plt.figure(figsize=(10, 5))
+sns.lineplot(data=df_curvas, x='Limiar', y='Custo', hue='Modelo')
+plt.axvline(CUSTO_FP / (CUSTO_FP + CUSTO_FN), color='gray', linestyle=':', label='Limiar teórico')
+plt.title('Custo na validação em função do limiar')
+plt.ylabel('Custo total (R$)')
+plt.legend(title='Modelo')
+plt.tight_layout()
+plt.show()
+
+melhor = df_limiares.iloc[0]
+melhor_nome = melhor['Modelo']
+limiar_final = float(melhor['Limiar ótimo'])
+
+num['limiar_teorico'] = f"{CUSTO_FP / (CUSTO_FP + CUSTO_FN):.3f}".replace(".", ",")
+num['melhor_nome'] = melhor_nome
+num['limiar_final'] = f"{limiar_final:.2f}".replace(".", ",")
+num['custo_melhor_otimo'] = brl(melhor['Custo com limiar ótimo (R$)'])
+num['custo_melhor_050'] = brl(melhor['Custo com corte 0,50 (R$)'])
+num['recall_melhor'] = pct(melhor['Recall'], 0)
+num['precisao_melhor'] = pct(melhor['Precisão'], 0)
+```
+
+```{r}
+#| echo: false
+tabela(py$df_limiares, "Limiar que minimiza o custo na validação, por modelo")
+```
+
+O modelo escolhido é **`r py$num$melhor_nome`**, com limiar de **`r py$num$limiar_final`** (o teórico seria `r py$num$limiar_teorico`). Na validação, esse corte detecta `r py$num$recall_melhor` das falhas, com precisão de `r py$num$precisao_melhor`, e o custo cai de `r py$num$custo_melhor_050` (corte 0,50) para `r py$num$custo_melhor_otimo`.
+
+Repare que reduzir o limiar aumenta o recall e derruba a precisão: aceitamos mais alarmes falsos para deixar passar menos quebras. Como o limiar foi **escolhido na validação**, o custo mostrado ali é otimista. A estimativa honesta vem do conjunto de teste, a seguir.
+
+## Erro de generalização
+
+Reestimamos o modelo escolhido com treino e validação juntos e o avaliamos **uma única vez** no conjunto de teste, aplicando o limiar definido na validação. Comparamos com as duas referências de negócio e com o corte padrão de 0,50.
+
+```{python}
+modelo_final = clone(modelos[melhor_nome])
+modelo_final.fit(pd.concat([X_train, X_val]), pd.concat([y_train, y_val]))
+
+prob_test = modelo_final.predict_proba(X_test)[:, 1]
+
+c_lim, fp_l, fn_l, tp_l = custo_total(y_test, prob_test, limiar_final)
+c_050, fp_5, fn_5, tp_5 = custo_total(y_test, prob_test, 0.5)
+n_pos, n_neg = int(y_test.sum()), int((y_test == 0).sum())
+
+def linha_teste(nome, fp, fn, tp, custo):
+    return {
+        'Estratégia': nome, 'FP': fp, 'FN': fn,
+        'Recall': round(tp / n_pos, 3),
+        'Precisão': round(tp / (tp + fp), 3) if (tp + fp) > 0 else 0.0,
+        'Custo total (R$)': custo,
+    }
+
+tab_teste = pd.DataFrame([
+    linha_teste(f'{melhor_nome}, limiar {limiar_final:.2f}', fp_l, fn_l, tp_l, c_lim),
+    linha_teste(f'{melhor_nome}, corte 0,50', fp_5, fn_5, tp_5, c_050),
+    linha_teste('Nunca alertar', 0, n_pos, 0, n_pos * CUSTO_FN),
+    linha_teste('Inspecionar tudo', n_neg, 0, n_pos, n_neg * CUSTO_FP),
+])
+
+num['custo_teste'] = brl(c_lim)
+num['custo_teste_050'] = brl(c_050)
+num['custo_teste_nunca'] = brl(n_pos * CUSTO_FN)
+num['custo_teste_tudo'] = brl(n_neg * CUSTO_FP)
+num['recall_teste'] = pct(tp_l / n_pos, 0)
+num['precisao_teste'] = pct(tp_l / (tp_l + fp_l), 0) if (tp_l + fp_l) > 0 else "0%"
+num['fn_teste'] = fmt_int(fn_l)
+num['fp_teste'] = fmt_int(fp_l)
+num['aucpr_teste'] = f"{average_precision_score(y_test, prob_test):.2f}".replace(".", ",")
+```
+
+```{r}
+#| echo: false
+tabela(py$tab_teste, "Desempenho no conjunto de teste")
+```
+
+No teste, o modelo com o limiar escolhido custa `r py$num$custo_teste`, contra `r py$num$custo_teste_050` com o corte de 0,50, `r py$num$custo_teste_nunca` se nunca alertássemos e `r py$num$custo_teste_tudo` se inspecionássemos todas as máquinas. O modelo detecta `r py$num$recall_teste` das falhas (deixando passar `r py$num$fn_teste`), ao custo de `r py$num$fp_teste` inspeções sem falha (precisão de `r py$num$precisao_teste`). A AUC-PR no teste é `r py$num$aucpr_teste`.
+
+## Uso prático e implantação
+
+**Para que serve.** O modelo funciona como **apoio à priorização**: ordena as máquinas por risco e sinaliza quais inspecionar primeiro, dado o custo relativo de inspeção e quebra.
+
+**Para que não serve.** Não deve substituir inspeções de segurança obrigatórias nem ser usado como única barreira contra falhas críticas: mesmo com o melhor limiar, parte das falhas passa despercebida, e os custos usados aqui são hipotéticos.
+
+**Como usar em produção.** Como a padronização e as *dummies* estão dentro do pipeline, basta salvar o modelo junto com o limiar e aplicá-los a dados brutos com as mesmas colunas do treinamento.
+
+```{python}
+#| eval: false
+import joblib
+
+joblib.dump({'modelo': modelo_final, 'limiar': limiar_final}, 'modelo_manutencao.joblib')
+
+# em outra sessão
+artefato = joblib.load('modelo_manutencao.joblib')
+
+novas_maquinas = pd.DataFrame({
+    'Air temperature [K]': [298.5, 301.2],
+    'Process temperature [K]': [308.9, 311.4],
+    'Rotational speed [rpm]': [1500, 1350],
+    'Torque [Nm]': [42.0, 65.0],
+    'Tool wear [min]': [30, 210],
+    'Type': ['L', 'M'],
+})
+
+prob = artefato['modelo'].predict_proba(novas_maquinas)[:, 1]
+novas_maquinas['prob_falha'] = prob
+novas_maquinas['inspecionar'] = prob >= artefato['limiar']
+novas_maquinas
+```
+
+Ao colocar o modelo em uso definitivo, vale reestimá-lo com **todos** os dados (treino, validação e teste), mantendo o limiar escolhido.
+
+**Manutenção do modelo.**
+
+- Monitorar a taxa de falha observada e o custo real de inspeções e quebras.
+- Reavaliar o limiar sempre que os custos mudarem: ele depende diretamente da razão entre o custo de uma quebra e o de uma inspeção.
+- Retreinar periodicamente, pois mudanças em equipamentos, produtos ou condições de operação alteram o padrão dos sensores.
+
+## Conclusão
+
+Com `r py$num$n_obs` observações e `r py$num$pct_falhas` de falhas, comparamos quatro modelos de classificação a um baseline que nunca prevê falha. Como a acurácia do baseline é `r py$num$acc_base`, avaliamos os modelos por precisão, recall, AUC-PR e, principalmente, pelo **custo** das decisões. O modelo escolhido na validação foi **`r py$num$melhor_nome`**, com limiar de `r py$num$limiar_final`. No teste, ele custa `r py$num$custo_teste`, contra `r py$num$custo_teste_nunca` de nunca alertar.
+
+O ponto central é que **o corte de decisão importa tanto quanto o modelo**: com custos assimétricos, o limiar de 0,50 é quase nunca o mais adequado.
+
+**Limitações:**
+
+- A base é sintética e sem ordem temporal; o desempenho em uma fábrica real pode ser diferente.
+- Os custos de inspeção e quebra são hipotéticos.
+- Há poucas falhas na validação e no teste, então as diferenças entre modelos próximos e o custo estimado são incertos.
+- Os modelos usam hiperparâmetros padrão, sem ajuste fino nem validação cruzada.
+- O limiar foi escolhido em um único conjunto de validação.
+- Há registros em que `Target` e `Failure Type` discordam, e não investigamos a origem.
+
+**Próximos passos:** ajustar hiperparâmetros com validação cruzada estratificada, calibrar as probabilidades (por exemplo, com `CalibratedClassifierCV`), testar `class_weight` para lidar com o desbalanceamento e escolher o limiar por validação cruzada, para obter uma estimativa de custo mais estável.
