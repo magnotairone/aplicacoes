@@ -47,6 +47,7 @@ format:
     theme:
       - cosmo
       - brand
+      - tema.scss
     css: styles.css
     toc: true
     number-sections: true
