@@ -5,13 +5,13 @@
 #| include: false
 ```
 
+![](images/capa.jpg){.capa-livro fig-alt="Capa do livro Ciência de Dados Aplicada, de Magno Severino: no canto inferior esquerdo, uma explosão caótica de pontos e traços coloridos que, rumo ao canto superior direito, se organiza em linhas paralelas e em quatro grupos circulares de pontos."}
+
 Este livro apresenta aplicações práticas de ciência de dados inspiradas em casos reais, vistas sob a ótica de negócios. Em cada capítulo, partimos de um problema que uma empresa poderia enfrentar (prever a falha de uma máquina, precificar um imóvel, entender o perfil dos clientes, definir ações de venda cruzada) e mostramos, passo a passo, como os dados podem ajudar a resolvê-lo.
 
 O foco não está em apresentar uma técnica isolada, mas em mostrar **como ela se encaixa em um projeto de ponta a ponta**: da pergunta de negócio até o uso prático dos resultados.
 
-::: {.callout-tip title="Não é preciso saber programar"}
-Os capítulos trazem trechos de código em R e em Python, que reproduzem cada etapa das análises. Esses trechos são **totalmente opcionais**: o texto explica cada passo e interpreta cada resultado, de modo que o livro pode ser lido do começo ao fim sem nenhum conhecimento de linguagens de programação. Quem quiser reproduzir ou adaptar as análises encontra o código completo junto ao texto.
-:::
+Não é preciso saber programar para acompanhar o livro. Os capítulos trazem trechos de código em R e em Python, que reproduzem cada etapa das análises. Esses trechos são **totalmente opcionais**: o texto explica cada passo e interpreta cada resultado, de modo que o livro pode ser lido do começo ao fim sem nenhum conhecimento de linguagens de programação. Quem quiser reproduzir ou adaptar as análises encontra o código completo junto ao texto.
 
 [Última atualização: [—]{#data-atualizacao}.]
 

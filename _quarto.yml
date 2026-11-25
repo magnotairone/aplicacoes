@@ -8,7 +8,7 @@ lang: pt-BR
 book:
   title: "Ciência de Dados Aplicada"
   subtitle: "estudos de caso de ciência de dados para negócios"
-  author: "Magno T. F. Severino"
+  author: "Magno Severino"
   date: "03/02/2026"
   tools:
     - icon: github
@@ -47,6 +47,7 @@ format:
     theme:
       - cosmo
       - brand
+    css: styles.css
     toc: true
     number-sections: true
     number-depth: 3
