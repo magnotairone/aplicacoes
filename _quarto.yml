@@ -6,7 +6,8 @@ project:
 lang: pt-BR
 
 book:
-  title: "Aplicações de Ciência de Dados"
+  title: "Ciência de Dados Aplicada"
+  subtitle: "estudos de caso de ciência de dados para negócios"
   author: "Magno T. F. Severino"
   date: "03/02/2026"
   tools:

@@ -9,6 +9,10 @@ Este livro apresenta aplicações práticas de ciência de dados inspiradas em c
 
 O foco não está em apresentar uma técnica isolada, mas em mostrar **como ela se encaixa em um projeto de ponta a ponta**: da pergunta de negócio até o uso prático dos resultados.
 
+::: {.callout-tip title="Não é preciso saber programar"}
+Os capítulos trazem trechos de código em R e em Python, que reproduzem cada etapa das análises. Esses trechos são **totalmente opcionais**: o texto explica cada passo e interpreta cada resultado, de modo que o livro pode ser lido do começo ao fim sem nenhum conhecimento de linguagens de programação. Quem quiser reproduzir ou adaptar as análises encontra o código completo junto ao texto.
+:::
+
 [Última atualização: [—]{#data-atualizacao}.]
 
 ## O processo que guia as análises: CRISP-DM
