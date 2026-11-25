@@ -9,7 +9,7 @@ Este livro apresenta aplicações práticas de ciência de dados inspiradas em c
 
 O foco não está em apresentar uma técnica isolada, mas em mostrar **como ela se encaixa em um projeto de ponta a ponta**: da pergunta de negócio até o uso prático dos resultados.
 
-[Última atualização: `r format(Sys.Date(), "%d/%m/%Y")`.]
+[Última atualização: [—]{#data-atualizacao}.]
 
 ## O processo que guia as análises: CRISP-DM
 

@@ -1,5 +1,7 @@
 project:
   type: book
+  # escreve a data de hoje em "Última atualização" (index) a cada render
+  post-render: scripts/atualiza_data.py
 
 lang: pt-BR
 
