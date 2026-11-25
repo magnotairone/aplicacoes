@@ -1,12 +1,16 @@
+---
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
 # Análise de Manutenção Preditiva
 
 ```{r}
 #| include: false
 library(reticulate)
 library(kableExtra)
-
-# O Python é configurado fora do .qmd (variável RETICULATE_PYTHON no .Renviron do projeto),
-# para o capítulo renderizar em qualquer máquina.
+use_python("C:/Users/m_tai/AppData/Local/Programs/Python/Python313/python.exe", required = TRUE)
 
 tabela <- function(df, caption = NULL) {
   knitr::kable(df, "html", caption = caption) |>
