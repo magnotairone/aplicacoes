@@ -738,16 +738,6 @@
     ]
   },
   {
-    "objectID": "references.html",
-    "href": "references.html",
-    "title": "Referências",
-    "section": "",
-    "text": "Agrawal, Rakesh, and Ramakrishnan Srikant. 1994. “Fast Algorithms\nfor Mining Association Rules.” In Proceedings of the 20th\nInternational Conference on Very Large Data Bases (VLDB), 487–99.\n\n\nChapman, Pete, Julian Clinton, Randy Kerber, Thomas Khabaza, Thomas\nReinartz, Colin Shearer, and Rüdiger Wirth. 2000.\n“CRISP-DM 1.0: Step-by-Step Data Mining\nGuide.” SPSS Inc.\n\n\nHahsler, Michael, Bettina Grün, and Kurt Hornik. 2005. “Arules – a\nComputational Environment for Mining Association Rules and Frequent Item\nSets.” Journal of Statistical Software 14 (15): 1–25.\n\n\nHahsler, Michael, Kurt Hornik, and Thomas Reutterer. 2006.\n“Implications of Probabilistic Data Modeling for Mining\nAssociation Rules.” In From Data and Information Analysis to\nKnowledge Engineering, edited by Myra Spiliopoulou, Rudolf Kruse,\nChristian Borgelt, Andreas Nürnberger, and Wolfgang Gaul, 598–605.\nSpringer.\n\n\nWirth, Rüdiger, and Jochen Hipp. 2000. “CRISP-DM:\nTowards a Standard Process Model for Data Mining.” In\nProceedings of the 4th International Conference on the Practical\nApplications of Knowledge Discovery and Data Mining, 29–39.",
-    "crumbs": [
-      "Referências"
-    ]
-  },
-  {
     "objectID": "07_rag.html#anexo-comparação-entre-dois-modelos-de-linguagem",
     "href": "07_rag.html#anexo-comparação-entre-dois-modelos-de-linguagem",
     "title": "8  Conversando com seus documentos: RAG",
@@ -756,6 +746,16 @@
     "crumbs": [
       "Modelos de linguagem",
       "<span class='chapter-number'>8</span>  <span class='chapter-title'>Conversando com seus documentos: RAG</span>"
+    ]
+  },
+  {
+    "objectID": "references.html",
+    "href": "references.html",
+    "title": "Referências",
+    "section": "",
+    "text": "Agrawal, Rakesh, and Ramakrishnan Srikant. 1994. “Fast Algorithms\nfor Mining Association Rules.” In Proceedings of the 20th\nInternational Conference on Very Large Data Bases (VLDB), 487–99.\n\n\nChapman, Pete, Julian Clinton, Randy Kerber, Thomas Khabaza, Thomas\nReinartz, Colin Shearer, and Rüdiger Wirth. 2000.\n“CRISP-DM 1.0: Step-by-Step Data Mining\nGuide.” SPSS Inc.\n\n\nHahsler, Michael, Bettina Grün, and Kurt Hornik. 2005. “Arules – a\nComputational Environment for Mining Association Rules and Frequent Item\nSets.” Journal of Statistical Software 14 (15): 1–25.\n\n\nHahsler, Michael, Kurt Hornik, and Thomas Reutterer. 2006.\n“Implications of Probabilistic Data Modeling for Mining\nAssociation Rules.” In From Data and Information Analysis to\nKnowledge Engineering, edited by Myra Spiliopoulou, Rudolf Kruse,\nChristian Borgelt, Andreas Nürnberger, and Wolfgang Gaul, 598–605.\nSpringer.\n\n\nWirth, Rüdiger, and Jochen Hipp. 2000. “CRISP-DM:\nTowards a Standard Process Model for Data Mining.” In\nProceedings of the 4th International Conference on the Practical\nApplications of Knowledge Discovery and Data Mining, 29–39.",
+    "crumbs": [
+      "Referências"
     ]
   }
 ]
