@@ -159,8 +159,10 @@ for ax, col in zip(axes, num_cols):
     taxa = data.groupby(faixa, observed=True)['Target'].mean() * 100
     ax.bar(range(len(taxa)), taxa.values, color='steelblue')
     ax.set_xticks(range(len(taxa)))
-    ax.set_xticklabels([f"{i.left:.0f}–{i.right:.0f}" for i in taxa.index],
-                       rotation=30, fontsize=8)
+    dec = 1 if col.endswith('[K]') or col.startswith('Torque') else 0
+    rotulos = [f"{max(i.left, data[col].min()):.{dec}f}–{i.right:.{dec}f}".replace('.', ',')
+               for i in taxa.index]
+    ax.set_xticklabels(rotulos, rotation=30, fontsize=8)
     ax.axhline(taxa_geral, color='red', linestyle='--', linewidth=1)
     ax.set_title(col, fontsize=10)
     ax.set_ylabel('% de falhas')
@@ -176,7 +178,49 @@ plt.tight_layout()
 plt.show()
 ```
 
-Faixas em que a barra passa bem acima da linha vermelha concentram mais falhas. Veja também a mediana de cada sensor entre máquinas com e sem falha:
+```{python}
+#| include: false
+def fmt_dec(x, d=1):
+    return f"{x:.{d}f}".replace(".", ",")
+
+def taxa_quintis(col):
+    faixa = pd.qcut(data[col], 5, duplicates='drop')
+    return data.groupby(faixa, observed=True)['Target'].mean()
+
+q = {c: taxa_quintis(c) for c in num_cols}
+rpm, tq = q['Rotational speed [rpm]'], q['Torque [Nm]']
+tw, air, proc = q['Tool wear [min]'], q['Air temperature [K]'], q['Process temperature [K]']
+
+num['rpm_q1'] = pct(rpm.iloc[0])
+num['rpm_q1_lim'] = fmt_int(rpm.index[0].right)
+num['rpm_razao'] = fmt_dec(rpm.iloc[0] / data['Target'].mean())
+num['rpm_meio_max'] = pct(rpm.iloc[1:4].max())
+num['tq_q5'] = pct(tq.iloc[4])
+num['tq_q5_lim'] = fmt_dec(tq.index[4].left)
+num['tq_q1'] = pct(tq.iloc[0])
+num['tq_meio_max'] = pct(tq.iloc[1:3].max())
+num['tw_resto_max'] = pct(tw.iloc[:4].max())
+num['tw_lim'] = fmt_int(tw.index[4].left)
+num['tw_q5'] = pct(tw.iloc[4])
+num['air_q5'] = pct(air.iloc[4])
+num['air_lim'] = fmt_dec(air.index[4].left)
+num['air_resto_max'] = pct(air.iloc[:4].max())
+num['proc_min'] = pct(proc.min())
+num['proc_max'] = pct(proc.max())
+num['type_L'], num['type_M'], num['type_H'] = [pct(taxa_type[t] / 100) for t in ['L', 'M', 'H']]
+num['corr_rpm_tq'] = fmt_dec(data['Rotational speed [rpm]'].corr(data['Torque [Nm]']), 2)
+```
+
+O risco se concentra nos extremos de poucos sensores:
+
+- **Rotação baixa:** na faixa de rotação mais baixa (até `r py$num$rpm_q1_lim` rpm), `r py$num$rpm_q1` das máquinas falharam, cerca de `r py$num$rpm_razao` vezes a taxa geral. Nas três faixas do meio, a taxa não passa de `r py$num$rpm_meio_max`.
+- **Torque alto:** acima de `r py$num$tq_q5_lim` Nm, a taxa chega a `r py$num$tq_q5`. A faixa de torque mais baixo (`r py$num$tq_q1`) também fica acima das faixas do meio (no máximo `r py$num$tq_meio_max`), um padrão em U que uma correlação linear não captaria.
+- **Desgaste da ferramenta:** a taxa fica estável, em no máximo `r py$num$tw_resto_max`, até `r py$num$tw_lim` minutos de uso e salta para `r py$num$tw_q5` na última faixa.
+- **Temperatura do ar:** só a faixa mais quente (acima de `r py$num$air_lim` K) se destaca, com `r py$num$air_q5`; as demais ficam em até `r py$num$air_resto_max`.
+- **Temperatura do processo:** as faixas variam pouco, de `r py$num$proc_min` a `r py$num$proc_max`.
+- **Type:** a taxa cai de L (`r py$num$type_L`) para M (`r py$num$type_M`) e H (`r py$num$type_H`).
+
+Rotação e torque andam juntos nesta base (correlação de `r py$num$corr_rpm_tq`): rotação baixa costuma vir com torque alto. As medianas de cada sensor entre máquinas com e sem falha confirmam o padrão: as que falharam giram mais devagar, com mais torque e com a ferramenta mais gasta.
 
 ```{python}
 tab_med = data.groupby('Target')[num_cols].median().T.round(1).reset_index()
@@ -201,6 +245,9 @@ tab_ft = (pd.crosstab(data['Failure Type'], data['Target'])
 n_incons = int(((data['Target'] == 1) & (data['Failure Type'] == 'No Failure')).sum()
                + ((data['Target'] == 0) & (data['Failure Type'] != 'No Failure')).sum())
 num['n_incons'] = fmt_int(n_incons)
+num['n_sem_tipo'] = fmt_int(((data['Target'] == 1) & (data['Failure Type'] == 'No Failure')).sum())
+num['n_random_0'] = fmt_int(((data['Target'] == 0) & (data['Failure Type'] == 'Random Failures')).sum())
+num['n_random'] = fmt_int((data['Failure Type'] == 'Random Failures').sum())
 ```
 
 ```{r}
@@ -208,7 +255,7 @@ num['n_incons'] = fmt_int(n_incons)
 tabela(py$tab_ft)
 ```
 
-Note ainda que há `r py$num$n_incons` registros em que `Target` e `Failure Type` não concordam (por exemplo, falha registrada sem tipo de falha). Em um projeto real, isso seria levado a quem gerou os dados. Aqui mantemos `Target` como está.
+Note ainda que há `r py$num$n_incons` registros em que `Target` e `Failure Type` não concordam: `r py$num$n_sem_tipo` estão marcados como falha (`Target = 1`), mas sem tipo de falha (`No Failure`), e `r py$num$n_random_0` estão classificados como `Random Failures`, mas com `Target = 0`. Ou seja, dos `r py$num$n_random` registros de `Random Failures`, nenhum conta como falha na variável alvo. Em um projeto real, isso seria levado a quem gerou os dados. Aqui mantemos `Target` como está.
 
 ## Preparação dos dados
 
@@ -286,11 +333,9 @@ modelos = {
     "Redes Neurais": montar_pipeline(MLPClassifier(max_iter=500, random_state=42)),
 }
 
-baseline = DummyClassifier(strategy='most_frequent')
-baseline.fit(X_train, y_train)
+baseline = DummyClassifier(strategy='most_frequent').fit(X_train, y_train)
 
-for nome, m in modelos.items():
-    m.fit(X_train, y_train)
+modelos = {nome: m.fit(X_train, y_train) for nome, m in modelos.items()}
 ```
 
 ### Avaliação na validação
@@ -402,6 +447,10 @@ captura = (analise_decis[analise_decis['Decil'] <= 2]
            .groupby('Modelo')['falhas'].sum() / y_val.sum())
 captura = (captura.mul(100).round(1).rename('% das falhas nos 20% de maior risco')
            .reset_index())
+
+cap = captura.set_index('Modelo').iloc[:, 0].sort_values(ascending=False)
+num['cap_melhor'], num['cap_melhor_v'] = cap.index[0], pct(cap.iloc[0] / 100)
+num['cap_pior'], num['cap_pior_v'] = cap.index[-1], pct(cap.iloc[-1] / 100)
 ```
 
 ```{r}
@@ -409,7 +458,7 @@ captura = (captura.mul(100).round(1).rename('% das falhas nos 20% de maior risco
 tabela(py$captura)
 ```
 
-Inspecionando apenas os 20% de máquinas de maior risco, o modelo captura a parcela das falhas mostrada na tabela. Um sorteio aleatório capturaria cerca de 20%.
+Inspecionando apenas os 20% de máquinas de maior risco, `r py$num$cap_melhor` captura `r py$num$cap_melhor_v` das falhas da validação, e `r py$num$cap_pior`, o pior nesse critério, `r py$num$cap_pior_v`. Um sorteio aleatório capturaria cerca de 20%.
 
 ## Impacto financeiro e escolha do limiar
 
@@ -449,6 +498,14 @@ num['pior_050'] = so_modelos.iloc[-1]['Modelo']
 num['custo_pior_050'] = brl(so_modelos.iloc[-1]['Custo total (R$)'])
 num['custo_nunca'] = brl(custo_nunca)
 num['custo_tudo'] = brl(custo_tudo)
+
+top_acc = tab_metricas.iloc[1:].sort_values('Acurácia', ascending=False).iloc[0]
+lin_050 = tab_metricas.set_index('Modelo').loc[num['melhor_050']]
+num['top_acc'] = top_acc['Modelo']
+num['acc_top'] = pct(top_acc['Acurácia'])
+num['fp_top'], num['fn_top'] = fmt_int(top_acc['FP']), fmt_int(top_acc['FN'])
+num['fp_dif'] = fmt_int(lin_050['FP'] - top_acc['FP'])
+num['fn_dif'] = fmt_int(top_acc['FN'] - lin_050['FN'])
 ```
 
 ```{r}
@@ -458,7 +515,7 @@ tabela(py$df_custos, "Custo na validação com corte de 0,50")
 
 Com o corte padrão, o modelo de menor custo foi **`r py$num$melhor_050`** (`r py$num$custo_min_050`) e o de maior custo foi `r py$num$pior_050` (`r py$num$custo_pior_050`). Para comparação, nunca alertar custaria `r py$num$custo_nunca` e inspecionar todas as máquinas, `r py$num$custo_tudo`.
 
-Note que o ranking por **custo** pode ser diferente do ranking por **acurácia**. Um modelo muito conservador, que só alerta quando tem quase certeza (poucos FP), pode ter acurácia alta e ainda assim sair caro por deixar passar muitas quebras (muitos FN). Em manutenção preditiva, em geral é preferível um modelo "barulhento" (mais inspeções desnecessárias) a um "míope" (mais quebras não detectadas).
+Note que o ranking por **custo** é diferente do ranking por **acurácia**. `r py$num$top_acc` tem a maior acurácia (`r py$num$acc_top`), mas `r py$num$melhor_050` sai mais barato com este corte: emite `r py$num$fp_dif` alarmes falsos a mais e deixa passar `r py$num$fn_dif` quebras a menos, e cada quebra custa 20 vezes mais do que uma inspeção. Com o corte de 0,50, `r py$num$top_acc` se comporta como um modelo conservador: só alerta quando tem quase certeza (`r py$num$fp_top` FP) e, por isso, deixa passar mais quebras (`r py$num$fn_top` FN). Esse ranking ainda depende do corte, como veremos a seguir. Em manutenção preditiva, em geral é preferível um modelo "barulhento" (mais inspeções desnecessárias) a um "míope" (mais quebras não detectadas).
 
 ### Escolha do limiar
 
@@ -515,6 +572,18 @@ num['custo_melhor_otimo'] = brl(melhor['Custo com limiar ótimo (R$)'])
 num['custo_melhor_050'] = brl(melhor['Custo com corte 0,50 (R$)'])
 num['recall_melhor'] = pct(melhor['Recall'], 0)
 num['precisao_melhor'] = pct(melhor['Precisão'], 0)
+
+segundo = df_limiares.iloc[1]
+num['segundo_nome'] = segundo['Modelo']
+num['custo_segundo'] = brl(segundo['Custo com limiar ótimo (R$)'])
+num['dif_fn_equiv'] = fmt_dec((segundo['Custo com limiar ótimo (R$)']
+                               - melhor['Custo com limiar ótimo (R$)']) / CUSTO_FN)
+num['n_falhas_val_txt'] = fmt_int(y_val.sum())
+k_knn = modelos['KNN'].named_steps['modelo'].n_neighbors
+num['k_knn'] = str(k_knn)
+num['passo_knn'] = fmt_dec(1 / k_knn)
+num['limiar_knn'] = fmt_dec(df_limiares.set_index('Modelo').loc['KNN', 'Limiar ótimo'], 2)
+num['custo_maq_val'] = brl(melhor['Custo com limiar ótimo (R$)'] / len(y_val))
 ```
 
 ```{r}
@@ -524,6 +593,8 @@ tabela(py$df_limiares, "Limiar que minimiza o custo na validação, por modelo")
 
 O modelo escolhido é **`r py$num$melhor_nome`**, com limiar de **`r py$num$limiar_final`** (o teórico seria `r py$num$limiar_teorico`). Na validação, esse corte detecta `r py$num$recall_melhor` das falhas, com precisão de `r py$num$precisao_melhor`, e o custo cai de `r py$num$custo_melhor_050` (corte 0,50) para `r py$num$custo_melhor_otimo`.
 
+Dois cuidados na leitura desta tabela. Primeiro, a diferença entre os dois melhores modelos é pequena: `r py$num$custo_melhor_otimo` contra `r py$num$custo_segundo` de `r py$num$segundo_nome`, o equivalente a cerca de `r py$num$dif_fn_equiv` quebras não detectadas em uma validação com apenas `r py$num$n_falhas_val_txt` falhas. Segundo, o limiar do KNN caiu no início da grade (`r py$num$limiar_knn`). Com k = `r py$num$k_knn` vizinhos, o KNN só produz probabilidades em passos de `r py$num$passo_knn` (0; `r py$num$passo_knn`; ...; 1), então qualquer limiar até `r py$num$passo_knn` gera as mesmas previsões e o mesmo custo (o trecho plano da curva do KNN no gráfico). A tabela de amostra mostra o mesmo efeito: o KNN atribui probabilidade zero a várias máquinas que falharam.
+
 Repare que reduzir o limiar aumenta o recall e derruba a precisão: aceitamos mais alarmes falsos para deixar passar menos quebras. Como o limiar foi **escolhido na validação**, o custo mostrado ali é otimista. A estimativa honesta vem do conjunto de teste, a seguir.
 
 ## Erro de generalização
@@ -531,8 +602,8 @@ Repare que reduzir o limiar aumenta o recall e derruba a precisão: aceitamos ma
 Reestimamos o modelo escolhido com treino e validação juntos e o avaliamos **uma única vez** no conjunto de teste, aplicando o limiar definido na validação. Comparamos com as duas referências de negócio e com o corte padrão de 0,50.
 
 ```{python}
-modelo_final = clone(modelos[melhor_nome])
-modelo_final.fit(pd.concat([X_train, X_val]), pd.concat([y_train, y_val]))
+modelo_final = clone(modelos[melhor_nome]).fit(
+    pd.concat([X_train, X_val]), pd.concat([y_train, y_val]))
 
 prob_test = modelo_final.predict_proba(X_test)[:, 1]
 
@@ -549,7 +620,7 @@ def linha_teste(nome, fp, fn, tp, custo):
     }
 
 tab_teste = pd.DataFrame([
-    linha_teste(f'{melhor_nome}, limiar {limiar_final:.2f}', fp_l, fn_l, tp_l, c_lim),
+    linha_teste(f'{melhor_nome}, limiar {limiar_final:.2f}'.replace('.', ','), fp_l, fn_l, tp_l, c_lim),
     linha_teste(f'{melhor_nome}, corte 0,50', fp_5, fn_5, tp_5, c_050),
     linha_teste('Nunca alertar', 0, n_pos, 0, n_pos * CUSTO_FN),
     linha_teste('Inspecionar tudo', n_neg, 0, n_pos, n_neg * CUSTO_FP),
@@ -563,6 +634,7 @@ num['recall_teste'] = pct(tp_l / n_pos, 0)
 num['precisao_teste'] = pct(tp_l / (tp_l + fp_l), 0) if (tp_l + fp_l) > 0 else "0%"
 num['fn_teste'] = fmt_int(fn_l)
 num['fp_teste'] = fmt_int(fp_l)
+num['custo_maq_teste'] = brl(c_lim / len(y_test))
 num['aucpr_teste'] = f"{average_precision_score(y_test, prob_test):.2f}".replace(".", ",")
 ```
 
@@ -572,6 +644,8 @@ tabela(py$tab_teste, "Desempenho no conjunto de teste")
 ```
 
 No teste, o modelo com o limiar escolhido custa `r py$num$custo_teste`, contra `r py$num$custo_teste_050` com o corte de 0,50, `r py$num$custo_teste_nunca` se nunca alertássemos e `r py$num$custo_teste_tudo` se inspecionássemos todas as máquinas. O modelo detecta `r py$num$recall_teste` das falhas (deixando passar `r py$num$fn_teste`), ao custo de `r py$num$fp_teste` inspeções sem falha (precisão de `r py$num$precisao_teste`). A AUC-PR no teste é `r py$num$aucpr_teste`.
+
+Nesta amostra, o resultado no teste não ficou pior do que o da validação: o recall foi de `r py$num$recall_teste` (contra `r py$num$recall_melhor`), e o custo por máquina, de `r py$num$custo_maq_teste` (contra `r py$num$custo_maq_val`). Isso não contradiz o aviso anterior: com apenas `r py$num$n_falhas_test` falhas no teste, cada quebra detectada a mais ou a menos muda o custo em R$ 10.000, e diferenças desse tamanho estão dentro da variação esperada.
 
 ## Uso prático e implantação
 
