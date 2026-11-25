@@ -33,6 +33,9 @@ book:
     - part: Regras de associação
       chapters:
         - 06_groceries.qmd
+    - part: Modelos de linguagem
+      chapters:
+        - 07_rag.qmd
     # - summary.qmd
     - references.qmd
 

@@ -9,3 +9,7 @@ TODO.txt
 *_cache/
 *.knit.md
 /*_files/
+
+# Variáveis de ambiente locais (chaves de API)
+.Renviron
+.env

@@ -1,0 +1,1258 @@
+---
+engine: knitr
+# Executar este capítulo exige a variável OPENAI_API_KEY (por exemplo, no
+# .Renviron, que não vai para o repositório). Com o freeze do projeto, os
+# resultados ficam em _freeze/ e o livro pode ser renderizado sem a chave.
+# Para renderizar sem executar, acrescente:
+# execute:
+#   eval: false
+format:
+  html:
+    mermaid:
+      theme: neutral
+---
+
+# Conversando com seus documentos: RAG
+
+```{r}
+#| include: false
+#| eval: true
+library(reticulate)
+library(kableExtra)
+use_python("C:/Users/m_tai/AppData/Local/Programs/Python/Python313/python.exe", required = TRUE)
+
+tabela <- function(df, caption = NULL) {
+  knitr::kable(df, "html", caption = caption) |>
+    kable_styling(bootstrap_options = c("striped", "hover", "condensed"),
+                  full_width = FALSE)
+}
+```
+
+```{python}
+#| echo: false
+import warnings
+warnings.filterwarnings("ignore")
+```
+
+<!-- TODO: escolher o tema do estudo de caso e adaptar esta introdução (ex.: manual de atendimento ao cliente). -->
+
+Em muitas empresas, a resposta para a dúvida de uma pessoa já existe em algum documento (um manual, uma política, um contrato), mas encontrá-la leva tempo, e o resultado depende de quem procura. Um assistente que responde perguntas com base nesses documentos, indicando de qual página tirou a informação, pode reduzir esse tempo e padronizar as respostas.
+
+Modelos de linguagem, sozinhos, não conhecem os documentos internos de uma empresa e podem inventar respostas plausíveis, mas erradas. A técnica de **RAG** (*Retrieval-Augmented Generation*, ou geração aumentada por recuperação) resolve isso em duas etapas: primeiro **recupera** os trechos do documento relacionados à pergunta e depois pede ao modelo que **gere** a resposta usando apenas esses trechos.
+
+Neste capítulo construímos um assistente de RAG do início ao fim, seguindo as etapas do CRISP-DM apresentadas na introdução do livro. Antes de usar as ferramentas prontas, explicamos com exemplos pequenos dois conceitos que sustentam tudo: a **tokenização** e os **embeddings**. Todo o trabalho é feito em **Python**, com a biblioteca LangChain.
+
+O estudo de caso usa um documento público: o manual de referência do pacote `ggplot2` (versão 3.5.1, de abril de 2024), escrito em inglês, consultado por pessoas que estão aprendendo a fazer gráficos no R. Nas seções de tokenização e embeddings, os exemplos pequenos usam frases de um manual de atendimento fictício, em português, porque são curtas e fáceis de acompanhar. A partir da leitura do PDF, tudo se refere ao manual do `ggplot2`.
+
+| Etapa do CRISP-DM | Onde aparece no capítulo |
+|---|---|
+| Entendimento do negócio | Esta introdução: quem consulta o documento e que respostas precisa |
+| Entendimento dos dados | Tokenização, embeddings e leitura do documento |
+| Preparação dos dados | Divisão em pedaços, cálculo de custo e criação do banco vetorial |
+| Modelagem | Recuperação e geração: o assistente |
+| Avaliação | Perguntas com gabarito e taxa de acerto da busca |
+| Implantação | Uso prático, custos, segurança e manutenção |
+
+## Como o RAG funciona
+
+O processo tem duas fases. A **indexação** é feita uma vez (ou quando o documento muda): o documento é dividido em pedaços, cada pedaço é transformado em um vetor numérico (embedding) e os vetores são guardados em um banco vetorial. A **consulta** acontece a cada pergunta: a pergunta também vira um vetor, o banco devolve os pedaços mais parecidos, e o modelo de linguagem responde com base neles.
+
+```{mermaid}
+%%| eval: true
+flowchart LR
+  subgraph IND["Indexação (feita uma vez)"]
+    A["Documento PDF"] --> B["Pedaços (chunks)"] --> C["Embeddings"] --> D[("Banco vetorial")]
+  end
+  subgraph CON["Consulta (a cada pergunta)"]
+    E["Pergunta"] --> F["Embedding da pergunta"] --> G["Busca por similaridade"]
+    D --> G --> H["Trechos relevantes"]
+    H --> I["Modelo de linguagem"]
+    E --> I
+    I --> J["Resposta com fontes"]
+  end
+```
+
+::: {.callout-note title="O que mudou em relação às versões anteriores do LangChain"}
+O LangChain mudou bastante desde as primeiras versões. Neste capítulo usamos a API atual (série 1.x):
+
+- as cadeias `RetrievalQA`, `create_retrieval_chain` e `create_history_aware_retriever` deram lugar a **agentes** criados com `create_agent`, que recebem uma ferramenta de busca (as cadeias antigas foram para um pacote de legado, o `langchain-classic`; confira o guia de migração da documentação);
+- o histórico de conversa passa a ser guardado por um **checkpointer** (`InMemorySaver`) e identificado por `thread_id`, em vez de `RunnableWithMessageHistory`;
+- os divisores de texto ficam no pacote `langchain-text-splitters`, e o recomendado é o `RecursiveCharacterTextSplitter`;
+- o modelo de embeddings `text-embedding-ada-002` deu lugar à família `text-embedding-3`;
+- o pacote do Pinecone agora se chama `pinecone` (antes `pinecone-client`).
+:::
+
+## Configuração
+
+Neste livro, os trechos em Python são executados pelo pacote `reticulate`, a partir do R. Usamos a mesma instalação de Python dos demais capítulos, indicada no início do capítulo com `use_python()`. Os pacotes são instalados uma única vez nessa instalação, pelo terminal:
+
+```bash
+python -m pip install langchain langchain-openai langchain-text-splitters langchain-community langchain-pinecone pinecone pypdf tiktoken numpy pandas scikit-learn matplotlib requests
+```
+
+Para usar a API da OpenAI (e, opcionalmente, o Pinecone), é preciso ter as chaves de acesso, que nunca devem ficar no código nem no repositório. Como o Python é executado a partir do R, a forma mais simples é guardá-las no arquivo `.Renviron`, na pasta do projeto. O R lê esse arquivo ao iniciar e repassa as variáveis ao Python, e o arquivo está listado no `.gitignore`, para não ir para o repositório:
+
+```bash
+OPENAI_API_KEY=cole-sua-chave-aqui
+PINECONE_API_KEY=cole-sua-chave-aqui
+```
+
+A segunda linha só é necessária para usar o Pinecone. Depois de editar o `.Renviron`, reinicie a sessão do R. Quem executar o código fora do R (em um terminal ou no Jupyter) pode definir as mesmas variáveis de ambiente no sistema.
+
+
+O documento consultado é o manual de referência do pacote `ggplot2`, o mesmo usado no tutorial que deu origem a este capítulo, na versão 3.5.1 (abril de 2024). Ele já está no arquivo `data/ggplot2.pdf`, e todos os resultados e números de página do capítulo se referem a esse arquivo.
+
+O código abaixo mostra como baixar o manual do CRAN. Atenção: esse endereço sempre entrega a versão **mais recente**, e com outra versão as páginas e os resultados mudam. Por isso, ele grava o arquivo com outro nome, sem substituir o usado no capítulo. Para outro tema, basta colocar o seu PDF na pasta `data` e alterar `CAMINHO_PDF` no bloco de parâmetros.
+
+```{python}
+#| eval: false
+import os, requests
+
+os.makedirs("data", exist_ok=True)
+url = "https://cran.r-project.org/web/packages/ggplot2/ggplot2.pdf"
+with open("data/ggplot2_cran.pdf", "wb") as f:
+    f.write(requests.get(url, timeout=60).content)
+```
+
+
+Os parâmetros que dependem do estudo de caso ficam concentrados em um único lugar. Os valores iniciais reproduzem o tutorial original (documentação do ggplot2, em inglês). Para trocar de tema, basta alterar este bloco.
+
+```{python}
+import os
+import numpy as np
+import pandas as pd
+
+# ---- parâmetros do estudo de caso ----
+CAMINHO_PDF = "data/ggplot2.pdf"
+PUBLICO = "pessoas que estão aprendendo a fazer gráficos no R"   # quem usa o assistente
+DOCUMENTO = "a documentação do pacote ggplot2"        # o que está sendo consultado
+IDIOMA_DOCUMENTO = "inglês"
+
+# ---- perguntas usadas nos testes ----
+PERGUNTA = "Como rotacionar o texto do eixo x de um gráfico do ggplot2?"
+PERGUNTA_EM_INGLES = "rotate x axis text labels with element_text angle in theme"   # a mesma pergunta, para a busca
+PERGUNTA_ESPECIFICA = "Qual versão do ggplot2 é descrita no documento e qual a data dela?"
+PERGUNTA_ACOMPANHAMENTO = "E como faço isso no eixo y?"
+PERGUNTA_FORA_DO_ESCOPO = "Qual a capital da Bahia?"
+
+# ---- parâmetros técnicos ----
+TAMANHO_PEDACO = 1000    # em caracteres
+SOBREPOSICAO = 200       # caracteres repetidos entre pedaços vizinhos
+K = 4                    # quantos pedaços recuperar por pergunta
+MODELO_EMBEDDING = "text-embedding-3-small"   # vetores de 1536 dimensões
+MODELO_CHAT = "openai:gpt-4o-mini"            # troque por um modelo atual da sua conta
+BANCO_VETORIAL = "memoria"                    # "memoria" ou "pinecone"
+NOME_INDICE = "rag-documento"
+```
+
+## Tokenização
+
+### Modelos não leem palavras, leem números
+
+Um modelo de linguagem não recebe texto: recebe uma sequência de números inteiros. O **tokenizador** é quem faz a conversão. Ele divide o texto em pedaços (os *tokens*) que podem ser uma palavra inteira, parte de uma palavra ou até um único caractere, e troca cada pedaço pelo seu número em um vocabulário fixo.
+
+Isso importa na prática por três motivos: o **custo** é cobrado por token, a **janela de contexto** do modelo é limitada em tokens, e o tamanho dos pedaços em que dividimos o documento deve levar isso em conta.
+
+### Construindo um tokenizador do zero
+
+A maioria dos modelos atuais usa variações do algoritmo **BPE** (*Byte Pair Encoding*). A ideia é simples: começar com cada caractere como um token e, repetidamente, **juntar o par de símbolos vizinhos mais frequente** em um novo símbolo. Pares comuns viram pedaços de palavra, e palavras muito frequentes acabam virando um único token.
+
+O código abaixo implementa essa ideia em poucas linhas, usando um texto minúsculo de exemplo. O símbolo `_` marca o fim de uma palavra.
+
+```{python}
+from collections import Counter
+
+def treinar_bpe(texto, n_fusoes=10):
+    """Aprende as regras de fusão do BPE (versão didática)."""
+    palavras = Counter(texto.lower().split())
+    # cada palavra vira uma sequência de caracteres; "_" marca o fim da palavra
+    vocab = {tuple(p) + ("_",): freq for p, freq in palavras.items()}
+    fusoes = []
+    for _ in range(n_fusoes):
+        pares = Counter()
+        for simbolos, freq in vocab.items():
+            for a, b in zip(simbolos, simbolos[1:]):
+                pares[(a, b)] += freq
+        if not pares:
+            break
+        melhor = max(pares, key=pares.get)   # par mais frequente
+        fusoes.append(melhor)
+        novo_vocab = {}
+        for simbolos, freq in vocab.items():
+            novos, i = [], 0
+            while i < len(simbolos):
+                if i < len(simbolos) - 1 and (simbolos[i], simbolos[i + 1]) == melhor:
+                    novos.append(simbolos[i] + simbolos[i + 1])
+                    i += 2
+                else:
+                    novos.append(simbolos[i])
+                    i += 1
+            novo_vocab[tuple(novos)] = freq
+        vocab = novo_vocab
+    return fusoes
+
+def tokenizar_bpe(palavra, fusoes):
+    """Aplica as fusões aprendidas, na ordem em que foram aprendidas."""
+    simbolos = list(palavra.lower()) + ["_"]
+    for a, b in fusoes:
+        i = 0
+        while i < len(simbolos) - 1:
+            if simbolos[i] == a and simbolos[i + 1] == b:
+                simbolos[i:i + 2] = [a + b]
+            else:
+                i += 1
+    return simbolos
+```
+
+Treinamos o tokenizador em um texto curto sobre atendimento e vemos as 12 primeiras regras aprendidas, na ordem.
+
+```{python}
+corpus = (
+    "cancelar cancelamento cancelado cancelar contrato contratar contratante "
+    "atendimento atendente atender atendimento cancelamento contrato cliente "
+    "clientes cliente cancelar atendimento"
+)
+
+fusoes = treinar_bpe(corpus, n_fusoes=12)
+for i, f in enumerate(fusoes, 1):
+    print(i, f)
+```
+
+Agora aplicamos as regras a palavras que estavam no texto de treinamento e a palavras que não estavam.
+
+```{python}
+for p in ["cancelamento", "cancelamentos", "atendentes", "contratos", "pix"]:
+    print(f"{p:15s}", tokenizar_bpe(p, fusoes))
+```
+
+As primeiras regras juntam pares muito frequentes de letras (como `e` + `n`), e aos poucos aparecem pedaços de palavra como `cancela` e `ment`. Palavras do texto de treinamento, como `cancelamento`, ficam com poucos tokens. Palavras nunca vistas, como `pix`, são quebradas em letras. Uma palavra nova (`cancelamentos`) reaproveita os pedaços já aprendidos, e por isso o tokenizador nunca encontra uma palavra que não consiga representar.
+
+### Um tokenizador real
+
+Os tokenizadores reais seguem a mesma lógica, mas são treinados com enormes volumes de texto, operam sobre *bytes* e têm vocabulários de dezenas ou centenas de milhares de tokens. A biblioteca `tiktoken` implementa os usados pelos modelos da OpenAI: o `cl100k_base` é o dos modelos de embedding da família `text-embedding-3`, e o `o200k_base` é o de modelos de chat mais novos, como o GPT-4o.
+
+```{python}
+import tiktoken
+
+enc = tiktoken.get_encoding("cl100k_base")
+
+frase = "O cliente solicitou o cancelamento do plano."
+ids = enc.encode(frase)
+
+print("Números (ids):", ids)
+print("Pedaços:", [enc.decode_single_token_bytes(i).decode("utf-8", errors="replace") for i in ids])
+print("Tokens:", len(ids), "| caracteres:", len(frase))
+```
+
+O mesmo conteúdo costuma gerar mais tokens em português do que em inglês, e termos técnicos, números e emojis podem ser quebrados em vários pedaços. Compare:
+
+```{python}
+exemplos = [
+    "Cancelamento de contrato",
+    "Contract cancellation",
+    "Como fazer um gráfico no ggplot2?",
+    "Atendimento encerrado 😀",
+]
+
+for t in exemplos:
+    print(f"{len(enc.encode(t)):3d} tokens | {len(t):3d} caracteres | {t}")
+```
+
+## Embeddings
+
+### Do texto ao vetor
+
+Um **embedding** é um vetor de números que representa o significado de um texto. A propriedade que nos interessa é que textos com significado parecido ficam **próximos** no espaço dos vetores. Medimos a proximidade com a **similaridade do cosseno**, que compara a direção de dois vetores $a$ e $b$:
+
+$$
+\cos(\theta) = \frac{a \cdot b}{\lVert a \rVert \, \lVert b \rVert}.
+$$
+
+O valor é 1 quando os vetores apontam na mesma direção, e 0 quando não têm nada em comum (no caso de vetores com valores não negativos, como os do exemplo a seguir).
+
+### Um exemplo simples: contando palavras
+
+Para entender a ideia, começamos com o vetor mais simples possível: um vetor com uma posição para cada palavra do vocabulário, contando quantas vezes cada palavra aparece em cada trecho. Usamos cinco trechos de um manual fictício.
+
+```{python}
+import re, unicodedata
+
+def normalizar(texto):
+    texto = unicodedata.normalize("NFD", texto.lower())
+    texto = "".join(c for c in texto if unicodedata.category(c) != "Mn")  # tira acentos
+    return re.findall(r"[a-z0-9]+", texto)
+
+STOP = {"o","a","os","as","de","do","da","dos","das","em","no","na","um","uma",
+        "e","para","por","que","com","se","ao","pode","como","quem","qual"}
+
+trechos = [
+    "O cliente pode cancelar o contrato a qualquer momento pelo aplicativo ou pelo telefone.",
+    "O prazo de arrependimento para compras feitas fora da loja é de sete dias corridos.",
+    "O atendente deve informar o número de protocolo ao final de cada atendimento.",
+    "Reclamações devem ser respondidas em até cinco dias úteis.",
+    "A segunda via da fatura está disponível no aplicativo e no site.",
+]
+
+docs_tokens = [[t for t in normalizar(x) if t not in STOP] for x in trechos]
+vocab = sorted({t for d in docs_tokens for t in d})
+idx = {t: i for i, t in enumerate(vocab)}
+
+def vetor(tokens):
+    v = np.zeros(len(vocab))
+    for t in tokens:
+        if t in idx:
+            v[idx[t]] += 1
+    return v
+
+M = np.array([vetor(d) for d in docs_tokens])
+print("Cada trecho vira um vetor com", M.shape[1], "posições (uma por palavra do vocabulário).")
+```
+
+Para buscar, transformamos a pergunta no mesmo tipo de vetor e comparamos com cada trecho pela similaridade do cosseno.
+
+```{python}
+def cos(a, b):
+    na, nb = np.linalg.norm(a), np.linalg.norm(b)
+    return float(a @ b / (na * nb)) if na > 0 and nb > 0 else 0.0
+
+def buscar(pergunta, k=2):
+    q = vetor([t for t in normalizar(pergunta) if t not in STOP])
+    sims = [cos(q, M[i]) for i in range(len(trechos))]
+    ordem = np.argsort(sims)[::-1][:k]
+    return [(round(sims[i], 3), trechos[i]) for i in ordem]
+
+perguntas = [
+    "Como cancelar o contrato?",
+    "Como encerrar a assinatura?",
+    "Quanto tempo tenho para me arrepender da compra?",
+]
+
+for p in perguntas:
+    print("\nPERGUNTA:", p)
+    for s, t in buscar(p, 2):
+        print(f"  {s:5.3f} | {t}")
+```
+
+A primeira pergunta encontra o trecho certo, porque compartilha palavras com ele (`cancelar` e `contrato`). As outras duas falham: "encerrar a assinatura" significa quase o mesmo que "cancelar o contrato", e "arrepender" é parente de "arrependimento", mas, para um vetor de contagem, **palavras diferentes são coisas totalmente diferentes**, e a similaridade com todos os trechos é zero.
+
+### O RAG em poucas linhas
+
+Com a busca por similaridade já temos a etapa de recuperação. Falta só a etapa de geração: montar um *prompt* que junta os trechos encontrados e a pergunta e entregá-lo a um modelo de linguagem.
+
+```{python}
+def montar_prompt(pergunta, k=2):
+    contexto = "\n".join(f"- {t}" for s, t in buscar(pergunta, k) if s > 0)
+    return (
+        "Responda usando apenas o contexto.\n\n"
+        f"Contexto:\n{contexto}\n\n"
+        f"Pergunta: {pergunta}"
+    )
+
+print(montar_prompt("Como cancelar o contrato?"))
+```
+
+Esse é, em essência, todo o RAG. O restante do capítulo troca cada peça por uma versão mais robusta: um tokenizador real, embeddings que capturam o **significado** (e não só as palavras) e um modelo de linguagem de verdade.
+
+### Embeddings que capturam o significado
+
+Modelos de embedding são treinados para que textos com o mesmo sentido gerem vetores próximos, mesmo com palavras diferentes. Em vez de um vetor com uma posição por palavra, cada texto vira um vetor denso, de centenas ou milhares de dimensões (1536, no modelo que usamos).
+
+```{python}
+from langchain_openai import OpenAIEmbeddings
+
+embeddings = OpenAIEmbeddings(model=MODELO_EMBEDDING)
+
+vetor_exemplo = embeddings.embed_query("Como encerrar a assinatura?")
+print("Dimensões do vetor:", len(vetor_exemplo))
+print("Primeiros valores:", np.round(vetor_exemplo[:5], 4))
+```
+
+Repetimos a comparação anterior com esses vetores, agora em uma matriz de similaridades entre frases.
+
+```{python}
+from sklearn.metrics.pairwise import cosine_similarity
+
+frases = [
+    "Como cancelar o contrato?",
+    "Como encerrar a assinatura?",
+    "Quanto tempo tenho para me arrepender da compra?",
+    "Qual o prazo de arrependimento?",
+    "Onde encontro a segunda via da fatura?",
+]
+
+vetores = np.array(embeddings.embed_documents(frases))
+sim = pd.DataFrame(cosine_similarity(vetores).round(2), index=frases, columns=range(1, len(frases) + 1))
+sim
+```
+
+As frases com o mesmo sentido (as duas primeiras, e as duas seguintes) devem ter similaridade bem maior entre si do que com as demais, mesmo sem compartilhar as mesmas palavras.
+
+::: {.callout-tip title="Visualizando embeddings com o PCA"}
+Vetores de 1536 dimensões não podem ser desenhados, mas podemos projetá-los em duas dimensões com o **PCA**, como no capítulo de agrupamento. Frases de assuntos parecidos tendem a formar grupos no gráfico.
+
+```{python}
+#| eval: false
+import matplotlib.pyplot as plt
+from sklearn.decomposition import PCA
+
+# exemplo com frases de 3 assuntos (troque por frases do seu tema)
+frases_assuntos = [
+    "Como cancelar o contrato?", "Quero encerrar minha assinatura", "Cancelamento de plano",
+    "Onde vejo a segunda via da fatura?", "Preciso de outra cópia do boleto", "Fatura em atraso",
+    "Qual o prazo de arrependimento?", "Posso devolver a compra?", "Troca de produto",
+]
+assunto = ["cancelamento"] * 3 + ["fatura"] * 3 + ["devolução"] * 3
+
+X = np.array(embeddings.embed_documents(frases_assuntos))
+pcs = PCA(n_components=2).fit_transform(X)
+
+plt.figure(figsize=(8, 6))
+for a in sorted(set(assunto)):
+    pts = pcs[[i for i, x in enumerate(assunto) if x == a]]
+    plt.scatter(pts[:, 0], pts[:, 1], label=a, s=80)
+plt.legend()
+plt.title("Embeddings de frases projetados em 2 dimensões (PCA)")
+plt.show()
+```
+:::
+
+## O documento: leitura e divisão em pedaços
+
+### Lendo o PDF
+
+O `PyPDFLoader` lê o PDF e devolve uma lista com um objeto por página, que traz o texto (`page_content`) e metadados, entre eles o número da página. Esses metadados são o que permitirá ao assistente **citar a fonte**.
+
+```{python}
+from langchain_community.document_loaders import PyPDFLoader
+
+paginas = PyPDFLoader(CAMINHO_PDF).load()
+
+print("Páginas:", len(paginas))
+print("Metadados da primeira página:", paginas[0].metadata)
+print("Caracteres na primeira página:", len(paginas[0].page_content))
+```
+
+A extração de texto de PDFs nem sempre é perfeita. Neste manual, o leitor de PDF não reconhece as aspas simples e as crases dos exemplos de código e escreve marcas como `/quotesingle.Var` e `/grave.Var` no lugar delas. Como isso atrapalharia tanto a busca quanto o código das respostas, contamos essas marcas e as substituímos pelos caracteres originais antes de dividir o texto.
+
+```{python}
+import re
+
+marcas = sum(len(re.findall(r"/[A-Za-z]+\.Var", p.page_content)) for p in paginas)
+paginas_com_marcas = sum(1 for p in paginas if ".Var" in p.page_content)
+print("Marcas encontradas:", marcas, "em", paginas_com_marcas, "páginas")
+
+for p in paginas:
+    p.page_content = (p.page_content
+                      .replace("/quotesingle.Var", "'")
+                      .replace("/grave.Var", "`"))
+
+print("Marcas restantes:", sum(len(re.findall(r"/[A-Za-z]+\.Var", p.page_content)) for p in paginas))
+```
+
+### Dividindo em pedaços
+
+Páginas inteiras são grandes demais para uma busca precisa e consomem muitos tokens quando enviadas ao modelo. Por isso, dividimos o texto em pedaços (*chunks*). Dois parâmetros importam:
+
+- **tamanho do pedaço:** pedaços pequenos tornam a busca mais precisa, mas podem separar uma regra de suas exceções; pedaços grandes carregam mais contexto, mas misturam assuntos;
+- **sobreposição:** parte do final de um pedaço é repetida no início do seguinte, para que uma ideia cortada no meio não se perca.
+
+O `RecursiveCharacterTextSplitter` tenta cortar primeiro em parágrafos, depois em linhas e em frases, e só em último caso no meio de uma palavra.
+
+```{python}
+from langchain_text_splitters import RecursiveCharacterTextSplitter
+
+divisor = RecursiveCharacterTextSplitter(
+    chunk_size=TAMANHO_PEDACO,
+    chunk_overlap=SOBREPOSICAO,
+    add_start_index=True
+)
+partes = divisor.split_documents(paginas)
+
+print("Pedaços:", len(partes))
+print(partes[0].metadata)
+print(partes[0].page_content[:300])
+```
+
+### Custo da indexação
+
+O custo dos embeddings é proporcional ao número de tokens. Contamos os tokens de cada pedaço e multiplicamos pelo preço.
+
+```{python}
+tokens_por_pedaco = [len(enc.encode(p.page_content)) for p in partes]
+print("Tokens no primeiro pedaço:", tokens_por_pedaco[0])
+```
+
+```{python}
+total_tokens = sum(tokens_por_pedaco)
+
+# preço em USD por 1 milhão de tokens: confira a tabela de preços atual da OpenAI
+preco_por_milhao = 0.02
+
+print("Tokens no documento:", total_tokens)
+print(f"Custo estimado dos embeddings: US$ {total_tokens / 1e6 * preco_por_milhao:.4f}")
+```
+
+
+## O banco vetorial
+
+Cada pedaço é transformado em um embedding e guardado em um **banco vetorial**, que sabe encontrar rapidamente os vetores mais próximos de uma consulta. Há duas opções neste capítulo. O banco em **memória** não exige nenhuma conta, mas desaparece quando a sessão termina e os embeddings são refeitos a cada vez. O **Pinecone** é um serviço na nuvem que mantém os vetores guardados.
+
+O objeto `embeddings`, criado na seção anterior, é o mesmo usado aqui: o modelo que transforma o documento em vetores será usado também para transformar as perguntas.
+
+```{python}
+if BANCO_VETORIAL == "pinecone":
+    import time
+    from pinecone import Pinecone, ServerlessSpec
+    from langchain_pinecone import PineconeVectorStore
+
+    pc = Pinecone(api_key=os.environ["PINECONE_API_KEY"])
+
+    dimensao = len(embeddings.embed_query("teste"))   # 1536 no text-embedding-3-small
+
+    if NOME_INDICE not in pc.list_indexes().names():
+        pc.create_index(
+            name=NOME_INDICE,
+            dimension=dimensao,       # deve coincidir com o modelo de embedding
+            metric="cosine",
+            spec=ServerlessSpec(cloud="aws", region="us-east-1")
+        )
+        # aguarda o índice ficar pronto
+        while not pc.describe_index(NOME_INDICE).status["ready"]:
+            time.sleep(1)
+
+    indice = pc.Index(NOME_INDICE)
+    vector_store = PineconeVectorStore(embedding=embeddings, index=indice)
+
+    # evita subir os mesmos vetores novamente a cada execução; se o documento
+    # mudar, apague o índice (ou use um nome de índice por versão do documento)
+    if indice.describe_index_stats()["total_vector_count"] == 0:
+        ids_vetores = vector_store.add_documents(documents=partes)
+else:
+    from langchain_core.vectorstores import InMemoryVectorStore
+
+    vector_store = InMemoryVectorStore(embeddings)
+    ids_vetores = vector_store.add_documents(documents=partes)
+
+print("Banco vetorial pronto.")
+```
+
+::: {.callout-warning title="Use o mesmo modelo na indexação e na consulta"}
+A pergunta precisa ser transformada em vetor pelo **mesmo** modelo usado para o documento, com a mesma dimensão. Se trocar o modelo de embedding, é preciso refazer o índice.
+:::
+
+### Testando a busca
+
+Antes de chamar um modelo de linguagem, vale testar apenas a recuperação: os trechos devolvidos fazem sentido para a pergunta? Quanto maior a pontuação, mais parecido é o trecho.
+
+Fazemos a mesma busca duas vezes: com a pergunta em português, como a pessoa escreveria, e com a mesma pergunta escrita em inglês, o idioma do documento.
+
+```{python}
+pergunta = PERGUNTA
+
+def mostrar_busca(consulta, k=K):
+    print("CONSULTA:", consulta)
+    for doc, pontuacao in vector_store.similarity_search_with_score(consulta, k=k):
+        pagina = doc.metadata.get("page", 0) + 1   # a numeração do PyPDFLoader começa em 0
+        print(f"  pontuação {pontuacao:.3f} | página {pagina} | "
+              + doc.page_content[:120].replace("\n", " ") + " ...")
+    print()
+
+mostrar_busca(PERGUNTA)
+mostrar_busca(PERGUNTA_EM_INGLES)
+```
+
+```{python}
+#| include: false
+import re
+
+rag = {}   # frases e números citados no texto, calculados a partir dos resultados
+
+# No manual, a rotação do texto do eixo é documentada em guide_axis(angle = ...),
+# nas páginas 201 e 202 (com o exemplo guides(x = guide_axis(angle = 90))).
+GUIA_INI, GUIA_FIM = 201, 202
+
+def paginas_da_busca(consulta, k=K):
+    return [d.metadata.get("page", 0) + 1 for d in vector_store.similarity_search(consulta, k=k)]
+
+def no_intervalo(paginas, ini=GUIA_INI, fim=GUIA_FIM):
+    return any(ini <= p <= fim for p in paginas)
+
+def lista_paginas(paginas):
+    paginas = sorted(set(paginas))
+    if not paginas:
+        return "nenhuma"
+    textos = [str(p) for p in paginas]
+    return textos[0] if len(textos) == 1 else ", ".join(textos[:-1]) + " e " + textos[-1]
+
+def busca_achou(consulta):
+    pags = paginas_da_busca(consulta)
+    if no_intervalo(pags):
+        return f"a busca chega a essas páginas (páginas recuperadas: {lista_paginas(pags)})"
+    return f"nenhum dos {K} trechos recuperados vem dessas páginas (páginas recuperadas: {lista_paginas(pags)})"
+
+rag["busca_pt"] = busca_achou(PERGUNTA)
+rag["busca_en"] = busca_achou(PERGUNTA_EM_INGLES)
+```
+
+No manual, a forma documentada de rotacionar o texto de um eixo é a função `guide_axis()`, com o argumento `angle` (p. 201), que traz o exemplo `guides(x = guide_axis(angle = 90))` (p. 202). Com a pergunta em português, `r py$rag$busca_pt`. Com a pergunta em inglês, `r py$rag$busca_en`.
+
+Isso mostra duas coisas. Primeiro, o idioma importa: o modelo de embedding aproxima textos em idiomas diferentes, mas a busca tende a funcionar melhor quando a consulta está no idioma do documento. Segundo, mesmo uma consulta bem escrita pode não encontrar a resposta quando o documento usa um vocabulário diferente do da pergunta: o manual fala em *guide* e *angle*, e não em *rotate*. É por isso que vale avaliar a recuperação separadamente, como faremos adiante.
+
+## O assistente
+
+### O modelo sozinho
+
+Como ponto de partida, fazemos a pergunta ao modelo de linguagem **sem** o documento. Ele responde com o que aprendeu no treinamento e não tem como citar uma fonte.
+
+```{python}
+from langchain.chat_models import init_chat_model
+
+llm = init_chat_model(MODELO_CHAT, temperature=0)
+
+resposta_sozinho = llm.invoke(pergunta).content
+print(resposta_sozinho)
+```
+
+```{python}
+#| include: false
+if "angle" in resposta_sozinho:
+    rag["sozinho"] = ("Para essa pergunta, o modelo sozinho dá uma resposta útil: rotacionar o texto do eixo "
+                      "é uma dúvida comum, que aparece em muitos textos usados no treinamento do modelo. "
+                      "Mas a resposta não cita fonte, e não há como saber se vale para a versão do pacote "
+                      "que a pessoa usa.")
+else:
+    rag["sozinho"] = ("Para essa pergunta, o modelo sozinho não chega a uma resposta concreta, e, de todo "
+                      "modo, não teria como citar uma fonte.")
+```
+
+`r py$rag$sozinho`
+
+A segunda pergunta só pode ser respondida com o documento em mãos: qual versão do `ggplot2` ele descreve.
+
+```{python}
+resposta_especifica_sozinho = llm.invoke(PERGUNTA_ESPECIFICA).content
+print(resposta_especifica_sozinho)
+```
+
+```{python}
+#| include: false
+if "3.5.1" in resposta_especifica_sozinho:
+    rag["especifica_sozinho"] = ("O modelo citou a versão certa, mas sem acesso ao documento isso só pode ter "
+                                 "sido coincidência com o que viu no treinamento.")
+else:
+    rag["especifica_sozinho"] = ("Sem o documento, o modelo não tem como saber a que versão a pergunta se refere. "
+                                 "É esse tipo de pergunta, sobre o conteúdo de um documento específico, que "
+                                 "justifica o RAG.")
+```
+
+`r py$rag$especifica_sozinho`
+
+### RAG de duas etapas
+
+A forma mais simples de RAG sempre busca os trechos e os coloca no *prompt* de sistema, com uma única chamada ao modelo por pergunta. No LangChain atual, isso é feito com um agente sem ferramentas e um *middleware* que monta o *prompt* a cada pergunta.
+
+```{python}
+from langchain.agents import create_agent
+from langchain.agents.middleware import dynamic_prompt, ModelRequest
+
+@dynamic_prompt
+def prompt_com_contexto(request: ModelRequest) -> str:
+    ultima_pergunta = request.state["messages"][-1].text
+    trechos = vector_store.similarity_search(ultima_pergunta, k=K)
+    contexto = "\n\n".join(
+        f"[página {d.metadata.get('page', 0) + 1}]\n{d.page_content}" for d in trechos
+    )
+    return (
+        f"Você ajuda {PUBLICO} a consultar {DOCUMENTO}. "
+        "Responda em português do Brasil, somente com base no contexto abaixo, "
+        "e cite a página de onde tirou a informação. "
+        "Se a resposta não estiver no contexto, diga que não encontrou no documento.\n\n"
+        f"Contexto:\n{contexto}"
+    )
+
+agente_simples = create_agent(llm, tools=[], middleware=[prompt_com_contexto])
+
+resposta = agente_simples.invoke({"messages": [{"role": "user", "content": pergunta}]})
+print(resposta["messages"][-1].text)
+```
+
+```{python}
+#| include: false
+if "não encontrei" in resposta["messages"][-1].text.lower():
+    rag["simples"] = ("Nesta execução, o RAG de duas etapas respondeu que não encontrou a informação. "
+                      "Como vimos no teste da busca, os trechos recuperados com a pergunta em português "
+                      "não tratam da rotação do texto do eixo. Como o *prompt* manda responder só com base "
+                      "no contexto, o modelo se absteve, que é o comportamento correto nesse caso.")
+else:
+    rag["simples"] = ("Nesta execução, o RAG de duas etapas respondeu à pergunta. Vale conferir se a resposta "
+                      "está de fato nos trechos recuperados, que, como vimos no teste da busca, não incluem "
+                      "as páginas de `guide_axis()`.")
+```
+
+`r py$rag$simples`
+
+Esse formato é rápido e barato, mas a busca usa a pergunta exatamente como o usuário a escreveu. Isso traz dois problemas: quando o documento está em outro idioma, a busca perde precisão, e, em uma conversa, perguntas de acompanhamento como "e no eixo y?" não têm sentido sozinhas.
+
+### RAG com agente e memória
+
+Na versão seguinte, a busca vira uma **ferramenta** que o modelo decide quando usar. Como é o modelo quem escreve a consulta, ele consegue reformular perguntas de acompanhamento usando o histórico da conversa e, se o documento estiver em outro idioma, formular a busca nesse idioma. Isso substitui o conjunto de peças que as versões antigas exigiam (um recuperador sensível ao histórico, uma cadeia de documentos e um gerenciador de histórico).
+
+A ferramenta devolve ao modelo o texto dos trechos e, separadamente, os documentos originais (o *artifact*), que usaremos para mostrar as fontes.
+
+```{python}
+from langchain.tools import tool
+from langgraph.checkpoint.memory import InMemorySaver
+
+@tool(response_format="content_and_artifact")
+def buscar_no_documento(consulta: str):
+    """Busca no documento os trechos relevantes para a consulta."""
+    trechos = vector_store.similarity_search(consulta, k=K)
+    texto = "\n\n".join(
+        f"[página {d.metadata.get('page', 0) + 1}]\n{d.page_content}" for d in trechos
+    )
+    return texto, trechos
+
+PROMPT_AGENTE = (
+    f"Você ajuda {PUBLICO} a consultar {DOCUMENTO}. "
+    "Use a ferramenta buscar_no_documento para encontrar os trechos relevantes antes de responder. "
+    "Responda em português do Brasil, de forma objetiva, somente com base nos trechos recuperados, "
+    "e cite a página (por exemplo: p. 12). "
+    "Se a informação não estiver nos trechos, diga que não encontrou no documento. "
+    "Não responda perguntas fora do escopo do documento. "
+    f"O documento está em {IDIOMA_DOCUMENTO}: formule a busca nesse idioma, mas responda em português."
+)
+
+agente = create_agent(
+    llm,
+    tools=[buscar_no_documento],
+    system_prompt=PROMPT_AGENTE,
+    checkpointer=InMemorySaver()   # guarda o histórico de cada conversa
+)
+
+def obter_resposta(pergunta, id_sessao="abc123"):
+    resultado = agente.invoke(
+        {"messages": [{"role": "user", "content": pergunta}]},
+        config={"configurable": {"thread_id": id_sessao}}
+    )
+    return resultado
+
+def mensagens_da_ultima_pergunta(resultado):
+    """O checkpointer devolve o histórico inteiro da conversa; ficamos só com
+    as mensagens a partir da última pergunta do usuário."""
+    mensagens = resultado["messages"]
+    inicio = max(i for i, m in enumerate(mensagens) if m.type == "human")
+    return mensagens[inicio:]
+
+def paginas_consultadas(resultado):
+    """Páginas dos trechos que o agente recuperou para a última pergunta."""
+    paginas = set()
+    for m in mensagens_da_ultima_pergunta(resultado):
+        if m.type == "tool" and m.artifact:
+            paginas.update(d.metadata.get("page", 0) + 1 for d in m.artifact)
+    return sorted(paginas)
+
+def consultas_feitas(resultado):
+    """Textos que o agente escreveu para buscar no documento."""
+    return [c["args"]["consulta"]
+            for m in mensagens_da_ultima_pergunta(resultado) if m.type == "ai"
+            for c in (m.tool_calls or [])]
+
+def responder(pergunta, id_sessao="abc123"):
+    """Versão simples, que devolve só o texto e as páginas (útil para o chat no console)."""
+    r = obter_resposta(pergunta, id_sessao)
+    return {"resposta": r["messages"][-1].text, "paginas": paginas_consultadas(r)}
+```
+
+Testamos uma pergunta e, em seguida, uma pergunta de acompanhamento que só faz sentido com o histórico, usando o mesmo `id_sessao`.
+
+```{python}
+r1 = obter_resposta(PERGUNTA)
+print(r1["messages"][-1].text)
+print("Consultas feitas pelo agente:", consultas_feitas(r1))
+print("Páginas consultadas:", paginas_consultadas(r1))
+```
+
+```{python}
+#| include: false
+def paginas_citadas(texto):
+    return sorted({int(n) for n in re.findall(r"p(?:á|a)g(?:ina)?s?\.?\s*(\d+)|p\.\s*(\d+)", texto)
+                   for n in n if n})
+
+cons_r1 = paginas_consultadas(r1)
+cit_r1 = paginas_citadas(r1["messages"][-1].text)
+n_buscas = len(consultas_feitas(r1))
+inicio = (f"O agente fez {n_buscas} busca{'s' if n_buscas != 1 else ''}, com consultas escritas por ele "
+          "(repare no idioma), e consultou as páginas " + lista_paginas(cons_r1) + ". ")
+if no_intervalo(cons_r1):
+    rag["r1"] = inicio + "Entre elas estão as páginas de `guide_axis()`, onde o manual documenta a rotação."
+else:
+    citadas = f" A página citada na resposta ({lista_paginas(cit_r1)}) foi consultada, mas não traz esse exemplo." if cit_r1 else ""
+    rag["r1"] = (inicio + "Nenhuma delas é das páginas de `guide_axis()`. A resposta, com `theme()` e "
+                 "`element_text()`, funciona, mas veio do conhecimento do próprio modelo, e não do manual."
+                 + citadas + " Esse é o risco descrito no quadro mais abaixo: a citação de uma página não garante "
+                 "que a informação esteja nela.")
+```
+
+`r py$rag$r1`
+
+```{python}
+r2 = obter_resposta(PERGUNTA_ACOMPANHAMENTO)
+print(r2["messages"][-1].text)
+print("Consultas feitas pelo agente:", consultas_feitas(r2))
+print("Páginas consultadas:", paginas_consultadas(r2))
+```
+
+```{python}
+#| include: false
+cons_r2 = paginas_consultadas(r2)
+cit_r2 = paginas_citadas(r2["messages"][-1].text)
+fora = [p for p in cit_r2 if p not in cons_r2]
+base = ("A pergunta de acompanhamento não diz qual é a tarefa, mas o agente usou o histórico para "
+        "reescrever a busca (" + "; ".join(consultas_feitas(r2)) + "). As páginas listadas são só as "
+        "consultadas para esta pergunta: como o *checkpointer* devolve a conversa inteira, a função "
+        "`paginas_consultadas()` considera apenas as mensagens a partir da última pergunta. ")
+if not consultas_feitas(r2):
+    base = ("Desta vez, o agente respondeu sem fazer nenhuma busca, usando apenas o histórico da conversa. ")
+if fora:
+    rag["r2"] = base + (f"Repare que a resposta cita a página {lista_paginas(fora)}, que não foi consultada "
+                        "nesta pergunta: a citação veio do histórico, e não dos trechos recuperados.")
+else:
+    rag["r2"] = base
+```
+
+`r py$rag$r2`
+
+A pergunta específica, que o modelo sozinho não tinha como responder:
+
+```{python}
+r_esp = obter_resposta(PERGUNTA_ESPECIFICA, id_sessao="teste-especifica")
+print(r_esp["messages"][-1].text)
+print("Páginas consultadas:", paginas_consultadas(r_esp))
+```
+
+```{python}
+#| include: false
+if "3.5.1" in r_esp["messages"][-1].text:
+    rag["esp"] = ("Com o documento, o agente encontra a resposta (versão 3.5.1, de 23 de abril de 2024), "
+                  "que está na primeira página do manual.")
+else:
+    rag["esp"] = ("Nesta execução, o agente não chegou à versão correta (3.5.1, na primeira página do manual), "
+                  "o que mostra que a recuperação também pode falhar em perguntas simples.")
+```
+
+`r py$rag$esp`
+
+E uma pergunta fora do escopo do documento, para verificar se o assistente se recusa a responder em vez de inventar.
+
+```{python}
+r3 = obter_resposta(PERGUNTA_FORA_DO_ESCOPO, id_sessao="teste-escopo")
+print(r3["messages"][-1].text)
+```
+
+::: {.callout-warning title="O prompt não é uma garantia"}
+Instruir o modelo a "responder apenas com base no documento" reduz, mas não elimina, respostas inventadas ou fora do escopo. Por isso mostramos sempre as páginas consultadas (para que a pessoa confira) e medimos o comportamento do sistema na seção de avaliação.
+:::
+
+### Conversando pelo console
+
+A função abaixo cria um chat simples no console, que mantém o histórico enquanto a sessão durar (precisa de uma sessão interativa, por isso não é executada na renderização do livro).
+
+```{python}
+#| eval: false
+def iniciar_chat(id_sessao="abc123"):
+    print("Iniciando o chat, digite 'sair' para terminar.")
+
+    while True:
+        pergunta = input("Diga: ")
+
+        if pergunta.strip().lower() == "sair":
+            print("Encerrando o chat.")
+            break
+
+        resultado = responder(pergunta, id_sessao)
+        print(resultado["resposta"])
+        print("Páginas consultadas:", ", ".join(map(str, resultado["paginas"])))
+
+iniciar_chat()
+```
+
+
+### Opcional: outro modelo de linguagem
+
+A mesma estrutura funciona com outros modelos de chat. Como exemplo, o código abaixo usa um modelo da Maritaca AI, treinado com foco em português do Brasil. Para não depender de recursos de agente (como a chamada de ferramentas), usamos o RAG manual: buscar, montar o *prompt* e chamar o modelo. Consulte a documentação da Maritaca para os nomes de modelos disponíveis, pois eles mudam com o tempo.
+
+```{python}
+#| eval: false
+from langchain_community.chat_models import ChatMaritalk
+
+# a chave deve estar na variável de ambiente MARITACAAI_API_KEY
+maritaca = ChatMaritalk(
+    model="sabiazinho-3",   # nome usado no tutorial original; confira os modelos atuais na documentação
+    api_key=os.environ["MARITACAAI_API_KEY"],
+    temperature=0.1,
+    max_tokens=2000,
+)
+
+def rag_manual(pergunta, modelo, k=K):
+    trechos = vector_store.similarity_search(pergunta, k=k)
+    contexto = "\n\n".join(
+        f"[página {d.metadata.get('page', 0) + 1}]\n{d.page_content}" for d in trechos
+    )
+    prompt = (
+        f"Você ajuda {PUBLICO} a consultar {DOCUMENTO}. Responda em português, "
+        "somente com base no contexto, citando a página.\n\n"
+        f"Contexto:\n{contexto}\n\nPergunta: {pergunta}"
+    )
+    return modelo.invoke(prompt).content
+
+print(rag_manual(pergunta, maritaca))
+```
+
+## Avaliação
+
+Um assistente que "parece funcionar" em duas ou três perguntas ainda não foi avaliado. A avaliação tem duas partes: a **recuperação** (a busca traz o trecho certo?) e a **resposta** (o modelo responde corretamente, com a fonte certa, ou se abstém quando deve?).
+
+### Perguntas com gabarito
+
+O ideal é construir um conjunto de perguntas reais, para as quais **uma pessoa** que conhece o documento indica onde está a resposta. Quanto mais variadas as perguntas (escritas por pessoas diferentes, com palavras diferentes das do documento), mais confiável a avaliação.
+
+Para este capítulo, montamos 30 perguntas em português: 25 sobre tarefas comuns com o `ggplot2` e 5 fora do escopo do manual, usadas no anexo ao final do capítulo. Como o manual tem uma seção para cada função, o gabarito de cada pergunta no escopo é o intervalo de páginas da função que resolve a tarefa, tirado do sumário do manual (a numeração das páginas começa em 1). Parte das perguntas evita, de propósito, as palavras usadas no manual (por exemplo, "girar os rótulos" em vez de *angle*). O arquivo tem as colunas `pergunta`, `topico`, `pagina_inicial`, `pagina_final` e `tipo`. Nesta seção usamos só as perguntas no escopo.
+
+```{python}
+todas_perguntas = pd.read_csv("data/perguntas_teste.csv")
+perguntas_teste = (todas_perguntas[todas_perguntas["tipo"] == "no_escopo"]
+                   .drop(columns="tipo")
+                   .astype({"pagina_inicial": int, "pagina_final": int})
+                   .reset_index(drop=True))
+```
+
+```{r}
+#| echo: false
+tabela(py$perguntas_teste)
+```
+
+### Taxa de acerto da busca
+
+A métrica mais simples é a **taxa de acerto**: a proporção de perguntas em que pelo menos um dos $k$ trechos recuperados está nas páginas esperadas. Como o conjunto de teste é pequeno, é importante reportar a incerteza. Usamos o intervalo de confiança de Wilson para proporções.
+
+Primeiro avaliamos a **busca direta**, que usa a pergunta exatamente como foi escrita (é o que faz o RAG de duas etapas).
+
+```{python}
+def acertou(paginas, linha):
+    return any(linha["pagina_inicial"] <= p <= linha["pagina_final"] for p in paginas)
+
+def taxa_acerto(df, k=K):
+    acertos = []
+    for _, linha in df.iterrows():
+        trechos = vector_store.similarity_search(linha["pergunta"], k=k)
+        paginas = [d.metadata.get("page", 0) + 1 for d in trechos]
+        acertos.append(acertou(paginas, linha))
+    return np.array(acertos)
+
+def intervalo_wilson(acertos, n, z=1.96):
+    p = acertos / n
+    centro = (p + z**2 / (2 * n)) / (1 + z**2 / n)
+    meia = z * np.sqrt(p * (1 - p) / n + z**2 / (4 * n**2)) / (1 + z**2 / n)
+    return max(0.0, centro - meia), min(1.0, centro + meia)
+
+resultados = []
+for k in (1, 2, 4, 8):
+    a = taxa_acerto(perguntas_teste, k)
+    inf, sup = intervalo_wilson(a.sum(), len(a))
+    resultados.append({"k": k, "taxa_acerto": a.mean(), "ic_inferior": inf, "ic_superior": sup})
+
+tab_k = pd.DataFrame(resultados).round(2)
+```
+
+```{r}
+#| echo: false
+tabela(py$tab_k, "Taxa de acerto da busca direta, por número de trechos recuperados")
+```
+
+Variar $k$ mostra o trade-off: recuperar mais trechos aumenta a chance de incluir o certo, mas também a quantidade de texto (e de tokens) enviada ao modelo. O mesmo experimento pode ser repetido com outros tamanhos de pedaço e de sobreposição, refazendo o índice a cada configuração.
+
+A busca direta, porém, não é o que o agente faz: ele escreve a própria consulta, em inglês, e pode buscar mais de uma vez. Para avaliar o assistente como ele é usado, fazemos cada pergunta ao agente, em uma conversa nova, e verificamos se alguma das páginas que ele consultou está no gabarito. Isso faz uma chamada ao modelo de linguagem por pergunta (ou mais, quando ele busca mais de uma vez).
+
+```{python}
+linhas_agente = []
+for i, linha in perguntas_teste.iterrows():
+    r = obter_resposta(linha["pergunta"], id_sessao=f"avaliacao-{i}")
+    paginas = paginas_consultadas(r)
+    linhas_agente.append({
+        "pergunta": linha["pergunta"],
+        "consulta do agente": " | ".join(consultas_feitas(r)),
+        "páginas consultadas": len(paginas),
+        "acertou": acertou(paginas, linha),
+    })
+
+avaliacao_agente = pd.DataFrame(linhas_agente)
+```
+
+```{r}
+#| echo: false
+tabela(py$avaliacao_agente, "Avaliação do agente, pergunta a pergunta")
+```
+
+```{python}
+direta = taxa_acerto(perguntas_teste, K)
+agente_ok = avaliacao_agente["acertou"].to_numpy()
+
+comparacao = pd.DataFrame([
+    {"estratégia": f"busca direta (k = {K})", "taxa_acerto": direta.mean(),
+     "ic": intervalo_wilson(direta.sum(), len(direta))},
+    {"estratégia": "agente", "taxa_acerto": agente_ok.mean(),
+     "ic": intervalo_wilson(agente_ok.sum(), len(agente_ok))},
+])
+comparacao["ic_inferior"] = comparacao["ic"].str[0]
+comparacao["ic_superior"] = comparacao["ic"].str[1]
+tab_comparacao = comparacao.drop(columns="ic").round(2)
+```
+
+```{r}
+#| echo: false
+tabela(py$tab_comparacao, "Busca direta e agente: taxa de acerto e intervalo de 95%")
+```
+
+```{python}
+#| include: false
+def pct(x):
+    return f"{100 * x:.0f}%"
+
+n = len(perguntas_teste)
+ic_d = intervalo_wilson(direta.sum(), n)
+ic_a = intervalo_wilson(agente_ok.sum(), n)
+dif = int(agente_ok.sum() - direta.sum())
+if dif == 0:
+    comp = "as duas estratégias acertaram o mesmo número de perguntas"
+else:
+    comp = (f"o agente acertou {abs(dif)} pergunta{'s' if abs(dif) > 1 else ''} "
+            f"{'a mais' if dif > 0 else 'a menos'} do que a busca direta")
+erros_agente = perguntas_teste.loc[~agente_ok, "topico"].tolist()
+media_paginas = f"{avaliacao_agente['páginas consultadas'].mean():.1f}".replace(".", ",")
+rag["aval"] = (
+    f"Nesta execução, a busca direta com k = {K} encontrou as páginas esperadas em {int(direta.sum())} "
+    f"das {n} perguntas (intervalo de {pct(ic_d[0])} a {pct(ic_d[1])}), e o agente, em {int(agente_ok.sum())} "
+    f"(de {pct(ic_a[0])} a {pct(ic_a[1])}): {comp}. Os intervalos são largos e se sobrepõem, então, com "
+    f"{n} perguntas, não dá para afirmar que uma estratégia recupera melhor do que a outra. O agente consultou, "
+    f"em média, {media_paginas} páginas por pergunta, contra no máximo {K} da busca direta."
+)
+rag["aval_erros"] = (
+    "As perguntas em que o agente não chegou às páginas esperadas tratam de: "
+    + ", ".join(f"`{t}`" for t in erros_agente) + ". "
+    "Vale olhar caso a caso: o gabarito considera só a seção da função principal, e parte das respostas "
+    "pode estar também em outras seções do manual."
+) if erros_agente else "O agente chegou às páginas esperadas em todas as perguntas."
+```
+
+`r py$rag$aval`
+
+`r py$rag$aval_erros`
+
+### Qualidade das respostas
+
+A avaliação das respostas geradas exige leitura humana. Para cada pergunta do conjunto (e para algumas perguntas **fora do escopo**), registre se a resposta:
+
+- está **correta** em relação ao documento;
+- está **completa** (não omite uma exceção importante);
+- **cita a página certa**;
+- **se abstém** quando a informação não está no documento.
+
+Com isso, é possível reportar proporções (com intervalos de confiança, como acima) e comparar versões do sistema. Parte desses critérios pode ser verificada automaticamente, como fazemos no anexo ao final do capítulo, que compara dois modelos de linguagem. Ferramentas como o LangSmith, da própria LangChain, ajudam a guardar os testes e os rastros de cada execução.
+
+## Uso prático e implantação
+
+A última etapa do CRISP-DM é a implantação: colocar o assistente nas mãos de quem vai usá-lo. Alguns pontos práticos:
+
+- **Interface:** o assistente pode ser exposto em um aplicativo web (por exemplo, com Shiny ou Streamlit) ou em uma ferramenta que as pessoas já usam, como Slack ou Teams. Mostre sempre as páginas consultadas, para que a resposta possa ser conferida.
+- **Pessoa no circuito:** o assistente apoia quem atende, e não substitui a conferência. Em respostas de impacto (valores, prazos, obrigações), a pessoa deve validar na fonte.
+- **Custos e latência:** os embeddings do documento são pagos uma vez. A cada pergunta, paga-se o modelo de linguagem pelos tokens da pergunta, dos trechos recuperados (cerca de $k$ vezes o tamanho do pedaço) e da resposta. A latência cresce com o número de chamadas ao modelo, e o agente com ferramenta faz mais de uma.
+- **Dados pessoais e LGPD:** as perguntas e os trechos são enviados ao provedor do modelo. Evite incluir dados pessoais de clientes, verifique os termos de uso e de tratamento de dados do provedor e registre a base legal para o tratamento.
+- **Segurança:** documentos recuperados podem conter textos que parecem instruções, e o modelo pode segui-las (*injeção indireta de comandos*). Não existe defesa completa; trate o conteúdo recuperado como dado, valide as respostas antes de agir sobre elas e limite o que o assistente é capaz de fazer.
+- **Manutenção:** quando o documento muda, o índice precisa ser refeito. No Pinecone, o código deste capítulo só envia os vetores quando o índice está vazio; com um documento novo, é preciso apagar o índice antes ou usar um índice por versão do documento. Guarde a versão do documento e a data da indexação, e repita a avaliação a cada mudança de documento, de modelo ou de parâmetros.
+- **Medir o impacto:** se o objetivo é reduzir o tempo de busca por informação, meça isso (por exemplo, o tempo médio de atendimento e a consistência das respostas) comparando um grupo que usa o assistente com um grupo de controle.
+
+## Conclusão
+
+Neste capítulo percorremos todas as etapas de um assistente de RAG: entendemos como o texto vira números (tokenização) e como números capturam significado (embeddings), preparamos o documento (leitura, divisão em pedaços e banco vetorial), construímos duas versões do assistente (de duas etapas e com agente e memória) e discutimos como avaliá-lo e colocá-lo em uso.
+
+**Limitações:**
+
+* A qualidade das respostas depende da qualidade da recuperação: se o trecho certo não é recuperado, o modelo não tem como acertar.
+* PDFs com tabelas, imagens ou formatação complexa perdem informação na leitura do texto.
+* O modelo de linguagem pode errar mesmo com o contexto correto, e o *prompt* não é uma garantia de que ele responderá apenas com base no documento.
+* Os resultados dependem de escolhas (tamanho dos pedaços, $k$, modelos, *prompt*) que devem ser avaliadas com um conjunto de perguntas com gabarito.
+* O uso envolve custos e o envio de dados a um provedor externo.
+
+**Próximos passos:** testar divisores que respeitam a estrutura do documento (títulos e seções), combinar a busca por significado com a busca por palavras-chave, reordenar os trechos recuperados antes de enviá-los ao modelo e automatizar a avaliação das respostas.
+
+## Anexo: comparação entre dois modelos de linguagem {.unnumbered}
+
+::: {.callout-note collapse="true" title="gpt-4o-mini contra gpt-5.5 (clique para expandir)"}
+
+O assistente deste capítulo usa o `gpt-4o-mini`, um modelo pequeno e barato. Um modelo mais recente e maior responde melhor? Para responder, repetimos a avaliação com o `gpt-5.5`, mantendo **todo o resto igual**: o mesmo documento, os mesmos pedaços, o mesmo modelo de embeddings, o mesmo *prompt* e as mesmas 30 perguntas. Assim, qualquer diferença vem do modelo de linguagem.
+
+Além de verificar se o agente chega às páginas certas, medimos três aspectos da resposta que podem ser conferidos automaticamente:
+
+- **Recuperação:** nas 25 perguntas no escopo, o agente consultou alguma página do gabarito?
+- **Fidelidade da citação:** as páginas citadas na resposta foram de fato consultadas? (Vimos no capítulo um caso em que o modelo citou uma página que não tinha consultado.)
+- **Abstenção:** nas 5 perguntas fora do escopo, o assistente se recusa a responder? E, nas perguntas no escopo, ele se recusa sem necessidade?
+
+A abstenção é identificada por expressões como "não encontrei" na resposta. É uma regra simples, que pode errar; por isso, as respostas completas ficam guardadas no arquivo de resultados, para conferência.
+
+#### Como a avaliação foi feita {.unnumbered}
+
+A avaliação faz cerca de 60 chamadas ao agente. Se ficasse no capítulo, seria refeita a cada renderização do livro, com custo e com resultados diferentes a cada vez (as respostas dos modelos variam). Por isso, ela roda em um script separado, que grava os resultados em `data/avaliacao_modelos.csv`:
+
+```{python, file="scripts/avaliacao_rag.py", eval=FALSE}
+```
+
+```{python}
+res = pd.read_csv("data/avaliacao_modelos.csv")
+modelos_avaliados = list(dict.fromkeys(res["modelo"]))
+
+def resumo_modelo(d):
+    escopo = d[d["tipo"] == "no_escopo"]
+    fora = d[d["tipo"] == "fora_do_escopo"]
+    com_citacao = d[d["citacao_fiel"].notna()]
+    rec = escopo["acertou_recuperacao"].astype(bool)
+    inf, sup = intervalo_wilson(rec.sum(), len(rec))
+    return pd.Series({
+        "recuperação (acertos)": f"{rec.sum()} de {len(rec)}",
+        "recuperação (IC 95%)": f"{100 * inf:.0f}% a {100 * sup:.0f}%",
+        "citação fiel": f"{int(com_citacao['citacao_fiel'].astype(bool).sum())} de {len(com_citacao)}",
+        "abstenção fora do escopo": f"{int(fora['absteve'].sum())} de {len(fora)}",
+        "abstenção indevida no escopo": f"{int(escopo['absteve'].sum())} de {len(escopo)}",
+        "tokens de entrada por pergunta": round(d["tokens_entrada"].mean()),
+        "tokens de saída por pergunta": round(d["tokens_saida"].mean()),
+        "segundos por pergunta": round(d["segundos"].mean(), 1),
+    })
+
+tab_modelos = (pd.DataFrame({m: resumo_modelo(res[res["modelo"] == m]) for m in modelos_avaliados})
+               .reset_index(names="métrica"))
+```
+
+```{r}
+#| echo: false
+tabela(py$tab_modelos, "Comparação entre os modelos nas 30 perguntas")
+```
+
+Como os dois modelos responderam às **mesmas** perguntas, a comparação mais informativa é pareada: em quantas perguntas um modelo chegou às páginas certas e o outro não.
+
+```{python}
+rec = (res[res["tipo"] == "no_escopo"]
+       .pivot(index="pergunta", columns="modelo", values="acertou_recuperacao")
+       .astype(bool))
+a, b = modelos_avaliados
+tab_pareada = pd.DataFrame({
+    "situação": ["os dois acertaram", f"só o {a} acertou", f"só o {b} acertou", "os dois erraram"],
+    "perguntas": [int((rec[a] & rec[b]).sum()), int((rec[a] & ~rec[b]).sum()),
+                  int((~rec[a] & rec[b]).sum()), int((~rec[a] & ~rec[b]).sum())],
+})
+```
+
+```{r}
+#| echo: false
+tabela(py$tab_pareada, "Recuperação nas perguntas no escopo: comparação pareada")
+```
+
+```{python}
+#| include: false
+from scipy.stats import binomtest
+
+def num(x, d=1):
+    return f"{x:.{d}f}".replace(".", ",")
+
+anexo = {}
+so_a, so_b = int((rec[a] & ~rec[b]).sum()), int((~rec[a] & rec[b]).sum())
+p_valor = binomtest(so_b, so_a + so_b, 0.5).pvalue if so_a + so_b > 0 else 1.0
+por_modelo = {m: res[res["modelo"] == m] for m in modelos_avaliados}
+buscas = {m: d["consultas"].fillna("").map(lambda s: len([q for q in s.split(" | ") if q])).mean()
+          for m, d in por_modelo.items()}
+
+anexo["rec"] = (
+    f"Na rodada registrada no arquivo, o `{b}` chegou às páginas esperadas em {int(rec[b].sum())} das "
+    f"{len(rec)} perguntas no escopo, contra {int(rec[a].sum())} do `{a}`. Na comparação pareada, houve "
+    f"{so_b} pergunta{'s' if so_b != 1 else ''} em que só o `{b}` acertou e {so_a} em que só o `{a}` acertou. "
+    "Se os dois modelos fossem equivalentes, cada uma dessas perguntas teria a mesma chance de cair para "
+    "um lado ou para o outro; a probabilidade de uma divisão tão desigual quanto a observada (teste exato "
+    f"de McNemar) é de {num(p_valor, 3)}."
+    + (" Ao contrário da comparação com a busca direta, feita no capítulo, aqui a diferença é clara mesmo "
+       "com poucas perguntas." if p_valor < 0.05 else
+       " Com tão poucas perguntas, essa diferença ainda pode ser obra do acaso.")
+)
+
+# exemplo concreto: a pergunta sobre girar os rótulos do eixo (guide_axis)
+ex = res[res["topico"] == "guide_axis"].set_index("modelo")
+anexo["exemplo"] = ""
+if len(ex) == 2 and str(ex.loc[b, "acertou_recuperacao"]) == "True" and str(ex.loc[a, "acertou_recuperacao"]) == "False":
+    anexo["exemplo"] = (
+        f" Na pergunta sobre girar os rótulos do eixo x, por exemplo, o `{a}` fez uma única busca "
+        f"(\"{ex.loc[a, 'consultas']}\") e não chegou às páginas de `guide_axis()`, enquanto o `{b}` fez "
+        f"{ex.loc[b, 'consultas'].count(' | ') + 1} buscas, a última delas por `guide_axis`, e consultou "
+        "as páginas em que o manual documenta a rotação.")
+anexo["buscas"] = (
+    f"A diferença vem principalmente da forma de buscar: o `{b}` fez, em média, {num(buscas[b], 2)} buscas "
+    f"por pergunta, contra {num(buscas[a], 2)} do `{a}`, e escreveu consultas mais completas."
+    + anexo["exemplo"]
+)
+
+# demais métricas
+fora = res[res["tipo"] == "fora_do_escopo"]
+nao_absteve = fora[~fora["absteve"].astype(bool)]
+logistica = nao_absteve["pergunta"].str.contains("logística")
+frase_fora = (
+    "Nas perguntas fora do escopo, o comportamento foi parecido: "
+    + " e ".join(f"o `{m}` se absteve em {int(fora[fora['modelo'] == m]['absteve'].sum())} das "
+                f"{len(fora[fora['modelo'] == m])}" for m in modelos_avaliados) + "."
+)
+if len(nao_absteve) and logistica.all():
+    frase_fora += (
+        " A exceção foi a pergunta sobre regressão logística: os modelos a interpretaram como \"mostrar "
+        "uma regressão logística em um gráfico\" e responderam com o exemplo de `geom_smooth()` com "
+        "`family = \"binomial\"`, que está no manual (p. 180 e 181). A pergunta é ambígua, e a resposta é "
+        "defensável, o que mostra que classificar uma pergunta como \"fora do escopo\" também exige cuidado.")
+indevidas = res[(res["tipo"] == "no_escopo") & res["absteve"].astype(bool)]
+frase_indevida = ""
+if len(indevidas):
+    def recusas(m):
+        n_rec = len(indevidas[indevidas["modelo"] == m])
+        return f"{n_rec} recusa{'s' if n_rec > 1 else ''} indevida{'s' if n_rec > 1 else ''} do `{m}`"
+    frase_indevida = (
+        " Nas perguntas no escopo, houve " + " e ".join(recusas(m) for m in modelos_avaliados
+                                                     if len(indevidas[indevidas["modelo"] == m])) +
+        (", em uma pergunta" if len(indevidas) == 1 else ", sempre em perguntas") +
+        " em que a busca não chegou às páginas certas: com os trechos errados em mãos, recusar-se é o "
+        "comportamento esperado."
+        if (~indevidas["acertou_recuperacao"].astype(bool)).all() else
+        " Houve recusas em perguntas no escopo mesmo com as páginas certas recuperadas.")
+com_cit = res[res["citacao_fiel"].notna()]
+anexo["outras"] = (
+    ("Nenhum dos modelos citou uma página que não tivesse consultado"
+     if com_cit["citacao_fiel"].astype(bool).all() else
+     "Houve citações de páginas não consultadas")
+    + " nestas perguntas, feitas uma de cada vez (no capítulo, o problema apareceu em uma pergunta de "
+    "acompanhamento, que depende do histórico). " + frase_fora + frase_indevida
+)
+
+ta, tb = por_modelo[a], por_modelo[b]
+anexo["custo"] = (
+    f"O ganho tem um preço: por pergunta, o `{b}` usou, em média, {num(tb['tokens_entrada'].mean() / ta['tokens_entrada'].mean())} "
+    f"vezes mais tokens de entrada e {num(tb['tokens_saida'].mean() / ta['tokens_saida'].mean())} vezes mais "
+    f"tokens de saída do que o `{a}` (efeito das buscas extras) e levou {num(tb['segundos'].mean())} segundos, "
+    f"contra {num(ta['segundos'].mean())}. Além disso, o preço por token de um modelo maior costuma ser bem "
+    "mais alto. Para decidir entre os dois, multiplique os tokens pela tabela de preços atual de cada modelo "
+    "e compare com o valor de responder certo."
+)
+```
+
+`r py$anexo$rec`
+
+`r py$anexo$buscas`
+
+`r py$anexo$outras`
+
+`r py$anexo$custo`
+
+**Cuidados na leitura:** é uma única rodada, com 30 perguntas sobre um único documento, e outra rodada pode trazer números um pouco diferentes, porque as respostas dos modelos variam. As métricas também não dizem se o conteúdo da resposta está correto: só se ela veio das páginas certas, se cita o que consultou e se o assistente se recusa quando deve. A correção ainda exige leitura humana, e as respostas completas estão no arquivo `data/avaliacao_modelos.csv`.
+
+:::

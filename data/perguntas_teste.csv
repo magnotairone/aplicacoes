@@ -1,0 +1,31 @@
+pergunta,topico,pagina_inicial,pagina_final,tipo
+"Como dividir o gráfico em vários painéis, um para cada valor de uma variável?",facet_wrap,63,65,no_escopo
+Como fazer um boxplot e mostrar os valores atípicos?,geom_boxplot,79,85,no_escopo
+Como salvar um gráfico em um arquivo PNG com largura e altura definidas?,ggsave,193,196,no_escopo
+Como mudar o título do gráfico e os rótulos dos eixos?,labs,225,226,no_escopo
+Como usar uma paleta de cores do ColorBrewer?,scale_colour_brewer,256,259,no_escopo
+Como mudar a posição da legenda para baixo do gráfico?,theme,331,341,no_escopo
+Como adicionar uma reta de regressão linear a um gráfico de dispersão?,geom_smooth,175,181,no_escopo
+Como colocar o eixo y em escala logarítmica?,scale_continuous,281,285,no_escopo
+Como colocar as barras lado a lado em vez de empilhadas?,position_dodge,239,241,no_escopo
+Como definir os limites mínimo e máximo do eixo x?,lims,233,235,no_escopo
+Como usar um tema com fundo branco e linhas de grade cinzas?,ggtheme,196,199,no_escopo
+Como adicionar uma linha horizontal de referência ao gráfico?,geom_abline,66,69,no_escopo
+Como fazer um gráfico de pizza?,coord_polar,47,49,no_escopo
+Como evitar que pontos sobrepostos fiquem escondidos uns atrás dos outros?,geom_jitter,128,131,no_escopo
+Como escolher manualmente a cor de cada categoria?,scale_manual,295,299,no_escopo
+Como fazer um gráfico de violino?,geom_violin,183,188,no_escopo
+Como girar os rótulos do eixo x para que eles não fiquem sobrepostos?,guide_axis,200,202,no_escopo
+Como mostrar a distribuição de uma variável contínua como uma curva suave?,geom_density,98,103,no_escopo
+"Como organizar painéis em uma grade, com uma variável nas linhas e outra nas colunas?",facet_grid,60,63,no_escopo
+Como acrescentar barras de erro a um gráfico?,geom_crossbar,94,98,no_escopo
+"Como escrever um texto em uma posição fixa do gráfico, sem ligação com os dados?",annotate,20,22,no_escopo
+Como formatar as datas do eixo x para mostrar só o mês e o ano?,scale_date,285,289,no_escopo
+"Com muitos pontos, como mostrar a concentração deles em quadradinhos coloridos?",geom_bin_2d,74,77,no_escopo
+Como acrescentar um segundo eixo y do lado direito do gráfico?,sec_axis,308,310,no_escopo
+Como usar uma paleta de cores que funcione bem para pessoas daltônicas?,scale_colour_viridis_d,277,281,no_escopo
+Como ajustar uma regressão logística no R?,,,,fora_do_escopo
+Como ler um arquivo do Excel no R?,,,,fora_do_escopo
+Como fazer um gráfico interativo com a biblioteca plotly do Python?,,,,fora_do_escopo
+Qual é a cotação do dólar hoje?,,,,fora_do_escopo
+Quem venceu a Copa do Mundo de 2002?,,,,fora_do_escopo
