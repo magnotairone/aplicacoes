@@ -1,3 +1,18 @@
+/* Fonte da capa (Schibsted Grotesk) no título e subtítulo do livro */
+@import url("https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;800&display=swap");
+
+/* Só o cabeçalho da página inicial tem subtítulo; os títulos dos capítulos não mudam */
+.quarto-title:has(.subtitle) .title {
+  font-family: "Schibsted Grotesk", system-ui, sans-serif;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+
+.quarto-title .subtitle {
+  font-family: "Schibsted Grotesk", system-ui, sans-serif;
+  font-weight: 400;
+}
+
 /* Capa do livro na introdução, flutuando à direita do texto */
 .capa-livro {
   float: right;
