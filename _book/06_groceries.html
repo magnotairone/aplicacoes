@@ -55,7 +55,27 @@ div.sourceCode
 @media screen {
 pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
-</style>
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
 
 
 <script src="site_libs/quarto-nav/quarto-nav.js"></script>
@@ -282,19 +302,28 @@ window.Quarto = {
     <h2 id="toc-title">Índice</h2>
    
   <ul>
-  <li><a href="#terminologia-de-regras-de-associação" id="toc-terminologia-de-regras-de-associação" class="nav-link active" data-scroll-target="#terminologia-de-regras-de-associação">Terminologia de Regras de Associação</a></li>
-  <li><a href="#o-cenário-e-os-dados" id="toc-o-cenário-e-os-dados" class="nav-link" data-scroll-target="#o-cenário-e-os-dados"><span class="header-section-number">7.1</span> O cenário e os dados</a>
+  <li><a href="#conceitos-básicos" id="toc-conceitos-básicos" class="nav-link active" data-scroll-target="#conceitos-básicos"><span class="header-section-number">7.1</span> Conceitos básicos</a></li>
+  <li><a href="#o-cenário-e-os-dados" id="toc-o-cenário-e-os-dados" class="nav-link" data-scroll-target="#o-cenário-e-os-dados"><span class="header-section-number">7.2</span> O cenário e os dados</a>
   <ul class="collapse">
   <li><a href="#diagnóstico-da-operação" id="toc-diagnóstico-da-operação" class="nav-link" data-scroll-target="#diagnóstico-da-operação">Diagnóstico da Operação</a></li>
   </ul></li>
-  <li><a href="#o-algoritmo-apriori" id="toc-o-algoritmo-apriori" class="nav-link" data-scroll-target="#o-algoritmo-apriori"><span class="header-section-number">7.2</span> O algoritmo <em>apriori</em></a></li>
-  <li><a href="#visualizando-o-dilema-confiança-vs.-lift" id="toc-visualizando-o-dilema-confiança-vs.-lift" class="nav-link" data-scroll-target="#visualizando-o-dilema-confiança-vs.-lift"><span class="header-section-number">7.3</span> Visualizando o Dilema: Confiança vs.&nbsp;Lift</a>
+  <li><a href="#o-algoritmo-apriori" id="toc-o-algoritmo-apriori" class="nav-link" data-scroll-target="#o-algoritmo-apriori"><span class="header-section-number">7.3</span> O algoritmo <em>apriori</em></a>
+  <ul class="collapse">
+  <li><a href="#quanta-evidência-existe-por-trás-de-cada-regra" id="toc-quanta-evidência-existe-por-trás-de-cada-regra" class="nav-link" data-scroll-target="#quanta-evidência-existe-por-trás-de-cada-regra">Quanta evidência existe por trás de cada regra?</a></li>
+  </ul></li>
+  <li><a href="#visualizando-o-dilema-confiança-vs.-lift" id="toc-visualizando-o-dilema-confiança-vs.-lift" class="nav-link" data-scroll-target="#visualizando-o-dilema-confiança-vs.-lift"><span class="header-section-number">7.4</span> Visualizando o Dilema: Confiança vs.&nbsp;Lift</a>
   <ul class="collapse">
   <li><a href="#top-5-as-regras-certeiras-alta-confiança" id="toc-top-5-as-regras-certeiras-alta-confiança" class="nav-link" data-scroll-target="#top-5-as-regras-certeiras-alta-confiança">Top 5: As Regras “Certeiras” (Alta Confiança)</a></li>
   <li><a href="#top-5-as-regras-de-impulso-alto-lift" id="toc-top-5-as-regras-de-impulso-alto-lift" class="nav-link" data-scroll-target="#top-5-as-regras-de-impulso-alto-lift">Top 5: As Regras de “Impulso” (Alto Lift)</a></li>
+  <li><a href="#do-lift-ao-potencial" id="toc-do-lift-ao-potencial" class="nav-link" data-scroll-target="#do-lift-ao-potencial">Do lift ao potencial</a></li>
   </ul></li>
-  <li><a href="#aplicação-prática-operação-cerveja" id="toc-aplicação-prática-operação-cerveja" class="nav-link" data-scroll-target="#aplicação-prática-operação-cerveja"><span class="header-section-number">7.4</span> Aplicação Prática: “Operação Cerveja”</a></li>
-  <li><a href="#conclusão" id="toc-conclusão" class="nav-link" data-scroll-target="#conclusão"><span class="header-section-number">7.5</span> Conclusão</a></li>
+  <li><a href="#aplicação-prática-operação-cerveja" id="toc-aplicação-prática-operação-cerveja" class="nav-link" data-scroll-target="#aplicação-prática-operação-cerveja"><span class="header-section-number">7.5</span> Aplicação Prática: “Operação Cerveja”</a>
+  <ul class="collapse">
+  <li><a href="#com-menos-confiança-mais-alcance" id="toc-com-menos-confiança-mais-alcance" class="nav-link" data-scroll-target="#com-menos-confiança-mais-alcance">Com menos confiança, mais alcance</a></li>
+  </ul></li>
+  <li><a href="#uso-prático-das-regras" id="toc-uso-prático-das-regras" class="nav-link" data-scroll-target="#uso-prático-das-regras"><span class="header-section-number">7.6</span> Uso prático das regras</a></li>
+  <li><a href="#uso-prático-das-regras-1" id="toc-uso-prático-das-regras-1" class="nav-link" data-scroll-target="#uso-prático-das-regras-1"><span class="header-section-number">7.7</span> Uso prático das regras</a></li>
+  <li><a href="#conclusão" id="toc-conclusão" class="nav-link" data-scroll-target="#conclusão"><span class="header-section-number">7.8</span> Conclusão</a></li>
   </ul>
 </nav>
     </div>
@@ -320,27 +349,106 @@ window.Quarto = {
 </header>
 
 
-<p>Como os supermercados e e-commerces decidem o layout das gôndolas ou as recomendações de “compre junto”? Vamos utilizar o algoritmo Apriori para minerar associações e entender o trade-off entre volume e especificidade. Em um mar de milhares de regras, como identificar aquelas que são estatisticamente robustas e comercialmente relevantes?</p>
-<section id="terminologia-de-regras-de-associação" class="level3 unnumbered">
-<h3 class="unnumbered anchored" data-anchor-id="terminologia-de-regras-de-associação">Terminologia de Regras de Associação</h3>
-<p>Ao trabalhar com arules, nosso foco está em três métricas que definem a qualidade da nossa “entrega”:</p>
+<p>Como os supermercados e e-commerces decidem o layout das gôndolas ou as recomendações de “compre junto”? Imagine que você é o Category Manager de uma rede de supermercados e precisa decidir quais produtos colocar em promoção conjunta. Neste capítulo, usamos o algoritmo Apriori para minerar associações entre produtos e entender o trade-off entre volume (quantas cestas a regra alcança) e especificidade (quão forte é a associação). Em um mar de milhares de regras, como identificar aquelas que têm evidência suficiente e relevância comercial?</p>
+<p>Perguntas que o Category Manager quer responder:</p>
 <ul>
-<li>Antecedente (<span class="math inline">\(X\)</span>): O produto que já está no carrinho do cliente.</li>
-<li>Consequente (<span class="math inline">\(Y\)</span>): O produto que queremos oferecer (o “próximo passo”).</li>
-<li>Suporte: Qual a penetração dessa combinação no faturamento total? (É um nicho ou é massa?)</li>
-<li>Confiança: Se o cliente comprou <span class="math inline">\(X\)</span>, qual a probabilidade real de ele aceitar <span class="math inline">\(Y\)</span>?</li>
-<li>Lift: O quanto a oferta de <span class="math inline">\(X\)</span> impulsiona <span class="math inline">\(Y\)</span> para além da venda natural do produto?</li>
+<li>Quais produtos costumam ser comprados juntos?</li>
+<li>Quais combinações merecem uma promoção conjunta, uma exposição lado a lado ou uma recomendação de “compre junto”?</li>
+<li>Quais regras têm evidência suficiente e alcance relevante para justificar uma ação?</li>
 </ul>
+<p>Seguimos as etapas do CRISP-DM apresentadas na introdução do livro. Todo o trabalho é feito em <strong>R</strong>, com o pacote <code>arules</code> <span class="citation" data-cites="hahsler2005arules">(<a href="references.html#ref-hahsler2005arules" role="doc-biblioref">Hahsler, Grün, e Hornik 2005</a>)</span>.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Etapa do CRISP-DM</th>
+<th>Onde aparece no capítulo</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Entendimento do negócio</td>
+<td>Esta introdução: as decisões do Category Manager</td>
+</tr>
+<tr class="even">
+<td>Entendimento dos dados</td>
+<td>O cenário e os dados; diagnóstico da operação</td>
+</tr>
+<tr class="odd">
+<td>Preparação dos dados</td>
+<td>Os dados já estão no formato <code>transactions</code>; a “preparação” é a escolha dos parâmetros e o filtro de regras redundantes</td>
+</tr>
+<tr class="even">
+<td>Modelagem</td>
+<td>O algoritmo <em>apriori</em></td>
+</tr>
+<tr class="odd">
+<td>Avaliação</td>
+<td>Evidência por trás das regras, confiança versus lift, potencial de cada regra</td>
+</tr>
+<tr class="even">
+<td>Implantação</td>
+<td>Aplicação prática (“Operação Cerveja”) e uso prático das regras</td>
+</tr>
+</tbody>
+</table>
+<section id="conceitos-básicos" class="level2" data-number="7.1">
+<h2 data-number="7.1" class="anchored" data-anchor-id="conceitos-básicos"><span class="header-section-number">7.1</span> Conceitos básicos</h2>
+<p>Uma regra de associação tem a forma “se <span class="math inline">\(X\)</span>, então <span class="math inline">\(Y\)</span>”. Seus elementos e suas métricas são:</p>
+<ul>
+<li><strong>Antecedente (<span class="math inline">\(X\)</span>):</strong> o(s) produto(s) que já está(ão) na cesta do cliente.</li>
+<li><strong>Consequente (<span class="math inline">\(Y\)</span>):</strong> o produto que queremos associar ao antecedente (o “próximo passo” da recomendação).</li>
+<li><strong>Suporte:</strong> a proporção de cestas que contêm <span class="math inline">\(X\)</span> e <span class="math inline">\(Y\)</span> juntos, em relação ao total de cestas. Mede o <strong>alcance</strong> da regra: é um nicho ou é massa?</li>
+<li><strong>Confiança:</strong> entre as cestas que contêm <span class="math inline">\(X\)</span>, a proporção que também contém <span class="math inline">\(Y\)</span>.</li>
+<li><strong>Lift:</strong> a razão entre a confiança e a proporção de cestas que contêm <span class="math inline">\(Y\)</span>. Valores acima de 1 indicam que <span class="math inline">\(X\)</span> e <span class="math inline">\(Y\)</span> aparecem juntos com mais frequência do que o esperado se fossem independentes.</li>
+</ul>
+<p>Em termos de probabilidades:</p>
+<p><span class="math display">\[
+\text{suporte} = P(X \cap Y), \qquad
+\text{confiança} = \frac{P(X \cap Y)}{P(X)}, \qquad
+\text{lift} = \frac{\text{confiança}}{P(Y)}.
+\]</span></p>
+<div class="callout callout-style-default callout-warning callout-titled" title="Associação não é causa">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Aviso</span>Associação não é causa
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>O lift mede <strong>co-ocorrência</strong> nas cestas, e não o efeito de uma oferta. Uma regra com lift alto não garante que oferecer <span class="math inline">\(Y\)</span> a quem comprou <span class="math inline">\(X\)</span> aumentará as vendas. Isso só pode ser verificado com um teste (por exemplo, um teste A/B com grupo de controle).</p>
+</div>
+</div>
 </section>
-<section id="o-cenário-e-os-dados" class="level2" data-number="7.1">
-<h2 data-number="7.1" class="anchored" data-anchor-id="o-cenário-e-os-dados"><span class="header-section-number">7.1</span> O cenário e os dados</h2>
-<p>Vamos analisar o dataset <code>Groceries</code>. Imagine que você é o Category Manager de uma rede de supermercados e precisa decidir quais produtos colocar em promoção conjunta.</p>
-<p>Diferente de modelos de regressão, aqui trabalhamos com objetos de classe transactions (matrizes esparsas), otimizados para grandes volumes de itens.</p>
+<section id="o-cenário-e-os-dados" class="level2" data-number="7.2">
+<h2 data-number="7.2" class="anchored" data-anchor-id="o-cenário-e-os-dados"><span class="header-section-number">7.2</span> O cenário e os dados</h2>
+<p>Vamos analisar o dataset <code>Groceries</code>. Diferente de modelos de regressão, aqui trabalhamos com objetos de classe <code>transactions</code> (matrizes esparsas), otimizados para grandes volumes de itens.</p>
+<div class="callout callout-style-default callout-note callout-titled" title="Sobre os dados">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Nota</span>Sobre os dados
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>O conjunto <code>Groceries</code>, do pacote <code>arules</code>, reúne cerca de um mês (30 dias) de transações reais de ponto de venda de um mercado local <span class="citation" data-cites="hahsler2006implications">(<a href="references.html#ref-hahsler2006implications" role="doc-biblioref">Hahsler, Hornik, e Reutterer 2006</a>)</span>. Os produtos já vêm agregados em 169 categorias (por exemplo, <code>whole milk</code> e <code>bottled beer</code>), e não há informações de quantidade, preço, margem ou identificação do cliente. Cada transação é uma <strong>cesta</strong>: não sabemos se o mesmo cliente aparece em várias cestas.</p>
+</div>
+</div>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(arules)</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(Groceries)</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(Groceries)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>n_cestas <span class="ot">&lt;-</span> <span class="fu">length</span>(Groceries)</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <section id="diagnóstico-da-operação" class="level3 unnumbered">
 <h3 class="unnumbered anchored" data-anchor-id="diagnóstico-da-operação">Diagnóstico da Operação</h3>
@@ -377,7 +485,7 @@ includes extended item information - examples:
 </div>
 <p>Note que, com 9.835 transações registradas e 169 itens distintos, podemos observar uma densidade de aproximadamente 0.026, indicando que o conjunto de dados é relativamente esparsamente povoado. Além disso, os itens mais frequentemente comprados incluem leite integral, vegetais diversos, pães, refrigerantes e iogurte, com quantidades significativamente maiores em comparação com outros itens. Também, a distribuição do comprimento dos itens mostra que a maioria das transações contém entre 1 e 6 itens, com uma mediana de 3 itens por transação. Isso sugere que os clientes geralmente compram um pequeno número de itens por vez.</p>
 <div class="callout callout-style-default callout-tip callout-titled" title="O Desafio">
-<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="true" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-3-contents" aria-controls="callout-3" aria-expanded="true" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
@@ -386,24 +494,24 @@ includes extended item information - examples:
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-1" class="callout-1-contents callout-collapse collapse show">
+<div id="callout-3" class="callout-3-contents callout-collapse collapse show">
 <div class="callout-body-container callout-body">
-<p>Vender leite é fácil (alta frequência). O lucro real está em descobrir quais itens de nicho “puxam” outros itens de maior margem.</p>
+<p>Vender leite é fácil (alta frequência). O valor está em descobrir combinações menos óbvias e verificar, com dados de preço e margem (que não temos aqui), se elas compensam a ação.</p>
 </div>
 </div>
 </div>
 </section>
 </section>
-<section id="o-algoritmo-apriori" class="level2" data-number="7.2">
-<h2 data-number="7.2" class="anchored" data-anchor-id="o-algoritmo-apriori"><span class="header-section-number">7.2</span> O algoritmo <em>apriori</em></h2>
-<p>O algoritmo <em>Apriori</em> é um método popular para mineração de regras de associação em conjuntos de dados. Ele opera em duas etapas principais: primeiro, <strong>identifica</strong> todos os conjuntos de itens frequentes, ou seja, aqueles que aparecem com uma frequência maior que um limite pré-definido (suporte mínimo). Em seguida, com base nesses conjuntos frequentes, <strong>gera regras</strong> de associação, que são implicações do tipo “se <span class="math inline">\(X\)</span>, então <span class="math inline">\(Y\)</span>”, onde <span class="math inline">\(X\)</span> e <span class="math inline">\(Y\)</span> são conjuntos de itens, calculando medidas como <em>confiança</em> e <em>lift</em> para avaliar a força das associações entre os itens.</p>
-<p>A <em>confiança</em> de uma regra é a probabilidade condicional de que um item (ou conjunto de itens) <span class="math inline">\(Y\)</span> seja comprado, dado que o item (ou conjunto de itens) <span class="math inline">\(X\)</span> também foi comprado. Em outras palavras, é a proporção de transações que contêm tanto <span class="math inline">\(X\)</span> quanto <span class="math inline">\(Y\)</span>, em relação ao número de transações que contêm <span class="math inline">\(X\)</span>. Uma alta confiança indica que o item <span class="math inline">\(Y\)</span> é frequentemente comprado quando o item <span class="math inline">\(X\)</span> é comprado, o que sugere uma forte associação entre eles.</p>
-<p>O <em>lift</em> de uma regra é uma medida de quão mais frequentemente <span class="math inline">\(X\)</span> e <span class="math inline">\(Y\)</span> ocorrem juntos do que seria esperado se fossem independentes. Em termos simples, o lift é a razão entre a confiança da regra e a frequência absoluta de <span class="math inline">\(Y\)</span>. Um lift maior que 1 indica que a regra tem uma associação positiva (os itens ocorrem juntos com mais frequência do que o esperado ao acaso), enquanto um lift menor que 1 indica uma associação negativa (os itens ocorrem juntos com menos frequência do que o esperado ao acaso).</p>
-<p>Não queremos todas as regras possíveis (seriam milhões). Precisamos filtrar aquelas que têm relevância estatística e potencial de negócio.</p>
+<section id="o-algoritmo-apriori" class="level2" data-number="7.3">
+<h2 data-number="7.3" class="anchored" data-anchor-id="o-algoritmo-apriori"><span class="header-section-number">7.3</span> O algoritmo <em>apriori</em></h2>
+<p>O algoritmo <em>Apriori</em> é um método popular para mineração de regras de associação em conjuntos de dados <span class="citation" data-cites="agrawal1994fast">(<a href="references.html#ref-agrawal1994fast" role="doc-biblioref">Agrawal e Srikant 1994</a>)</span>. Ele opera em duas etapas principais: primeiro, <strong>identifica</strong> todos os conjuntos de itens frequentes, ou seja, aqueles que aparecem com uma frequência maior que um limite pré-definido (suporte mínimo). Em seguida, com base nesses conjuntos frequentes, <strong>gera regras</strong> de associação, que são implicações do tipo “se <span class="math inline">\(X\)</span>, então <span class="math inline">\(Y\)</span>”, onde <span class="math inline">\(X\)</span> e <span class="math inline">\(Y\)</span> são conjuntos de itens, calculando medidas como <em>confiança</em> e <em>lift</em> para avaliar a força das associações entre os itens.</p>
+<p>A <em>confiança</em> de uma regra é a probabilidade condicional de que um item (ou conjunto de itens) <span class="math inline">\(Y\)</span> seja comprado, dado que o item (ou conjunto de itens) <span class="math inline">\(X\)</span> também foi comprado. Em outras palavras, é a proporção de transações que contêm tanto <span class="math inline">\(X\)</span> quanto <span class="math inline">\(Y\)</span>, em relação ao número de transações que contêm <span class="math inline">\(X\)</span>. Uma alta confiança indica que o item <span class="math inline">\(Y\)</span> é frequentemente comprado quando o item <span class="math inline">\(X\)</span> é comprado, o que sugere uma associação entre eles. Mas atenção: se <span class="math inline">\(Y\)</span> for um item muito popular, a confiança será alta mesmo sem relação específica com <span class="math inline">\(X\)</span>.</p>
+<p>O <em>lift</em> de uma regra é uma medida de quão mais frequentemente <span class="math inline">\(X\)</span> e <span class="math inline">\(Y\)</span> ocorrem juntos do que seria esperado se fossem independentes. Em termos simples, o lift é a razão entre a confiança da regra e a proporção de transações que contêm <span class="math inline">\(Y\)</span> (o suporte de <span class="math inline">\(Y\)</span>). Um lift maior que 1 indica que a regra tem uma associação positiva (os itens ocorrem juntos com mais frequência do que o esperado ao acaso), enquanto um lift menor que 1 indica uma associação negativa (os itens ocorrem juntos com menos frequência do que o esperado ao acaso).</p>
+<p>Não queremos todas as regras possíveis (seriam milhões). Precisamos filtrar aquelas que têm evidência suficiente e potencial de negócio.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Gerando regras: Queresmos algo que aconteça em pelo menos 0.1% das vendas</span></span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="co"># e que tenha pelo menos 80% de chance de acontecer (Confiança)</span></span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>rules <span class="ot">&lt;-</span> <span class="fu">apriori</span>(Groceries, <span class="at">parameter =</span> <span class="fu">list</span>(<span class="at">sup =</span> <span class="fl">0.001</span>, <span class="at">conf =</span> <span class="fl">0.8</span>))</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Gerando regras: queremos combinações que apareçam em pelo menos 0.1% das cestas</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="co"># e em que pelo menos 80% das cestas com o antecedente também tenham o consequente (confiança)</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>rules_todas <span class="ot">&lt;-</span> <span class="fu">apriori</span>(Groceries, <span class="at">parameter =</span> <span class="fu">list</span>(<span class="at">sup =</span> <span class="fl">0.001</span>, <span class="at">conf =</span> <span class="fl">0.8</span>))</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Apriori
 
@@ -420,46 +528,92 @@ Algorithmic control:
 Absolute minimum support count: 9 
 
 set item appearances ...[0 item(s)] done [0.00s].
-set transactions ...[169 item(s), 9835 transaction(s)] done [0.01s].
+set transactions ...[169 item(s), 9835 transaction(s)] done [0.00s].
 sorting and recoding items ... [157 item(s)] done [0.00s].
 creating transaction tree ... done [0.00s].
-checking subsets of size 1 2 3 4 5 6 done [0.03s].
+checking subsets of size 1 2 3 4 5 6 done [0.01s].
 writing ... [410 rule(s)] done [0.00s].
 creating S4 object  ... done [0.00s].</code></pre>
 </div>
 </div>
-<p>O código abaixo exibe os cinco primeiros conjuntos de regras de associação descobertos pelo algoritmo Apriori. Ele mostra as associações entre os itens, juntamente com suas medidas de suporte, confiança e lift.</p>
+<p>Um suporte mínimo de 0.1% equivale a pelo menos 10 cestas das 9835 da base. O algoritmo encontrou 410 regras.</p>
+<p>Muitas dessas regras são <strong>redundantes</strong>: uma regra é redundante quando existe outra, mais simples (com menos itens no antecedente), com confiança igual ou maior. Mantemos apenas as não redundantes.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">inspect</span>(rules[<span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>])</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>rules <span class="ot">&lt;-</span> rules_todas[<span class="sc">!</span><span class="fu">is.redundant</span>(rules_todas)]</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Restaram 392 regras. O código abaixo exibe as cinco de maior suporte, ou seja, as que alcançam mais cestas. Ele mostra as associações entre os itens, juntamente com suas medidas de suporte, confiança e lift.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">inspect</span>(<span class="fu">head</span>(rules, <span class="at">n =</span> <span class="dv">5</span>, <span class="at">by =</span> <span class="st">"support"</span>))</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>    lhs                         rhs            support     confidence
-[1] {liquor, red/blush wine} =&gt; {bottled beer} 0.001931876 0.9047619 
-[2] {curd, cereals}          =&gt; {whole milk}   0.001016777 0.9090909 
-[3] {yogurt, cereals}        =&gt; {whole milk}   0.001728521 0.8095238 
-[4] {butter, jam}            =&gt; {whole milk}   0.001016777 0.8333333 
-[5] {soups, bottled beer}    =&gt; {whole milk}   0.001118454 0.9166667 
-    coverage    lift      count
-[1] 0.002135231 11.235269 19   
-[2] 0.001118454  3.557863 10   
-[3] 0.002135231  3.168192 17   
-[4] 0.001220132  3.261374 10   
-[5] 0.001220132  3.587512 11   </code></pre>
+<pre><code>    lhs                    rhs                    support confidence    coverage     lift count
+[1] {citrus fruit,                                                                             
+     tropical fruit,                                                                           
+     root vegetables,                                                                          
+     whole milk}        =&gt; {other vegetables} 0.003152008  0.8857143 0.003558719 4.577509    31
+[2] {other vegetables,                                                                         
+     curd,                                                                                     
+     domestic eggs}     =&gt; {whole milk}       0.002846975  0.8235294 0.003457041 3.223005    28
+[3] {hamburger meat,                                                                           
+     curd}              =&gt; {whole milk}       0.002541942  0.8064516 0.003152008 3.156169    25
+[4] {herbs,                                                                                    
+     rolls/buns}        =&gt; {whole milk}       0.002440264  0.8000000 0.003050330 3.130919    24
+[5] {tropical fruit,                                                                           
+     herbs}             =&gt; {whole milk}       0.002338587  0.8214286 0.002846975 3.214783    23</code></pre>
 </div>
 </div>
-<p>Cada regra é apresentada acima com os itens à esquerda (<code>lhs</code>) e os itens à direita (<code>rhs</code>), indicando a associação entre eles. A coluna “support” indica a frequência relativa da ocorrência da regra no conjunto de dados, enquanto a coluna “confidence” mostra a probabilidade condicional de que os itens à direita da regra sejam comprados, dado que os itens à esquerda foram comprados. O “lift” é uma medida da força da associação entre os itens, indicando quantas vezes mais provável é a compra dos itens à direita da regra em comparação com sua compra independente.</p>
+<p>Como ler as regras acima, usando os números do resultado:</p>
+<ul>
+<li><strong>Regra 1</strong>, <code>{citrus fruit, tropical fruit, root vegetables, whole milk} =&gt; {other vegetables}</code>: o antecedente aparece em 35 cestas (coverage de 0,36%), e em 31 delas (confiança de 88,6%) havia também <code>other vegetables</code>. Como esse item está em cerca de 19% de todas as cestas, o lift de 4,6 indica que a compra conjunta é 4,6 vezes mais frequente do que o esperado ao acaso. É um perfil de cesta de hortifrúti: quem leva várias frutas e raízes costuma levar também outros vegetais.</li>
+<li><strong>Regras 2 a 5</strong> têm <code>whole milk</code> como consequente, com confiança entre 80% e 82%. Por exemplo, em <code>{hamburger meat, curd} =&gt; {whole milk}</code>, 80,6% das cestas com carne de hambúrguer e coalhada também continham leite integral (25 das 31 cestas com o antecedente). Como o leite está em cerca de 26% de todas as cestas, o lift fica em torno de 3,1 a 3,2.</li>
+<li><strong>Alcance:</strong> mesmo sendo as cinco regras de maior suporte, nenhuma passa de 0,32% das cestas (no máximo 31 das 9.835). Com confiança mínima de 80%, as regras descrevem combinações muito específicas, e não o comportamento da maioria dos clientes.</li>
+</ul>
+<p>O fato de quatro das cinco regras terminarem em leite antecipa um ponto discutido adiante: parte da confiança alta vem da popularidade do próprio leite.</p>
+<!-- Cada regra é apresentada acima com os itens à esquerda (`lhs`) e os itens à direita (`rhs`), indicando a associação entre eles. A coluna "support" indica a frequência relativa da ocorrência da regra no conjunto de dados, enquanto a coluna "confidence" mostra a proporção das cestas com os itens à esquerda que também contêm os itens à direita. O "lift" indica quantas vezes mais frequente é a compra conjunta em comparação com o esperado se os itens fossem independentes. A coluna "count" é o número de cestas em que a regra se baseia. -->
+<section id="quanta-evidência-existe-por-trás-de-cada-regra" class="level3 unnumbered">
+<h3 class="unnumbered anchored" data-anchor-id="quanta-evidência-existe-por-trás-de-cada-regra">Quanta evidência existe por trás de cada regra?</h3>
+<p>Um ponto crítico é o <strong>número de cestas</strong> por trás de cada regra. Com poucas cestas, a confiança e o lift oscilam muito: uma cesta a mais ou a menos pode mudar bastante o resultado.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(<span class="fu">quality</span>(rules)<span class="sc">$</span>count)</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+  10.00   10.00   12.00   12.33   13.00   31.00 </code></pre>
+</div>
+</div>
+<p>A mediana é de 12 cestas por regra, e 99.74% das regras se baseiam em menos de 30 cestas. Além disso, ao examinar milhares de combinações possíveis, algumas regras aparecem apenas por acaso. Por isso, regras com poucos casos devem ser vistas como <strong>hipóteses</strong> a testar, e não como fatos.</p>
 </section>
-<section id="visualizando-o-dilema-confiança-vs.-lift" class="level2" data-number="7.3">
-<h2 data-number="7.3" class="anchored" data-anchor-id="visualizando-o-dilema-confiança-vs.-lift"><span class="header-section-number">7.3</span> Visualizando o Dilema: Confiança vs.&nbsp;Lift</h2>
+</section>
+<section id="visualizando-o-dilema-confiança-vs.-lift" class="level2" data-number="7.4">
+<h2 data-number="7.4" class="anchored" data-anchor-id="visualizando-o-dilema-confiança-vs.-lift"><span class="header-section-number">7.4</span> Visualizando o Dilema: Confiança vs.&nbsp;Lift</h2>
 <p>No negócio, existe um trade-off:</p>
 <ul>
 <li><p><strong>Regras de Alta Confiança</strong>: São óbvias (ex: quem compra pão, compra manteiga). O risco de errar é baixo, mas o valor agregado da sugestão também pode ser baixo.</p></li>
-<li><p><strong>Regras de Alto Lift</strong>: São as “minas de ouro”. Elas mostram associações surpreendentes que a intuição humana geralmente não percebe.</p></li>
+<li><p><strong>Regras de Alto Lift</strong>: São as “minas de ouro”. Elas mostram associações surpreendentes que a intuição humana geralmente não percebe, mas costumam alcançar poucas cestas.</p></li>
 </ul>
+<p>O gráfico abaixo mostra cada regra como um ponto: o suporte (alcance, em escala logarítmica) no eixo x, a confiança no eixo y e o lift na cor.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="06_groceries_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="06_groceries_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Observe que todas as regras têm suporte baixo (entre 0,1% e 0,3% das cestas): é o efeito de combinar um suporte mínimo baixo com antecedentes de vários itens. As regras de maior suporte (à direita) têm lift moderado, em torno de 3 a 5, enquanto a de lift mais alto (≈ 11) alcança menos cestas do que elas. Em nenhum ponto do gráfico há uma regra que una alto alcance e alto lift, e esse é o dilema do negócio.</p>
 <section id="top-5-as-regras-certeiras-alta-confiança" class="level3 unnumbered">
 <h3 class="unnumbered anchored" data-anchor-id="top-5-as-regras-certeiras-alta-confiança">Top 5: As Regras “Certeiras” (Alta Confiança)</h3>
-<p>No código abaixo, estamos extraindo as cinco primeiras regras com base na confiança mais alta. Isso nos permite identificar as associações mais fortes entre os itens, onde a confiança é uma medida da probabilidade de que o item B seja comprado quando o item A é comprado. Todas as cinco regras apresentam uma confiança de 100%, o que indica que sempre que os itens à esquerda da regra são comprados, os itens à direita também são comprados. Isso sugere que essas combinações de itens são altamente associadas no conjunto de dados.</p>
+<p>No código abaixo, extraímos as cinco regras de maior confiança. Como várias regras empatam em 100% de confiança, a escolha entre elas é arbitrária. Uma confiança de 100% significa que, em <strong>todas as cestas da base</strong> que continham os itens à esquerda, os itens à direita também estavam presentes. Atenção à coluna <code>count</code>: ela mostra em quantas cestas cada regra se baseia.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">inspect</span>(<span class="fu">head</span>(rules, <span class="at">n =</span> <span class="dv">5</span>, <span class="at">by =</span> <span class="st">"confidence"</span>))</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">inspect</span>(<span class="fu">head</span>(rules, <span class="at">n =</span> <span class="dv">5</span>, <span class="at">by =</span> <span class="st">"confidence"</span>))</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>    lhs                      rhs              support confidence    coverage     lift count
 [1] {rice,                                                                                 
@@ -477,8 +631,9 @@ creating S4 object  ... done [0.00s].</code></pre>
      domestic eggs}       =&gt; {whole milk} 0.001016777          1 0.001016777 3.913649    10</code></pre>
 </div>
 </div>
+<p>Nas cinco regras, a confiança é de 100% e o consequente é sempre <code>whole milk</code>, mas cada uma se baseia em poucas cestas: entre 10 e 17, perto do mínimo de 10 imposto pelo suporte de 0,1%. Note também que o lift é idêntico nas cinco (3,91). Esse é o valor máximo possível para uma regra com leite no consequente (1 dividido pela proporção de cestas com leite), atingido sempre que a confiança é 100%. Assim, o lift aqui apenas repete a confiança de 100% comparada com a popularidade do leite, e não permite distinguir uma regra da outra.</p>
 <div class="callout callout-style-default callout-tip callout-titled" title="Impactos práticos">
-<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-2-contents" aria-controls="callout-2" aria-expanded="true" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-4-contents" aria-controls="callout-4" aria-expanded="true" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
@@ -487,18 +642,20 @@ creating S4 object  ... done [0.00s].</code></pre>
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
-<div id="callout-2" class="callout-2-contents callout-collapse collapse show">
+<div id="callout-4" class="callout-4-contents callout-collapse collapse show">
 <div class="callout-body-container callout-body">
-<p>Note que o whole milk aparece em quase todos os consequentes. Faz sentido gastar verba de marketing recomendando leite para quem já está comprando itens de café da manhã? Provavelmente não, ele já levaria o leite de qualquer forma.</p>
+<p>O <code>whole milk</code> é o consequente de 61% das regras encontradas. Isso acontece porque ele está presente em cerca de 26% de todas as cestas: a confiança alta reflete, em parte, a popularidade do próprio leite.</p>
+<p>Faz sentido gastar verba de marketing recomendando leite para quem está comprando arroz e açúcar? Provavelmente não. Em uma regra com 100% de confiança, todas as cestas com o antecedente já tinham leite, então não há nenhuma cesta a que a recomendação pudesse acrescentar o produto.</p>
 </div>
 </div>
 </div>
 </section>
 <section id="top-5-as-regras-de-impulso-alto-lift" class="level3 unnumbered">
 <h3 class="unnumbered anchored" data-anchor-id="top-5-as-regras-de-impulso-alto-lift">Top 5: As Regras de “Impulso” (Alto Lift)</h3>
-<p>Agora, vamos extrair as cinco primeiras regras com base no lift mais alto. Ele nos diz quantas vezes o item B é mais provável de ser comprado quando o item A é comprado do que se eles fossem comprados independentemente.</p>
+<p>Agora, vamos extrair as cinco regras de maior lift. Ele nos diz quantas vezes mais frequente é a compra conjunta de <span class="math inline">\(X\)</span> e <span class="math inline">\(Y\)</span> do que se eles fossem comprados independentemente.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">inspect</span>(<span class="fu">head</span>(rules, <span class="at">n =</span> <span class="dv">5</span>, <span class="at">by =</span> <span class="st">"lift"</span>))</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>top_lift <span class="ot">&lt;-</span> <span class="fu">head</span>(rules, <span class="at">n =</span> <span class="dv">5</span>, <span class="at">by =</span> <span class="st">"lift"</span>)</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="fu">inspect</span>(top_lift)</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>    lhs                        rhs                   support confidence    coverage      lift count
 [1] {liquor,                                                                                       
@@ -521,17 +678,90 @@ creating S4 object  ... done [0.00s].</code></pre>
      rice}                  =&gt; {root vegetables} 0.001321810  0.8666667 0.001525165  7.951182    13</code></pre>
 </div>
 </div>
-<p>Aqui o cenário muda. O Lift de 11.24 para a regra {liquor, red/blush wine} =&gt; {bottled beer} indica uma oportunidade de cross-selling fortíssima que não é óbvia para quem olha apenas o volume de vendas isolado.</p>
-<p>A segunda regra mostra que a compra de “citrus fruit”, “other vegetables”, “soda” e “fruit/vegetable juice” está 8.34 vezes mais associada à compra de “root vegetables” do que se fosse uma compra independente. E assim, sucessivamente.</p>
+<p>Aqui o cenário muda. O lift das cinco regras varia de 7,95 a 11,24, indicando associações fortes e pouco óbvias para quem olha apenas o volume de vendas isolado.</p>
+<p>A regra de maior lift é {liquor,red/blush wine} =&gt; {bottled beer}, com lift de 11,24. A segunda é {citrus fruit,other vegetables,soda,fruit/vegetable juice} =&gt; {root vegetables}, com lift de 8,34, ou seja, a compra conjunta dos itens à esquerda com o item à direita é 8,3 vezes mais frequente do que seria se fossem independentes.</p>
+<p>Mas esse lift alto precisa ser lido com cuidado:</p>
+<ul>
+<li><strong>Pouca evidência:</strong> as cinco regras se baseiam em apenas 10 a 19 cestas (o mínimo permitido pelo suporte de 0,1% é 10). Com tão poucos casos, o lift e a confiança oscilam muito.</li>
+<li><strong>Alcance pequeno:</strong> o antecedente mais frequente aparece em apenas 0,21% das cestas.</li>
+<li><strong>Antecedentes longos:</strong> quatro das cinco regras exigem três ou mais itens na mesma cesta, o que as torna pouco acionáveis. Três delas têm <code>root vegetables</code> como consequente.</li>
+</ul>
+<p>Os lifts são altos, em parte, porque o consequente não é um item muito popular: quanto mais raro o consequente, mais alto o lift máximo possível. A seção a seguir mede quanto cada uma dessas regras pode realmente render.</p>
+</section>
+<section id="do-lift-ao-potencial" class="level3 unnumbered">
+<h3 class="unnumbered anchored" data-anchor-id="do-lift-ao-potencial">Do lift ao potencial</h3>
+<p>Um lift alto diz que a associação é forte, mas não diz <strong>quanto ela vale</strong>. Para isso, olhamos o alcance: em quantas cestas a regra se aplica e quantas delas ainda “faltam” o item do consequente (a verdadeira margem de oportunidade).</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>potencial <span class="ot">&lt;-</span> <span class="fu">tibble</span>(</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">regra =</span> <span class="fu">labels</span>(top_lift),</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>  <span class="st">`</span><span class="at">cestas com X</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">round</span>(<span class="fu">quality</span>(top_lift)<span class="sc">$</span>coverage <span class="sc">*</span> n_cestas),</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>  <span class="st">`</span><span class="at">cestas com X e Y</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">round</span>(<span class="fu">quality</span>(top_lift)<span class="sc">$</span>count),</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>  <span class="st">`</span><span class="at">cestas com X sem Y</span><span class="st">`</span> <span class="ot">=</span> <span class="st">`</span><span class="at">cestas com X</span><span class="st">`</span> <span class="sc">-</span> <span class="st">`</span><span class="at">cestas com X e Y</span><span class="st">`</span>,</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>  <span class="st">`</span><span class="at">% do total de cestas com X</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">round</span>(<span class="dv">100</span> <span class="sc">*</span> <span class="fu">quality</span>(top_lift)<span class="sc">$</span>coverage, <span class="dv">2</span>)</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="cell">
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th">regra</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">cestas com X</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">cestas com X e Y</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">cestas com X sem Y</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">% do total de cestas com X</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">{liquor,red/blush wine} =&gt; {bottled beer}</td>
+<td style="text-align: right;">21</td>
+<td style="text-align: right;">19</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">0.21</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">{citrus fruit,other vegetables,soda,fruit/vegetable juice} =&gt; {root vegetables}</td>
+<td style="text-align: right;">11</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0.11</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">{tropical fruit,other vegetables,whole milk,yogurt,oil} =&gt; {root vegetables}</td>
+<td style="text-align: right;">11</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0.11</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">{citrus fruit,grapes,fruit/vegetable juice} =&gt; {tropical fruit}</td>
+<td style="text-align: right;">13</td>
+<td style="text-align: right;">11</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">0.13</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">{other vegetables,whole milk,yogurt,rice} =&gt; {root vegetables}</td>
+<td style="text-align: right;">15</td>
+<td style="text-align: right;">13</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">0.15</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>Mesmo entre as regras de maior lift, o antecedente aparece, no máximo, em 0,21% das cestas. O potencial de venda adicional (as cestas com <span class="math inline">\(X\)</span> que ainda não levam <span class="math inline">\(Y\)</span>) é, portanto, pequeno em termos absolutos. Isso também vale para regras de confiança de 100%: nelas, não há <strong>nenhuma</strong> cesta com <span class="math inline">\(X\)</span> sem <span class="math inline">\(Y\)</span>, e portanto nada a ganhar com a recomendação.</p>
 </section>
 </section>
-<section id="aplicação-prática-operação-cerveja" class="level2" data-number="7.4">
-<h2 data-number="7.4" class="anchored" data-anchor-id="aplicação-prática-operação-cerveja"><span class="header-section-number">7.4</span> Aplicação Prática: “Operação Cerveja”</h2>
+<section id="aplicação-prática-operação-cerveja" class="level2" data-number="7.5">
+<h2 data-number="7.5" class="anchored" data-anchor-id="aplicação-prática-operação-cerveja"><span class="header-section-number">7.5</span> Aplicação Prática: “Operação Cerveja”</h2>
 <p>Imagine que o estoque de <code>bottled beer</code> está alto. Onde devemos atuar?</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Filtrando regras onde a cerveja é o alvo</span></span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>regras_cerveja <span class="ot">&lt;-</span> <span class="fu">subset</span>(rules, <span class="at">subset =</span> rhs <span class="sc">%in%</span> <span class="st">"bottled beer"</span>)</span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="fu">inspect</span>(<span class="fu">sort</span>(regras_cerveja, <span class="at">by =</span> <span class="st">"lift"</span>))</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Filtrando regras onde a cerveja é o alvo</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>regras_cerveja <span class="ot">&lt;-</span> <span class="fu">subset</span>(rules, <span class="at">subset =</span> rhs <span class="sc">%in%</span> <span class="st">"bottled beer"</span>)</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="fu">inspect</span>(<span class="fu">sort</span>(regras_cerveja, <span class="at">by =</span> <span class="st">"lift"</span>))</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>    lhs                         rhs            support     confidence
 [1] {liquor, red/blush wine} =&gt; {bottled beer} 0.001931876 0.9047619 
@@ -539,24 +769,151 @@ creating S4 object  ... done [0.00s].</code></pre>
 [1] 0.002135231 11.23527 19   </code></pre>
 </div>
 </div>
-<p>Identificamos que clientes que compram licor e vinhos têm uma probabilidade de 90.4% de comprar cerveja de garrafa (um comportamento de “abastecimento de adega”). Portanto, uma ação recomendada seria: Em vez de dar desconto na cerveja para todo o mercado, crie um cupom de desconto em cervejas artesanais impresso no verso da nota fiscal apenas para quem comprar vinhos ou licores.</p>
-<!-- Esse resultado mostra uma regra de associação onde a compra conjunta de "liquor" e "red/blush wine" (à esquerda, `lhs`) está associada à compra de "bottled beer" (à direita, `rhs`).  -->
-<!-- Neste caso, o suporte é de aproximadamente 0.19%, o que significa que cerca de 0.19% de todas as transações incluem "liquor", "red/blush wine" e "bottled beer". -->
-<!-- A confiança é de cerca de 90.48%, o que sugere uma forte associação entre esses itens. -->
-<!-- O  lift é de aproximadamente 11.24, o que significa que a compra de "liquor" e "red/blush wine" aumenta a probabilidade de compra de "bottled beer" em cerca de 11.24 vezes, em comparação com a situação em que essas compras são independentes. -->
-<!-- Se fossemos fazer uma ação de divulgação de uma "bottled beer", qual seria? -->
-<!-- > Uma proporção significativa (aproximadamente 90.5%) dos consumidores que compram licor e vinho vermelho/branco também compram "bottled beer". Portanto, seria vantajoso direcionar campanhas publicitárias para esse grupo demográfico, destacando a disponibilidade e a qualidade da "bottled beer" em relação aos produtos relacionados, como licores e vinhos. -->
-</section>
-<section id="conclusão" class="level2" data-number="7.5">
-<h2 data-number="7.5" class="anchored" data-anchor-id="conclusão"><span class="header-section-number">7.5</span> Conclusão</h2>
-<p>A análise de regras de associação através do algoritmo <em>apriori</em> nos permite compreender melhor o comportamento do consumidor e tomar decisões informadas para otimizar as estratégias de marketing.</p>
-<p>A análise de associação nos permite compreender melhor o comportamento do consumidor. Entretanto, pode servir também para provocar novos comportamentos nos clientes:</p>
+<p>A regra de maior lift é {liquor,red/blush wine} =&gt; {bottled beer}, com lift de 11,24 e confiança de 90,5%. Em números absolutos: das 21 cestas que contêm o antecedente, 19 também continham cerveja de garrafa.</p>
+<p>Antes de transformar isso em ação, é preciso ler a regra com cuidado:</p>
 <ul>
-<li><p><strong>Suporte Baixo + Lift Alto</strong>: Oportunidade de criar novos hábitos em nichos rentáveis.</p></li>
-<li><p><strong>Suporte Alto + Confiança Alta</strong>: Itens “âncora”. Não precisam de promoção, mas devem estar localizados no fundo da loja para o cliente percorrer outros corredores.</p></li>
+<li><strong>É um comportamento dentro da mesma compra.</strong> A regra mostra que cerveja de garrafa costuma estar na mesma cesta que esses itens (um comportamento de “abastecimento de adega”). Ela não diz que o cliente voltará para comprar cerveja depois.</li>
+<li><strong>A evidência é pequena.</strong> A confiança de 90,5% vem de 19 em 21 cestas. Pouquíssimas cestas sustentam o resultado.</li>
+<li><strong>O alcance é pequeno.</strong> O antecedente aparece em apenas 0,21% das cestas.</li>
+<li><strong>A maioria já compra a cerveja.</strong> Dar desconto em cerveja para quem já a leva com probabilidade tão alta seria subsidiar uma compra que aconteceria de qualquer forma, o mesmo problema que apontamos para o leite. Restam apenas 2 cestas com o antecedente sem cerveja.</li>
 </ul>
+<p>Portanto, em vez de dar desconto, as ações mais coerentes com essa regra são de <strong>exposição</strong>: posicionar a cerveja de garrafa próxima à seção de vinhos e licores, ou montar um kit de “adega” com a combinação. Em qualquer caso, a ação deve ser tratada como hipótese e testada. O conjunto de dados não distingue tipos de cerveja de garrafa (por exemplo, artesanais), então qualquer ação específica para um tipo exigiria dados mais detalhados.</p>
+<section id="com-menos-confiança-mais-alcance" class="level3 unnumbered">
+<h3 class="unnumbered anchored" data-anchor-id="com-menos-confiança-mais-alcance">Com menos confiança, mais alcance</h3>
+<p>Para encontrar regras com mais alcance, podemos aceitar uma confiança menor e um suporte maior, restringindo o consequente à cerveja de garrafa:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>regras_cerveja_amplas <span class="ot">&lt;-</span> <span class="fu">apriori</span>(</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>  Groceries,</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">parameter =</span> <span class="fu">list</span>(<span class="at">sup =</span> <span class="fl">0.003</span>, <span class="at">conf =</span> <span class="fl">0.2</span>, <span class="at">minlen =</span> <span class="dv">2</span>),</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">appearance =</span> <span class="fu">list</span>(<span class="at">rhs =</span> <span class="st">"bottled beer"</span>, <span class="at">default =</span> <span class="st">"lhs"</span>)</span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Apriori
+
+Parameter specification:
+ confidence minval smax arem  aval originalSupport maxtime support minlen
+        0.2    0.1    1 none FALSE            TRUE       5   0.003      2
+ maxlen target  ext
+     10  rules TRUE
+
+Algorithmic control:
+ filter tree heap memopt load sort verbose
+    0.1 TRUE TRUE  FALSE TRUE    2    TRUE
+
+Absolute minimum support count: 29 
+
+set item appearances ...[1 item(s)] done [0.00s].
+set transactions ...[169 item(s), 9835 transaction(s)] done [0.00s].
+sorting and recoding items ... [136 item(s)] done [0.00s].
+creating transaction tree ... done [0.00s].
+checking subsets of size 1 2 3 4 5 done [0.00s].
+writing ... [2 rule(s)] done [0.00s].
+creating S4 object  ... done [0.00s].</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">inspect</span>(<span class="fu">head</span>(regras_cerveja_amplas, <span class="at">n =</span> <span class="dv">5</span>, <span class="at">by =</span> <span class="st">"lift"</span>))</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>    lhs                 rhs            support     confidence coverage  
+[1] {liquor}         =&gt; {bottled beer} 0.004677173 0.4220183  0.01108287
+[2] {red/blush wine} =&gt; {bottled beer} 0.004880529 0.2539683  0.01921708
+    lift     count
+[1] 5.240594 46   
+[2] 3.153760 48   </code></pre>
+</div>
+</div>
+<p>Reduzindo o suporte mínimo para 0,3% (30 cestas), o algoritmo encontrou 2 regras, ambas com um único item no antecedente: <code>{liquor}</code> e <code>{red/blush wine}</code>. Elas não apareciam com o suporte de 0,5% porque se baseiam em 46 e 48 cestas, logo abaixo do mínimo de 49 daquele corte.</p>
+<p>Comparadas à regra anterior, <code>{liquor, red/blush wine} =&gt; {bottled beer}</code>, elas trocam confiança por alcance e por evidência:</p>
+<ul>
+<li><strong>Alcance:</strong> o antecedente aparece em 1,1% (licor) e 1,9% (vinho tinto) das cestas, contra 0,21% da regra anterior. É de 5 a 9 vezes mais cestas.</li>
+<li><strong>Confiança e lift menores, mas mais evidência:</strong> a confiança é de 42% e 25%, e o lift de 5,2 e 3,2, contra 90,5% e 11,2 da regra anterior. Em compensação, elas se apoiam em 46 e 48 cestas, mais que o dobro das 19 daquela regra.</li>
+<li><strong>Oportunidade real:</strong> há 63 cestas com licor e 141 com vinho tinto que não levaram cerveja de garrafa. Na regra anterior, eram apenas 2. Com 90% de confiança quase todos já levavam a cerveja, e uma promoção apenas subsidiaria uma compra que aconteceria de qualquer forma.</li>
+</ul>
+<p>Isso muda a leitura comercial: as regras de confiança mais baixa são, aqui, mais úteis do que a de 90%. Uma ação coerente é oferecer a cerveja (por exemplo, com um cupom no caixa) apenas a quem comprou licor ou vinho tinto e ainda não a levou, evitando dar desconto a quem já a compraria. Mas o potencial é limitado: são, no máximo, cerca de 204 cestas, ou 2,1% das cestas do mês (os dois grupos podem se sobrepor), e nem todas aceitariam a oferta. Como nas demais regras, trata-se de uma hipótese a ser testada com um grupo de controle.</p>
+</section>
+</section>
+<section id="uso-prático-das-regras" class="level2" data-number="7.6">
+<h2 data-number="7.6" class="anchored" data-anchor-id="uso-prático-das-regras"><span class="header-section-number">7.6</span> Uso prático das regras</h2>
+</section>
+<section id="uso-prático-das-regras-1" class="level2" data-number="7.7">
+<h2 data-number="7.7" class="anchored" data-anchor-id="uso-prático-das-regras-1"><span class="header-section-number">7.7</span> Uso prático das regras</h2>
+<p>A última etapa do CRISP-DM é a <strong>implantação</strong>. Algumas formas de transformar as regras em ação:</p>
+<ul>
+<li><strong>Exposição e layout:</strong> usar regras de antecedente curto (1 ou 2 itens) para posicionar produtos próximos ou montar kits.</li>
+<li><strong>Recomendações a partir da cesta:</strong> exibir “compre junto” a partir dos itens que o cliente já escolheu. O código abaixo mostra uma função simples que, dada uma cesta, devolve as regras aplicáveis cujo consequente ainda não está na cesta.</li>
+<li><strong>Aplicações no e-commerce:</strong> no ambiente online, a mesma lógica pode ser usada em vários pontos da jornada: na página do produto (“quem comprou este item também comprou”), no carrinho (sugerir um complemento antes do pagamento), em e-mails pós-compra e em kits com preço combinado. Diferentemente da loja física, o site conhece a cesta em tempo real e pode medir o efeito de cada sugestão (cliques, conversão, ticket médio) com testes A/B. Em contrapartida, é preciso evitar sugestões óbvias (como o leite), itens sem estoque e itens de baixa margem.</li>
+<li><strong>Testar antes de ampliar:</strong> cada ação deve ser testada com um grupo de controle, para medir o aumento real das vendas e da margem.</li>
+<li><strong>Atualizar periodicamente:</strong> os dados cobrem apenas um mês. Em um uso real, as regras devem ser recalculadas com dados mais recentes e de períodos diferentes, para considerar a sazonalidade.</li>
+</ul>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>recomendar <span class="ot">&lt;-</span> <span class="cf">function</span>(itens, regras, <span class="at">n =</span> <span class="dv">3</span>) {</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>  <span class="co"># regras cujo antecedente está contido na cesta</span></span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>  lhs_ok <span class="ot">&lt;-</span> <span class="fu">sapply</span>(<span class="fu">as</span>(<span class="fu">lhs</span>(regras), <span class="st">"list"</span>), <span class="cf">function</span>(x) <span class="fu">all</span>(x <span class="sc">%in%</span> itens))</span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>  candidatas <span class="ot">&lt;-</span> regras[lhs_ok]</span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>  <span class="co"># descarta regras cujo consequente já está na cesta</span></span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>  rhs_novo <span class="ot">&lt;-</span> <span class="sc">!</span><span class="fu">sapply</span>(<span class="fu">as</span>(<span class="fu">rhs</span>(candidatas), <span class="st">"list"</span>), <span class="cf">function</span>(x) <span class="fu">any</span>(x <span class="sc">%in%</span> itens))</span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">head</span>(<span class="fu">sort</span>(candidatas[rhs_novo], <span class="at">by =</span> <span class="st">"lift"</span>), n)</span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a><span class="fu">inspect</span>(<span class="fu">recomendar</span>(<span class="fu">c</span>(<span class="st">"liquor"</span>, <span class="st">"red/blush wine"</span>), rules))</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>    lhs                         rhs            support     confidence
+[1] {liquor, red/blush wine} =&gt; {bottled beer} 0.001931876 0.9047619 
+    coverage    lift     count
+[1] 0.002135231 11.23527 19   </code></pre>
+</div>
+</div>
+<p>A função <code>recomendar()</code> recebe a cesta atual do cliente (<code>itens</code>), o conjunto de regras (<code>regras</code>) e o número de sugestões desejado (<code>n</code>), e segue três passos:</p>
+<ol type="1">
+<li><strong>Seleciona as regras aplicáveis:</strong> aquelas cujo antecedente está inteiro dentro da cesta. A expressão <code>as(lhs(regras), "list")</code> transforma o antecedente de cada regra em um vetor de itens, e <code>all(x %in% itens)</code> verifica se todos eles estão na cesta.</li>
+<li><strong>Descarta as regras cujo consequente já está na cesta,</strong> pois recomendar o que o cliente já escolheu não acrescenta nada.</li>
+<li><strong>Ordena pelo lift e devolve as <code>n</code> melhores.</strong> O critério poderia ser outro, como a confiança ou, se tivéssemos dados de preço e margem, o ganho esperado.</li>
+</ol>
+<p>No exemplo, a cesta contém <code>liquor</code> e <code>red/blush wine</code>, que formam o antecedente da regra da cerveja de garrafa, então ela deve ser a sugerida. Se nenhuma regra se aplicar à cesta, a função devolve um resultado vazio, e o sistema precisa de uma alternativa (por exemplo, os produtos mais vendidos).</p>
+<p>Com as regras que geramos (suporte mínimo de 0,1% e confiança mínima de 80%), a função terá poucas oportunidades de agir. O cálculo abaixo mostra em que proporção das cestas da base ela devolve ao menos uma sugestão:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>cestas_lista <span class="ot">&lt;-</span> <span class="fu">as</span>(Groceries, <span class="st">"list"</span>)</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>tem_recomendacao <span class="ot">&lt;-</span> <span class="fu">sapply</span>(cestas_lista, <span class="cf">function</span>(cesta) {</span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">length</span>(<span class="fu">recomendar</span>(cesta, rules, <span class="at">n =</span> <span class="dv">1</span>)) <span class="sc">&gt;</span> <span class="dv">0</span></span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>})</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Em apenas 4,4% das cestas há alguma regra aplicável com consequente ainda ausente. Isso ocorre porque as regras têm antecedentes longos e alta confiança (o que deixa pouco “espaço” para recomendar). Em um sistema real de recomendação, é comum usar parâmetros menos restritivos (suporte e confiança menores) e limitar o tamanho do antecedente, trocando precisão por cobertura.</p>
+</section>
+<section id="conclusão" class="level2" data-number="7.8">
+<h2 data-number="7.8" class="anchored" data-anchor-id="conclusão"><span class="header-section-number">7.8</span> Conclusão</h2>
+<p>Neste capítulo, usamos o algoritmo <em>apriori</em> sobre 9835 cestas de um mercado para entender quais produtos costumam ser comprados juntos e transformar essas associações em ações de cross-selling. Alguns aprendizados importantes:</p>
+<ul>
+<li><strong>Confiança alta pode refletir apenas a popularidade do consequente</strong>, como no caso do leite.</li>
+<li><strong>Lift alto costuma vir com suporte baixo:</strong> as associações mais surpreendentes alcançam poucas cestas.</li>
+<li><strong>O número de cestas por trás de cada regra</strong> determina o quanto podemos confiar nela. Regras com poucos casos são hipóteses.</li>
+<li><strong>Uma regra descreve co-compra, e não o efeito de uma ação.</strong> Só um teste com grupo de controle mostra se uma oferta realmente aumenta as vendas.</li>
+</ul>
+<p>A análise nos permite compreender melhor o comportamento do consumidor. Entretanto, pode servir também para provocar novos comportamentos nos clientes. Como orientação geral (hipóteses a validar):</p>
+<ul>
+<li><p><strong>Suporte Baixo + Lift Alto</strong>: possíveis nichos de oportunidade, a validar quanto ao alcance, à margem e ao efeito da ação.</p></li>
+<li><p><strong>Suporte Alto + Confiança Alta</strong>: itens “âncora”, que não precisam de promoção para vender. Uma prática comum no varejo é posicioná-los longe da entrada, para que o cliente percorra outros corredores. Essa é uma hipótese de layout a ser testada, e não um resultado desta análise.</p></li>
+</ul>
+<p><strong>Limitações:</strong></p>
+<ul>
+<li>Os dados cobrem cerca de um mês de um único mercado e as categorias de produto são agregadas.</li>
+<li>Não há preço, margem ou identificação do cliente, então não é possível medir o retorno financeiro nem o comportamento ao longo do tempo.</li>
+<li>Os resultados dependem dos parâmetros escolhidos (suporte e confiança mínimos).</li>
+<li>Com muitas combinações possíveis, algumas regras aparecem por acaso, sobretudo as que têm poucas cestas.</li>
+<li>As regras são descritivas e não causais.</li>
+</ul>
+<p><strong>Próximos passos:</strong> usar os níveis de hierarquia dos produtos (o <code>Groceries</code> traz categorias mais agregadas, como <code>level1</code> e <code>level2</code>, que podem ser exploradas com <code>aggregate()</code>), incorporar dados de preço e margem para ordenar as regras pelo ganho esperado e testar as ações em campo.</p>
 
 
+<div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list" style="display: none">
+<div id="ref-agrawal1994fast" class="csl-entry" role="listitem">
+Agrawal, Rakesh, e Ramakrishnan Srikant. 1994. <span>“Fast algorithms for mining association rules”</span>. Em <em>Proceedings of the 20th International Conference on Very Large Data Bases (VLDB)</em>, 487–99.
+</div>
+<div id="ref-hahsler2005arules" class="csl-entry" role="listitem">
+Hahsler, Michael, Bettina Grün, e Kurt Hornik. 2005. <span>“arules – A computational environment for mining association rules and frequent item sets”</span>. <em>Journal of Statistical Software</em> 14 (15): 1–25.
+</div>
+<div id="ref-hahsler2006implications" class="csl-entry" role="listitem">
+Hahsler, Michael, Kurt Hornik, e Thomas Reutterer. 2006. <span>“Implications of probabilistic data modeling for mining association rules”</span>. Em <em>From Data and Information Analysis to Knowledge Engineering</em>, editado por Myra Spiliopoulou, Rudolf Kruse, Christian Borgelt, Andreas Nürnberger, e Wolfgang Gaul, 598–605. Springer.
+</div>
+</div>
 </section>
 
 </main> <!-- /main -->

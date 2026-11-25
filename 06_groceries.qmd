@@ -4,8 +4,6 @@ editor_options:
   chunk_output_type: console
 ---
 
-## Estratégias de Cross-Selling em Mercado
-
 ```{r include=FALSE}
 library(kableExtra)
 
@@ -14,36 +12,83 @@ knitr::opts_chunk$set(
   message = FALSE,
   echo = TRUE
 )
+
+generate_table <- function(df){
+  if (knitr::is_html_output()){
+    df |> 
+      kable("html")
+  } else {
+    df |> 
+      kable("latex")
+  }
+}
+
+fmt <- function(x, d = 2) formatC(x, format = "f", digits = d, decimal.mark = ",")
 ```
 
+# Estratégias de Cross-Selling em Mercado
 
-Como os supermercados e e-commerces decidem o layout das gôndolas ou as recomendações de "compre junto"? Vamos utilizar o algoritmo Apriori para minerar associações e entender o trade-off entre volume e especificidade. Em um mar de milhares de regras, como identificar aquelas que são estatisticamente robustas e comercialmente relevantes?
+Como os supermercados e e-commerces decidem o layout das gôndolas ou as recomendações de "compre junto"? Imagine que você é o Category Manager de uma rede de supermercados e precisa decidir quais produtos colocar em promoção conjunta. Neste capítulo, usamos o algoritmo Apriori para minerar associações entre produtos e entender o trade-off entre volume (quantas cestas a regra alcança) e especificidade (quão forte é a associação). Em um mar de milhares de regras, como identificar aquelas que têm evidência suficiente e relevância comercial?
 
-### Terminologia de Regras de Associação {.unnumbered}
+Perguntas que o Category Manager quer responder:
 
-Ao trabalhar com arules, nosso foco está em três métricas que definem a qualidade da nossa "entrega":
+- Quais produtos costumam ser comprados juntos?
+- Quais combinações merecem uma promoção conjunta, uma exposição lado a lado ou uma recomendação de "compre junto"?
+- Quais regras têm evidência suficiente e alcance relevante para justificar uma ação?
 
-- Antecedente ($X$): O produto que já está no carrinho do cliente.
-- Consequente ($Y$): O produto que queremos oferecer (o "próximo passo").
-- Suporte: Qual a penetração dessa combinação no faturamento total? (É um nicho ou é massa?)
-- Confiança: Se o cliente comprou $X$, qual a probabilidade real de ele aceitar $Y$?
-- Lift: O quanto a oferta de $X$ impulsiona $Y$ para além da venda natural do produto?
+Seguimos as etapas do CRISP-DM apresentadas na introdução do livro. Todo o trabalho é feito em **R**, com o pacote `arules` [@hahsler2005arules].
+
+| Etapa do CRISP-DM | Onde aparece no capítulo |
+|---|---|
+| Entendimento do negócio | Esta introdução: as decisões do Category Manager |
+| Entendimento dos dados | O cenário e os dados; diagnóstico da operação |
+| Preparação dos dados | Os dados já estão no formato `transactions`; a "preparação" é a escolha dos parâmetros e o filtro de regras redundantes |
+| Modelagem | O algoritmo *apriori* |
+| Avaliação | Evidência por trás das regras, confiança versus lift, potencial de cada regra |
+| Implantação | Aplicação prática ("Operação Cerveja") e uso prático das regras |
+
+## Conceitos básicos
+
+Uma regra de associação tem a forma "se $X$, então $Y$". Seus elementos e suas métricas são:
+
+- **Antecedente ($X$):** o(s) produto(s) que já está(ão) na cesta do cliente.
+- **Consequente ($Y$):** o produto que queremos associar ao antecedente (o "próximo passo" da recomendação).
+- **Suporte:** a proporção de cestas que contêm $X$ e $Y$ juntos, em relação ao total de cestas. Mede o **alcance** da regra: é um nicho ou é massa?
+- **Confiança:** entre as cestas que contêm $X$, a proporção que também contém $Y$.
+- **Lift:** a razão entre a confiança e a proporção de cestas que contêm $Y$. Valores acima de 1 indicam que $X$ e $Y$ aparecem juntos com mais frequência do que o esperado se fossem independentes.
+
+Em termos de probabilidades:
+
+$$
+\text{suporte} = P(X \cap Y), \qquad
+\text{confiança} = \frac{P(X \cap Y)}{P(X)}, \qquad
+\text{lift} = \frac{\text{confiança}}{P(Y)}.
+$$
+
+::: {.callout-warning title="Associação não é causa"}
+O lift mede **co-ocorrência** nas cestas, e não o efeito de uma oferta. Uma regra com lift alto não garante que oferecer $Y$ a quem comprou $X$ aumentará as vendas. Isso só pode ser verificado com um teste (por exemplo, um teste A/B com grupo de controle).
+:::
 
 ## O cenário e os dados
 
-Vamos analisar o dataset `Groceries`. Imagine que você é o Category Manager de uma rede de supermercados e precisa decidir quais produtos colocar em promoção conjunta.
+Vamos analisar o dataset `Groceries`. Diferente de modelos de regressão, aqui trabalhamos com objetos de classe `transactions` (matrizes esparsas), otimizados para grandes volumes de itens.
 
-Diferente de modelos de regressão, aqui trabalhamos com objetos de classe transactions (matrizes esparsas), otimizados para grandes volumes de itens.
+::: {.callout-note title="Sobre os dados"}
+O conjunto `Groceries`, do pacote `arules`, reúne cerca de um mês (30 dias) de transações reais de ponto de venda de um mercado local [@hahsler2006implications]. Os produtos já vêm agregados em 169 categorias (por exemplo, `whole milk` e `bottled beer`), e não há informações de quantidade, preço, margem ou identificação do cliente. Cada transação é uma **cesta**: não sabemos se o mesmo cliente aparece em várias cestas.
+:::
 
 ```{r}
 library(arules)
 library(dplyr)
+library(ggplot2)
 
 data(Groceries)
+
+n_cestas <- length(Groceries)
 ```
 
-
 ### Diagnóstico da Operação {.unnumbered}
+
 Antes de rodar o algoritmo, precisamos entender o comportamento da base:
 
 ```{r}
@@ -55,41 +100,64 @@ Além disso, os itens mais frequentemente comprados incluem leite integral, vege
 Também, a distribuição do comprimento dos itens mostra que a maioria das transações contém entre 1 e 6 itens, com uma mediana de 3 itens por transação. Isso sugere que os clientes geralmente compram um pequeno número de itens por vez. 
 
 ::: {.callout-tip collapse="false" title="O Desafio"}
-Vender leite é fácil (alta frequência). O lucro real está em descobrir quais itens de nicho "puxam" outros itens de maior margem.
+Vender leite é fácil (alta frequência). O valor está em descobrir combinações menos óbvias e verificar, com dados de preço e margem (que não temos aqui), se elas compensam a ação.
 :::
 
 ## O algoritmo _apriori_
 
-
-O algoritmo *Apriori* é um método popular para mineração de regras de associação em conjuntos de dados. 
+O algoritmo *Apriori* é um método popular para mineração de regras de associação em conjuntos de dados [@agrawal1994fast]. 
 Ele opera em duas etapas principais: primeiro, **identifica** todos os conjuntos de itens frequentes, ou seja, aqueles que aparecem com uma frequência maior que um limite pré-definido (suporte mínimo). 
 Em seguida, com base nesses conjuntos frequentes, **gera regras** de associação, que são implicações do tipo "se $X$, então $Y$", onde $X$ e $Y$ são conjuntos de itens, calculando medidas como _confiança_ e _lift_ para avaliar a força das associações entre os itens.
 
 A _confiança_ de uma regra é a probabilidade condicional de que um item (ou conjunto de itens) $Y$ seja comprado, dado que o item (ou conjunto de itens) $X$ também foi comprado. 
 Em outras palavras, é a proporção de transações que contêm tanto $X$ quanto $Y$, em relação ao número de transações que contêm $X$. 
-Uma alta confiança indica que o item $Y$ é frequentemente comprado quando o item $X$ é comprado, o que sugere uma forte associação entre eles.
+Uma alta confiança indica que o item $Y$ é frequentemente comprado quando o item $X$ é comprado, o que sugere uma associação entre eles. Mas atenção: se $Y$ for um item muito popular, a confiança será alta mesmo sem relação específica com $X$.
 
 O _lift_ de uma regra é uma medida de quão mais frequentemente $X$ e $Y$ ocorrem juntos do que seria esperado se fossem independentes. 
-Em termos simples, o lift é a razão entre a confiança da regra e a frequência absoluta de $Y$. 
+Em termos simples, o lift é a razão entre a confiança da regra e a proporção de transações que contêm $Y$ (o suporte de $Y$). 
 Um lift maior que 1 indica que a regra tem uma associação positiva (os itens ocorrem juntos com mais frequência do que o esperado ao acaso), enquanto um lift menor que 1 indica uma associação negativa (os itens ocorrem juntos com menos frequência do que o esperado ao acaso).
 
-Não queremos todas as regras possíveis (seriam milhões). Precisamos filtrar aquelas que têm relevância estatística e potencial de negócio.
+Não queremos todas as regras possíveis (seriam milhões). Precisamos filtrar aquelas que têm evidência suficiente e potencial de negócio.
 
 ```{r}
-# Gerando regras: Queresmos algo que aconteça em pelo menos 0.1% das vendas
-# e que tenha pelo menos 80% de chance de acontecer (Confiança)
-rules <- apriori(Groceries, parameter = list(sup = 0.001, conf = 0.8))
+# Gerando regras: queremos combinações que apareçam em pelo menos 0.1% das cestas
+# e em que pelo menos 80% das cestas com o antecedente também tenham o consequente (confiança)
+rules_todas <- apriori(Groceries, parameter = list(sup = 0.001, conf = 0.8))
 ```
 
-O código abaixo exibe os cinco primeiros conjuntos de regras de associação descobertos pelo algoritmo Apriori. 
-Ele mostra as associações entre os itens, juntamente com suas medidas de suporte, confiança e lift.
+Um suporte mínimo de 0.1% equivale a pelo menos `r ceiling(0.001 * n_cestas)` cestas das `r n_cestas` da base. O algoritmo encontrou `r length(rules_todas)` regras.
+
+Muitas dessas regras são **redundantes**: uma regra é redundante quando existe outra, mais simples (com menos itens no antecedente), com confiança igual ou maior. Mantemos apenas as não redundantes.
 
 ```{r}
-inspect(rules[1:5])
+rules <- rules_todas[!is.redundant(rules_todas)]
 ```
 
-Cada regra é apresentada acima com os itens à esquerda (`lhs`) e os itens à direita (`rhs`), indicando a associação entre eles. A coluna "support" indica a frequência relativa da ocorrência da regra no conjunto de dados, enquanto a coluna "confidence" mostra a probabilidade condicional de que os itens à direita da regra sejam comprados, dado que os itens à esquerda foram comprados. O "lift" é uma medida da força da associação entre os itens, indicando quantas vezes mais provável é a compra dos itens à direita da regra em comparação com sua compra independente.
+Restaram `r length(rules)` regras. O código abaixo exibe as cinco de maior suporte, ou seja, as que alcançam mais cestas. Ele mostra as associações entre os itens, juntamente com suas medidas de suporte, confiança e lift.
 
+```{r}
+inspect(head(rules, n = 5, by = "support"))
+```
+
+Como ler as regras acima, usando os números do resultado:
+
+- **Regra 1**, `{citrus fruit, tropical fruit, root vegetables, whole milk} => {other vegetables}`: o antecedente aparece em 35 cestas (coverage de 0,36%), e em 31 delas (confiança de 88,6%) havia também `other vegetables`. Como esse item está em cerca de 19% de todas as cestas, o lift de 4,6 indica que a compra conjunta é 4,6 vezes mais frequente do que o esperado ao acaso. É um perfil de cesta de hortifrúti: quem leva várias frutas e raízes costuma levar também outros vegetais.
+- **Regras 2 a 5** têm `whole milk` como consequente, com confiança entre 80% e 82%. Por exemplo, em `{hamburger meat, curd} => {whole milk}`, 80,6% das cestas com carne de hambúrguer e coalhada também continham leite integral (25 das 31 cestas com o antecedente). Como o leite está em cerca de 26% de todas as cestas, o lift fica em torno de 3,1 a 3,2.
+- **Alcance:** mesmo sendo as cinco regras de maior suporte, nenhuma passa de 0,32% das cestas (no máximo 31 das 9.835). Com confiança mínima de 80%, as regras descrevem combinações muito específicas, e não o comportamento da maioria dos clientes.
+
+O fato de quatro das cinco regras terminarem em leite antecipa um ponto discutido adiante: parte da confiança alta vem da popularidade do próprio leite.
+
+<!-- Cada regra é apresentada acima com os itens à esquerda (`lhs`) e os itens à direita (`rhs`), indicando a associação entre eles. A coluna "support" indica a frequência relativa da ocorrência da regra no conjunto de dados, enquanto a coluna "confidence" mostra a proporção das cestas com os itens à esquerda que também contêm os itens à direita. O "lift" indica quantas vezes mais frequente é a compra conjunta em comparação com o esperado se os itens fossem independentes. A coluna "count" é o número de cestas em que a regra se baseia. -->
+
+### Quanta evidência existe por trás de cada regra? {.unnumbered}
+
+Um ponto crítico é o **número de cestas** por trás de cada regra. Com poucas cestas, a confiança e o lift oscilam muito: uma cesta a mais ou a menos pode mudar bastante o resultado.
+
+```{r}
+summary(quality(rules)$count)
+```
+
+A mediana é de `r median(quality(rules)$count)` cestas por regra, e `r round(100 * mean(quality(rules)$count < 30),2)`% das regras se baseiam em menos de 30 cestas. Além disso, ao examinar milhares de combinações possíveis, algumas regras aparecem apenas por acaso. Por isso, regras com poucos casos devem ser vistas como **hipóteses** a testar, e não como fatos.
 
 ## Visualizando o Dilema: Confiança vs. Lift
 
@@ -97,35 +165,106 @@ No negócio, existe um trade-off:
 
 - **Regras de Alta Confiança**: São óbvias (ex: quem compra pão, compra manteiga). O risco de errar é baixo, mas o valor agregado da sugestão também pode ser baixo.
 
-- **Regras de Alto Lift**: São as "minas de ouro". Elas mostram associações surpreendentes que a intuição humana geralmente não percebe.
+- **Regras de Alto Lift**: São as "minas de ouro". Elas mostram associações surpreendentes que a intuição humana geralmente não percebe, mas costumam alcançar poucas cestas.
 
+O gráfico abaixo mostra cada regra como um ponto: o suporte (alcance, em escala logarítmica) no eixo x, a confiança no eixo y e o lift na cor.
+
+```{r echo=FALSE}
+as.data.frame(quality(rules)) |> 
+  ggplot(aes(x = support, y = confidence, fill = lift)) +
+  geom_point(shape = 21, size = 4, color = "grey25") +
+  scale_x_continuous(labels = scales::label_percent(accuracy = 0.1)) +
+  scale_y_continuous(labels = scales::label_percent(accuracy = 1)) +
+  scale_fill_gradient(low = "#c6dbef", high = "#08306b") +
+  labs(title = "Regras de associação: alcance, confiança e lift",
+       x = "Suporte",
+       y = "Confiança",
+       fill = "Lift") +
+  theme_bw()
+```
+
+
+```{r echo=FALSE}
+qual <- as.data.frame(quality(rules))
+destaque <- qual |> slice_max(lift, n = 1)
+
+ggplot(qual, aes(x = support, y = confidence, fill = lift)) +
+  geom_point(shape = 21, size = 4, color = "grey25", stroke = 0.3) +
+  geom_point(data = destaque, shape = 21, size = 4, color = "black", stroke = 1) +
+  scale_x_continuous(labels = scales::label_percent(accuracy = 0.01, decimal.mark = ",")) +
+  scale_y_continuous(labels = scales::label_percent(accuracy = 1)) +
+  scale_fill_gradient(low = "#9ecae1", high = "#08306b") +
+  labs(title = "Regras de associação: alcance, confiança e lift",
+       x = "Suporte",
+       y = "Confiança",
+       fill = "Lift") +
+  theme_bw()
+```
+
+Observe que todas as regras têm suporte baixo (entre 0,1% e 0,3% das cestas): é o efeito de combinar um suporte mínimo baixo com antecedentes de vários itens. As regras de maior suporte (à direita) têm lift moderado, em torno de 3 a 5, enquanto a de lift mais alto (≈ 11) alcança menos cestas do que elas. Em nenhum ponto do gráfico há uma regra que una alto alcance e alto lift, e esse é o dilema do negócio.
 
 ### Top 5: As Regras "Certeiras" (Alta Confiança) {.unnumbered}
 
-No código abaixo, estamos extraindo as cinco primeiras regras com base na confiança mais alta. Isso nos permite identificar as associações mais fortes entre os itens, onde a confiança é uma medida da probabilidade de que o item B seja comprado quando o item A é comprado. Todas as cinco regras apresentam uma confiança de 100%, o que indica que sempre que os itens à esquerda da regra são comprados, os itens à direita também são comprados. Isso sugere que essas combinações de itens são altamente associadas no conjunto de dados.
+No código abaixo, extraímos as cinco regras de maior confiança. Como várias regras empatam em 100% de confiança, a escolha entre elas é arbitrária. Uma confiança de 100% significa que, em **todas as cestas da base** que continham os itens à esquerda, os itens à direita também estavam presentes. Atenção à coluna `count`: ela mostra em quantas cestas cada regra se baseia.
 
 ```{r}
 inspect(head(rules, n = 5, by = "confidence"))
 ```
 
+Nas cinco regras, a confiança é de 100% e o consequente é sempre `whole milk`, mas cada uma se baseia em poucas cestas: entre 10 e 17, perto do mínimo de 10 imposto pelo suporte de 0,1%. Note também que o lift é idêntico nas cinco (3,91). Esse é o valor máximo possível para uma regra com leite no consequente (1 dividido pela proporção de cestas com leite), atingido sempre que a confiança é 100%. Assim, o lift aqui apenas repete a confiança de 100% comparada com a popularidade do leite, e não permite distinguir uma regra da outra.
+
+```{r include=FALSE}
+rhs_leite <- mean(unlist(as(rhs(rules), "list")) == "whole milk")
+sup_leite <- unname(itemFrequency(Groceries)["whole milk"])
+```
+
 ::: {.callout-tip collapse="false" title="Impactos práticos"}
-Note que o whole milk aparece em quase todos os consequentes. 
-Faz sentido gastar verba de marketing recomendando leite para quem já está comprando itens de café da manhã? Provavelmente não, ele já levaria o leite de qualquer forma.
+O `whole milk` é o consequente de `r round(100 * rhs_leite)`% das regras encontradas. Isso acontece porque ele está presente em cerca de `r round(100 * sup_leite)`% de todas as cestas: a confiança alta reflete, em parte, a popularidade do próprio leite.
+
+Faz sentido gastar verba de marketing recomendando leite para quem está comprando arroz e açúcar? Provavelmente não. Em uma regra com 100% de confiança, todas as cestas com o antecedente já tinham leite, então não há nenhuma cesta a que a recomendação pudesse acrescentar o produto.
 :::
 
 ### Top 5: As Regras de "Impulso" (Alto Lift) {.unnumbered}
 
-Agora, vamos extrair as cinco primeiras regras com base no lift mais alto. 
-Ele nos diz quantas vezes o item B é mais provável de ser comprado quando o item A é comprado do que se eles fossem comprados independentemente.
+Agora, vamos extrair as cinco regras de maior lift. 
+Ele nos diz quantas vezes mais frequente é a compra conjunta de $X$ e $Y$ do que se eles fossem comprados independentemente.
 
 ```{r}
-inspect(head(rules, n = 5, by = "lift"))
+top_lift <- head(rules, n = 5, by = "lift")
+inspect(top_lift)
 ```
 
-Aqui o cenário muda. O Lift de 11.24 para a regra {liquor, red/blush wine} => {bottled beer} indica uma oportunidade de cross-selling fortíssima que não é óbvia para quem olha apenas o volume de vendas isolado.
+Aqui o cenário muda. O lift das cinco regras varia de `r fmt(min(quality(top_lift)$lift))` a `r fmt(max(quality(top_lift)$lift))`, indicando associações fortes e pouco óbvias para quem olha apenas o volume de vendas isolado.
 
-A segunda regra mostra que a compra de "citrus fruit", "other vegetables", "soda" e "fruit/vegetable juice" está 8.34 vezes mais associada à compra de "root vegetables" do que se fosse uma compra independente.
-E assim, sucessivamente.
+A regra de maior lift é `r labels(top_lift)[1]`, com lift de `r fmt(quality(top_lift)$lift[1])`. A segunda é `r labels(top_lift)[2]`, com lift de `r fmt(quality(top_lift)$lift[2])`, ou seja, a compra conjunta dos itens à esquerda com o item à direita é `r fmt(quality(top_lift)$lift[2], 1)` vezes mais frequente do que seria se fossem independentes.
+
+Mas esse lift alto precisa ser lido com cuidado:
+
+- **Pouca evidência:** as cinco regras se baseiam em apenas `r min(quality(top_lift)$count)` a `r max(quality(top_lift)$count)` cestas (o mínimo permitido pelo suporte de 0,1% é `r ceiling(0.001 * n_cestas)`). Com tão poucos casos, o lift e a confiança oscilam muito.
+- **Alcance pequeno:** o antecedente mais frequente aparece em apenas `r fmt(100 * max(quality(top_lift)$coverage), 2)`% das cestas.
+- **Antecedentes longos:** quatro das cinco regras exigem três ou mais itens na mesma cesta, o que as torna pouco acionáveis. Três delas têm `root vegetables` como consequente.
+
+Os lifts são altos, em parte, porque o consequente não é um item muito popular: quanto mais raro o consequente, mais alto o lift máximo possível. A seção a seguir mede quanto cada uma dessas regras pode realmente render.
+
+### Do lift ao potencial {.unnumbered}
+
+Um lift alto diz que a associação é forte, mas não diz **quanto ela vale**. Para isso, olhamos o alcance: em quantas cestas a regra se aplica e quantas delas ainda "faltam" o item do consequente (a verdadeira margem de oportunidade).
+
+```{r}
+potencial <- tibble(
+  regra = labels(top_lift),
+  `cestas com X` = round(quality(top_lift)$coverage * n_cestas),
+  `cestas com X e Y` = round(quality(top_lift)$count),
+  `cestas com X sem Y` = `cestas com X` - `cestas com X e Y`,
+  `% do total de cestas com X` = round(100 * quality(top_lift)$coverage, 2)
+)
+```
+
+```{r echo=FALSE}
+generate_table(potencial)
+```
+
+Mesmo entre as regras de maior lift, o antecedente aparece, no máximo, em `r fmt(max(potencial$"% do total de cestas com X"))`% das cestas. O potencial de venda adicional (as cestas com $X$ que ainda não levam $Y$) é, portanto, pequeno em termos absolutos. Isso também vale para regras de confiança de 100%: nelas, não há **nenhuma** cesta com $X$ sem $Y$, e portanto nada a ganhar com a recomendação.
 
 ## Aplicação Prática: "Operação Cerveja"
 
@@ -137,28 +276,122 @@ regras_cerveja <- subset(rules, subset = rhs %in% "bottled beer")
 inspect(sort(regras_cerveja, by = "lift"))
 ```
 
-Identificamos que clientes que compram licor e vinhos têm uma probabilidade de 90.4% de comprar cerveja de garrafa (um comportamento de "abastecimento de adega").
-Portanto, uma ação recomendada seria: Em vez de dar desconto na cerveja para todo o mercado, crie um cupom de desconto em cervejas artesanais impresso no verso da nota fiscal apenas para quem comprar vinhos ou licores.
+```{r include=FALSE}
+cerveja_top <- sort(regras_cerveja, by = "lift")[1]
+q <- quality(cerveja_top)
+n_x  <- round(q$coverage * n_cestas)
+n_xy <- round(q$count)
+```
 
+A regra de maior lift é `r labels(cerveja_top)`, com lift de `r fmt(q$lift)` e confiança de `r fmt(100 * q$confidence, 1)`%. Em números absolutos: das `r n_x` cestas que contêm o antecedente, `r n_xy` também continham cerveja de garrafa.
 
-<!-- Esse resultado mostra uma regra de associação onde a compra conjunta de "liquor" e "red/blush wine" (à esquerda, `lhs`) está associada à compra de "bottled beer" (à direita, `rhs`).  -->
-<!-- Neste caso, o suporte é de aproximadamente 0.19%, o que significa que cerca de 0.19% de todas as transações incluem "liquor", "red/blush wine" e "bottled beer". -->
-<!-- A confiança é de cerca de 90.48%, o que sugere uma forte associação entre esses itens. -->
-<!-- O  lift é de aproximadamente 11.24, o que significa que a compra de "liquor" e "red/blush wine" aumenta a probabilidade de compra de "bottled beer" em cerca de 11.24 vezes, em comparação com a situação em que essas compras são independentes. -->
+Antes de transformar isso em ação, é preciso ler a regra com cuidado:
 
-<!-- Se fossemos fazer uma ação de divulgação de uma "bottled beer", qual seria? -->
+- **É um comportamento dentro da mesma compra.** A regra mostra que cerveja de garrafa costuma estar na mesma cesta que esses itens (um comportamento de "abastecimento de adega"). Ela não diz que o cliente voltará para comprar cerveja depois.
+- **A evidência é pequena.** A confiança de `r fmt(100 * q$confidence, 1)`% vem de `r n_xy` em `r n_x` cestas. Pouquíssimas cestas sustentam o resultado.
+- **O alcance é pequeno.** O antecedente aparece em apenas `r fmt(100 * q$coverage, 2)`% das cestas.
+- **A maioria já compra a cerveja.** Dar desconto em cerveja para quem já a leva com probabilidade tão alta seria subsidiar uma compra que aconteceria de qualquer forma, o mesmo problema que apontamos para o leite. Restam apenas `r n_x - n_xy` cestas com o antecedente sem cerveja.
 
-<!-- > Uma proporção significativa (aproximadamente 90.5%) dos consumidores que compram licor e vinho vermelho/branco também compram "bottled beer". Portanto, seria vantajoso direcionar campanhas publicitárias para esse grupo demográfico, destacando a disponibilidade e a qualidade da "bottled beer" em relação aos produtos relacionados, como licores e vinhos. -->
+Portanto, em vez de dar desconto, as ações mais coerentes com essa regra são de **exposição**: posicionar a cerveja de garrafa próxima à seção de vinhos e licores, ou montar um kit de "adega" com a combinação. Em qualquer caso, a ação deve ser tratada como hipótese e testada. O conjunto de dados não distingue tipos de cerveja de garrafa (por exemplo, artesanais), então qualquer ação específica para um tipo exigiria dados mais detalhados.
 
+### Com menos confiança, mais alcance {.unnumbered}
+
+Para encontrar regras com mais alcance, podemos aceitar uma confiança menor e um suporte maior, restringindo o consequente à cerveja de garrafa:
+
+```{r}
+regras_cerveja_amplas <- apriori(
+  Groceries,
+  parameter = list(sup = 0.003, conf = 0.2, minlen = 2),
+  appearance = list(rhs = "bottled beer", default = "lhs")
+)
+
+inspect(head(regras_cerveja_amplas, n = 5, by = "lift"))
+```
+
+```{r include=FALSE}
+amplas_ord <- sort(regras_cerveja_amplas, by = "lift")
+q_amp <- quality(amplas_ord)
+cestas_x  <- round(q_amp$coverage * n_cestas)
+cestas_xy <- round(q_amp$count)
+cestas_sem <- cestas_x - cestas_xy
+```
+
+Reduzindo o suporte mínimo para 0,3% (`r ceiling(0.003 * n_cestas)` cestas), o algoritmo encontrou `r length(regras_cerveja_amplas)` regras, ambas com um único item no antecedente: `{liquor}` e `{red/blush wine}`. Elas não apareciam com o suporte de 0,5% porque se baseiam em `r cestas_xy[1]` e `r cestas_xy[2]` cestas, logo abaixo do mínimo de 49 daquele corte.
+
+Comparadas à regra anterior, `{liquor, red/blush wine} => {bottled beer}`, elas trocam confiança por alcance e por evidência:
+
+- **Alcance:** o antecedente aparece em `r fmt(100 * q_amp$coverage[1], 1)`% (licor) e `r fmt(100 * q_amp$coverage[2], 1)`% (vinho tinto) das cestas, contra 0,21% da regra anterior. É de 5 a 9 vezes mais cestas.
+- **Confiança e lift menores, mas mais evidência:** a confiança é de `r fmt(100 * q_amp$confidence[1], 0)`% e `r fmt(100 * q_amp$confidence[2], 0)`%, e o lift de `r fmt(q_amp$lift[1], 1)` e `r fmt(q_amp$lift[2], 1)`, contra 90,5% e 11,2 da regra anterior. Em compensação, elas se apoiam em `r cestas_xy[1]` e `r cestas_xy[2]` cestas, mais que o dobro das 19 daquela regra.
+- **Oportunidade real:** há `r cestas_sem[1]` cestas com licor e `r cestas_sem[2]` com vinho tinto que não levaram cerveja de garrafa. Na regra anterior, eram apenas 2. Com 90% de confiança quase todos já levavam a cerveja, e uma promoção apenas subsidiaria uma compra que aconteceria de qualquer forma.
+
+Isso muda a leitura comercial: as regras de confiança mais baixa são, aqui, mais úteis do que a de 90%. Uma ação coerente é oferecer a cerveja (por exemplo, com um cupom no caixa) apenas a quem comprou licor ou vinho tinto e ainda não a levou, evitando dar desconto a quem já a compraria. Mas o potencial é limitado: são, no máximo, cerca de `r sum(cestas_sem)` cestas, ou `r fmt(100 * sum(cestas_sem) / n_cestas, 1)`% das cestas do mês (os dois grupos podem se sobrepor), e nem todas aceitariam a oferta. Como nas demais regras, trata-se de uma hipótese a ser testada com um grupo de controle.
+
+## Uso prático das regras
+
+## Uso prático das regras
+
+A última etapa do CRISP-DM é a **implantação**. Algumas formas de transformar as regras em ação:
+
+- **Exposição e layout:** usar regras de antecedente curto (1 ou 2 itens) para posicionar produtos próximos ou montar kits.
+- **Recomendações a partir da cesta:** exibir "compre junto" a partir dos itens que o cliente já escolheu. O código abaixo mostra uma função simples que, dada uma cesta, devolve as regras aplicáveis cujo consequente ainda não está na cesta.
+- **Aplicações no e-commerce:** no ambiente online, a mesma lógica pode ser usada em vários pontos da jornada: na página do produto ("quem comprou este item também comprou"), no carrinho (sugerir um complemento antes do pagamento), em e-mails pós-compra e em kits com preço combinado. Diferentemente da loja física, o site conhece a cesta em tempo real e pode medir o efeito de cada sugestão (cliques, conversão, ticket médio) com testes A/B. Em contrapartida, é preciso evitar sugestões óbvias (como o leite), itens sem estoque e itens de baixa margem.
+- **Testar antes de ampliar:** cada ação deve ser testada com um grupo de controle, para medir o aumento real das vendas e da margem.
+- **Atualizar periodicamente:** os dados cobrem apenas um mês. Em um uso real, as regras devem ser recalculadas com dados mais recentes e de períodos diferentes, para considerar a sazonalidade.
+
+```{r}
+recomendar <- function(itens, regras, n = 3) {
+  # regras cujo antecedente está contido na cesta
+  lhs_ok <- sapply(as(lhs(regras), "list"), function(x) all(x %in% itens))
+  candidatas <- regras[lhs_ok]
+  # descarta regras cujo consequente já está na cesta
+  rhs_novo <- !sapply(as(rhs(candidatas), "list"), function(x) any(x %in% itens))
+  head(sort(candidatas[rhs_novo], by = "lift"), n)
+}
+
+inspect(recomendar(c("liquor", "red/blush wine"), rules))
+```
+
+A função `recomendar()` recebe a cesta atual do cliente (`itens`), o conjunto de regras (`regras`) e o número de sugestões desejado (`n`), e segue três passos:
+
+1. **Seleciona as regras aplicáveis:** aquelas cujo antecedente está inteiro dentro da cesta. A expressão `as(lhs(regras), "list")` transforma o antecedente de cada regra em um vetor de itens, e `all(x %in% itens)` verifica se todos eles estão na cesta.
+2. **Descarta as regras cujo consequente já está na cesta,** pois recomendar o que o cliente já escolheu não acrescenta nada.
+3. **Ordena pelo lift e devolve as `n` melhores.** O critério poderia ser outro, como a confiança ou, se tivéssemos dados de preço e margem, o ganho esperado.
+
+No exemplo, a cesta contém `liquor` e `red/blush wine`, que formam o antecedente da regra da cerveja de garrafa, então ela deve ser a sugerida. Se nenhuma regra se aplicar à cesta, a função devolve um resultado vazio, e o sistema precisa de uma alternativa (por exemplo, os produtos mais vendidos).
+
+Com as regras que geramos (suporte mínimo de 0,1% e confiança mínima de 80%), a função terá poucas oportunidades de agir. O cálculo abaixo mostra em que proporção das cestas da base ela devolve ao menos uma sugestão:
+
+```{r}
+cestas_lista <- as(Groceries, "list")
+
+tem_recomendacao <- sapply(cestas_lista, function(cesta) {
+  length(recomendar(cesta, rules, n = 1)) > 0
+})
+```
+
+Em apenas `r fmt(100 * mean(tem_recomendacao), 1)`% das cestas há alguma regra aplicável com consequente ainda ausente. Isso ocorre porque as regras têm antecedentes longos e alta confiança (o que deixa pouco "espaço" para recomendar). Em um sistema real de recomendação, é comum usar parâmetros menos restritivos (suporte e confiança menores) e limitar o tamanho do antecedente, trocando precisão por cobertura.
 
 ## Conclusão
 
-A análise de regras de associação através do algoritmo *apriori* nos permite compreender melhor o comportamento do consumidor e tomar decisões informadas para otimizar as estratégias de marketing. 
+Neste capítulo, usamos o algoritmo *apriori* sobre `r n_cestas` cestas de um mercado para entender quais produtos costumam ser comprados juntos e transformar essas associações em ações de cross-selling. Alguns aprendizados importantes:
 
+- **Confiança alta pode refletir apenas a popularidade do consequente**, como no caso do leite.
+- **Lift alto costuma vir com suporte baixo:** as associações mais surpreendentes alcançam poucas cestas.
+- **O número de cestas por trás de cada regra** determina o quanto podemos confiar nela. Regras com poucos casos são hipóteses.
+- **Uma regra descreve co-compra, e não o efeito de uma ação.** Só um teste com grupo de controle mostra se uma oferta realmente aumenta as vendas.
 
-A análise de associação nos permite compreender melhor o comportamento do consumidor. Entretanto, pode servir também para provocar novos comportamentos nos clientes:
+A análise nos permite compreender melhor o comportamento do consumidor. Entretanto, pode servir também para provocar novos comportamentos nos clientes. Como orientação geral (hipóteses a validar):
 
-- **Suporte Baixo + Lift Alto**: Oportunidade de criar novos hábitos em nichos rentáveis.
+- **Suporte Baixo + Lift Alto**: possíveis nichos de oportunidade, a validar quanto ao alcance, à margem e ao efeito da ação.
 
-- **Suporte Alto + Confiança Alta**: Itens "âncora". Não precisam de promoção, mas devem estar localizados no fundo da loja para o cliente percorrer outros corredores.
+- **Suporte Alto + Confiança Alta**: itens "âncora", que não precisam de promoção para vender. Uma prática comum no varejo é posicioná-los longe da entrada, para que o cliente percorra outros corredores. Essa é uma hipótese de layout a ser testada, e não um resultado desta análise.
 
+**Limitações:**
+
+* Os dados cobrem cerca de um mês de um único mercado e as categorias de produto são agregadas.
+* Não há preço, margem ou identificação do cliente, então não é possível medir o retorno financeiro nem o comportamento ao longo do tempo.
+* Os resultados dependem dos parâmetros escolhidos (suporte e confiança mínimos).
+* Com muitas combinações possíveis, algumas regras aparecem por acaso, sobretudo as que têm poucas cestas.
+* As regras são descritivas e não causais.
+
+**Próximos passos:** usar os níveis de hierarquia dos produtos (o `Groceries` traz categorias mais agregadas, como `level1` e `level2`, que podem ser exploradas com `aggregate()`), incorporar dados de preço e margem para ordenar as regras pelo ganho esperado e testar as ações em campo.
