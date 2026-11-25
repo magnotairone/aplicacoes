@@ -312,7 +312,7 @@ window.Quarto = {
   <li><a href="#tokenização" id="toc-tokenização" class="nav-link" data-scroll-target="#tokenização"><span class="header-section-number">8.3</span> Tokenização</a>
   <ul class="collapse">
   <li><a href="#modelos-não-leem-palavras-leem-números" id="toc-modelos-não-leem-palavras-leem-números" class="nav-link" data-scroll-target="#modelos-não-leem-palavras-leem-números"><span class="header-section-number">8.3.1</span> Modelos não leem palavras, leem números</a></li>
-  <li><a href="#um-tokenizador-de-brinquedo" id="toc-um-tokenizador-de-brinquedo" class="nav-link" data-scroll-target="#um-tokenizador-de-brinquedo"><span class="header-section-number">8.3.2</span> Um tokenizador de brinquedo</a></li>
+  <li><a href="#construindo-um-tokenizador-do-zero" id="toc-construindo-um-tokenizador-do-zero" class="nav-link" data-scroll-target="#construindo-um-tokenizador-do-zero"><span class="header-section-number">8.3.2</span> Construindo um tokenizador do zero</a></li>
   <li><a href="#um-tokenizador-real" id="toc-um-tokenizador-real" class="nav-link" data-scroll-target="#um-tokenizador-real"><span class="header-section-number">8.3.3</span> Um tokenizador real</a></li>
   </ul></li>
   <li><a href="#embeddings" id="toc-embeddings" class="nav-link" data-scroll-target="#embeddings"><span class="header-section-number">8.4</span> Embeddings</a>
@@ -517,8 +517,8 @@ window.Quarto = {
 <p>Um modelo de linguagem não recebe texto: recebe uma sequência de números inteiros. O <strong>tokenizador</strong> é quem faz a conversão. Ele divide o texto em pedaços (os <em>tokens</em>) que podem ser uma palavra inteira, parte de uma palavra ou até um único caractere, e troca cada pedaço pelo seu número em um vocabulário fixo.</p>
 <p>Isso importa na prática por três motivos: o <strong>custo</strong> é cobrado por token, a <strong>janela de contexto</strong> do modelo é limitada em tokens, e o tamanho dos pedaços em que dividimos o documento deve levar isso em conta.</p>
 </section>
-<section id="um-tokenizador-de-brinquedo" class="level3" data-number="8.3.2">
-<h3 data-number="8.3.2" class="anchored" data-anchor-id="um-tokenizador-de-brinquedo"><span class="header-section-number">8.3.2</span> Um tokenizador de brinquedo</h3>
+<section id="construindo-um-tokenizador-do-zero" class="level3" data-number="8.3.2">
+<h3 data-number="8.3.2" class="anchored" data-anchor-id="construindo-um-tokenizador-do-zero"><span class="header-section-number">8.3.2</span> Construindo um tokenizador do zero</h3>
 <p>A maioria dos modelos atuais usa variações do algoritmo <strong>BPE</strong> (<em>Byte Pair Encoding</em>). A ideia é simples: começar com cada caractere como um token e, repetidamente, <strong>juntar o par de símbolos vizinhos mais frequente</strong> em um novo símbolo. Pares comuns viram pedaços de palavra, e palavras muito frequentes acabam virando um único token.</p>
 <p>O código abaixo implementa essa ideia em poucas linhas, usando um texto minúsculo de exemplo. O símbolo <code>_</code> marca o fim de uma palavra.</p>
 <div class="cell">
@@ -1091,7 +1091,7 @@ Neste exemplo, o texto do eixo x será rotacionado em 45 graus. O parâmetro `hj
 packageVersion("ggplot2")
 ```
 
-Para verificar a data de lançamento da versão específica, você pode consultar o repositório do `ggplot2` no CRAN ou no GitHub. No CRAN, você pode visitar a página do pacote e encontrar informações sobre as versões e suas datas de lançamento.</code></pre>
+Para verificar a data de lançamento da versão específica, você pode consultar o repositório do `ggplot2` no GitHub ou a documentação oficial do pacote. Se precisar de mais informações sobre como fazer isso, estou à disposição para ajudar!</code></pre>
 </div>
 </div>
 <p>Sem o documento, o modelo não tem como saber a que versão a pergunta se refere. É esse tipo de pergunta, sobre o conteúdo de um documento específico, que justifica o RAG.</p>
@@ -1205,46 +1205,46 @@ Para verificar a data de lançamento da versão específica, você pode consulta
 
 ```R
 ggplot(data, aes(x, y)) +
-  geom_bar(stat = "identity") +
+  geom_col() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
 
-Neste exemplo, o texto do eixo x será rotacionado em 45 graus. Essa informação pode ser encontrada na página 339 do documento.</code></pre>
+Neste exemplo, o texto do eixo x será rotacionado em 45 graus. A propriedade `hjust` pode ser ajustada para alinhar o texto conforme necessário (p. 339).</code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb68"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb68-1"><a href="#cb68-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Consultas feitas pelo agente:"</span>, consultas_feitas(r1))</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Consultas feitas pelo agente: ['rotate x-axis text ggplot2', 'theme axis text angle ggplot2']</code></pre>
+<pre><code>Consultas feitas pelo agente: ['rotate x-axis text ggplot2', 'theme axis.text.x angle ggplot2']</code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb70"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb70-1"><a href="#cb70-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Páginas consultadas:"</span>, paginas_consultadas(r1))</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Páginas consultadas: [23, 131, 136, 339, 340]</code></pre>
+<pre><code>Páginas consultadas: [23, 131, 136, 339]</code></pre>
 </div>
 </div>
-<p>O agente fez 2 buscas, com consultas escritas por ele (repare no idioma), e consultou as páginas 23, 131, 136, 339 e 340. Nenhuma delas é das páginas de <code>guide_axis()</code>. A resposta, com <code>theme()</code> e <code>element_text()</code>, funciona, mas veio do conhecimento do próprio modelo, e não do manual. A página citada na resposta (339) foi consultada, mas não traz esse exemplo. Esse é o risco descrito no quadro mais abaixo: a citação de uma página não garante que a informação esteja nela.</p>
+<p>O agente fez 2 buscas, com consultas escritas por ele (repare no idioma), e consultou as páginas 23, 131, 136 e 339. Nenhuma delas é das páginas de <code>guide_axis()</code>. A resposta, com <code>theme()</code> e <code>element_text()</code>, funciona, mas veio do conhecimento do próprio modelo, e não do manual. A página citada na resposta (339) foi consultada, mas não traz esse exemplo. Esse é o risco descrito no quadro mais abaixo: a citação de uma página não garante que a informação esteja nela.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb72"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb72-1"><a href="#cb72-1" aria-hidden="true" tabindex="-1"></a>r2 <span class="op">=</span> obter_resposta(PERGUNTA_ACOMPANHAMENTO)</span>
 <span id="cb72-2"><a href="#cb72-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(r2[<span class="st">"messages"</span>][<span class="op">-</span><span class="dv">1</span>].text)</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Para rotacionar o texto do eixo y em um gráfico do ggplot2, você pode usar a função `theme()` e ajustar o parâmetro `axis.text.y` com `element_text()`, especificando o ângulo desejado. Por exemplo:
+<pre><code>Para rotacionar o texto do eixo y em um gráfico do ggplot2, você também pode usar a função `theme()` e ajustar o parâmetro `axis.text.y` com `element_text()`, especificando o ângulo desejado. Por exemplo:
 
 ```R
 ggplot(data, aes(x, y)) +
-  geom_bar(stat = "identity") +
+  geom_col() +
   theme(axis.text.y = element_text(angle = 45, hjust = 1))
 ```
 
-Neste exemplo, o texto do eixo y será rotacionado em 45 graus. Essa informação pode ser encontrada na página 339 do documento.</code></pre>
+Neste exemplo, o texto do eixo y será rotacionado em 45 graus. A propriedade `hjust` pode ser ajustada para alinhar o texto conforme necessário (p. 339).</code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb74"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb74-1"><a href="#cb74-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Consultas feitas pelo agente:"</span>, consultas_feitas(r2))</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Consultas feitas pelo agente: ['rotate y-axis text ggplot2', 'theme y-axis text angle ggplot2']</code></pre>
+<pre><code>Consultas feitas pelo agente: ['rotate y-axis text ggplot2']</code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb76"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb76-1"><a href="#cb76-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Páginas consultadas:"</span>, paginas_consultadas(r2))</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Páginas consultadas: [136, 175, 246, 339, 340]</code></pre>
+<pre><code>Páginas consultadas: [136, 175, 246]</code></pre>
 </div>
 </div>
-<p>A pergunta de acompanhamento não diz qual é a tarefa, mas o agente usou o histórico para reescrever a busca (rotate y-axis text ggplot2; theme y-axis text angle ggplot2). As páginas listadas são só as consultadas para esta pergunta: como o <em>checkpointer</em> devolve a conversa inteira, a função <code>paginas_consultadas()</code> considera apenas as mensagens a partir da última pergunta.</p>
+<p>A pergunta de acompanhamento não diz qual é a tarefa, mas o agente usou o histórico para reescrever a busca (rotate y-axis text ggplot2). As páginas listadas são só as consultadas para esta pergunta: como o <em>checkpointer</em> devolve a conversa inteira, a função <code>paginas_consultadas()</code> considera apenas as mensagens a partir da última pergunta. Repare que a resposta cita a página 339, que não foi consultada nesta pergunta: a citação veio do histórico, e não dos trechos recuperados.</p>
 <p>A pergunta específica, que o modelo sozinho não tinha como responder:</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb78"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb78-1"><a href="#cb78-1" aria-hidden="true" tabindex="-1"></a>r_esp <span class="op">=</span> obter_resposta(PERGUNTA_ESPECIFICA, id_sessao<span class="op">=</span><span class="st">"teste-especifica"</span>)</span>
@@ -1614,9 +1614,9 @@ Neste exemplo, o texto do eixo y será rotacionado em 45 graus. Essa informaçã
 <tbody>
 <tr class="odd">
 <td style="text-align: left;">Como dividir o gráfico em vários painéis, um para cada valor de uma variável?</td>
-<td style="text-align: left;">facet_wrap</td>
-<td style="text-align: right;">4</td>
-<td style="text-align: left;">TRUE</td>
+<td style="text-align: left;">facet</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: left;">FALSE</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">Como fazer um boxplot e mostrar os valores atípicos?</td>
@@ -1626,7 +1626,7 @@ Neste exemplo, o texto do eixo y será rotacionado em 45 graus. Essa informaçã
 </tr>
 <tr class="odd">
 <td style="text-align: left;">Como salvar um gráfico em um arquivo PNG com largura e altura definidas?</td>
-<td style="text-align: left;">save a plot as PNG with specified width and height</td>
+<td style="text-align: left;">save a plot as a PNG file with specified width and height</td>
 <td style="text-align: right;">3</td>
 <td style="text-align: left;">TRUE</td>
 </tr>
@@ -1674,14 +1674,14 @@ Neste exemplo, o texto do eixo y será rotacionado em 45 graus. Essa informaçã
 </tr>
 <tr class="odd">
 <td style="text-align: left;">Como usar um tema com fundo branco e linhas de grade cinzas?</td>
-<td style="text-align: left;">theme with white background and gray grid lines</td>
+<td style="text-align: left;">theme white background gray grid lines</td>
 <td style="text-align: right;">4</td>
 <td style="text-align: left;">TRUE</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">Como adicionar uma linha horizontal de referência ao gráfico?</td>
-<td style="text-align: left;">add horizontal reference line to ggplot | horizontal line in ggplot2</td>
-<td style="text-align: right;">6</td>
+<td style="text-align: left;">add horizontal reference line | horizontal line reference ggplot2 | geom_hline</td>
+<td style="text-align: right;">9</td>
 <td style="text-align: left;">FALSE</td>
 </tr>
 <tr class="odd">
@@ -1692,7 +1692,7 @@ Neste exemplo, o texto do eixo y será rotacionado em 45 graus. Essa informaçã
 </tr>
 <tr class="even">
 <td style="text-align: left;">Como evitar que pontos sobrepostos fiquem escondidos uns atrás dos outros?</td>
-<td style="text-align: left;">how to avoid overlapping points in ggplot2</td>
+<td style="text-align: left;">overlapping points</td>
 <td style="text-align: right;">4</td>
 <td style="text-align: left;">FALSE</td>
 </tr>
@@ -1728,8 +1728,8 @@ Neste exemplo, o texto do eixo y será rotacionado em 45 graus. Essa informaçã
 </tr>
 <tr class="even">
 <td style="text-align: left;">Como acrescentar barras de erro a um gráfico?</td>
-<td style="text-align: left;">add error bars to a plot</td>
-<td style="text-align: right;">3</td>
+<td style="text-align: left;">error bars ggplot2</td>
+<td style="text-align: right;">4</td>
 <td style="text-align: left;">TRUE</td>
 </tr>
 <tr class="odd">
@@ -1758,7 +1758,7 @@ Neste exemplo, o texto do eixo y será rotacionado em 45 graus. Essa informaçã
 </tr>
 <tr class="odd">
 <td style="text-align: left;">Como usar uma paleta de cores que funcione bem para pessoas daltônicas?</td>
-<td style="text-align: left;">color palette for colorblind</td>
+<td style="text-align: left;">color palette for colorblind people</td>
 <td style="text-align: right;">3</td>
 <td style="text-align: left;">FALSE</td>
 </tr>
@@ -1801,16 +1801,16 @@ Neste exemplo, o texto do eixo y será rotacionado em 45 graus. Essa informaçã
 </tr>
 <tr class="even">
 <td style="text-align: left;">agente</td>
-<td style="text-align: right;">0.60</td>
-<td style="text-align: right;">0.41</td>
-<td style="text-align: right;">0.77</td>
+<td style="text-align: right;">0.56</td>
+<td style="text-align: right;">0.37</td>
+<td style="text-align: right;">0.73</td>
 </tr>
 </tbody>
 </table>
 </div>
 </div>
-<p>Nesta execução, a busca direta com k = 4 encontrou as páginas esperadas em 14 das 25 perguntas (intervalo de 37% a 73%), e o agente, em 15 (de 41% a 77%): o agente acertou 1 pergunta a mais do que a busca direta. Os intervalos são largos e se sobrepõem, então, com 25 perguntas, não dá para afirmar que uma estratégia recupera melhor do que a outra. O agente consultou, em média, 3,8 páginas por pergunta, contra no máximo 4 da busca direta.</p>
-<p>As perguntas em que o agente não chegou às páginas esperadas tratam de: <code>scale_continuous</code>, <code>position_dodge</code>, <code>geom_abline</code>, <code>coord_polar</code>, <code>geom_jitter</code>, <code>guide_axis</code>, <code>geom_density</code>, <code>annotate</code>, <code>geom_bin_2d</code>, <code>scale_colour_viridis_d</code>. Vale olhar caso a caso: o gabarito considera só a seção da função principal, e parte das respostas pode estar também em outras seções do manual.</p>
+<p>Nesta execução, a busca direta com k = 4 encontrou as páginas esperadas em 14 das 25 perguntas (intervalo de 37% a 73%), e o agente, em 14 (de 37% a 73%): as duas estratégias acertaram o mesmo número de perguntas. Os intervalos são largos e se sobrepõem, então, com 25 perguntas, não dá para afirmar que uma estratégia recupera melhor do que a outra. O agente consultou, em média, 3,9 páginas por pergunta, contra no máximo 4 da busca direta.</p>
+<p>As perguntas em que o agente não chegou às páginas esperadas tratam de: <code>facet_wrap</code>, <code>scale_continuous</code>, <code>position_dodge</code>, <code>geom_abline</code>, <code>coord_polar</code>, <code>geom_jitter</code>, <code>guide_axis</code>, <code>geom_density</code>, <code>annotate</code>, <code>geom_bin_2d</code>, <code>scale_colour_viridis_d</code>. Vale olhar caso a caso: o gabarito considera só a seção da função principal, e parte das respostas pode estar também em outras seções do manual.</p>
 </section>
 <section id="qualidade-das-respostas" class="level3" data-number="8.8.3">
 <h3 data-number="8.8.3" class="anchored" data-anchor-id="qualidade-das-respostas"><span class="header-section-number">8.8.3</span> Qualidade das respostas</h3>

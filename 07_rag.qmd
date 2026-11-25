@@ -153,7 +153,7 @@ Um modelo de linguagem não recebe texto: recebe uma sequência de números inte
 
 Isso importa na prática por três motivos: o **custo** é cobrado por token, a **janela de contexto** do modelo é limitada em tokens, e o tamanho dos pedaços em que dividimos o documento deve levar isso em conta.
 
-### Um tokenizador de brinquedo
+### Construindo um tokenizador do zero
 
 A maioria dos modelos atuais usa variações do algoritmo **BPE** (*Byte Pair Encoding*). A ideia é simples: começar com cada caractere como um token e, repetidamente, **juntar o par de símbolos vizinhos mais frequente** em um novo símbolo. Pares comuns viram pedaços de palavra, e palavras muito frequentes acabam virando um único token.
 
