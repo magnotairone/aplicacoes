@@ -2,9 +2,9 @@
   {
     "objectID": "index.html",
     "href": "index.html",
-    "title": "Aplicações de Ciência de Dados",
+    "title": "Ciência de Dados Aplicada",
     "section": "",
-    "text": "Introdução\nEste livro apresenta aplicações práticas de ciência de dados inspiradas em casos reais, vistas sob a ótica de negócios. Em cada capítulo, partimos de um problema que uma empresa poderia enfrentar (prever a falha de uma máquina, precificar um imóvel, entender o perfil dos clientes, definir ações de venda cruzada) e mostramos, passo a passo, como os dados podem ajudar a resolvê-lo.\nO foco não está em apresentar uma técnica isolada, mas em mostrar como ela se encaixa em um projeto de ponta a ponta: da pergunta de negócio até o uso prático dos resultados.\n[Última atualização: 25/11/2026.]",
+    "text": "Introdução\nEste livro apresenta aplicações práticas de ciência de dados inspiradas em casos reais, vistas sob a ótica de negócios. Em cada capítulo, partimos de um problema que uma empresa poderia enfrentar (prever a falha de uma máquina, precificar um imóvel, entender o perfil dos clientes, definir ações de venda cruzada) e mostramos, passo a passo, como os dados podem ajudar a resolvê-lo.\nO foco não está em apresentar uma técnica isolada, mas em mostrar como ela se encaixa em um projeto de ponta a ponta: da pergunta de negócio até o uso prático dos resultados.\nNão é preciso saber programar para acompanhar o livro. Os capítulos trazem trechos de código em R e em Python, que reproduzem cada etapa das análises. Esses trechos são totalmente opcionais: o texto explica cada passo e interpreta cada resultado, de modo que o livro pode ser lido do começo ao fim sem nenhum conhecimento de linguagens de programação. Quem quiser reproduzir ou adaptar as análises encontra o código completo junto ao texto.\n[Última atualização: 25/11/2026.]",
     "crumbs": [
       "Introdução"
     ]
@@ -12,7 +12,7 @@
   {
     "objectID": "index.html#o-processo-que-guia-as-análises-crisp-dm",
     "href": "index.html#o-processo-que-guia-as-análises-crisp-dm",
-    "title": "Aplicações de Ciência de Dados",
+    "title": "Ciência de Dados Aplicada",
     "section": "O processo que guia as análises: CRISP-DM",
     "text": "O processo que guia as análises: CRISP-DM\nProjetos de ciência de dados bem-sucedidos raramente começam pelo algoritmo. Para organizar o trabalho, usamos ao longo do livro o CRISP-DM (Cross-Industry Standard Process for Data Mining), um processo criado no fim da década de 1990 por um consórcio de empresas e instituições europeias e que se tornou um dos referenciais mais usados em projetos de análise de dados (Chapman et al. 2000; Wirth e Hipp 2000). Ele é neutro em relação a setor, ferramenta e técnica, o que o torna adequado para casos tão distintos quanto os deste livro.\nO CRISP-DM divide um projeto em seis fases:\n\nEntendimento do negócio (business understanding): definir o problema, os objetivos e os critérios de sucesso do ponto de vista do negócio, antes de olhar para os dados.\nEntendimento dos dados (data understanding): coletar os dados disponíveis, descrevê-los, explorá-los e avaliar sua qualidade.\nPreparação dos dados (data preparation): selecionar, limpar, transformar e integrar os dados, até chegar à base que será usada na modelagem.\nModelagem (modeling): escolher e aplicar técnicas estatísticas ou de aprendizado de máquina, ajustando seus parâmetros.\nAvaliação (evaluation): verificar se os resultados são consistentes e, principalmente, se respondem ao objetivo de negócio definido no início.\nImplantação (deployment): colocar os resultados em uso (um relatório, uma regra de decisão, um modelo em produção) e planejar seu monitoramento e manutenção.\n\n\n\n\n\n\n\nFigura 1: Fases do processo CRISP-DM. Fonte: Kenneth Jensen, via Wikimedia Commons, licença CC BY-SA 3.0.\n\n\n\nComo mostra o diagrama (Figura 1), o processo não é uma sequência rígida. As setas indicam as dependências mais frequentes entre as fases, mas é comum voltar atrás: uma avaliação ruim pode levar a uma nova preparação dos dados, e o entendimento dos dados pode obrigar a rever o problema de negócio. O círculo externo lembra que o trabalho continua depois da implantação, pois os modelos precisam ser monitorados e atualizados.\n\n\n\n\n\n\nNotaComo o CRISP-DM aparece neste livro\n\n\n\nSempre que possível, os capítulos seguem a lógica do CRISP-DM: começam pelo problema de negócio, passam pela exploração e preparação dos dados, apresentam a modelagem e a avaliação e terminam discutindo o uso prático e as limitações dos resultados. Nem todos os capítulos enfatizam todas as fases. Em alguns, o destaque é a exploração dos dados, em outros a modelagem ou a interpretação dos resultados para o negócio.",
     "crumbs": [
@@ -22,7 +22,7 @@
   {
     "objectID": "index.html#o-que-você-vai-encontrar",
     "href": "index.html#o-que-você-vai-encontrar",
-    "title": "Aplicações de Ciência de Dados",
+    "title": "Ciência de Dados Aplicada",
     "section": "O que você vai encontrar",
     "text": "O que você vai encontrar\nOs capítulos são estudos de caso inspirados em situações reais. Eles usam bases de dados públicas ou simuladas, e cada capítulo indica a origem dos dados e suas limitações. Os resultados, portanto, ilustram o uso das técnicas e não devem ser tomados como conclusões sobre os mercados ou setores retratados.",
     "crumbs": [
@@ -32,7 +32,7 @@
   {
     "objectID": "index.html#código-em-r-e-em-python",
     "href": "index.html#código-em-r-e-em-python",
-    "title": "Aplicações de Ciência de Dados",
+    "title": "Ciência de Dados Aplicada",
     "section": "Código em R e em Python",
     "text": "Código em R e em Python\nTodas as análises são acompanhadas do código completo, que pode ser copiado e executado. Ele aparece ora em R, ora em Python, justamente para mostrar como os mesmos conceitos e etapas do processo se aplicam nas duas linguagens, que são as mais usadas em ciência de dados. A escolha em cada capítulo busca apenas variar os exemplos. As técnicas apresentadas podem ser reproduzidas em qualquer uma das duas.\nEste material não é um curso de programação. Alguma familiaridade com R ou Python ajuda a acompanhar o código, mas a narrativa de cada capítulo foi escrita para ser compreendida também por quem quer focar no raciocínio analítico e nas decisões de negócio.",
     "crumbs": [
@@ -42,7 +42,7 @@
   {
     "objectID": "index.html#sec-dados",
     "href": "index.html#sec-dados",
-    "title": "Aplicações de Ciência de Dados",
+    "title": "Ciência de Dados Aplicada",
     "section": "Dados e códigos",
     "text": "Dados e códigos\nOs códigos-fonte deste livro estão disponíveis no repositório do projeto no GitHub, e as bases de dados utilizadas nos capítulos estão reunidas nesta pasta pública.\nPara reproduzir as análises, baixe os arquivos da pasta e salve-os em um diretório chamado data, no mesmo local em que estiver o código. Os códigos leem os arquivos a partir desse diretório (por exemplo, data/sao-paulo-properties-april-2019.csv).\n\n\n\n\n\n\nChapman, Pete, Julian Clinton, Randy Kerber, Thomas Khabaza, Thomas Reinartz, Colin Shearer, e Rüdiger Wirth. 2000. “CRISP-DM 1.0: Step-by-step data mining guide”. SPSS Inc.\n\n\nWirth, Rüdiger, e Jochen Hipp. 2000. “CRISP-DM: Towards a standard process model for data mining”. Em Proceedings of the 4th International Conference on the Practical Applications of Knowledge Discovery and Data Mining, 29–39.",
     "crumbs": [

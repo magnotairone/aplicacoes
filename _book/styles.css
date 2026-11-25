@@ -1,0 +1,17 @@
+/* Capa do livro na introdução, flutuando à direita do texto */
+.capa-livro {
+  float: right;
+  width: 250px;
+  margin: 0.25rem 0 1rem 1.5rem;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* Em telas estreitas, a capa fica centralizada acima do texto */
+@media (max-width: 576px) {
+  .capa-livro {
+    float: none;
+    display: block;
+    width: 60%;
+    margin: 0 auto 1.25rem;
+  }
+}
