@@ -348,6 +348,7 @@ window.Quarto = {
   </ul></li>
   <li><a href="#uso-prático-e-implantação" id="toc-uso-prático-e-implantação" class="nav-link" data-scroll-target="#uso-prático-e-implantação"><span class="header-section-number">8.9</span> Uso prático e implantação</a></li>
   <li><a href="#conclusão" id="toc-conclusão" class="nav-link" data-scroll-target="#conclusão"><span class="header-section-number">8.10</span> Conclusão</a></li>
+  <li><a href="#anexo-comparação-entre-dois-modelos-de-linguagem" id="toc-anexo-comparação-entre-dois-modelos-de-linguagem" class="nav-link" data-scroll-target="#anexo-comparação-entre-dois-modelos-de-linguagem">Anexo: comparação entre dois modelos de linguagem</a></li>
   </ul>
 </nav>
     </div>
@@ -1090,7 +1091,7 @@ Neste exemplo, o texto do eixo x será rotacionado em 45 graus. O parâmetro `hj
 packageVersion("ggplot2")
 ```
 
-Para verificar a data de lançamento da versão específica, você pode consultar o repositório do `ggplot2` no GitHub ou a documentação oficial do pacote. Se precisar de mais informações sobre como fazer isso, estou à disposição para ajudar!</code></pre>
+Para verificar a data de lançamento da versão específica, você pode consultar o repositório do `ggplot2` no CRAN ou no GitHub. No CRAN, você pode visitar a página do pacote e encontrar informações sobre as versões e suas datas de lançamento.</code></pre>
 </div>
 </div>
 <p>Sem o documento, o modelo não tem como saber a que versão a pergunta se refere. É esse tipo de pergunta, sobre o conteúdo de um documento específico, que justifica o RAG.</p>
@@ -1204,46 +1205,46 @@ Para verificar a data de lançamento da versão específica, você pode consulta
 
 ```R
 ggplot(data, aes(x, y)) +
-  geom_col() +
+  geom_bar(stat = "identity") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
 
-Isso rotacionará o texto do eixo x em 45 graus. A propriedade `hjust` pode ser ajustada para alinhar o texto conforme necessário (p. 339).</code></pre>
+Neste exemplo, o texto do eixo x será rotacionado em 45 graus. Essa informação pode ser encontrada na página 339 do documento.</code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb68"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb68-1"><a href="#cb68-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Consultas feitas pelo agente:"</span>, consultas_feitas(r1))</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Consultas feitas pelo agente: ['rotate x-axis text ggplot2', 'theme axis.text.x angle ggplot2']</code></pre>
+<pre><code>Consultas feitas pelo agente: ['rotate x-axis text ggplot2', 'theme axis text angle ggplot2']</code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb70"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb70-1"><a href="#cb70-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Páginas consultadas:"</span>, paginas_consultadas(r1))</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Páginas consultadas: [23, 131, 136, 339]</code></pre>
+<pre><code>Páginas consultadas: [23, 131, 136, 339, 340]</code></pre>
 </div>
 </div>
-<p>O agente fez 2 buscas, com consultas escritas por ele (repare no idioma), e consultou as páginas 23, 131, 136 e 339. Nenhuma delas é das páginas de <code>guide_axis()</code>. A resposta, com <code>theme()</code> e <code>element_text()</code>, funciona, mas veio do conhecimento do próprio modelo, e não do manual. A página citada na resposta (339) foi consultada, mas não traz esse exemplo. Esse é o risco descrito no quadro mais abaixo: a citação de uma página não garante que a informação esteja nela.</p>
+<p>O agente fez 2 buscas, com consultas escritas por ele (repare no idioma), e consultou as páginas 23, 131, 136, 339 e 340. Nenhuma delas é das páginas de <code>guide_axis()</code>. A resposta, com <code>theme()</code> e <code>element_text()</code>, funciona, mas veio do conhecimento do próprio modelo, e não do manual. A página citada na resposta (339) foi consultada, mas não traz esse exemplo. Esse é o risco descrito no quadro mais abaixo: a citação de uma página não garante que a informação esteja nela.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb72"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb72-1"><a href="#cb72-1" aria-hidden="true" tabindex="-1"></a>r2 <span class="op">=</span> obter_resposta(PERGUNTA_ACOMPANHAMENTO)</span>
 <span id="cb72-2"><a href="#cb72-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(r2[<span class="st">"messages"</span>][<span class="op">-</span><span class="dv">1</span>].text)</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Para rotacionar o texto do eixo y em um gráfico do ggplot2, você também pode usar a função `theme()` e ajustar o parâmetro `axis.text.y` com `element_text()`, especificando o ângulo desejado. Por exemplo:
+<pre><code>Para rotacionar o texto do eixo y em um gráfico do ggplot2, você pode usar a função `theme()` e ajustar o parâmetro `axis.text.y` com `element_text()`, especificando o ângulo desejado. Por exemplo:
 
 ```R
 ggplot(data, aes(x, y)) +
-  geom_col() +
+  geom_bar(stat = "identity") +
   theme(axis.text.y = element_text(angle = 45, hjust = 1))
 ```
 
-Isso rotacionará o texto do eixo y em 45 graus. A propriedade `hjust` pode ser ajustada para alinhar o texto conforme necessário (p. 339).</code></pre>
+Neste exemplo, o texto do eixo y será rotacionado em 45 graus. Essa informação pode ser encontrada na página 339 do documento.</code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb74"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb74-1"><a href="#cb74-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Consultas feitas pelo agente:"</span>, consultas_feitas(r2))</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Consultas feitas pelo agente: ['rotate y-axis text ggplot2']</code></pre>
+<pre><code>Consultas feitas pelo agente: ['rotate y-axis text ggplot2', 'theme y-axis text angle ggplot2']</code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb76"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb76-1"><a href="#cb76-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Páginas consultadas:"</span>, paginas_consultadas(r2))</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Páginas consultadas: [136, 175, 246]</code></pre>
+<pre><code>Páginas consultadas: [136, 175, 246, 339, 340]</code></pre>
 </div>
 </div>
-<p>A pergunta de acompanhamento não diz qual é a tarefa, mas o agente usou o histórico para reescrever a busca (rotate y-axis text ggplot2). As páginas listadas são só as consultadas para esta pergunta: como o <em>checkpointer</em> devolve a conversa inteira, a função <code>paginas_consultadas()</code> considera apenas as mensagens a partir da última pergunta. Repare que a resposta cita a página 339, que não foi consultada nesta pergunta: a citação veio do histórico, e não dos trechos recuperados.</p>
+<p>A pergunta de acompanhamento não diz qual é a tarefa, mas o agente usou o histórico para reescrever a busca (rotate y-axis text ggplot2; theme y-axis text angle ggplot2). As páginas listadas são só as consultadas para esta pergunta: como o <em>checkpointer</em> devolve a conversa inteira, a função <code>paginas_consultadas()</code> considera apenas as mensagens a partir da última pergunta.</p>
 <p>A pergunta específica, que o modelo sozinho não tinha como responder:</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb78"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb78-1"><a href="#cb78-1" aria-hidden="true" tabindex="-1"></a>r_esp <span class="op">=</span> obter_resposta(PERGUNTA_ESPECIFICA, id_sessao<span class="op">=</span><span class="st">"teste-especifica"</span>)</span>
@@ -1253,7 +1254,7 @@ Isso rotacionará o texto do eixo y em 45 graus. A propriedade `hjust` pode ser 
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb80"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb80-1"><a href="#cb80-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Páginas consultadas:"</span>, paginas_consultadas(r_esp))</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Páginas consultadas: [1, 144, 285, 309]</code></pre>
+<pre><code>Páginas consultadas: [1, 2, 144]</code></pre>
 </div>
 </div>
 <p>Com o documento, o agente encontra a resposta (versão 3.5.1, de 23 de abril de 2024), que está na primeira página do manual.</p>
@@ -1336,9 +1337,13 @@ Isso rotacionará o texto do eixo y em 45 graus. A propriedade `hjust` pode ser 
 <section id="perguntas-com-gabarito" class="level3" data-number="8.8.1">
 <h3 data-number="8.8.1" class="anchored" data-anchor-id="perguntas-com-gabarito"><span class="header-section-number">8.8.1</span> Perguntas com gabarito</h3>
 <p>O ideal é construir um conjunto de perguntas reais, para as quais <strong>uma pessoa</strong> que conhece o documento indica onde está a resposta. Quanto mais variadas as perguntas (escritas por pessoas diferentes, com palavras diferentes das do documento), mais confiável a avaliação.</p>
-<p>Para este capítulo, montamos 16 perguntas em português sobre tarefas comuns com o <code>ggplot2</code>. Como o manual tem uma seção para cada função, o gabarito de cada pergunta é o intervalo de páginas da função que resolve a tarefa, tirado do sumário do manual (a numeração das páginas começa em 1). O arquivo tem as colunas <code>pergunta</code>, <code>topico</code>, <code>pagina_inicial</code> e <code>pagina_final</code>.</p>
+<p>Para este capítulo, montamos 30 perguntas em português: 25 sobre tarefas comuns com o <code>ggplot2</code> e 5 fora do escopo do manual, usadas no anexo ao final do capítulo. Como o manual tem uma seção para cada função, o gabarito de cada pergunta no escopo é o intervalo de páginas da função que resolve a tarefa, tirado do sumário do manual (a numeração das páginas começa em 1). Parte das perguntas evita, de propósito, as palavras usadas no manual (por exemplo, “girar os rótulos” em vez de <em>angle</em>). O arquivo tem as colunas <code>pergunta</code>, <code>topico</code>, <code>pagina_inicial</code>, <code>pagina_final</code> e <code>tipo</code>. Nesta seção usamos só as perguntas no escopo.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb86"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb86-1"><a href="#cb86-1" aria-hidden="true" tabindex="-1"></a>perguntas_teste <span class="op">=</span> pd.read_csv(<span class="st">"data/perguntas_teste.csv"</span>)</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb86"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb86-1"><a href="#cb86-1" aria-hidden="true" tabindex="-1"></a>todas_perguntas <span class="op">=</span> pd.read_csv(<span class="st">"data/perguntas_teste.csv"</span>)</span>
+<span id="cb86-2"><a href="#cb86-2" aria-hidden="true" tabindex="-1"></a>perguntas_teste <span class="op">=</span> (todas_perguntas[todas_perguntas[<span class="st">"tipo"</span>] <span class="op">==</span> <span class="st">"no_escopo"</span>]</span>
+<span id="cb86-3"><a href="#cb86-3" aria-hidden="true" tabindex="-1"></a>                   .drop(columns<span class="op">=</span><span class="st">"tipo"</span>)</span>
+<span id="cb86-4"><a href="#cb86-4" aria-hidden="true" tabindex="-1"></a>                   .astype({<span class="st">"pagina_inicial"</span>: <span class="bu">int</span>, <span class="st">"pagina_final"</span>: <span class="bu">int</span>})</span>
+<span id="cb86-5"><a href="#cb86-5" aria-hidden="true" tabindex="-1"></a>                   .reset_index(drop<span class="op">=</span><span class="va">True</span>))</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="cell">
 <div class="cell-output-display">
@@ -1448,6 +1453,60 @@ Isso rotacionará o texto do eixo y em 45 graus. A propriedade `hjust` pode ser 
 <td style="text-align: right;">183</td>
 <td style="text-align: right;">188</td>
 </tr>
+<tr class="odd">
+<td style="text-align: left;">Como girar os rótulos do eixo x para que eles não fiquem sobrepostos?</td>
+<td style="text-align: left;">guide_axis</td>
+<td style="text-align: right;">200</td>
+<td style="text-align: right;">202</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Como mostrar a distribuição de uma variável contínua como uma curva suave?</td>
+<td style="text-align: left;">geom_density</td>
+<td style="text-align: right;">98</td>
+<td style="text-align: right;">103</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Como organizar painéis em uma grade, com uma variável nas linhas e outra nas colunas?</td>
+<td style="text-align: left;">facet_grid</td>
+<td style="text-align: right;">60</td>
+<td style="text-align: right;">63</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Como acrescentar barras de erro a um gráfico?</td>
+<td style="text-align: left;">geom_crossbar</td>
+<td style="text-align: right;">94</td>
+<td style="text-align: right;">98</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Como escrever um texto em uma posição fixa do gráfico, sem ligação com os dados?</td>
+<td style="text-align: left;">annotate</td>
+<td style="text-align: right;">20</td>
+<td style="text-align: right;">22</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Como formatar as datas do eixo x para mostrar só o mês e o ano?</td>
+<td style="text-align: left;">scale_date</td>
+<td style="text-align: right;">285</td>
+<td style="text-align: right;">289</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Com muitos pontos, como mostrar a concentração deles em quadradinhos coloridos?</td>
+<td style="text-align: left;">geom_bin_2d</td>
+<td style="text-align: right;">74</td>
+<td style="text-align: right;">77</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Como acrescentar um segundo eixo y do lado direito do gráfico?</td>
+<td style="text-align: left;">sec_axis</td>
+<td style="text-align: right;">308</td>
+<td style="text-align: right;">310</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Como usar uma paleta de cores que funcione bem para pessoas daltônicas?</td>
+<td style="text-align: left;">scale_colour_viridis_d</td>
+<td style="text-align: right;">277</td>
+<td style="text-align: right;">281</td>
+</tr>
 </tbody>
 </table>
 </div>
@@ -1498,27 +1557,27 @@ Isso rotacionará o texto do eixo y em 45 graus. A propriedade `hjust` pode ser 
 <tbody>
 <tr class="odd">
 <td style="text-align: right;">1</td>
-<td style="text-align: right;">0.62</td>
-<td style="text-align: right;">0.39</td>
-<td style="text-align: right;">0.82</td>
+<td style="text-align: right;">0.48</td>
+<td style="text-align: right;">0.30</td>
+<td style="text-align: right;">0.67</td>
 </tr>
 <tr class="even">
 <td style="text-align: right;">2</td>
-<td style="text-align: right;">0.62</td>
-<td style="text-align: right;">0.39</td>
-<td style="text-align: right;">0.82</td>
+<td style="text-align: right;">0.48</td>
+<td style="text-align: right;">0.30</td>
+<td style="text-align: right;">0.67</td>
 </tr>
 <tr class="odd">
 <td style="text-align: right;">4</td>
-<td style="text-align: right;">0.69</td>
-<td style="text-align: right;">0.44</td>
-<td style="text-align: right;">0.86</td>
+<td style="text-align: right;">0.56</td>
+<td style="text-align: right;">0.37</td>
+<td style="text-align: right;">0.73</td>
 </tr>
 <tr class="even">
 <td style="text-align: right;">8</td>
-<td style="text-align: right;">0.81</td>
-<td style="text-align: right;">0.57</td>
-<td style="text-align: right;">0.93</td>
+<td style="text-align: right;">0.72</td>
+<td style="text-align: right;">0.52</td>
+<td style="text-align: right;">0.86</td>
 </tr>
 </tbody>
 </table>
@@ -1555,25 +1614,25 @@ Isso rotacionará o texto do eixo y em 45 graus. A propriedade `hjust` pode ser 
 <tbody>
 <tr class="odd">
 <td style="text-align: left;">Como dividir o gráfico em vários painéis, um para cada valor de uma variável?</td>
-<td style="text-align: left;">facet</td>
-<td style="text-align: right;">3</td>
-<td style="text-align: left;">FALSE</td>
+<td style="text-align: left;">facet_wrap</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: left;">TRUE</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">Como fazer um boxplot e mostrar os valores atípicos?</td>
-<td style="text-align: left;">boxplot outliers</td>
+<td style="text-align: left;">boxplot show outliers</td>
 <td style="text-align: right;">3</td>
 <td style="text-align: left;">TRUE</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">Como salvar um gráfico em um arquivo PNG com largura e altura definidas?</td>
-<td style="text-align: left;">save a plot as a PNG file with specified width and height</td>
+<td style="text-align: left;">save a plot as PNG with specified width and height</td>
 <td style="text-align: right;">3</td>
 <td style="text-align: left;">TRUE</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">Como mudar o título do gráfico e os rótulos dos eixos?</td>
-<td style="text-align: left;">how to change the title of the plot | how to change axis labels</td>
+<td style="text-align: left;">change title of the plot | change axis labels</td>
 <td style="text-align: right;">8</td>
 <td style="text-align: left;">TRUE</td>
 </tr>
@@ -1615,14 +1674,14 @@ Isso rotacionará o texto do eixo y em 45 graus. A propriedade `hjust` pode ser 
 </tr>
 <tr class="odd">
 <td style="text-align: left;">Como usar um tema com fundo branco e linhas de grade cinzas?</td>
-<td style="text-align: left;">theme white background gray grid lines</td>
+<td style="text-align: left;">theme with white background and gray grid lines</td>
 <td style="text-align: right;">4</td>
 <td style="text-align: left;">TRUE</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">Como adicionar uma linha horizontal de referência ao gráfico?</td>
-<td style="text-align: left;">add horizontal reference line | horizontal line reference ggplot2</td>
-<td style="text-align: right;">7</td>
+<td style="text-align: left;">add horizontal reference line to ggplot | horizontal line in ggplot2</td>
+<td style="text-align: right;">6</td>
 <td style="text-align: left;">FALSE</td>
 </tr>
 <tr class="odd">
@@ -1648,6 +1707,60 @@ Isso rotacionará o texto do eixo y em 45 graus. A propriedade `hjust` pode ser 
 <td style="text-align: left;">violin plot</td>
 <td style="text-align: right;">3</td>
 <td style="text-align: left;">TRUE</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Como girar os rótulos do eixo x para que eles não fiquem sobrepostos?</td>
+<td style="text-align: left;">rotate x-axis labels</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: left;">FALSE</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Como mostrar a distribuição de uma variável contínua como uma curva suave?</td>
+<td style="text-align: left;">smooth curve continuous variable distribution</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: left;">FALSE</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Como organizar painéis em uma grade, com uma variável nas linhas e outra nas colunas?</td>
+<td style="text-align: left;">organizing panels in a grid with one variable in rows and another in columns</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: left;">TRUE</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Como acrescentar barras de erro a um gráfico?</td>
+<td style="text-align: left;">add error bars to a plot</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: left;">TRUE</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Como escrever um texto em uma posição fixa do gráfico, sem ligação com os dados?</td>
+<td style="text-align: left;">add text to a fixed position in the plot without linking to data</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: left;">FALSE</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Como formatar as datas do eixo x para mostrar só o mês e o ano?</td>
+<td style="text-align: left;">format x-axis dates month year</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: left;">TRUE</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Com muitos pontos, como mostrar a concentração deles em quadradinhos coloridos?</td>
+<td style="text-align: left;">show concentration of points in colored squares</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: left;">FALSE</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Como acrescentar um segundo eixo y do lado direito do gráfico?</td>
+<td style="text-align: left;">add second y axis on the right</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: left;">TRUE</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Como usar uma paleta de cores que funcione bem para pessoas daltônicas?</td>
+<td style="text-align: left;">color palette for colorblind</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: left;">FALSE</td>
 </tr>
 </tbody>
 </table>
@@ -1682,22 +1795,22 @@ Isso rotacionará o texto do eixo y em 45 graus. A propriedade `hjust` pode ser 
 <tbody>
 <tr class="odd">
 <td style="text-align: left;">busca direta (k = 4)</td>
-<td style="text-align: right;">0.69</td>
-<td style="text-align: right;">0.44</td>
-<td style="text-align: right;">0.86</td>
+<td style="text-align: right;">0.56</td>
+<td style="text-align: right;">0.37</td>
+<td style="text-align: right;">0.73</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">agente</td>
-<td style="text-align: right;">0.62</td>
-<td style="text-align: right;">0.39</td>
-<td style="text-align: right;">0.82</td>
+<td style="text-align: right;">0.60</td>
+<td style="text-align: right;">0.41</td>
+<td style="text-align: right;">0.77</td>
 </tr>
 </tbody>
 </table>
 </div>
 </div>
-<p>Nesta execução, a busca direta com k = 4 encontrou as páginas esperadas em 11 das 16 perguntas (intervalo de 44% a 86%), e o agente, em 10 (de 39% a 82%): o agente acertou 1 pergunta a menos do que a busca direta. Os intervalos são largos e se sobrepõem, então, com 16 perguntas, não dá para afirmar que uma estratégia recupera melhor do que a outra. O agente consultou, em média, 3,9 páginas por pergunta, contra no máximo 4 da busca direta.</p>
-<p>As perguntas em que o agente não chegou às páginas esperadas tratam de: <code>facet_wrap</code>, <code>scale_continuous</code>, <code>position_dodge</code>, <code>geom_abline</code>, <code>coord_polar</code>, <code>geom_jitter</code>. Vale olhar caso a caso: o gabarito considera só a seção da função principal, e parte das respostas pode estar também em outras seções do manual.</p>
+<p>Nesta execução, a busca direta com k = 4 encontrou as páginas esperadas em 14 das 25 perguntas (intervalo de 37% a 73%), e o agente, em 15 (de 41% a 77%): o agente acertou 1 pergunta a mais do que a busca direta. Os intervalos são largos e se sobrepõem, então, com 25 perguntas, não dá para afirmar que uma estratégia recupera melhor do que a outra. O agente consultou, em média, 3,8 páginas por pergunta, contra no máximo 4 da busca direta.</p>
+<p>As perguntas em que o agente não chegou às páginas esperadas tratam de: <code>scale_continuous</code>, <code>position_dodge</code>, <code>geom_abline</code>, <code>coord_polar</code>, <code>geom_jitter</code>, <code>guide_axis</code>, <code>geom_density</code>, <code>annotate</code>, <code>geom_bin_2d</code>, <code>scale_colour_viridis_d</code>. Vale olhar caso a caso: o gabarito considera só a seção da função principal, e parte das respostas pode estar também em outras seções do manual.</p>
 </section>
 <section id="qualidade-das-respostas" class="level3" data-number="8.8.3">
 <h3 data-number="8.8.3" class="anchored" data-anchor-id="qualidade-das-respostas"><span class="header-section-number">8.8.3</span> Qualidade das respostas</h3>
@@ -1708,7 +1821,7 @@ Isso rotacionará o texto do eixo y em 45 graus. A propriedade `hjust` pode ser 
 <li><strong>cita a página certa</strong>;</li>
 <li><strong>se abstém</strong> quando a informação não está no documento.</li>
 </ul>
-<p>Com isso, é possível reportar proporções (com intervalos de confiança, como acima) e comparar versões do sistema. Ferramentas como o LangSmith, da própria LangChain, ajudam a guardar os testes e os rastros de cada execução.</p>
+<p>Com isso, é possível reportar proporções (com intervalos de confiança, como acima) e comparar versões do sistema. Parte desses critérios pode ser verificada automaticamente, como fazemos no anexo ao final do capítulo, que compara dois modelos de linguagem. Ferramentas como o LangSmith, da própria LangChain, ajudam a guardar os testes e os rastros de cada execução.</p>
 </section>
 </section>
 <section id="uso-prático-e-implantação" class="level2" data-number="8.9">
@@ -1736,6 +1849,357 @@ Isso rotacionará o texto do eixo y em 45 graus. A propriedade `hjust` pode ser 
 <li>O uso envolve custos e o envio de dados a um provedor externo.</li>
 </ul>
 <p><strong>Próximos passos:</strong> testar divisores que respeitam a estrutura do documento (títulos e seções), combinar a busca por significado com a busca por palavras-chave, reordenar os trechos recuperados antes de enviá-los ao modelo e automatizar a avaliação das respostas.</p>
+</section>
+<section id="anexo-comparação-entre-dois-modelos-de-linguagem" class="level2 unnumbered">
+<h2 class="unnumbered anchored" data-anchor-id="anexo-comparação-entre-dois-modelos-de-linguagem">Anexo: comparação entre dois modelos de linguagem</h2>
+<div class="callout callout-style-default callout-note callout-titled" title="gpt-4o-mini contra gpt-5.5 (clique para expandir)">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-5-contents" aria-controls="callout-5" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Nota</span>gpt-4o-mini contra gpt-5.5 (clique para expandir)
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-5" class="callout-5-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>O assistente deste capítulo usa o <code>gpt-4o-mini</code>, um modelo pequeno e barato. Um modelo mais recente e maior responde melhor? Para responder, repetimos a avaliação com o <code>gpt-5.5</code>, mantendo <strong>todo o resto igual</strong>: o mesmo documento, os mesmos pedaços, o mesmo modelo de embeddings, o mesmo <em>prompt</em> e as mesmas 30 perguntas. Assim, qualquer diferença vem do modelo de linguagem.</p>
+<p>Além de verificar se o agente chega às páginas certas, medimos três aspectos da resposta que podem ser conferidos automaticamente:</p>
+<ul>
+<li><strong>Recuperação:</strong> nas 25 perguntas no escopo, o agente consultou alguma página do gabarito?</li>
+<li><strong>Fidelidade da citação:</strong> as páginas citadas na resposta foram de fato consultadas? (Vimos no capítulo um caso em que o modelo citou uma página que não tinha consultado.)</li>
+<li><strong>Abstenção:</strong> nas 5 perguntas fora do escopo, o assistente se recusa a responder? E, nas perguntas no escopo, ele se recusa sem necessidade?</li>
+</ul>
+<p>A abstenção é identificada por expressões como “não encontrei” na resposta. É uma regra simples, que pode errar; por isso, as respostas completas ficam guardadas no arquivo de resultados, para conferência.</p>
+<section id="como-a-avaliação-foi-feita" class="level4 unnumbered">
+<h4 class="unnumbered anchored" data-anchor-id="como-a-avaliação-foi-feita">Como a avaliação foi feita</h4>
+<p>A avaliação faz cerca de 60 chamadas ao agente. Se ficasse no capítulo, seria refeita a cada renderização do livro, com custo e com resultados diferentes a cada vez (as respostas dos modelos variam). Por isso, ela roda em um script separado, que grava os resultados em <code>data/avaliacao_modelos.csv</code>:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb90"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb90-1"><a href="#cb90-1" aria-hidden="true" tabindex="-1"></a><span class="co">"""Compara dois modelos de linguagem no assistente de RAG do capítulo de LLM.</span></span>
+<span id="cb90-2"><a href="#cb90-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb90-3"><a href="#cb90-3" aria-hidden="true" tabindex="-1"></a><span class="co">A avaliação roda fora do livro, porque faz dezenas de chamadas à API e os</span></span>
+<span id="cb90-4"><a href="#cb90-4" aria-hidden="true" tabindex="-1"></a><span class="co">resultados mudariam a cada renderização. O script grava uma linha por</span></span>
+<span id="cb90-5"><a href="#cb90-5" aria-hidden="true" tabindex="-1"></a><span class="co">pergunta e modelo em data/avaliacao_modelos.csv, que o capítulo lê no anexo.</span></span>
+<span id="cb90-6"><a href="#cb90-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb90-7"><a href="#cb90-7" aria-hidden="true" tabindex="-1"></a><span class="co">Uso, na pasta do projeto, com a chave OPENAI_API_KEY definida (no ambiente</span></span>
+<span id="cb90-8"><a href="#cb90-8" aria-hidden="true" tabindex="-1"></a><span class="co">ou no arquivo .Renviron):</span></span>
+<span id="cb90-9"><a href="#cb90-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb90-10"><a href="#cb90-10" aria-hidden="true" tabindex="-1"></a><span class="co">    python scripts/avaliacao_rag.py              # avaliação completa</span></span>
+<span id="cb90-11"><a href="#cb90-11" aria-hidden="true" tabindex="-1"></a><span class="co">    python scripts/avaliacao_rag.py --piloto 2   # só as 2 primeiras perguntas</span></span>
+<span id="cb90-12"><a href="#cb90-12" aria-hidden="true" tabindex="-1"></a><span class="co">"""</span></span>
+<span id="cb90-13"><a href="#cb90-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb90-14"><a href="#cb90-14" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> argparse</span>
+<span id="cb90-15"><a href="#cb90-15" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span>
+<span id="cb90-16"><a href="#cb90-16" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> re</span>
+<span id="cb90-17"><a href="#cb90-17" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> time</span>
+<span id="cb90-18"><a href="#cb90-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb90-19"><a href="#cb90-19" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb90-20"><a href="#cb90-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb90-21"><a href="#cb90-21" aria-hidden="true" tabindex="-1"></a><span class="co"># ---- mesmos parâmetros do capítulo ----</span></span>
+<span id="cb90-22"><a href="#cb90-22" aria-hidden="true" tabindex="-1"></a>CAMINHO_PDF <span class="op">=</span> <span class="st">"data/ggplot2.pdf"</span></span>
+<span id="cb90-23"><a href="#cb90-23" aria-hidden="true" tabindex="-1"></a>CAMINHO_PERGUNTAS <span class="op">=</span> <span class="st">"data/perguntas_teste.csv"</span></span>
+<span id="cb90-24"><a href="#cb90-24" aria-hidden="true" tabindex="-1"></a>PUBLICO <span class="op">=</span> <span class="st">"pessoas que estão aprendendo a fazer gráficos no R"</span></span>
+<span id="cb90-25"><a href="#cb90-25" aria-hidden="true" tabindex="-1"></a>DOCUMENTO <span class="op">=</span> <span class="st">"a documentação do pacote ggplot2"</span></span>
+<span id="cb90-26"><a href="#cb90-26" aria-hidden="true" tabindex="-1"></a>IDIOMA_DOCUMENTO <span class="op">=</span> <span class="st">"inglês"</span></span>
+<span id="cb90-27"><a href="#cb90-27" aria-hidden="true" tabindex="-1"></a>TAMANHO_PEDACO <span class="op">=</span> <span class="dv">1000</span></span>
+<span id="cb90-28"><a href="#cb90-28" aria-hidden="true" tabindex="-1"></a>SOBREPOSICAO <span class="op">=</span> <span class="dv">200</span></span>
+<span id="cb90-29"><a href="#cb90-29" aria-hidden="true" tabindex="-1"></a>K <span class="op">=</span> <span class="dv">4</span></span>
+<span id="cb90-30"><a href="#cb90-30" aria-hidden="true" tabindex="-1"></a>MODELO_EMBEDDING <span class="op">=</span> <span class="st">"text-embedding-3-small"</span></span>
+<span id="cb90-31"><a href="#cb90-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb90-32"><a href="#cb90-32" aria-hidden="true" tabindex="-1"></a><span class="co"># ---- modelos comparados ----</span></span>
+<span id="cb90-33"><a href="#cb90-33" aria-hidden="true" tabindex="-1"></a><span class="co"># Modelos com raciocínio interno (como a família gpt-5) não aceitam</span></span>
+<span id="cb90-34"><a href="#cb90-34" aria-hidden="true" tabindex="-1"></a><span class="co"># temperature = 0, por isso cada modelo tem os próprios parâmetros.</span></span>
+<span id="cb90-35"><a href="#cb90-35" aria-hidden="true" tabindex="-1"></a>MODELOS <span class="op">=</span> {</span>
+<span id="cb90-36"><a href="#cb90-36" aria-hidden="true" tabindex="-1"></a>    <span class="st">"gpt-4o-mini"</span>: {<span class="st">"model"</span>: <span class="st">"openai:gpt-4o-mini"</span>, <span class="st">"temperature"</span>: <span class="dv">0</span>},</span>
+<span id="cb90-37"><a href="#cb90-37" aria-hidden="true" tabindex="-1"></a>    <span class="st">"gpt-5.5"</span>: {<span class="st">"model"</span>: <span class="st">"openai:gpt-5.5"</span>},</span>
+<span id="cb90-38"><a href="#cb90-38" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb90-39"><a href="#cb90-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb90-40"><a href="#cb90-40" aria-hidden="true" tabindex="-1"></a>PADRAO_ABSTENCAO <span class="op">=</span> re.<span class="bu">compile</span>(</span>
+<span id="cb90-41"><a href="#cb90-41" aria-hidden="true" tabindex="-1"></a>    <span class="vs">r"não </span><span class="kw">(</span><span class="vs">encontrei</span><span class="cf">|</span><span class="vs">foi encontrad</span><span class="cf">|</span><span class="vs">está </span><span class="kw">(</span><span class="vs">no</span><span class="cf">|</span><span class="vs">nos</span><span class="cf">|</span><span class="vs">presente</span><span class="kw">)</span><span class="cf">|</span><span class="vs">consta</span><span class="cf">|</span><span class="vs">há informaç</span><span class="cf">|</span><span class="vs">tenho informaç"</span></span>
+<span id="cb90-42"><a href="#cb90-42" aria-hidden="true" tabindex="-1"></a>    <span class="vs">r"</span><span class="cf">|</span><span class="vs">posso responder</span><span class="cf">|</span><span class="vs">consigo responder</span><span class="er">)</span><span class="cf">|</span><span class="vs">fora do escopo"</span>,</span>
+<span id="cb90-43"><a href="#cb90-43" aria-hidden="true" tabindex="-1"></a>    flags<span class="op">=</span>re.IGNORECASE,</span>
+<span id="cb90-44"><a href="#cb90-44" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb90-45"><a href="#cb90-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb90-46"><a href="#cb90-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb90-47"><a href="#cb90-47" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> carregar_chave():</span>
+<span id="cb90-48"><a href="#cb90-48" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Usa a chave do ambiente ou, se não houver, a do .Renviron (sem exibi-la)."""</span></span>
+<span id="cb90-49"><a href="#cb90-49" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> os.environ.get(<span class="st">"OPENAI_API_KEY"</span>) <span class="kw">or</span> <span class="kw">not</span> os.path.exists(<span class="st">".Renviron"</span>):</span>
+<span id="cb90-50"><a href="#cb90-50" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span></span>
+<span id="cb90-51"><a href="#cb90-51" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> linha <span class="kw">in</span> <span class="bu">open</span>(<span class="st">".Renviron"</span>, encoding<span class="op">=</span><span class="st">"utf-8"</span>):</span>
+<span id="cb90-52"><a href="#cb90-52" aria-hidden="true" tabindex="-1"></a>        m <span class="op">=</span> re.match(<span class="vs">r"</span><span class="dv">\s</span><span class="op">*</span><span class="kw">(</span><span class="pp">[A-Z_][A-Z0-9_]</span><span class="op">*</span><span class="kw">)</span><span class="dv">\s</span><span class="op">*</span><span class="vs">=</span><span class="dv">\s</span><span class="op">*</span><span class="kw">(</span><span class="dv">.</span><span class="op">*</span><span class="kw">)</span><span class="dv">\s</span><span class="op">*</span><span class="dv">$</span><span class="vs">"</span>, linha)</span>
+<span id="cb90-53"><a href="#cb90-53" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> m:</span>
+<span id="cb90-54"><a href="#cb90-54" aria-hidden="true" tabindex="-1"></a>            os.environ.setdefault(m.group(<span class="dv">1</span>), m.group(<span class="dv">2</span>).strip().strip(<span class="st">'"'</span>).strip(<span class="st">"'"</span>))</span>
+<span id="cb90-55"><a href="#cb90-55" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb90-56"><a href="#cb90-56" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb90-57"><a href="#cb90-57" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> criar_banco_vetorial():</span>
+<span id="cb90-58"><a href="#cb90-58" aria-hidden="true" tabindex="-1"></a>    <span class="im">from</span> langchain_community.document_loaders <span class="im">import</span> PyPDFLoader</span>
+<span id="cb90-59"><a href="#cb90-59" aria-hidden="true" tabindex="-1"></a>    <span class="im">from</span> langchain_core.vectorstores <span class="im">import</span> InMemoryVectorStore</span>
+<span id="cb90-60"><a href="#cb90-60" aria-hidden="true" tabindex="-1"></a>    <span class="im">from</span> langchain_openai <span class="im">import</span> OpenAIEmbeddings</span>
+<span id="cb90-61"><a href="#cb90-61" aria-hidden="true" tabindex="-1"></a>    <span class="im">from</span> langchain_text_splitters <span class="im">import</span> RecursiveCharacterTextSplitter</span>
+<span id="cb90-62"><a href="#cb90-62" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb90-63"><a href="#cb90-63" aria-hidden="true" tabindex="-1"></a>    paginas <span class="op">=</span> PyPDFLoader(CAMINHO_PDF).load()</span>
+<span id="cb90-64"><a href="#cb90-64" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> p <span class="kw">in</span> paginas:   <span class="co"># mesma limpeza do capítulo</span></span>
+<span id="cb90-65"><a href="#cb90-65" aria-hidden="true" tabindex="-1"></a>        p.page_content <span class="op">=</span> (p.page_content</span>
+<span id="cb90-66"><a href="#cb90-66" aria-hidden="true" tabindex="-1"></a>                          .replace(<span class="st">"/quotesingle.Var"</span>, <span class="st">"'"</span>)</span>
+<span id="cb90-67"><a href="#cb90-67" aria-hidden="true" tabindex="-1"></a>                          .replace(<span class="st">"/grave.Var"</span>, <span class="st">"`"</span>))</span>
+<span id="cb90-68"><a href="#cb90-68" aria-hidden="true" tabindex="-1"></a>    divisor <span class="op">=</span> RecursiveCharacterTextSplitter(</span>
+<span id="cb90-69"><a href="#cb90-69" aria-hidden="true" tabindex="-1"></a>        chunk_size<span class="op">=</span>TAMANHO_PEDACO, chunk_overlap<span class="op">=</span>SOBREPOSICAO, add_start_index<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb90-70"><a href="#cb90-70" aria-hidden="true" tabindex="-1"></a>    vector_store <span class="op">=</span> InMemoryVectorStore(OpenAIEmbeddings(model<span class="op">=</span>MODELO_EMBEDDING))</span>
+<span id="cb90-71"><a href="#cb90-71" aria-hidden="true" tabindex="-1"></a>    vector_store.add_documents(documents<span class="op">=</span>divisor.split_documents(paginas))</span>
+<span id="cb90-72"><a href="#cb90-72" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> vector_store</span>
+<span id="cb90-73"><a href="#cb90-73" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb90-74"><a href="#cb90-74" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb90-75"><a href="#cb90-75" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> criar_agente(vector_store, parametros):</span>
+<span id="cb90-76"><a href="#cb90-76" aria-hidden="true" tabindex="-1"></a>    <span class="im">from</span> langchain.agents <span class="im">import</span> create_agent</span>
+<span id="cb90-77"><a href="#cb90-77" aria-hidden="true" tabindex="-1"></a>    <span class="im">from</span> langchain.chat_models <span class="im">import</span> init_chat_model</span>
+<span id="cb90-78"><a href="#cb90-78" aria-hidden="true" tabindex="-1"></a>    <span class="im">from</span> langchain.tools <span class="im">import</span> tool</span>
+<span id="cb90-79"><a href="#cb90-79" aria-hidden="true" tabindex="-1"></a>    <span class="im">from</span> langgraph.checkpoint.memory <span class="im">import</span> InMemorySaver</span>
+<span id="cb90-80"><a href="#cb90-80" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb90-81"><a href="#cb90-81" aria-hidden="true" tabindex="-1"></a>    <span class="at">@tool</span>(response_format<span class="op">=</span><span class="st">"content_and_artifact"</span>)</span>
+<span id="cb90-82"><a href="#cb90-82" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> buscar_no_documento(consulta: <span class="bu">str</span>):</span>
+<span id="cb90-83"><a href="#cb90-83" aria-hidden="true" tabindex="-1"></a>        <span class="co">"""Busca no documento os trechos relevantes para a consulta."""</span></span>
+<span id="cb90-84"><a href="#cb90-84" aria-hidden="true" tabindex="-1"></a>        trechos <span class="op">=</span> vector_store.similarity_search(consulta, k<span class="op">=</span>K)</span>
+<span id="cb90-85"><a href="#cb90-85" aria-hidden="true" tabindex="-1"></a>        texto <span class="op">=</span> <span class="st">"</span><span class="ch">\n\n</span><span class="st">"</span>.join(</span>
+<span id="cb90-86"><a href="#cb90-86" aria-hidden="true" tabindex="-1"></a>            <span class="ss">f"[página </span><span class="sc">{</span>d<span class="sc">.</span>metadata<span class="sc">.</span>get(<span class="st">'page'</span>, <span class="dv">0</span>) <span class="op">+</span> <span class="dv">1</span><span class="sc">}</span><span class="ss">]</span><span class="ch">\n</span><span class="sc">{</span>d<span class="sc">.</span>page_content<span class="sc">}</span><span class="ss">"</span> <span class="cf">for</span> d <span class="kw">in</span> trechos)</span>
+<span id="cb90-87"><a href="#cb90-87" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> texto, trechos</span>
+<span id="cb90-88"><a href="#cb90-88" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb90-89"><a href="#cb90-89" aria-hidden="true" tabindex="-1"></a>    prompt <span class="op">=</span> (</span>
+<span id="cb90-90"><a href="#cb90-90" aria-hidden="true" tabindex="-1"></a>        <span class="ss">f"Você ajuda </span><span class="sc">{</span>PUBLICO<span class="sc">}</span><span class="ss"> a consultar </span><span class="sc">{</span>DOCUMENTO<span class="sc">}</span><span class="ss">. "</span></span>
+<span id="cb90-91"><a href="#cb90-91" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Use a ferramenta buscar_no_documento para encontrar os trechos relevantes antes de responder. "</span></span>
+<span id="cb90-92"><a href="#cb90-92" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Responda em português do Brasil, de forma objetiva, somente com base nos trechos recuperados, "</span></span>
+<span id="cb90-93"><a href="#cb90-93" aria-hidden="true" tabindex="-1"></a>        <span class="st">"e cite a página (por exemplo: p. 12). "</span></span>
+<span id="cb90-94"><a href="#cb90-94" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Se a informação não estiver nos trechos, diga que não encontrou no documento. "</span></span>
+<span id="cb90-95"><a href="#cb90-95" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Não responda perguntas fora do escopo do documento. "</span></span>
+<span id="cb90-96"><a href="#cb90-96" aria-hidden="true" tabindex="-1"></a>        <span class="ss">f"O documento está em </span><span class="sc">{</span>IDIOMA_DOCUMENTO<span class="sc">}</span><span class="ss">: formule a busca nesse idioma, mas responda em português."</span></span>
+<span id="cb90-97"><a href="#cb90-97" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb90-98"><a href="#cb90-98" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> create_agent(init_chat_model(<span class="op">**</span>parametros), tools<span class="op">=</span>[buscar_no_documento],</span>
+<span id="cb90-99"><a href="#cb90-99" aria-hidden="true" tabindex="-1"></a>                        system_prompt<span class="op">=</span>prompt, checkpointer<span class="op">=</span>InMemorySaver())</span>
+<span id="cb90-100"><a href="#cb90-100" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb90-101"><a href="#cb90-101" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb90-102"><a href="#cb90-102" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> paginas_citadas(texto):</span>
+<span id="cb90-103"><a href="#cb90-103" aria-hidden="true" tabindex="-1"></a>    achados <span class="op">=</span> re.findall(<span class="vs">r"p</span>(?:<span class="vs">á</span><span class="cf">|</span><span class="vs">a</span>)<span class="vs">g</span>(?:<span class="vs">ina</span>)<span class="op">?</span><span class="vs">s</span><span class="op">?</span><span class="ch">\.</span><span class="op">?</span><span class="dv">\s</span><span class="op">*</span><span class="kw">(</span><span class="dv">\d</span><span class="op">+</span><span class="kw">)</span><span class="cf">|</span><span class="vs">p</span><span class="ch">\.</span><span class="dv">\s</span><span class="op">*</span><span class="kw">(</span><span class="dv">\d</span><span class="op">+</span><span class="kw">)</span><span class="vs">"</span>, texto)</span>
+<span id="cb90-104"><a href="#cb90-104" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="bu">sorted</span>({<span class="bu">int</span>(n) <span class="cf">for</span> par <span class="kw">in</span> achados <span class="cf">for</span> n <span class="kw">in</span> par <span class="cf">if</span> n})</span>
+<span id="cb90-105"><a href="#cb90-105" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb90-106"><a href="#cb90-106" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb90-107"><a href="#cb90-107" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> avaliar_pergunta(agente, linha, id_sessao):</span>
+<span id="cb90-108"><a href="#cb90-108" aria-hidden="true" tabindex="-1"></a>    inicio <span class="op">=</span> time.perf_counter()</span>
+<span id="cb90-109"><a href="#cb90-109" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> tentativa <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">3</span>):</span>
+<span id="cb90-110"><a href="#cb90-110" aria-hidden="true" tabindex="-1"></a>        <span class="cf">try</span>:</span>
+<span id="cb90-111"><a href="#cb90-111" aria-hidden="true" tabindex="-1"></a>            r <span class="op">=</span> agente.invoke({<span class="st">"messages"</span>: [{<span class="st">"role"</span>: <span class="st">"user"</span>, <span class="st">"content"</span>: linha[<span class="st">"pergunta"</span>]}]},</span>
+<span id="cb90-112"><a href="#cb90-112" aria-hidden="true" tabindex="-1"></a>                              config<span class="op">=</span>{<span class="st">"configurable"</span>: {<span class="st">"thread_id"</span>: id_sessao}})</span>
+<span id="cb90-113"><a href="#cb90-113" aria-hidden="true" tabindex="-1"></a>            <span class="cf">break</span></span>
+<span id="cb90-114"><a href="#cb90-114" aria-hidden="true" tabindex="-1"></a>        <span class="cf">except</span> <span class="pp">Exception</span> <span class="im">as</span> erro:   <span class="co"># limite de requisições ou falha temporária</span></span>
+<span id="cb90-115"><a href="#cb90-115" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> tentativa <span class="op">==</span> <span class="dv">2</span>:</span>
+<span id="cb90-116"><a href="#cb90-116" aria-hidden="true" tabindex="-1"></a>                <span class="cf">raise</span></span>
+<span id="cb90-117"><a href="#cb90-117" aria-hidden="true" tabindex="-1"></a>            <span class="bu">print</span>(<span class="st">"  nova tentativa após erro:"</span>, <span class="bu">type</span>(erro).<span class="va">__name__</span>)</span>
+<span id="cb90-118"><a href="#cb90-118" aria-hidden="true" tabindex="-1"></a>            time.sleep(<span class="dv">10</span> <span class="op">*</span> (tentativa <span class="op">+</span> <span class="dv">1</span>))</span>
+<span id="cb90-119"><a href="#cb90-119" aria-hidden="true" tabindex="-1"></a>    segundos <span class="op">=</span> time.perf_counter() <span class="op">-</span> inicio</span>
+<span id="cb90-120"><a href="#cb90-120" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb90-121"><a href="#cb90-121" aria-hidden="true" tabindex="-1"></a>    mensagens <span class="op">=</span> r[<span class="st">"messages"</span>]</span>
+<span id="cb90-122"><a href="#cb90-122" aria-hidden="true" tabindex="-1"></a>    ultimas <span class="op">=</span> mensagens[<span class="bu">max</span>(i <span class="cf">for</span> i, m <span class="kw">in</span> <span class="bu">enumerate</span>(mensagens) <span class="cf">if</span> m.<span class="bu">type</span> <span class="op">==</span> <span class="st">"human"</span>):]</span>
+<span id="cb90-123"><a href="#cb90-123" aria-hidden="true" tabindex="-1"></a>    consultas, consultadas, tok_in, tok_out <span class="op">=</span> [], <span class="bu">set</span>(), <span class="dv">0</span>, <span class="dv">0</span></span>
+<span id="cb90-124"><a href="#cb90-124" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> m <span class="kw">in</span> ultimas:</span>
+<span id="cb90-125"><a href="#cb90-125" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> m.<span class="bu">type</span> <span class="op">==</span> <span class="st">"ai"</span>:</span>
+<span id="cb90-126"><a href="#cb90-126" aria-hidden="true" tabindex="-1"></a>            consultas <span class="op">+=</span> [c[<span class="st">"args"</span>].get(<span class="st">"consulta"</span>, <span class="st">""</span>) <span class="cf">for</span> c <span class="kw">in</span> (m.tool_calls <span class="kw">or</span> [])]</span>
+<span id="cb90-127"><a href="#cb90-127" aria-hidden="true" tabindex="-1"></a>            uso <span class="op">=</span> <span class="bu">getattr</span>(m, <span class="st">"usage_metadata"</span>, <span class="va">None</span>) <span class="kw">or</span> {}</span>
+<span id="cb90-128"><a href="#cb90-128" aria-hidden="true" tabindex="-1"></a>            tok_in <span class="op">+=</span> uso.get(<span class="st">"input_tokens"</span>, <span class="dv">0</span>)</span>
+<span id="cb90-129"><a href="#cb90-129" aria-hidden="true" tabindex="-1"></a>            tok_out <span class="op">+=</span> uso.get(<span class="st">"output_tokens"</span>, <span class="dv">0</span>)</span>
+<span id="cb90-130"><a href="#cb90-130" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> m.<span class="bu">type</span> <span class="op">==</span> <span class="st">"tool"</span> <span class="kw">and</span> m.artifact:</span>
+<span id="cb90-131"><a href="#cb90-131" aria-hidden="true" tabindex="-1"></a>            consultadas.update(d.metadata.get(<span class="st">"page"</span>, <span class="dv">0</span>) <span class="op">+</span> <span class="dv">1</span> <span class="cf">for</span> d <span class="kw">in</span> m.artifact)</span>
+<span id="cb90-132"><a href="#cb90-132" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb90-133"><a href="#cb90-133" aria-hidden="true" tabindex="-1"></a>    resposta <span class="op">=</span> mensagens[<span class="op">-</span><span class="dv">1</span>].text</span>
+<span id="cb90-134"><a href="#cb90-134" aria-hidden="true" tabindex="-1"></a>    citadas <span class="op">=</span> paginas_citadas(resposta)</span>
+<span id="cb90-135"><a href="#cb90-135" aria-hidden="true" tabindex="-1"></a>    no_escopo <span class="op">=</span> linha[<span class="st">"tipo"</span>] <span class="op">==</span> <span class="st">"no_escopo"</span></span>
+<span id="cb90-136"><a href="#cb90-136" aria-hidden="true" tabindex="-1"></a>    acertou <span class="op">=</span> (<span class="bu">any</span>(<span class="bu">int</span>(linha[<span class="st">"pagina_inicial"</span>]) <span class="op">&lt;=</span> p <span class="op">&lt;=</span> <span class="bu">int</span>(linha[<span class="st">"pagina_final"</span>]) <span class="cf">for</span> p <span class="kw">in</span> consultadas)</span>
+<span id="cb90-137"><a href="#cb90-137" aria-hidden="true" tabindex="-1"></a>               <span class="cf">if</span> no_escopo <span class="cf">else</span> <span class="va">None</span>)</span>
+<span id="cb90-138"><a href="#cb90-138" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> {</span>
+<span id="cb90-139"><a href="#cb90-139" aria-hidden="true" tabindex="-1"></a>        <span class="st">"pergunta"</span>: linha[<span class="st">"pergunta"</span>],</span>
+<span id="cb90-140"><a href="#cb90-140" aria-hidden="true" tabindex="-1"></a>        <span class="st">"tipo"</span>: linha[<span class="st">"tipo"</span>],</span>
+<span id="cb90-141"><a href="#cb90-141" aria-hidden="true" tabindex="-1"></a>        <span class="st">"topico"</span>: linha[<span class="st">"topico"</span>],</span>
+<span id="cb90-142"><a href="#cb90-142" aria-hidden="true" tabindex="-1"></a>        <span class="st">"consultas"</span>: <span class="st">" | "</span>.join(consultas),</span>
+<span id="cb90-143"><a href="#cb90-143" aria-hidden="true" tabindex="-1"></a>        <span class="st">"paginas_consultadas"</span>: <span class="st">" "</span>.join(<span class="bu">map</span>(<span class="bu">str</span>, <span class="bu">sorted</span>(consultadas))),</span>
+<span id="cb90-144"><a href="#cb90-144" aria-hidden="true" tabindex="-1"></a>        <span class="st">"paginas_citadas"</span>: <span class="st">" "</span>.join(<span class="bu">map</span>(<span class="bu">str</span>, citadas)),</span>
+<span id="cb90-145"><a href="#cb90-145" aria-hidden="true" tabindex="-1"></a>        <span class="st">"acertou_recuperacao"</span>: acertou,</span>
+<span id="cb90-146"><a href="#cb90-146" aria-hidden="true" tabindex="-1"></a>        <span class="co"># citação fiel: todas as páginas citadas foram consultadas (vazio se não citou nenhuma)</span></span>
+<span id="cb90-147"><a href="#cb90-147" aria-hidden="true" tabindex="-1"></a>        <span class="st">"citacao_fiel"</span>: (<span class="bu">set</span>(citadas) <span class="op">&lt;=</span> consultadas) <span class="cf">if</span> citadas <span class="cf">else</span> <span class="va">None</span>,</span>
+<span id="cb90-148"><a href="#cb90-148" aria-hidden="true" tabindex="-1"></a>        <span class="st">"absteve"</span>: <span class="bu">bool</span>(PADRAO_ABSTENCAO.search(resposta)),</span>
+<span id="cb90-149"><a href="#cb90-149" aria-hidden="true" tabindex="-1"></a>        <span class="st">"tokens_entrada"</span>: tok_in,</span>
+<span id="cb90-150"><a href="#cb90-150" aria-hidden="true" tabindex="-1"></a>        <span class="st">"tokens_saida"</span>: tok_out,</span>
+<span id="cb90-151"><a href="#cb90-151" aria-hidden="true" tabindex="-1"></a>        <span class="st">"segundos"</span>: <span class="bu">round</span>(segundos, <span class="dv">1</span>),</span>
+<span id="cb90-152"><a href="#cb90-152" aria-hidden="true" tabindex="-1"></a>        <span class="st">"resposta"</span>: resposta,</span>
+<span id="cb90-153"><a href="#cb90-153" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb90-154"><a href="#cb90-154" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb90-155"><a href="#cb90-155" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb90-156"><a href="#cb90-156" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> main():</span>
+<span id="cb90-157"><a href="#cb90-157" aria-hidden="true" tabindex="-1"></a>    parser <span class="op">=</span> argparse.ArgumentParser()</span>
+<span id="cb90-158"><a href="#cb90-158" aria-hidden="true" tabindex="-1"></a>    parser.add_argument(<span class="st">"--piloto"</span>, <span class="bu">type</span><span class="op">=</span><span class="bu">int</span>, default<span class="op">=</span><span class="dv">0</span>,</span>
+<span id="cb90-159"><a href="#cb90-159" aria-hidden="true" tabindex="-1"></a>                        <span class="bu">help</span><span class="op">=</span><span class="st">"avalia só as N primeiras perguntas (não grava o arquivo final)"</span>)</span>
+<span id="cb90-160"><a href="#cb90-160" aria-hidden="true" tabindex="-1"></a>    parser.add_argument(<span class="st">"--saida"</span>, default<span class="op">=</span><span class="st">"data/avaliacao_modelos.csv"</span>)</span>
+<span id="cb90-161"><a href="#cb90-161" aria-hidden="true" tabindex="-1"></a>    args <span class="op">=</span> parser.parse_args()</span>
+<span id="cb90-162"><a href="#cb90-162" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb90-163"><a href="#cb90-163" aria-hidden="true" tabindex="-1"></a>    carregar_chave()</span>
+<span id="cb90-164"><a href="#cb90-164" aria-hidden="true" tabindex="-1"></a>    perguntas <span class="op">=</span> pd.read_csv(CAMINHO_PERGUNTAS, dtype<span class="op">=</span><span class="bu">str</span>, keep_default_na<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb90-165"><a href="#cb90-165" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> args.piloto:</span>
+<span id="cb90-166"><a href="#cb90-166" aria-hidden="true" tabindex="-1"></a>        perguntas <span class="op">=</span> perguntas.head(args.piloto)</span>
+<span id="cb90-167"><a href="#cb90-167" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb90-168"><a href="#cb90-168" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"Criando o banco vetorial..."</span>)</span>
+<span id="cb90-169"><a href="#cb90-169" aria-hidden="true" tabindex="-1"></a>    vector_store <span class="op">=</span> criar_banco_vetorial()</span>
+<span id="cb90-170"><a href="#cb90-170" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb90-171"><a href="#cb90-171" aria-hidden="true" tabindex="-1"></a>    linhas <span class="op">=</span> []</span>
+<span id="cb90-172"><a href="#cb90-172" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> nome, parametros <span class="kw">in</span> MODELOS.items():</span>
+<span id="cb90-173"><a href="#cb90-173" aria-hidden="true" tabindex="-1"></a>        agente <span class="op">=</span> criar_agente(vector_store, parametros)</span>
+<span id="cb90-174"><a href="#cb90-174" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> i, linha <span class="kw">in</span> perguntas.iterrows():</span>
+<span id="cb90-175"><a href="#cb90-175" aria-hidden="true" tabindex="-1"></a>            <span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>nome<span class="sc">}</span><span class="ss"> | </span><span class="sc">{</span>i <span class="op">+</span> <span class="dv">1</span><span class="sc">}</span><span class="ss">/</span><span class="sc">{</span><span class="bu">len</span>(perguntas)<span class="sc">}</span><span class="ss"> | </span><span class="sc">{</span>linha[<span class="st">'pergunta'</span>][:<span class="dv">60</span>]<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb90-176"><a href="#cb90-176" aria-hidden="true" tabindex="-1"></a>            resultado <span class="op">=</span> avaliar_pergunta(agente, linha, id_sessao<span class="op">=</span><span class="ss">f"</span><span class="sc">{</span>nome<span class="sc">}</span><span class="ss">-</span><span class="sc">{</span>i<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb90-177"><a href="#cb90-177" aria-hidden="true" tabindex="-1"></a>            linhas.append({<span class="st">"modelo"</span>: nome, <span class="op">**</span>resultado})</span>
+<span id="cb90-178"><a href="#cb90-178" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb90-179"><a href="#cb90-179" aria-hidden="true" tabindex="-1"></a>    tabela <span class="op">=</span> pd.DataFrame(linhas)</span>
+<span id="cb90-180"><a href="#cb90-180" aria-hidden="true" tabindex="-1"></a>    resumo <span class="op">=</span> tabela.groupby(<span class="st">"modelo"</span>)[[<span class="st">"tokens_entrada"</span>, <span class="st">"tokens_saida"</span>, <span class="st">"segundos"</span>]].<span class="bu">sum</span>()</span>
+<span id="cb90-181"><a href="#cb90-181" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(resumo)</span>
+<span id="cb90-182"><a href="#cb90-182" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb90-183"><a href="#cb90-183" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> args.piloto:</span>
+<span id="cb90-184"><a href="#cb90-184" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="st">"Piloto: arquivo não gravado."</span>)</span>
+<span id="cb90-185"><a href="#cb90-185" aria-hidden="true" tabindex="-1"></a>    <span class="cf">else</span>:</span>
+<span id="cb90-186"><a href="#cb90-186" aria-hidden="true" tabindex="-1"></a>        tabela.to_csv(args.saida, index<span class="op">=</span><span class="va">False</span>, encoding<span class="op">=</span><span class="st">"utf-8"</span>)</span>
+<span id="cb90-187"><a href="#cb90-187" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="st">"Resultados gravados em"</span>, args.saida)</span>
+<span id="cb90-188"><a href="#cb90-188" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb90-189"><a href="#cb90-189" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb90-190"><a href="#cb90-190" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="va">__name__</span> <span class="op">==</span> <span class="st">"__main__"</span>:</span>
+<span id="cb90-191"><a href="#cb90-191" aria-hidden="true" tabindex="-1"></a>    main()</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb91"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb91-1"><a href="#cb91-1" aria-hidden="true" tabindex="-1"></a>res <span class="op">=</span> pd.read_csv(<span class="st">"data/avaliacao_modelos.csv"</span>)</span>
+<span id="cb91-2"><a href="#cb91-2" aria-hidden="true" tabindex="-1"></a>modelos_avaliados <span class="op">=</span> <span class="bu">list</span>(<span class="bu">dict</span>.fromkeys(res[<span class="st">"modelo"</span>]))</span>
+<span id="cb91-3"><a href="#cb91-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb91-4"><a href="#cb91-4" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> resumo_modelo(d):</span>
+<span id="cb91-5"><a href="#cb91-5" aria-hidden="true" tabindex="-1"></a>    escopo <span class="op">=</span> d[d[<span class="st">"tipo"</span>] <span class="op">==</span> <span class="st">"no_escopo"</span>]</span>
+<span id="cb91-6"><a href="#cb91-6" aria-hidden="true" tabindex="-1"></a>    fora <span class="op">=</span> d[d[<span class="st">"tipo"</span>] <span class="op">==</span> <span class="st">"fora_do_escopo"</span>]</span>
+<span id="cb91-7"><a href="#cb91-7" aria-hidden="true" tabindex="-1"></a>    com_citacao <span class="op">=</span> d[d[<span class="st">"citacao_fiel"</span>].notna()]</span>
+<span id="cb91-8"><a href="#cb91-8" aria-hidden="true" tabindex="-1"></a>    rec <span class="op">=</span> escopo[<span class="st">"acertou_recuperacao"</span>].astype(<span class="bu">bool</span>)</span>
+<span id="cb91-9"><a href="#cb91-9" aria-hidden="true" tabindex="-1"></a>    inf, sup <span class="op">=</span> intervalo_wilson(rec.<span class="bu">sum</span>(), <span class="bu">len</span>(rec))</span>
+<span id="cb91-10"><a href="#cb91-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> pd.Series({</span>
+<span id="cb91-11"><a href="#cb91-11" aria-hidden="true" tabindex="-1"></a>        <span class="st">"recuperação (acertos)"</span>: <span class="ss">f"</span><span class="sc">{</span>rec<span class="sc">.</span><span class="bu">sum</span>()<span class="sc">}</span><span class="ss"> de </span><span class="sc">{</span><span class="bu">len</span>(rec)<span class="sc">}</span><span class="ss">"</span>,</span>
+<span id="cb91-12"><a href="#cb91-12" aria-hidden="true" tabindex="-1"></a>        <span class="st">"recuperação (IC 95%)"</span>: <span class="ss">f"</span><span class="sc">{</span><span class="dv">100</span> <span class="op">*</span> inf<span class="sc">:.0f}</span><span class="ss">% a </span><span class="sc">{</span><span class="dv">100</span> <span class="op">*</span> sup<span class="sc">:.0f}</span><span class="ss">%"</span>,</span>
+<span id="cb91-13"><a href="#cb91-13" aria-hidden="true" tabindex="-1"></a>        <span class="st">"citação fiel"</span>: <span class="ss">f"</span><span class="sc">{</span><span class="bu">int</span>(com_citacao[<span class="st">'citacao_fiel'</span>].astype(<span class="bu">bool</span>).<span class="bu">sum</span>())<span class="sc">}</span><span class="ss"> de </span><span class="sc">{</span><span class="bu">len</span>(com_citacao)<span class="sc">}</span><span class="ss">"</span>,</span>
+<span id="cb91-14"><a href="#cb91-14" aria-hidden="true" tabindex="-1"></a>        <span class="st">"abstenção fora do escopo"</span>: <span class="ss">f"</span><span class="sc">{</span><span class="bu">int</span>(fora[<span class="st">'absteve'</span>].<span class="bu">sum</span>())<span class="sc">}</span><span class="ss"> de </span><span class="sc">{</span><span class="bu">len</span>(fora)<span class="sc">}</span><span class="ss">"</span>,</span>
+<span id="cb91-15"><a href="#cb91-15" aria-hidden="true" tabindex="-1"></a>        <span class="st">"abstenção indevida no escopo"</span>: <span class="ss">f"</span><span class="sc">{</span><span class="bu">int</span>(escopo[<span class="st">'absteve'</span>].<span class="bu">sum</span>())<span class="sc">}</span><span class="ss"> de </span><span class="sc">{</span><span class="bu">len</span>(escopo)<span class="sc">}</span><span class="ss">"</span>,</span>
+<span id="cb91-16"><a href="#cb91-16" aria-hidden="true" tabindex="-1"></a>        <span class="st">"tokens de entrada por pergunta"</span>: <span class="bu">round</span>(d[<span class="st">"tokens_entrada"</span>].mean()),</span>
+<span id="cb91-17"><a href="#cb91-17" aria-hidden="true" tabindex="-1"></a>        <span class="st">"tokens de saída por pergunta"</span>: <span class="bu">round</span>(d[<span class="st">"tokens_saida"</span>].mean()),</span>
+<span id="cb91-18"><a href="#cb91-18" aria-hidden="true" tabindex="-1"></a>        <span class="st">"segundos por pergunta"</span>: <span class="bu">round</span>(d[<span class="st">"segundos"</span>].mean(), <span class="dv">1</span>),</span>
+<span id="cb91-19"><a href="#cb91-19" aria-hidden="true" tabindex="-1"></a>    })</span>
+<span id="cb91-20"><a href="#cb91-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb91-21"><a href="#cb91-21" aria-hidden="true" tabindex="-1"></a>tab_modelos <span class="op">=</span> (pd.DataFrame({m: resumo_modelo(res[res[<span class="st">"modelo"</span>] <span class="op">==</span> m]) <span class="cf">for</span> m <span class="kw">in</span> modelos_avaliados})</span>
+<span id="cb91-22"><a href="#cb91-22" aria-hidden="true" tabindex="-1"></a>               .reset_index(names<span class="op">=</span><span class="st">"métrica"</span>))</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="cell">
+<div class="cell-output-display">
+<table class="table table-striped table-hover table-condensed caption-top table-sm small">
+<caption>Comparação entre os modelos nas 30 perguntas</caption>
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th">métrica</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">gpt-4o-mini</th>
+<th style="text-align: left;" data-quarto-table-cell-role="th">gpt-5.5</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">recuperação (acertos)</td>
+<td style="text-align: left;">15 de 25</td>
+<td style="text-align: left;">23 de 25</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">recuperação (IC 95%)</td>
+<td style="text-align: left;">41% a 77%</td>
+<td style="text-align: left;">75% a 98%</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">citação fiel</td>
+<td style="text-align: left;">25 de 25</td>
+<td style="text-align: left;">28 de 28</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">abstenção fora do escopo</td>
+<td style="text-align: left;">4 de 5</td>
+<td style="text-align: left;">4 de 5</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">abstenção indevida no escopo</td>
+<td style="text-align: left;">1 de 25</td>
+<td style="text-align: left;">0 de 25</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">tokens de entrada por pergunta</td>
+<td style="text-align: left;">1290</td>
+<td style="text-align: left;">2319</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">tokens de saída por pergunta</td>
+<td style="text-align: left;">164</td>
+<td style="text-align: left;">268</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">segundos por pergunta</td>
+<td style="text-align: left;">4.1</td>
+<td style="text-align: left;">5.7</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>Como os dois modelos responderam às <strong>mesmas</strong> perguntas, a comparação mais informativa é pareada: em quantas perguntas um modelo chegou às páginas certas e o outro não.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb92"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb92-1"><a href="#cb92-1" aria-hidden="true" tabindex="-1"></a>rec <span class="op">=</span> (res[res[<span class="st">"tipo"</span>] <span class="op">==</span> <span class="st">"no_escopo"</span>]</span>
+<span id="cb92-2"><a href="#cb92-2" aria-hidden="true" tabindex="-1"></a>       .pivot(index<span class="op">=</span><span class="st">"pergunta"</span>, columns<span class="op">=</span><span class="st">"modelo"</span>, values<span class="op">=</span><span class="st">"acertou_recuperacao"</span>)</span>
+<span id="cb92-3"><a href="#cb92-3" aria-hidden="true" tabindex="-1"></a>       .astype(<span class="bu">bool</span>))</span>
+<span id="cb92-4"><a href="#cb92-4" aria-hidden="true" tabindex="-1"></a>a, b <span class="op">=</span> modelos_avaliados</span>
+<span id="cb92-5"><a href="#cb92-5" aria-hidden="true" tabindex="-1"></a>tab_pareada <span class="op">=</span> pd.DataFrame({</span>
+<span id="cb92-6"><a href="#cb92-6" aria-hidden="true" tabindex="-1"></a>    <span class="st">"situação"</span>: [<span class="st">"os dois acertaram"</span>, <span class="ss">f"só o </span><span class="sc">{</span>a<span class="sc">}</span><span class="ss"> acertou"</span>, <span class="ss">f"só o </span><span class="sc">{</span>b<span class="sc">}</span><span class="ss"> acertou"</span>, <span class="st">"os dois erraram"</span>],</span>
+<span id="cb92-7"><a href="#cb92-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">"perguntas"</span>: [<span class="bu">int</span>((rec[a] <span class="op">&amp;</span> rec[b]).<span class="bu">sum</span>()), <span class="bu">int</span>((rec[a] <span class="op">&amp;</span> <span class="op">~</span>rec[b]).<span class="bu">sum</span>()),</span>
+<span id="cb92-8"><a href="#cb92-8" aria-hidden="true" tabindex="-1"></a>                  <span class="bu">int</span>((<span class="op">~</span>rec[a] <span class="op">&amp;</span> rec[b]).<span class="bu">sum</span>()), <span class="bu">int</span>((<span class="op">~</span>rec[a] <span class="op">&amp;</span> <span class="op">~</span>rec[b]).<span class="bu">sum</span>())],</span>
+<span id="cb92-9"><a href="#cb92-9" aria-hidden="true" tabindex="-1"></a>})</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="cell">
+<div class="cell-output-display">
+<table class="table table-striped table-hover table-condensed caption-top table-sm small">
+<caption>Recuperação nas perguntas no escopo: comparação pareada</caption>
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th">situação</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">perguntas</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">os dois acertaram</td>
+<td style="text-align: right;">15</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">só o gpt-4o-mini acertou</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">só o gpt-5.5 acertou</td>
+<td style="text-align: right;">8</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">os dois erraram</td>
+<td style="text-align: right;">2</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>Na rodada registrada no arquivo, o <code>gpt-5.5</code> chegou às páginas esperadas em 23 das 25 perguntas no escopo, contra 15 do <code>gpt-4o-mini</code>. Na comparação pareada, houve 8 perguntas em que só o <code>gpt-5.5</code> acertou e 0 em que só o <code>gpt-4o-mini</code> acertou. Se os dois modelos fossem equivalentes, cada uma dessas perguntas teria a mesma chance de cair para um lado ou para o outro; a probabilidade de uma divisão tão desigual quanto a observada (teste exato de McNemar) é de 0,008. Ao contrário da comparação com a busca direta, feita no capítulo, aqui a diferença é clara mesmo com poucas perguntas.</p>
+<p>A diferença vem principalmente da forma de buscar: o <code>gpt-5.5</code> fez, em média, 1,33 buscas por pergunta, contra 0,97 do <code>gpt-4o-mini</code>, e escreveu consultas mais completas. Na pergunta sobre girar os rótulos do eixo x, por exemplo, o <code>gpt-4o-mini</code> fez uma única busca (“rotate x-axis labels”) e não chegou às páginas de <code>guide_axis()</code>, enquanto o <code>gpt-5.5</code> fez 3 buscas, a última delas por <code>guide_axis</code>, e consultou as páginas em que o manual documenta a rotação.</p>
+<p>Nenhum dos modelos citou uma página que não tivesse consultado nestas perguntas, feitas uma de cada vez (no capítulo, o problema apareceu em uma pergunta de acompanhamento, que depende do histórico). Nas perguntas fora do escopo, o comportamento foi parecido: o <code>gpt-4o-mini</code> se absteve em 4 das 5 e o <code>gpt-5.5</code> se absteve em 4 das 5. A exceção foi a pergunta sobre regressão logística: os modelos a interpretaram como “mostrar uma regressão logística em um gráfico” e responderam com o exemplo de <code>geom_smooth()</code> com <code>family = "binomial"</code>, que está no manual (p.&nbsp;180 e 181). A pergunta é ambígua, e a resposta é defensável, o que mostra que classificar uma pergunta como “fora do escopo” também exige cuidado. Nas perguntas no escopo, houve 1 recusa indevida do <code>gpt-4o-mini</code>, em uma pergunta em que a busca não chegou às páginas certas: com os trechos errados em mãos, recusar-se é o comportamento esperado.</p>
+<p>O ganho tem um preço: por pergunta, o <code>gpt-5.5</code> usou, em média, 1,8 vezes mais tokens de entrada e 1,6 vezes mais tokens de saída do que o <code>gpt-4o-mini</code> (efeito das buscas extras) e levou 5,7 segundos, contra 4,1. Além disso, o preço por token de um modelo maior costuma ser bem mais alto. Para decidir entre os dois, multiplique os tokens pela tabela de preços atual de cada modelo e compare com o valor de responder certo.</p>
+<p><strong>Cuidados na leitura:</strong> é uma única rodada, com 30 perguntas sobre um único documento, e outra rodada pode trazer números um pouco diferentes, porque as respostas dos modelos variam. As métricas também não dizem se o conteúdo da resposta está correto: só se ela veio das páginas certas, se cita o que consultou e se o assistente se recusa quando deve. A correção ainda exige leitura humana, e as respostas completas estão no arquivo <code>data/avaliacao_modelos.csv</code>.</p>
+</section>
+</div>
+</div>
+</div>
 
 
 </section>

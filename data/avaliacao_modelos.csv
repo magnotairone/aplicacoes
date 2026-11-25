@@ -1,0 +1,933 @@
+modelo,pergunta,tipo,topico,consultas,paginas_consultadas,paginas_citadas,acertou_recuperacao,citacao_fiel,absteve,tokens_entrada,tokens_saida,segundos,resposta
+gpt-4o-mini,"Como dividir o gráfico em vários painéis, um para cada valor de uma variável?",no_escopo,facet_wrap,facet_wrap,61 63 64 347,63,True,True,False,1604,186,4.3,"Para dividir o gráfico em vários painéis, um para cada valor de uma variável, você pode usar a função `facet_wrap()` do pacote ggplot2. Essa função organiza uma sequência de painéis em uma grade 2D, o que é geralmente mais eficiente em termos de espaço na tela.
+
+A sintaxe básica é a seguinte:
+
+```R
+facet_wrap(facets, nrow = NULL, ncol = NULL, scales = ""fixed"", ...)
+```
+
+- **facets**: define os grupos de facetas com base em variáveis.
+- **nrow** e **ncol**: permitem especificar o número de linhas e colunas dos painéis.
+- **scales**: determina se as escalas devem ser fixas ou livres.
+
+Para mais detalhes, consulte a documentação na página 63."
+gpt-4o-mini,Como fazer um boxplot e mostrar os valores atípicos?,no_escopo,geom_boxplot,boxplot show outliers,14 83 84,84,True,True,False,1505,232,4.5,"Para fazer um boxplot e mostrar os valores atípicos no R usando o pacote ggplot2, você pode usar a função `geom_boxplot()`. Aqui estão alguns exemplos de como fazer isso:
+
+1. Para criar um boxplot padrão que mostra os valores atípicos:
+   ```R
+   ggplot(data, aes(x = factor_variable, y = numeric_variable)) +
+   geom_boxplot()
+   ```
+
+2. Para personalizar a cor e o formato dos valores atípicos:
+   ```R
+   p + geom_boxplot(outlier.colour = ""red"", outlier.shape = 1)
+   ```
+
+3. Se você quiser remover os outliers ao sobrepor o boxplot com os pontos de dados originais:
+   ```R
+   p + geom_boxplot(outlier.shape = NA) + geom_jitter(width = 0.2)
+   ```
+
+Esses trechos mostram como você pode visualizar e personalizar os valores atípicos em um boxplot. (p. 84)"
+gpt-4o-mini,Como salvar um gráfico em um arquivo PNG com largura e altura definidas?,no_escopo,ggsave,save a plot as a PNG file with specified width and height,193 194 195,194 195,True,True,False,1119,231,5.4,"Para salvar um gráfico em um arquivo PNG com largura e altura definidas, você pode usar a função `ggsave()` do pacote ggplot2. Aqui está um exemplo de como fazer isso:
+
+```R
+ggsave(""meu_grafico.png"", width = 10, height = 8, units = ""cm"")
+```
+
+Neste exemplo, o gráfico será salvo como ""meu_grafico.png"" com 10 cm de largura e 8 cm de altura (p. 194).
+
+Alternativamente, você pode usar a função `png()` para abrir um dispositivo gráfico, imprimir o gráfico e depois fechar o dispositivo:
+
+```R
+png(""meu_grafico.png"", width = 800, height = 600) # largura e altura em pixels
+print(meu_grafico) # onde meu_grafico é o seu objeto ggplot
+dev.off()
+```
+
+Isso também permitirá que você defina a largura e a altura do gráfico (p. 195)."
+gpt-4o-mini,Como mudar o título do gráfico e os rótulos dos eixos?,no_escopo,labs,how to change the title of the plot | how to change axis labels,35 64 203 225 226 333 335 337,226 337,True,True,False,2172,329,5.6,"Para mudar o título do gráfico e os rótulos dos eixos no ggplot2, você pode usar a função `labs()`. Aqui estão alguns exemplos:
+
+1. **Mudar o título do gráfico**:
+   ```R
+   p + labs(title = ""Novo título do gráfico"")
+   ```
+
+2. **Mudar os rótulos dos eixos**:
+   ```R
+   p + labs(x = ""Novo rótulo do eixo x"", y = ""Novo rótulo do eixo y"")
+   ```
+
+3. **Mudar o rótulo da legenda**:
+   ```R
+   p + labs(colour = ""Cilindros"")
+   ```
+
+Essas alterações podem ser feitas em um objeto ggplot existente (como `p` no exemplo acima) e são recomendadas quando você está mudando outras opções de escala (p. 226). 
+
+Além disso, você pode remover um título ou rótulo existente definindo o argumento correspondente como `NULL`, por exemplo:
+```R
+p + labs(subtitle = NULL)  # Remove o subtítulo
+```
+
+Para mais detalhes sobre a aparência do título e dos rótulos, você pode consultar as seções sobre `plot.title`, `plot.subtitle`, e `plot.caption` (p. 337)."
+gpt-4o-mini,Como usar uma paleta de cores do ColorBrewer?,no_escopo,scale_colour_brewer,ColorBrewer palette,256 258 262,256,True,True,False,1260,184,4.7,"Para usar uma paleta de cores do ColorBrewer no ggplot2, você pode utilizar as funções `scale_colour_brewer()` ou `scale_fill_brewer()`. Aqui está um exemplo básico de como fazer isso:
+
+```R
+library(ggplot2)
+library(RColorBrewer)
+
+ggplot(data, aes(x = variavel_x, fill = variavel_y)) +
+  geom_bar() +
+  scale_fill_brewer(palette = ""Accent"")  # Substitua ""Accent"" pela paleta desejada
+```
+
+As paletas disponíveis incluem ""Accent"", ""Dark2"", ""Paired"", entre outras. Você pode consultar mais sobre as paletas em [colorbrewer2.org](https://colorbrewer2.org) (p. 256-258)."
+gpt-4o-mini,Como mudar a posição da legenda para baixo do gráfico?,no_escopo,theme,change legend position below the plot,218 333 336,333,True,True,False,1168,153,4.0,"Para mudar a posição da legenda para abaixo do gráfico no ggplot2, você pode usar o argumento `legend.position` dentro da função `theme()`. Para posicionar a legenda abaixo do gráfico, você pode definir `legend.position` como `c(0.5, -0.1)`, onde `0.5` é a posição horizontal (centro) e `-0.1` é a posição vertical (abaixo do gráfico).
+
+Exemplo de código:
+
+```R
+p + theme(legend.position = c(0.5, -0.1))
+```
+
+Essa informação foi encontrada na página 333 do documento."
+gpt-4o-mini,Como adicionar uma reta de regressão linear a um gráfico de dispersão?,no_escopo,geom_smooth,add linear regression line to scatter plot,144 147 180,180,True,True,False,1298,133,3.2,"Para adicionar uma reta de regressão linear a um gráfico de dispersão no ggplot2, você pode usar a função `geom_smooth()` com o método `lm`. Aqui está um exemplo:
+
+```R
+ggplot(mpg, aes(displ, hwy)) +
+  geom_point() +
+  geom_smooth(method = lm, se = FALSE)
+```
+
+Esse código cria um gráfico de dispersão com pontos e adiciona uma reta de regressão linear sem a faixa de erro (se = FALSE) (p. 180)."
+gpt-4o-mini,Como colocar o eixo y em escala logarítmica?,no_escopo,scale_continuous,logarithmic scale y axis,24 120 203 204,204,False,True,False,1395,169,4.1,"Para colocar o eixo y em escala logarítmica no ggplot2, você pode usar a função `scale_y_log10()`. Aqui está um exemplo básico:
+
+```R
+ggplot(data, aes(x = x_variable, y = y_variable)) +
+  geom_point() +
+  scale_y_log10()
+```
+
+Além disso, você também pode usar `coord_trans(y = ""log10"")` para transformar as coordenadas do eixo y. Aqui está um exemplo:
+
+```R
+ggplot(data, aes(x = x_variable, y = y_variable)) +
+  geom_point() +
+  coord_trans(y = ""log10"")
+```
+
+Essas informações estão disponíveis nas páginas 204 e 120 do documento."
+gpt-4o-mini,Como colocar as barras lado a lado em vez de empilhadas?,no_escopo,position_dodge,side by side bars instead of stacked,72 244 245,72,False,True,False,1206,145,3.8,"Para colocar as barras lado a lado em vez de empilhadas no ggplot2, você deve usar a função `position_dodge()` ou `position_dodge2()`. Por padrão, as barras que ocupam a mesma posição no eixo x são empilhadas uma sobre a outra. Ao aplicar `position_dodge()`, as barras serão dispostas lado a lado. 
+
+Exemplo de uso:
+
+```R
+ggplot(data, aes(x = factor, fill = grupo)) +
+  geom_bar(position = position_dodge())
+```
+
+Essa informação pode ser encontrada na página 72 do documento."
+gpt-4o-mini,Como definir os limites mínimo e máximo do eixo x?,no_escopo,lims,set limits for x axis,34 233 234 354,234,True,True,False,1231,245,5.5,"Para definir os limites mínimo e máximo do eixo x no ggplot2, você pode usar as funções `xlim()` ou `lims()`. Aqui estão algumas informações relevantes:
+
+1. **xlim()**: Aceita dois valores numéricos que especificam o limite inferior e superior do eixo x. Se o valor maior for fornecido primeiro, a escala será invertida. Você pode deixar um dos valores como NA para calcular o limite correspondente a partir da faixa dos dados.
+   - Exemplo: `xlim(15, 20)`
+
+2. **lims()**: É um atalho para fornecer os limites para as escalas individuais. Qualquer valor fora dos limites especificados será substituído por NA, o que pode remover dados fora dos limites. Para mudar os limites do eixo x sem descartar observações de dados, use `coord_cartesian()`.
+   - Exemplo: `lims(x = c(15, 20))`
+
+Lembre-se de que especificar limites apenas em uma direção pode afetar os limites gerados automaticamente na outra direção (p. 234)."
+gpt-4o-mini,Como usar um tema com fundo branco e linhas de grade cinzas?,no_escopo,ggtheme,theme white background gray grid lines,196 197 198 293,198,True,True,False,1211,161,3.8,"Para usar um tema com fundo branco e linhas de grade cinzas no ggplot2, você pode utilizar o tema `theme_light()`. Este tema é semelhante ao `theme_linedraw()`, mas com linhas e eixos em cinza claro, direcionando mais atenção para os dados. 
+
+Aqui está um exemplo de como aplicar esse tema:
+
+```R
+library(ggplot2)
+
+ggplot(data = seu_dataframe, aes(x = variavel_x, y = variavel_y)) +
+  geom_point() +
+  theme_light()
+```
+
+Essa abordagem garante que o fundo seja branco e as linhas de grade sejam em cinza claro, conforme desejado (p. 198)."
+gpt-4o-mini,Como adicionar uma linha horizontal de referência ao gráfico?,no_escopo,geom_abline,add horizontal reference line to ggplot | horizontal line in ggplot2,17 98 136 144 175 228,17,False,True,False,3599,184,5.1,"Para adicionar uma linha horizontal de referência ao gráfico no ggplot2, você pode usar a função `geom_hline()`. Essa função permite que você especifique a posição da linha no eixo y. Por exemplo:
+
+```R
+ggplot(data = df, aes(x, y)) +
+  geom_line() +
+  geom_hline(yintercept = valor_de_referencia, linetype = ""dashed"", color = ""red"")
+```
+
+Aqui, `valor_de_referencia` é o valor no eixo y onde você deseja que a linha horizontal apareça. Você pode ajustar o tipo de linha e a cor conforme necessário. 
+
+Essa informação foi encontrada na página 17 do documento."
+gpt-4o-mini,Como fazer um gráfico de pizza?,no_escopo,coord_polar,pie chart,13 14 69 74,,False,,True,1440,33,2.2,Não encontrei informações específicas sobre como fazer um gráfico de pizza no documento.
+gpt-4o-mini,Como evitar que pontos sobrepostos fiquem escondidos uns atrás dos outros?,no_escopo,geom_jitter,how to avoid overlapping points in ggplot2,84 145 175 315,145,False,True,False,1391,150,4.5,"Para evitar que pontos sobrepostos fiquem escondidos uns atrás dos outros em gráficos criados com o ggplot2, você pode usar a função `geom_jitter()`. Essa função adiciona um pequeno deslocamento aleatório aos pontos, o que ajuda a visualizar melhor os dados quando há sobreposição. 
+
+Além disso, você também pode considerar o uso de `geom_count()` ou `geom_bin_2d()`, que são variações que lidam melhor com a sobreposição de pontos. 
+
+Essas informações podem ser encontradas na descrição da função `geom_point` e suas alternativas (p. 145)."
+gpt-4o-mini,Como escolher manualmente a cor de cada categoria?,no_escopo,scale_manual,manually choose color for each category,262 278 298 351,298,True,True,False,1277,166,5.8,"Para escolher manualmente a cor de cada categoria no ggplot2, você pode usar a função `scale_colour_manual()`. Essa função permite que você defina um vetor de cores correspondente a cada nível da variável categórica que está sendo mapeada. 
+
+Por exemplo:
+
+```R
+ggplot(data, aes(x, y, colour = factor(categoria))) +
+  geom_point() +
+  scale_colour_manual(values = c(""categoria1"" = ""red"", ""categoria2"" = ""blue"", ""categoria3"" = ""green""))
+```
+
+Isso atribui a cor vermelha à ""categoria1"", azul à ""categoria2"" e verde à ""categoria3"" (p. 298)."
+gpt-4o-mini,Como fazer um gráfico de violino?,no_escopo,geom_violin,violin plot,183 187 188,183,True,True,False,1270,245,5.7,"Para fazer um gráfico de violino no R usando o pacote ggplot2, você pode utilizar a função `geom_violin()`. Aqui está um exemplo básico:
+
+```R
+library(ggplot2)
+
+# Exemplo com o conjunto de dados mtcars
+p <- ggplot(mtcars, aes(factor(cyl), mpg))
+p + geom_violin()
+```
+
+Esse código cria um gráfico de violino que mostra a distribuição da variável `mpg` (milhas por galão) para diferentes números de cilindros (`cyl`). 
+
+Você também pode personalizar o gráfico com diferentes opções, como:
+
+- Para não limitar o gráfico ao intervalo dos dados:
+  ```R
+  p + geom_violin(trim = FALSE)
+  ```
+
+- Para ajustar a largura do gráfico:
+  ```R
+  p + geom_violin(scale = ""width"")
+  ```
+
+- Para adicionar cores com base em uma variável:
+  ```R
+  p + geom_violin(aes(fill = factor(cyl)))
+  ```
+
+Essas informações estão disponíveis nas páginas 183 a 188 do documento."
+gpt-4o-mini,Como girar os rótulos do eixo x para que eles não fiquem sobrepostos?,no_escopo,guide_axis,rotate x-axis labels,64 134 333 335,134,False,True,False,1393,116,3.2,"Para girar os rótulos do eixo x e evitar que fiquem sobrepostos, você pode usar o argumento `angle` dentro da função `theme()` para ajustar a rotação dos rótulos. Por exemplo:
+
+```R
+theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+Isso gira os rótulos em 45 graus. Você pode ajustar o valor do `angle` conforme necessário (p. 134)."
+gpt-4o-mini,Como mostrar a distribuição de uma variável contínua como uma curva suave?,no_escopo,geom_density,smooth curve continuous variable distribution,121 180 281,180,False,True,False,1453,256,6.3,"Para mostrar a distribuição de uma variável contínua como uma curva suave no R usando o pacote ggplot2, você pode utilizar a função `geom_smooth()`. Essa função ajusta uma curva suave aos dados. Aqui estão alguns exemplos de como utilizá-la:
+
+1. Para um ajuste padrão:
+   ```R
+   ggplot(mpg, aes(displ, hwy)) +
+   geom_point() +
+   geom_smooth()
+   ```
+
+2. Para controlar a ""ondulação"" da curva, você pode ajustar o parâmetro `span`:
+   ```R
+   ggplot(mpg, aes(displ, hwy)) +
+   geom_point() +
+   geom_smooth(span = 0.3)  # Valores menores tornam a curva mais ondulada
+   ```
+
+3. Se você quiser usar um modelo linear:
+   ```R
+   ggplot(mpg, aes(displ, hwy)) +
+   geom_point() +
+   geom_smooth(method = lm, se = FALSE)
+   ```
+
+Esses exemplos mostram como você pode visualizar a distribuição de uma variável contínua com uma curva suave. (p. 180)"
+gpt-4o-mini,"Como organizar painéis em uma grade, com uma variável nas linhas e outra nas colunas?",no_escopo,facet_grid,organizing panels in a grid with one variable in rows and another in columns,60 61 62 337,60,True,True,False,1354,217,4.8,"Para organizar painéis em uma grade com uma variável nas linhas e outra nas colunas no ggplot2, você pode usar a função `facet_grid()`. Essa função cria uma matriz de painéis definida por variáveis de facetas nas linhas e colunas. É especialmente útil quando você tem duas variáveis discretas e todas as combinações dessas variáveis estão presentes nos dados.
+
+A sintaxe básica é a seguinte:
+
+```R
+p + facet_grid(rows = vars(variavel_linhas), cols = vars(variavel_colunas))
+```
+
+Por exemplo, se você quiser usar a variável `drv` nas linhas e `cyl` nas colunas, você faria:
+
+```R
+p + facet_grid(rows = vars(drv), cols = vars(cyl))
+```
+
+Isso permitirá que você visualize os dados em uma grade organizada de acordo com as variáveis especificadas (p. 60-62)."
+gpt-4o-mini,Como acrescentar barras de erro a um gráfico?,no_escopo,geom_crossbar,how to add error bars to a plot,98 112 240,98 240,True,True,False,1242,269,5.7,"Para acrescentar barras de erro a um gráfico no ggplot2, você pode usar a função `geom_errorbar()`. Aqui está um exemplo de como fazer isso:
+
+```R
+p + geom_errorbar(
+  aes(ymin = y - 1, ymax = y + 1),
+  width = 0.2,
+  position = position_dodge(width = 0.9)
+)
+```
+
+Neste exemplo, `ymin` e `ymax` definem os limites inferior e superior das barras de erro, respectivamente. O parâmetro `width` controla a largura das barras de erro, e `position` pode ser usado para ajustar a posição das barras em relação às barras do gráfico (p. 240). 
+
+Outra forma de adicionar barras de erro, especialmente quando se está usando `geom_col()`, é:
+
+```R
+p + geom_col(position = ""dodge"") +
+  geom_errorbar(aes(ymin = lower, ymax = upper), position = ""dodge"", width = 0.25)
+```
+
+Aqui, `lower` e `upper` devem ser definidos no seu conjunto de dados para representar os limites das barras de erro (p. 98)."
+gpt-4o-mini,"Como escrever um texto em uma posição fixa do gráfico, sem ligação com os dados?",no_escopo,annotate,add text to a fixed position in the plot without linking to data,116 134 136 157,134,False,True,False,1300,155,4.1,"Para adicionar um texto em uma posição fixa no gráfico, sem ligação com os dados, você pode usar a função `annotate()`. O código seria algo como:
+
+```R
+ggplot(data = seu_dataframe, aes(x, y)) +
+  geom_point() +  # ou outro geom que você esteja usando
+  annotate(""text"", x = posição_x, y = posição_y, label = ""Seu texto aqui"")
+```
+
+Isso permite que você especifique as coordenadas (posição_x e posição_y) onde o texto deve aparecer, independentemente dos dados. Essa informação está disponível na página 134 do documento."
+gpt-4o-mini,Como formatar as datas do eixo x para mostrar só o mês e o ano?,no_escopo,scale_date,format x-axis dates month year,285 286 309,285,True,True,False,1129,139,4.4,"Para formatar as datas do eixo x e mostrar apenas o mês e o ano, você pode usar a função `scale_x_date()` ou `scale_x_datetime()` com o argumento `date_labels`. Por exemplo:
+
+```R
+scale_x_date(date_labels = ""%b %Y"")
+```
+
+ou, se estiver usando datetimes:
+
+```R
+scale_x_datetime(date_labels = ""%b %Y"")
+```
+
+Aqui, `%b` representa o mês abreviado e `%Y` representa o ano com quatro dígitos. Essa informação está disponível na página 285 do documento."
+gpt-4o-mini,"Com muitos pontos, como mostrar a concentração deles em quadradinhos coloridos?",no_escopo,geom_bin_2d,show concentration of points in colored squares,102 145 148 267,267,False,True,False,1394,183,4.5,"Para mostrar a concentração de pontos em quadradinhos coloridos no R usando o pacote ggplot2, você pode utilizar a função `geom_raster()` ou `geom_tile()`. Essas funções permitem criar uma representação de densidade dos pontos em uma grade de quadrados coloridos.
+
+Aqui está um exemplo básico usando `geom_raster()`:
+
+```R
+ggplot(data, aes(x, y)) +
+  geom_raster(aes(fill = density)) +
+  scale_fill_gradientn(colours = terrain.colors(10))
+```
+
+Neste exemplo, `density` deve ser uma variável que representa a densidade dos pontos em cada quadrado. A função `scale_fill_gradientn()` é usada para definir a paleta de cores.
+
+Essa informação pode ser encontrada na página 267 do documento."
+gpt-4o-mini,Como acrescentar um segundo eixo y do lado direito do gráfico?,no_escopo,sec_axis,add second y axis on the right,309 333 354,309,True,True,False,1306,234,5.0,"Para acrescentar um segundo eixo y do lado direito do gráfico no ggplot2, você pode usar a função `sec_axis()` dentro da função `scale_y_continuous()`. Aqui estão alguns exemplos:
+
+1. Criar um eixo secundário simples:
+   ```R
+   p + scale_y_continuous(sec.axis = sec_axis(~ . + 10))
+   ```
+
+2. Herdar o nome do eixo primário:
+   ```R
+   p + scale_y_continuous(""Miles/gallon"", sec.axis = sec_axis(~ . + 10, name = derive()))
+   ```
+
+3. Duplicar o eixo primário:
+   ```R
+   p + scale_y_continuous(sec.axis = dup_axis())
+   ```
+
+4. Usar uma fórmula como atalho:
+   ```R
+   p + scale_y_continuous(sec.axis = ~ .^2)
+   ```
+
+Esses exemplos mostram como você pode manipular o eixo y secundário de diferentes maneiras (p. 309)."
+gpt-4o-mini,Como usar uma paleta de cores que funcione bem para pessoas daltônicas?,no_escopo,scale_colour_viridis_d,color palette for colorblind,260 273 297,260,False,True,False,1068,167,4.3,"Para usar uma paleta de cores que funcione bem para pessoas daltônicas, recomenda-se utilizar paletas do tipo ""viridis"", que são perceptualmente uniformes tanto em exibições coloridas quanto em preto e branco. Isso garante boas propriedades perceptivas para suas visualizações. Além disso, o pacote `colorspace` oferece funcionalidades para gerar paletas de cores com boas propriedades perceptivas e para analisar paletas existentes, incluindo a emulação de daltonismo (p. 260).
+
+Evite paletas derivadas de combinações RGB, como a paleta ""rainbow"", pois não são adequadas para todos os espectadores, especialmente aqueles com deficiências de visão de cores (p. 260)."
+gpt-4o-mini,Como ajustar uma regressão logística no R?,fora_do_escopo,,logistic regression R,2 156 178 180,180,,True,False,1135,174,4.0,"Para ajustar uma regressão logística no R utilizando o pacote ggplot2, você pode usar a função `geom_smooth()` com o método ""glm"" e especificar a família como ""binomial"". Aqui está um exemplo:
+
+```R
+binomial_smooth <- function(...) {
+  geom_smooth(method = ""glm"", method.args = list(family = ""binomial""), ...)
+}
+
+ggplot(rpart::kyphosis, aes(Age, Kyphosis)) +
+  geom_jitter(height = 0.05) +
+  binomial_smooth()
+```
+
+Neste exemplo, os valores precisam ser convertidos em um vetor numérico que varia entre 0 e 1 para que a regressão logística funcione corretamente (p. 180)."
+gpt-4o-mini,Como ler um arquivo do Excel no R?,fora_do_escopo,,read excel file in R,1 2 63,,,,True,1237,39,3.2,Não encontrei informações sobre como ler um arquivo do Excel no R no documento consultado.
+gpt-4o-mini,Como fazer um gráfico interativo com a biblioteca plotly do Python?,fora_do_escopo,,,,,,,True,182,21,1.1,Não encontrei informações sobre como fazer gráficos interativos com a biblioteca plotly do Python no documento.
+gpt-4o-mini,Qual é a cotação do dólar hoje?,fora_do_escopo,,,,,,,True,177,7,0.8,Não encontrei no documento.
+gpt-4o-mini,Quem venceu a Copa do Mundo de 2002?,fora_do_escopo,,,,,,,True,179,7,0.7,Não encontrei no documento.
+gpt-5.5,"Como dividir o gráfico em vários painéis, um para cada valor de uma variável?",no_escopo,facet_wrap,ggplot2 split plot into multiple panels one for each value of a variable faceting facet_wrap facet_grid,60 62 63 65,60 62 63 65,True,True,False,1604,275,5.4,"Para dividir um gráfico em vários painéis, um para cada valor de uma variável, use **facetas**.
+
+Se você tem **uma variável**, a documentação recomenda `facet_wrap()`:
+
+```r
+ggplot(mpg, aes(displ, hwy)) +
+  geom_point() +
+  facet_wrap(vars(class))
+```
+
+`facet_wrap()` “transforma uma sequência 1D de painéis em 2D” e usa variáveis passadas com `vars()` para definir os grupos de facetas (p. 63). A documentação também mostra esse uso com `facet_wrap(vars(class))` (p. 65).
+
+Se você quiser organizar painéis em uma grade por linhas ou colunas, pode usar `facet_grid()`:
+
+```r
+p + facet_grid(rows = vars(drv))
+p + facet_grid(cols = vars(cyl))
+```
+
+`facet_grid()` cria uma matriz de painéis definida por variáveis de faceta nas linhas e colunas (p. 60, p. 62). Para apenas uma variável com muitos níveis, a documentação sugere usar `facet_wrap()` (p. 60)."
+gpt-5.5,Como fazer um boxplot e mostrar os valores atípicos?,no_escopo,geom_boxplot,ggplot2 boxplot outliers geom_boxplot show outlier values,83 84 315,83 84,True,True,False,1517,287,5.6,"Para fazer um boxplot no **ggplot2**, use `geom_boxplot()`:
+
+```r
+library(ggplot2)
+
+p <- ggplot(mpg, aes(class, hwy))
+p + geom_boxplot()
+```
+
+Os valores atípicos (*outliers*) são mostrados individualmente por padrão: pontos além dos “bigodes” do boxplot são chamados de *outlying points* e são plotados separadamente (p. 83).
+
+Você também pode destacar os outliers mudando cor e formato:
+
+```r
+p + geom_boxplot(outlier.colour = ""red"", outlier.shape = 1)
+```
+
+Esse exemplo aparece na documentação para sobrescrever a cor dos valores atípicos (p. 84).
+
+Se quiser ajustar a transparência dos outliers:
+
+```r
+ggplot(diamonds, aes(carat, price)) +
+  geom_boxplot(
+    aes(group = cut_width(carat, 0.25)),
+    outlier.alpha = 0.1
+  )
+```
+
+A documentação mostra `outlier.alpha` para ajustar a transparência dos outliers (p. 84)."
+gpt-5.5,Como salvar um gráfico em um arquivo PNG com largura e altura definidas?,no_escopo,ggsave,save plot PNG file width height ggsave,193 194 195,193 194 195,True,True,False,1290,241,5.1,"Use `ggsave()`, informando o nome do arquivo com extensão `.png` e definindo `width` e `height`.
+
+Exemplo:
+
+```r
+ggsave(""meu_grafico.png"", width = 4, height = 4)
+```
+
+O `ggsave()` infere o tipo de arquivo pela extensão do nome, como `.png` (p. 193, p. 194). Os argumentos `width` e `height` definem o tamanho do gráfico nas unidades indicadas por `units`; se `units` não for informado, o padrão é usado pela função (p. 194).
+
+Também é possível especificar unidades, por exemplo em centímetros:
+
+```r
+ggsave(""meu_grafico.png"", width = 20, height = 20, units = ""cm"")
+```
+
+A documentação mostra exemplos semelhantes para definir dimensões ao salvar o gráfico (p. 195)."
+gpt-5.5,Como mudar o título do gráfico e os rótulos dos eixos?,no_escopo,labs,change plot title axis labels ggplot2 labs xlab ylab ggtitle,136 225 226 339,225,True,True,False,1364,218,4.7,"Use `labs()` para mudar o título do gráfico e os rótulos dos eixos:
+
+```r
+p + labs(
+  title = ""Novo título do gráfico"",
+  x = ""Novo rótulo do eixo x"",
+  y = ""Novo rótulo do eixo y""
+)
+```
+
+A documentação também mostra formas específicas:
+
+```r
+p + labs(title = ""New plot title"")
+p + labs(x = ""New x label"")
+```
+
+`labs()` serve para modificar rótulos de eixos, legendas e do gráfico (p. 225–226).
+
+Você também pode usar:
+
+```r
+p + xlab(""Novo rótulo do eixo x"")
+p + ylab(""Novo rótulo do eixo y"")
+p + ggtitle(""Novo título"")
+```
+
+Essas funções aparecem na seção de uso de `labs()` (p. 225)."
+gpt-5.5,Como usar uma paleta de cores do ColorBrewer?,no_escopo,scale_colour_brewer,ColorBrewer palette scale_colour_brewer scale_fill_brewer usage palette,256 258 262,256 258,True,True,False,1446,369,5.8,"Para usar uma paleta do **ColorBrewer** no ggplot2, use:
+
+- `scale_colour_brewer()` para a estética `colour`
+- `scale_fill_brewer()` para a estética `fill`
+
+Exemplo:
+
+```r
+ggplot(dados, aes(x, y, colour = grupo)) +
+  geom_point() +
+  scale_colour_brewer(palette = ""Set2"")
+```
+
+Para preenchimento:
+
+```r
+ggplot(dados, aes(x, fill = grupo)) +
+  geom_bar() +
+  scale_fill_brewer(palette = ""Blues"")
+```
+
+As escalas Brewer oferecem paletas **sequenciais**, **divergentes** e **qualitativas**, especialmente adequadas para valores discretos, como em mapas (p. 256).
+
+Você pode escolher a paleta pelo argumento `palette` (p. 258). Exemplos de paletas disponíveis:
+
+- Divergentes: `""BrBG""`, `""PiYG""`, `""RdBu""`, `""Spectral""`
+- Qualitativas: `""Accent""`, `""Dark2""`, `""Paired""`, `""Set1""`, `""Set2""`, `""Set3""`
+- Sequenciais: `""Blues""`, `""Greens""`, `""Oranges""`, `""Reds""`, `""YlGnBu""`
+
+Também é possível controlar o tipo com `type = ""seq""`, `""div""` ou `""qual""` e inverter a direção com `direction = -1` (p. 256)."
+gpt-5.5,Como mudar a posição da legenda para baixo do gráfico?,no_escopo,theme,"ggplot2 legend position bottom theme legend.position | legend.position bottom ""bottom"" examples theme | legend.position the position of legends ""top"" ""right"" ""bottom"" ""left"" ""none""",211 218 333 336 339,336,True,True,False,4829,218,7.7,"Use `theme()` com `legend.position = ""bottom""`:
+
+```r
+p + theme(legend.position = ""bottom"")
+```
+
+Na documentação, `legend.position` define a posição padrão das legendas e aceita `""none""`, `""left""`, `""right""`, `""bottom""`, `""top""` e `""inside""` (p. 336)."
+gpt-5.5,Como adicionar uma reta de regressão linear a um gráfico de dispersão?,no_escopo,geom_smooth,add linear regression line to scatter plot geom_smooth method lm ggplot2,175 179 180,180,True,True,False,1710,160,4.0,"Para adicionar uma reta de regressão linear a um gráfico de dispersão no **ggplot2**, use `geom_point()` para os pontos e `geom_smooth(method = lm)` para a linha linear.
+
+Exemplo:
+
+```r
+ggplot(mpg, aes(displ, hwy)) +
+  geom_point() +
+  geom_smooth(method = lm, se = FALSE)
+```
+
+O documento mostra que `geom_smooth()` pode usar `method = lm` para ajustar um modelo linear, e `se = FALSE` remove a faixa de erro padrão ao redor da reta (p. 180)."
+gpt-5.5,Como colocar o eixo y em escala logarítmica?,no_escopo,scale_continuous,logarithmic y axis scale_y_log10 ggplot2,23 24 120 204,24 204,False,True,False,1652,198,4.4,"Use `scale_y_log10()` para colocar o eixo **y** em escala logarítmica:
+
+```r
+ggplot(dados, aes(x, y)) +
+  geom_point() +
+  scale_y_log10()
+```
+
+O documento mostra o uso de `scale_y_log10()` junto com `scale_x_log10()` para escalas logarítmicas (p. 204) e também menciona `scale_y_log10()` como transformação logarítmica do eixo y (p. 24).
+
+Se quiser marcas especiais de escala logarítmica, pode usar:
+
+```r
+ggplot(dados, aes(x, y)) +
+  geom_point() +
+  scale_y_log10(guide = ""axis_logticks"")
+```
+
+Exemplo documentado na p. 204."
+gpt-5.5,Como colocar as barras lado a lado em vez de empilhadas?,no_escopo,position_dodge,bar chart side by side instead of stacked position dodge geom_bar,72 74 240,72 240,True,True,False,1578,249,4.3,"Para colocar as barras lado a lado em vez de empilhadas, use `position = ""dodge""` ou `position = position_dodge()` no `geom_bar()`/`geom_col()`.
+
+Exemplo:
+
+```r
+ggplot(dados, aes(x = categoria, fill = grupo)) +
+  geom_bar(position = ""dodge"")
+```
+
+Ou:
+
+```r
+ggplot(dados, aes(x = categoria, fill = grupo)) +
+  geom_bar(position = position_dodge())
+```
+
+A documentação diz que, por padrão, múltiplas barras na mesma posição de `x` são empilhadas com `position_stack()`, e que para colocá-las lado a lado deve-se usar `position_dodge()` ou `position_dodge2()` (p. 72). Também há exemplos com `geom_col(position = ""dodge"")` (p. 240)."
+gpt-5.5,Como definir os limites mínimo e máximo do eixo x?,no_escopo,lims,set minimum and maximum limits x axis ggplot2 scale_x_continuous xlim limits,34 234 254 284,234 254 284,True,True,False,1356,276,5.4,"Para definir os limites mínimo e máximo do eixo x no **ggplot2**, use `scale_x_continuous(limits = c(min, max))`:
+
+```r
+p1 + scale_x_continuous(limits = c(2, 6))
+```
+
+Também é possível usar a forma abreviada `xlim()`:
+
+```r
+p1 + xlim(2, 6)
+```
+
+Exemplo:
+
+```r
+ggplot(mtcars, aes(mpg, wt)) +
+  geom_point() +
+  xlim(15, 20)
+```
+
+Você pode usar `NA` para deixar um dos limites automático:
+
+```r
+ggplot(mtcars, aes(mpg, wt)) +
+  geom_point() +
+  xlim(NA, 20)
+```
+
+Atenção: definir limites em escalas posicionais pode remover dados fora dos limites. Se o objetivo for apenas dar zoom, o documento recomenda usar o argumento de limite no sistema de coordenadas, como `coord_cartesian()` (p. 254).  
+
+Referências: p. 234, p. 284, p. 254."
+gpt-5.5,Como usar um tema com fundo branco e linhas de grade cinzas?,no_escopo,ggtheme,ggplot2 theme white background grey grid lines theme_bw,196 197 198 339,197 198,True,True,False,1532,182,4.1,"Use `theme_light()`. Segundo a documentação, ele é semelhante ao `theme_linedraw()`, mas usa **linhas e eixos cinza-claro** sobre **fundo branco**, dando mais atenção aos dados (p. 198).
+
+Exemplo:
+
+```r
+ggplot(dados, aes(x, y)) +
+  geom_point() +
+  theme_light()
+```
+
+Também existe `theme_bw()`, descrito como um tema clássico “dark-on-light” do ggplot2 (p. 197), mas o trecho que menciona explicitamente linhas cinza-claras é o de `theme_light()` (p. 198)."
+gpt-5.5,Como adicionar uma linha horizontal de referência ao gráfico?,no_escopo,geom_abline,add horizontal reference line geom_hline ggplot2 | geom_abline geom_hline geom_vline reference lines horizontal vertical yintercept,4 68 98 136 175,68,True,True,False,4718,239,6.4,"Use `geom_hline()` e defina a posição da linha com `yintercept`:
+
+```r
+ggplot(dados, aes(x, y)) +
+  geom_point() +
+  geom_hline(yintercept = 10)
+```
+
+O documento indica que `geom_hline()` é usado para linhas horizontais e que sua posição é controlada pela estética `yintercept` (p. 68). Também menciona que é possível ajustar aparência com `linetype` e `linewidth` (p. 68), por exemplo:
+
+```r
+ggplot(dados, aes(x, y)) +
+  geom_point() +
+  geom_hline(yintercept = 10, linetype = ""dashed"", linewidth = 1)
+```"
+gpt-5.5,Como fazer um gráfico de pizza?,no_escopo,coord_polar,pie chart ggplot2 coord_polar bar chart,48 74 98 136,48,True,True,False,1653,258,5.0,"Para fazer um gráfico de pizza no **ggplot2**, o documento mostra que ele é um **gráfico de barras empilhadas + coordenadas polares** (p. 48):
+
+```r
+pie <- ggplot(mtcars, aes(x = factor(1), fill = factor(cyl))) +
+  geom_bar(width = 1)
+
+pie + coord_polar(theta = ""y"")
+```
+
+Outro exemplo com valores já agregados (p. 48):
+
+```r
+df <- data.frame(
+  variable = c(""does not resemble"", ""resembles""),
+  value = c(20, 80)
+)
+
+ggplot(df, aes(x = """", y = value, fill = variable)) +
+  geom_col(width = 1) +
+  coord_polar(theta = ""y"")
+```
+
+Observação: o próprio documento recomenda usar gráficos com coordenadas polares com **muita cautela**, pois podem ter problemas de percepção visual (p. 48)."
+gpt-5.5,Como evitar que pontos sobrepostos fiquem escondidos uns atrás dos outros?,no_escopo,geom_jitter,overplotting points overlapping hidden behind each other geom_jitter position_jitter,128 230 242,128 230 242,True,True,False,1500,313,5.3,"Para evitar que pontos sobrepostos fiquem escondidos, use **jitter**, que adiciona uma pequena variação aleatória à posição dos pontos.
+
+Exemplo:
+
+```r
+ggplot(dados, aes(x, y)) +
+  geom_jitter()
+```
+
+`geom_jitter()` é um atalho para:
+
+```r
+geom_point(position = ""jitter"")
+```
+
+Ele é útil para lidar com **overplotting**, especialmente quando os dados têm posições discretas e conjuntos menores (p. 128).
+
+Você também pode controlar o quanto os pontos se espalham:
+
+```r
+ggplot(mtcars, aes(am, vs)) +
+  geom_jitter(width = 0.1, height = 0.1)
+```
+
+ou:
+
+```r
+ggplot(mtcars, aes(am, vs)) +
+  geom_jitter(position = position_jitter(width = 0.1, height = 0.1))
+```
+
+A documentação também diz que `position_jitter()` adiciona ruído aleatório aos pontos para ajudar com sobreposição, funcionando melhor quando os pontos têm posições discretas no eixo x (p. 230, p. 242)."
+gpt-5.5,Como escolher manualmente a cor de cada categoria?,no_escopo,scale_manual,manually choose colour for each category scale_colour_manual values | scale_manual scale_colour_manual values breaks named vector discrete values examples,267 274 296 297 298 350 351,296 297,True,True,False,4002,325,7.4,"Use `scale_colour_manual()` para definir manualmente uma cor para cada categoria. O argumento principal é `values`, que recebe as cores (p. 296).
+
+Exemplo:
+
+```r
+ggplot(dados, aes(x, y, colour = categoria)) +
+  geom_point() +
+  scale_colour_manual(values = c(""red"", ""blue"", ""green""))
+```
+
+Por padrão, os valores em `values` são associados às categorias na ordem da escala, geralmente alfabética. Se você quiser garantir qual cor vai para cada categoria, use um vetor nomeado (p. 297):
+
+```r
+ggplot(dados, aes(x, y, colour = categoria)) +
+  geom_point() +
+  scale_colour_manual(
+    values = c(
+      ""A"" = ""red"",
+      ""B"" = ""blue"",
+      ""C"" = ""green""
+    )
+  )
+```
+
+Se a estética for preenchimento em vez de contorno/cor, use `scale_fill_manual()` (p. 296)."
+gpt-5.5,Como fazer um gráfico de violino?,no_escopo,geom_violin,geom_violin violin plot ggplot2,183 187,183 187,True,True,False,1294,280,5.2,"Para fazer um gráfico de violino no **ggplot2**, use `geom_violin()`.
+
+Exemplo básico:
+
+```r
+p <- ggplot(mtcars, aes(factor(cyl), mpg))
+p + geom_violin()
+```
+
+Nesse exemplo, `cyl` é tratado como variável categórica no eixo x, e `mpg` é a variável contínua no eixo y (p. 187).
+
+Também é possível inverter a orientação:
+
+```r
+ggplot(mtcars, aes(mpg, factor(cyl))) +
+  geom_violin()
+```
+
+A documentação descreve o gráfico de violino como uma forma compacta de mostrar uma distribuição contínua, combinando ideias de `geom_boxplot()` e `geom_density()` (p. 183).
+
+Você também pode adicionar pontos com jitter:
+
+```r
+p + geom_violin() + geom_jitter(height = 0, width = 0.1)
+```
+
+E ajustar a largura proporcionalmente ao tamanho da amostra:
+
+```r
+p + geom_violin(scale = ""count"")
+```
+
+(p. 187)"
+gpt-5.5,Como girar os rótulos do eixo x para que eles não fiquem sobrepostos?,no_escopo,guide_axis,rotate x axis labels overlap element_text angle hjust axis.text.x | element_text angle hjust vjust theme axis.text.x examples | guide_axis usage scale_x_discrete guide angle examples,134 200 201 203 205 206 332 333 335,201 335,True,True,False,6985,625,12.1,"Você pode girar os rótulos do eixo x usando `guide_axis(angle = ...)` na escala do eixo x. A documentação diz que `angle` aceita “um número representando o ângulo do texto em graus” e que, comparado a `theme()/element_text()`, ele também escolhe automaticamente valores adequados de `hjust` e `vjust` (p. 201).
+
+Exemplo:
+
+```r
+p +
+  scale_x_discrete(guide = guide_axis(angle = 45))
+```
+
+Se ainda houver sobreposição, outra opção documentada é usar `n.dodge`, que define o número de linhas/colunas usadas para renderizar os rótulos; isso é útil para rótulos que se sobreporiam (p. 201):
+
+```r
+p +
+  scale_x_discrete(guide = guide_axis(n.dodge = 2))
+```
+
+Também é possível alterar especificamente os rótulos do eixo x via tema, pois `axis.text.x` controla os rótulos do eixo x e usa `element_text()` (p. 335)."
+gpt-5.5,Como mostrar a distribuição de uma variável contínua como uma curva suave?,no_escopo,geom_density,show distribution of a continuous variable as a smooth curve ggplot2 density geom_density,98 102 103 107,98 102,True,True,False,1578,197,4.2,"Use `geom_density()`. Ele calcula e desenha uma estimativa de densidade kernel, isto é, uma versão suavizada do histograma, útil para dados contínuos com distribuição subjacente suave (p. 98).
+
+Exemplo:
+
+```r
+ggplot(diamonds, aes(carat)) +
+  geom_density()
+```
+
+A documentação também mostra que você pode ajustar a suavização com `adjust`:
+
+```r
+ggplot(diamonds, aes(carat)) +
+  geom_density(adjust = 1/5)
+
+ggplot(diamonds, aes(carat)) +
+  geom_density(adjust = 5)
+```
+
+(p. 102)"
+gpt-5.5,"Como organizar painéis em uma grade, com uma variável nas linhas e outra nas colunas?",no_escopo,facet_grid,facet grid arrange panels in a grid one variable in rows another in columns facet_grid rows columns,60 62 63 65,60 62,True,True,False,1606,189,4.1,"Use `facet_grid()`. Ele organiza os painéis em uma matriz definida por variáveis de facetas nas linhas e nas colunas; é mais útil quando há duas variáveis discretas e todas as combinações existem nos dados (p. 60).
+
+Exemplo:
+
+```r
+p + facet_grid(rows = vars(drv), cols = vars(cyl))
+```
+
+Ou, de forma abreviada:
+
+```r
+p + facet_grid(vars(drv), vars(cyl))
+```
+
+Nos exemplos da documentação, `drv` define as linhas e `cyl` define as colunas (p. 62)."
+gpt-5.5,Como acrescentar barras de erro a um gráfico?,no_escopo,geom_crossbar,add error bars to a plot geom_errorbar ggplot2,98 112 136 240,98 112 240,True,True,False,1521,374,6.1,"Para acrescentar barras de erro, use `geom_errorbar()` e mapeie os limites inferior e superior com `ymin` e `ymax` dentro de `aes()`.
+
+Exemplo:
+
+```r
+p +
+  geom_errorbar(
+    aes(ymin = lower, ymax = upper),
+    width = 0.2
+  )
+```
+
+O documento também mostra que, se você estiver usando barras agrupadas com `position = ""dodge""`, é melhor especificar manualmente a largura do deslocamento para alinhar barras e barras de erro:
+
+```r
+dodge <- position_dodge(width = 0.9)
+
+p +
+  geom_col(position = dodge) +
+  geom_errorbar(
+    aes(ymin = lower, ymax = upper),
+    position = dodge,
+    width = 0.25
+  )
+```
+
+Isso é necessário porque as barras e as barras de erro podem ter larguras diferentes (p. 98).  
+Também há exemplo com `aes(ymin = y - 1, ymax = y + 1)` e `width = 0.2` para barras de erro mais estreitas que as barras (p. 240).
+
+Para barras de erro horizontais, o documento menciona `geom_errorbarh()`, uma versão rotacionada de `geom_errorbar()` (p. 112)."
+gpt-5.5,"Como escrever um texto em uma posição fixa do gráfico, sem ligação com os dados?",no_escopo,annotate,write text at a fixed position on a plot not connected to data annotate text ggplot2,131 134 136,134 136,False,True,False,1505,287,5.2,"Use `annotate()` em vez de `geom_text()` quando quiser colocar texto em pontos específicos, sem criar um rótulo para cada linha dos dados.
+
+Exemplo:
+
+```r
+ggplot(dados, aes(x, y)) +
+  geom_point() +
+  annotate(
+    ""text"",
+    label = ""meu texto"",
+    x = 2,
+    y = 15,
+    size = 8,
+    colour = ""red""
+  )
+```
+
+A documentação diz que `geom_text()` e `geom_label()` adicionam rótulos para cada linha dos dados, mesmo quando `x` e `y` são valores únicos. Para adicionar rótulos em pontos especificados, use `annotate()` com `geom = ""text""` ou `geom = ""label""` (p. 134). Há também um exemplo com `annotate(""text"", label = ""plot mpg vs. wt"", x = 2, y = 15, ...)` (p. 136)."
+gpt-5.5,Como formatar as datas do eixo x para mostrar só o mês e o ano?,no_escopo,scale_date,format dates x axis month year date_labels scale_x_date | date_labels format string strftime month year %Y %b | date_labels A string giving the formatting specification for the labels strftime,285 286 287 288 309,285 288,True,True,False,5909,386,10.5,"Use `scale_x_date()` se sua variável do eixo x for da classe `Date`, ou `scale_x_datetime()` se for `POSIXct`. O argumento relevante é `date_labels`, que recebe uma especificação de formato definida por `strftime()` (p. 288).
+
+Exemplo para mostrar mês e ano:
+
+```r
++ scale_x_date(date_labels = ""%b %Y"")
+```
+
+Se for data-hora:
+
+```r
++ scale_x_datetime(date_labels = ""%b %Y"")
+```
+
+O documento mostra que `scale_x_date()` e `scale_x_datetime()` são usados para escalas de data/data-hora no eixo x (p. 285–286), e que `date_labels` controla o formato dos rótulos (p. 288)."
+gpt-5.5,"Com muitos pontos, como mostrar a concentração deles em quadradinhos coloridos?",no_escopo,geom_bin_2d,many points show density concentration in colored squares geom_bin2d two dimensional bins,4 74 119 127,74 119,True,True,False,1799,309,5.7,"Use `geom_bin_2d()`. Ele “divide o plano em retângulos, conta o número de casos em cada retângulo e, por padrão, mapeia esse número para o preenchimento do retângulo”. É indicado como alternativa a `geom_point()` quando há muitos pontos sobrepostos (*overplotting*) (p. 74).
+
+Exemplo:
+
+```r
+ggplot(dados, aes(x = x, y = y)) +
+  geom_bin_2d()
+```
+
+Você pode controlar a quantidade ou o tamanho dos quadradinhos com:
+
+```r
+ggplot(dados, aes(x = x, y = y)) +
+  geom_bin_2d(bins = 30)
+```
+
+ou
+
+```r
+ggplot(dados, aes(x = x, y = y)) +
+  geom_bin_2d(binwidth = c(1, 1))
+```
+
+O documento também menciona que a contagem em cada “bin” pode ser acessada como `after_stat(count)` (p. 119)."
+gpt-5.5,Como acrescentar um segundo eixo y do lado direito do gráfico?,no_escopo,sec_axis,ggplot2 add secondary y axis on right side sec_axis | sec_axis secondary axis scale_y_continuous name breaks labels right axis ggplot2,43 136 203 284 309,309,True,True,False,3632,381,7.4,"Para acrescentar um segundo eixo y no lado direito, use o argumento `sec.axis` dentro de `scale_y_continuous()` com `sec_axis()`:
+
+```r
+p + scale_y_continuous(
+  sec.axis = sec_axis(~ . + 10)
+)
+```
+
+Exemplo da documentação:
+
+```r
+p <- ggplot(mtcars, aes(cyl, mpg)) +
+  geom_point()
+
+p + scale_y_continuous(sec.axis = sec_axis(~ . + 10))
+```
+
+Isso cria um eixo secundário no eixo y, usando a transformação indicada em `sec_axis()` (p. 309).
+
+Se você quiser apenas duplicar o eixo y principal no lado direito, use:
+
+```r
+p + scale_y_continuous(sec.axis = dup_axis())
+```
+
+A documentação descreve `dup_axis()` como um atalho para criar um eixo secundário que duplica o eixo primário (p. 309).
+
+Também é possível definir o nome do eixo secundário, por exemplo herdando o nome do eixo primário:
+
+```r
+p + scale_y_continuous(
+  ""Miles/gallon"",
+  sec.axis = sec_axis(~ . + 10, name = derive())
+)
+```
+
+(p. 309)"
+gpt-5.5,Como usar uma paleta de cores que funcione bem para pessoas daltônicas?,no_escopo,scale_colour_viridis_d,colour palette colorblind friendly ggplot2 discrete scale viridis brewer color blindness | scale_colour_viridis_d color blindness perceptually uniform black-and-white display viridis ggplot2,258 259 260 262 277 278,260 277 278,True,True,False,3523,338,7.6,"Use as escalas **viridis** do ggplot2. A documentação diz que elas são perceptualmente uniformes em cor e em preto-e-branco, e foram projetadas para serem percebidas por pessoas com formas comuns de daltonismo (p. 277). Também afirma que usar o tipo `viridis` é uma opção fácil para evitar paletas inadequadas como `""rainbow""` (p. 260).
+
+Exemplos:
+
+```r
+ggplot(dados, aes(x, y, colour = grupo)) +
+  geom_point() +
+  scale_colour_viridis_d()
+```
+
+Para preenchimento (`fill`):
+
+```r
+ggplot(dados, aes(x, fill = grupo)) +
+  geom_bar() +
+  scale_fill_viridis_d()
+```
+
+Se a variável for contínua, use:
+
+```r
+scale_colour_viridis_c()
+```
+
+ou
+
+```r
+scale_fill_viridis_c()
+```
+
+As funções documentadas incluem `scale_colour_viridis_d()`, `scale_fill_viridis_d()`, `scale_colour_viridis_c()` e `scale_fill_viridis_c()` (p. 278)."
+gpt-5.5,Como ajustar uma regressão logística no R?,fora_do_escopo,,logistic regression geom_smooth glm binomial family,178 179 180,179 180,,True,False,1580,292,5.6,"Para ajustar uma regressão logística em um gráfico com **ggplot2**, use `geom_smooth()` com `method = ""glm""` e `method.args = list(family = ""binomial"")`. O documento mostra este exemplo (p. 180):
+
+```r
+binomial_smooth <- function(...) {
+  geom_smooth(method = ""glm"", method.args = list(family = ""binomial""), ...)
+}
+
+ggplot(rpart::kyphosis, aes(Age, Kyphosis)) +
+  geom_jitter(height = 0.05) +
+  binomial_smooth()
+```
+
+Observação importante: para ajustar uma regressão logística, os valores da variável resposta precisam ser coerçados para um vetor numérico entre 0 e 1 (p. 180).
+
+O documento também indica que `glm()` é usado para suavizações lineares generalizadas, e que os intervalos de confiança para `glm()` são construídos na escala do link e depois transformados de volta para a escala da resposta (p. 179–180)."
+gpt-5.5,Como ler um arquivo do Excel no R?,fora_do_escopo,,read Excel file in R xls xlsx import data ggplot2,1 144 339,1,,True,True,1498,138,4.2,"Não encontrei no documento do **ggplot2** informações sobre como ler arquivos do Excel no R. O documento recuperado descreve o pacote ggplot2 como voltado à criação de visualizações de dados, não à importação de arquivos Excel (p. 1)."
+gpt-5.5,Como fazer um gráfico interativo com a biblioteca plotly do Python?,fora_do_escopo,,Python plotly interactive graph,136 147 148 339,136 147 339,,True,True,1621,145,4.2,"Não encontrei no documento informações sobre gráficos interativos com a biblioteca **plotly do Python**.
+
+Os trechos recuperados tratam de **ggplot2 em R**, por exemplo temas, textos e `geom_point()` (p. 136, p. 147–148, p. 339), mas não explicam o uso de Plotly em Python."
+gpt-5.5,Qual é a cotação do dólar hoje?,fora_do_escopo,,today dollar exchange rate currency quotation,5 53 309 310,,,,True,1696,157,4.6,Não encontrei no documento a cotação do dólar hoje. O documento é sobre o pacote **ggplot2** e não traz dados atuais de câmbio.
+gpt-5.5,Quem venceu a Copa do Mundo de 2002?,fora_do_escopo,,World Cup 2002 winner,5 103 286 349,,,,True,2074,121,4.0,Não encontrei essa informação no documento.

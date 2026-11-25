@@ -916,10 +916,14 @@ Um assistente que "parece funcionar" em duas ou três perguntas ainda não foi a
 
 O ideal é construir um conjunto de perguntas reais, para as quais **uma pessoa** que conhece o documento indica onde está a resposta. Quanto mais variadas as perguntas (escritas por pessoas diferentes, com palavras diferentes das do documento), mais confiável a avaliação.
 
-Para este capítulo, montamos 16 perguntas em português sobre tarefas comuns com o `ggplot2`. Como o manual tem uma seção para cada função, o gabarito de cada pergunta é o intervalo de páginas da função que resolve a tarefa, tirado do sumário do manual (a numeração das páginas começa em 1). O arquivo tem as colunas `pergunta`, `topico`, `pagina_inicial` e `pagina_final`.
+Para este capítulo, montamos 30 perguntas em português: 25 sobre tarefas comuns com o `ggplot2` e 5 fora do escopo do manual, usadas no anexo ao final do capítulo. Como o manual tem uma seção para cada função, o gabarito de cada pergunta no escopo é o intervalo de páginas da função que resolve a tarefa, tirado do sumário do manual (a numeração das páginas começa em 1). Parte das perguntas evita, de propósito, as palavras usadas no manual (por exemplo, "girar os rótulos" em vez de *angle*). O arquivo tem as colunas `pergunta`, `topico`, `pagina_inicial`, `pagina_final` e `tipo`. Nesta seção usamos só as perguntas no escopo.
 
 ```{python}
-perguntas_teste = pd.read_csv("data/perguntas_teste.csv")
+todas_perguntas = pd.read_csv("data/perguntas_teste.csv")
+perguntas_teste = (todas_perguntas[todas_perguntas["tipo"] == "no_escopo"]
+                   .drop(columns="tipo")
+                   .astype({"pagina_inicial": int, "pagina_final": int})
+                   .reset_index(drop=True))
 ```
 
 ```{r}
@@ -1053,7 +1057,7 @@ A avaliação das respostas geradas exige leitura humana. Para cada pergunta do 
 - **cita a página certa**;
 - **se abstém** quando a informação não está no documento.
 
-Com isso, é possível reportar proporções (com intervalos de confiança, como acima) e comparar versões do sistema. Ferramentas como o LangSmith, da própria LangChain, ajudam a guardar os testes e os rastros de cada execução.
+Com isso, é possível reportar proporções (com intervalos de confiança, como acima) e comparar versões do sistema. Parte desses critérios pode ser verificada automaticamente, como fazemos no anexo ao final do capítulo, que compara dois modelos de linguagem. Ferramentas como o LangSmith, da própria LangChain, ajudam a guardar os testes e os rastros de cada execução.
 
 ## Uso prático e implantação
 
@@ -1080,3 +1084,175 @@ Neste capítulo percorremos todas as etapas de um assistente de RAG: entendemos 
 * O uso envolve custos e o envio de dados a um provedor externo.
 
 **Próximos passos:** testar divisores que respeitam a estrutura do documento (títulos e seções), combinar a busca por significado com a busca por palavras-chave, reordenar os trechos recuperados antes de enviá-los ao modelo e automatizar a avaliação das respostas.
+
+## Anexo: comparação entre dois modelos de linguagem {.unnumbered}
+
+::: {.callout-note collapse="true" title="gpt-4o-mini contra gpt-5.5 (clique para expandir)"}
+
+O assistente deste capítulo usa o `gpt-4o-mini`, um modelo pequeno e barato. Um modelo mais recente e maior responde melhor? Para responder, repetimos a avaliação com o `gpt-5.5`, mantendo **todo o resto igual**: o mesmo documento, os mesmos pedaços, o mesmo modelo de embeddings, o mesmo *prompt* e as mesmas 30 perguntas. Assim, qualquer diferença vem do modelo de linguagem.
+
+Além de verificar se o agente chega às páginas certas, medimos três aspectos da resposta que podem ser conferidos automaticamente:
+
+- **Recuperação:** nas 25 perguntas no escopo, o agente consultou alguma página do gabarito?
+- **Fidelidade da citação:** as páginas citadas na resposta foram de fato consultadas? (Vimos no capítulo um caso em que o modelo citou uma página que não tinha consultado.)
+- **Abstenção:** nas 5 perguntas fora do escopo, o assistente se recusa a responder? E, nas perguntas no escopo, ele se recusa sem necessidade?
+
+A abstenção é identificada por expressões como "não encontrei" na resposta. É uma regra simples, que pode errar; por isso, as respostas completas ficam guardadas no arquivo de resultados, para conferência.
+
+#### Como a avaliação foi feita {.unnumbered}
+
+A avaliação faz cerca de 60 chamadas ao agente. Se ficasse no capítulo, seria refeita a cada renderização do livro, com custo e com resultados diferentes a cada vez (as respostas dos modelos variam). Por isso, ela roda em um script separado, que grava os resultados em `data/avaliacao_modelos.csv`:
+
+```{python, file="scripts/avaliacao_rag.py", eval=FALSE}
+```
+
+```{python}
+res = pd.read_csv("data/avaliacao_modelos.csv")
+modelos_avaliados = list(dict.fromkeys(res["modelo"]))
+
+def resumo_modelo(d):
+    escopo = d[d["tipo"] == "no_escopo"]
+    fora = d[d["tipo"] == "fora_do_escopo"]
+    com_citacao = d[d["citacao_fiel"].notna()]
+    rec = escopo["acertou_recuperacao"].astype(bool)
+    inf, sup = intervalo_wilson(rec.sum(), len(rec))
+    return pd.Series({
+        "recuperação (acertos)": f"{rec.sum()} de {len(rec)}",
+        "recuperação (IC 95%)": f"{100 * inf:.0f}% a {100 * sup:.0f}%",
+        "citação fiel": f"{int(com_citacao['citacao_fiel'].astype(bool).sum())} de {len(com_citacao)}",
+        "abstenção fora do escopo": f"{int(fora['absteve'].sum())} de {len(fora)}",
+        "abstenção indevida no escopo": f"{int(escopo['absteve'].sum())} de {len(escopo)}",
+        "tokens de entrada por pergunta": round(d["tokens_entrada"].mean()),
+        "tokens de saída por pergunta": round(d["tokens_saida"].mean()),
+        "segundos por pergunta": round(d["segundos"].mean(), 1),
+    })
+
+tab_modelos = (pd.DataFrame({m: resumo_modelo(res[res["modelo"] == m]) for m in modelos_avaliados})
+               .reset_index(names="métrica"))
+```
+
+```{r}
+#| echo: false
+tabela(py$tab_modelos, "Comparação entre os modelos nas 30 perguntas")
+```
+
+Como os dois modelos responderam às **mesmas** perguntas, a comparação mais informativa é pareada: em quantas perguntas um modelo chegou às páginas certas e o outro não.
+
+```{python}
+rec = (res[res["tipo"] == "no_escopo"]
+       .pivot(index="pergunta", columns="modelo", values="acertou_recuperacao")
+       .astype(bool))
+a, b = modelos_avaliados
+tab_pareada = pd.DataFrame({
+    "situação": ["os dois acertaram", f"só o {a} acertou", f"só o {b} acertou", "os dois erraram"],
+    "perguntas": [int((rec[a] & rec[b]).sum()), int((rec[a] & ~rec[b]).sum()),
+                  int((~rec[a] & rec[b]).sum()), int((~rec[a] & ~rec[b]).sum())],
+})
+```
+
+```{r}
+#| echo: false
+tabela(py$tab_pareada, "Recuperação nas perguntas no escopo: comparação pareada")
+```
+
+```{python}
+#| include: false
+from scipy.stats import binomtest
+
+def num(x, d=1):
+    return f"{x:.{d}f}".replace(".", ",")
+
+anexo = {}
+so_a, so_b = int((rec[a] & ~rec[b]).sum()), int((~rec[a] & rec[b]).sum())
+p_valor = binomtest(so_b, so_a + so_b, 0.5).pvalue if so_a + so_b > 0 else 1.0
+por_modelo = {m: res[res["modelo"] == m] for m in modelos_avaliados}
+buscas = {m: d["consultas"].fillna("").map(lambda s: len([q for q in s.split(" | ") if q])).mean()
+          for m, d in por_modelo.items()}
+
+anexo["rec"] = (
+    f"Na rodada registrada no arquivo, o `{b}` chegou às páginas esperadas em {int(rec[b].sum())} das "
+    f"{len(rec)} perguntas no escopo, contra {int(rec[a].sum())} do `{a}`. Na comparação pareada, houve "
+    f"{so_b} pergunta{'s' if so_b != 1 else ''} em que só o `{b}` acertou e {so_a} em que só o `{a}` acertou. "
+    "Se os dois modelos fossem equivalentes, cada uma dessas perguntas teria a mesma chance de cair para "
+    "um lado ou para o outro; a probabilidade de uma divisão tão desigual quanto a observada (teste exato "
+    f"de McNemar) é de {num(p_valor, 3)}."
+    + (" Ao contrário da comparação com a busca direta, feita no capítulo, aqui a diferença é clara mesmo "
+       "com poucas perguntas." if p_valor < 0.05 else
+       " Com tão poucas perguntas, essa diferença ainda pode ser obra do acaso.")
+)
+
+# exemplo concreto: a pergunta sobre girar os rótulos do eixo (guide_axis)
+ex = res[res["topico"] == "guide_axis"].set_index("modelo")
+anexo["exemplo"] = ""
+if len(ex) == 2 and str(ex.loc[b, "acertou_recuperacao"]) == "True" and str(ex.loc[a, "acertou_recuperacao"]) == "False":
+    anexo["exemplo"] = (
+        f" Na pergunta sobre girar os rótulos do eixo x, por exemplo, o `{a}` fez uma única busca "
+        f"(\"{ex.loc[a, 'consultas']}\") e não chegou às páginas de `guide_axis()`, enquanto o `{b}` fez "
+        f"{ex.loc[b, 'consultas'].count(' | ') + 1} buscas, a última delas por `guide_axis`, e consultou "
+        "as páginas em que o manual documenta a rotação.")
+anexo["buscas"] = (
+    f"A diferença vem principalmente da forma de buscar: o `{b}` fez, em média, {num(buscas[b], 2)} buscas "
+    f"por pergunta, contra {num(buscas[a], 2)} do `{a}`, e escreveu consultas mais completas."
+    + anexo["exemplo"]
+)
+
+# demais métricas
+fora = res[res["tipo"] == "fora_do_escopo"]
+nao_absteve = fora[~fora["absteve"].astype(bool)]
+logistica = nao_absteve["pergunta"].str.contains("logística")
+frase_fora = (
+    "Nas perguntas fora do escopo, o comportamento foi parecido: "
+    + " e ".join(f"o `{m}` se absteve em {int(fora[fora['modelo'] == m]['absteve'].sum())} das "
+                f"{len(fora[fora['modelo'] == m])}" for m in modelos_avaliados) + "."
+)
+if len(nao_absteve) and logistica.all():
+    frase_fora += (
+        " A exceção foi a pergunta sobre regressão logística: os modelos a interpretaram como \"mostrar "
+        "uma regressão logística em um gráfico\" e responderam com o exemplo de `geom_smooth()` com "
+        "`family = \"binomial\"`, que está no manual (p. 180 e 181). A pergunta é ambígua, e a resposta é "
+        "defensável, o que mostra que classificar uma pergunta como \"fora do escopo\" também exige cuidado.")
+indevidas = res[(res["tipo"] == "no_escopo") & res["absteve"].astype(bool)]
+frase_indevida = ""
+if len(indevidas):
+    def recusas(m):
+        n_rec = len(indevidas[indevidas["modelo"] == m])
+        return f"{n_rec} recusa{'s' if n_rec > 1 else ''} indevida{'s' if n_rec > 1 else ''} do `{m}`"
+    frase_indevida = (
+        " Nas perguntas no escopo, houve " + " e ".join(recusas(m) for m in modelos_avaliados
+                                                     if len(indevidas[indevidas["modelo"] == m])) +
+        (", em uma pergunta" if len(indevidas) == 1 else ", sempre em perguntas") +
+        " em que a busca não chegou às páginas certas: com os trechos errados em mãos, recusar-se é o "
+        "comportamento esperado."
+        if (~indevidas["acertou_recuperacao"].astype(bool)).all() else
+        " Houve recusas em perguntas no escopo mesmo com as páginas certas recuperadas.")
+com_cit = res[res["citacao_fiel"].notna()]
+anexo["outras"] = (
+    ("Nenhum dos modelos citou uma página que não tivesse consultado"
+     if com_cit["citacao_fiel"].astype(bool).all() else
+     "Houve citações de páginas não consultadas")
+    + " nestas perguntas, feitas uma de cada vez (no capítulo, o problema apareceu em uma pergunta de "
+    "acompanhamento, que depende do histórico). " + frase_fora + frase_indevida
+)
+
+ta, tb = por_modelo[a], por_modelo[b]
+anexo["custo"] = (
+    f"O ganho tem um preço: por pergunta, o `{b}` usou, em média, {num(tb['tokens_entrada'].mean() / ta['tokens_entrada'].mean())} "
+    f"vezes mais tokens de entrada e {num(tb['tokens_saida'].mean() / ta['tokens_saida'].mean())} vezes mais "
+    f"tokens de saída do que o `{a}` (efeito das buscas extras) e levou {num(tb['segundos'].mean())} segundos, "
+    f"contra {num(ta['segundos'].mean())}. Além disso, o preço por token de um modelo maior costuma ser bem "
+    "mais alto. Para decidir entre os dois, multiplique os tokens pela tabela de preços atual de cada modelo "
+    "e compare com o valor de responder certo."
+)
+```
+
+`r py$anexo$rec`
+
+`r py$anexo$buscas`
+
+`r py$anexo$outras`
+
+`r py$anexo$custo`
+
+**Cuidados na leitura:** é uma única rodada, com 30 perguntas sobre um único documento, e outra rodada pode trazer números um pouco diferentes, porque as respostas dos modelos variam. As métricas também não dizem se o conteúdo da resposta está correto: só se ela veio das páginas certas, se cita o que consultou e se o assistente se recusa quando deve. A correção ainda exige leitura humana, e as respostas completas estão no arquivo `data/avaliacao_modelos.csv`.
+
+:::
