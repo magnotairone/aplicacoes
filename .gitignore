@@ -4,3 +4,8 @@
 config.R
 .rprofile
 TODO.txt
+
+# Saídas intermediárias do knitr/Quarto
+*_cache/
+*.knit.md
+/*_files/
