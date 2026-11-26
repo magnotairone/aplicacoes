@@ -49,9 +49,19 @@ Seguimos as etapas do CRISP-DM apresentadas na introdução do livro. Todo o tra
 
 ## Dados disponíveis
 
-Os dados disponíveis para esta análise contemplam 11 variáveis que podem ser agrupadas em três pilares fundamentais para a segmentação de clientes no varejo:
+::: {.callout-note title="Sobre os dados"}
+A base é **simulada** para fins didáticos: os clientes são fictícios, mas o comportamento de compra foi gerado semana a semana (visitas e gasto por visita), de forma que as variáveis sejam coerentes entre si. O script que gera os dados está em `scripts/gera_clientes_mercado.py`.
 
-<!-- TODO: informar a origem dos dados (ex.: base simulada para fins didáticos) e o período de referência. -->
+A base é uma **foto tirada em uma data de referência**, como as que um mercado extrai do seu sistema de CRM:
+
+- inclui os clientes com pelo menos uma compra nos **12 meses** anteriores à data de referência;
+- os gastos e o `interesse` referem-se aos **6 meses (26 semanas)** anteriores a essa data;
+- a recência (`dias_ult_compra`) é contada em dias até a data de referência.
+
+Por isso, um cliente cuja última compra foi há mais de 182 dias não comprou nada na janela de 6 meses, e seus gastos são zero.
+:::
+
+Os dados disponíveis para esta análise contemplam 11 variáveis que podem ser agrupadas em três pilares fundamentais para a segmentação de clientes no varejo:
 
 1. **Perfil Demográfico e de Crédito**
 
@@ -61,24 +71,21 @@ Fornecem o contexto socioeconômico do cliente, fundamentais para entender o pod
 
 - `renda`: Renda mensal declarada.
 
-- `score_serasa`: Indicador de comportamento financeiro e risco de crédito (essencial para ofertas de prazo ou cartões fidelidade).
+- `score_serasa`: Indicador de comportamento financeiro e risco de crédito, de 0 a 1.000 (essencial para ofertas de prazo ou cartões fidelidade).
 
 2. **Comportamento de Compra (RFM)**
 
 Variáveis que capturam a Recência, Frequência e Valor (modelo RFM), o "coração" da análise de CRM.
 
-- `dias_ult_compra` (Recência): Quantidade de dias desde a última transação. Clientes com valores baixos são ativos; valores altos indicam menor atividade recente.
+- `dias_ult_compra` (Recência): Quantidade de dias entre a última compra e a data de referência, de 0 a 364. Clientes com valores baixos são ativos; valores altos indicam menor atividade recente.
 
-<!-- TODO: descrever a escala de `interesse` (ex.: índice de 0 a 1? como é calculado?) -->
-- `interesse` (Frequência): Um proxy para a frequência de visita ao mercado.
+- `interesse` (Frequência): Proporção das 26 semanas da janela em que o cliente fez pelo menos uma compra, de 0 a 1. Um valor de 0,5 indica compras em metade das semanas (em média, a cada duas semanas); 1 indica compras toda semana.
 
-- `vlr_tran_total_6m` (Valor): Gasto acumulado no último semestre (o "M" de *monetary* do RFM). Mede o valor **recente** do cliente, e não o seu valor de vida (LTV), que exigiria uma visão de longo prazo e da margem de lucro.
+- `vlr_tran_total_6m` (Valor): Gasto total nos 6 meses da janela (o "M" de *monetary* do RFM), somando todas as categorias de produto. Mede o valor **recente** do cliente, e não o seu valor de vida (LTV), que exigiria uma visão de longo prazo e da margem de lucro.
 
 3. **Mix de Consumo (Categorias)**
 
-Permitem identificar as preferências e o estilo de vida do cliente (ex: o sommelier, o fã de churrasco, o focado em saúde). Todas as variáveis abaixo referem-se ao gasto acumulado nos últimos 6 meses:
-
-<!-- TODO: confirmar se `vlr_tran_total_6m` inclui outras categorias além das cinco abaixo (a soma das categorias é bem menor que o total). -->
+Permitem identificar as preferências e o estilo de vida do cliente (ex: o sommelier, o fã de churrasco, o focado em saúde). Todas as variáveis abaixo referem-se ao gasto nos 6 meses da janela. Elas cobrem apenas cinco categorias, e por isso a soma delas é menor que o gasto total: a diferença corresponde às demais compras do cliente (carnes, higiene, padaria etc.), que não estão na base.
 
 - `gasto_vinho_6m`: Consumo na categoria de vinhos e espumantes.
 
@@ -116,6 +123,26 @@ warnings.filterwarnings("ignore", category=FutureWarning)
 ```{python}
 df = pd.read_csv("data/clientes_mercado.csv")
 cols = list(df.columns)
+```
+
+```{python}
+#| include: false
+num = {}  # números que serão citados no texto
+
+def fmt_int(x):
+    return f"{x:,.0f}".replace(",", ".")
+
+def fmt_dec(x, d=1):
+    return f"{x:,.{d}f}".replace(",", "X").replace(".", ",").replace("X", ".")
+
+def pct(x, d=1):
+    return fmt_dec(100 * x, d) + "%"
+
+num["n_clientes"] = fmt_int(len(df))
+num["pct_sem_compra"] = pct((df["vlr_tran_total_6m"] == 0).mean())
+rfm = df[["interesse", "dias_ult_compra", "vlr_tran_total_6m"]].corr()
+num["corr_rec_valor"] = fmt_dec(rfm.loc["dias_ult_compra", "vlr_tran_total_6m"], 2)
+num["corr_freq_valor"] = fmt_dec(rfm.loc["interesse", "vlr_tran_total_6m"], 2)
 ```
 
 ## Análise Exploratória de Dados
@@ -173,9 +200,9 @@ plt.show()
 ```
 
 ::: {.callout-note title="O que observar?"}
-Observe a correlação entre `dias_ult_compra` e `vlr_tran_total_6m`, de aproximadamente -0,6 (conforme o mapa de calor).
+Observe a correlação entre `dias_ult_compra` e `vlr_tran_total_6m`, de `r py$num$corr_rec_valor`, e a entre `interesse` e `vlr_tran_total_6m`, de `r py$num$corr_freq_valor`.
 
-Ela indica que clientes que estão há mais tempo sem comprar tendem a ter gasto menos nos últimos 6 meses. Cuidado com a interpretação: as duas variáveis medem aspectos do mesmo comportamento (quem compra pouco tem, naturalmente, mais dias desde a última compra), e a correlação, por si só, não mostra que o cliente vai abandonar o mercado.
+Elas indicam que clientes que estão há mais tempo sem comprar tendem a ter gasto menos nos últimos 6 meses, e que quem compra em mais semanas gasta mais. Note que `r py$num$pct_sem_compra` dos clientes não compraram nada na janela de 6 meses (recência acima de 182 dias e gasto zero). Cuidado com a interpretação: as duas variáveis medem aspectos do mesmo comportamento (quem compra pouco tem, naturalmente, mais dias desde a última compra), e a correlação, por si só, não mostra que o cliente vai abandonar o mercado.
 
 Para o gestor, a recência é um bom **indicador de alerta** para campanhas de win-back (re-engajamento), mas a janela de dias deve ser calibrada pelo ciclo normal de compra dos clientes, e o abandono (*churn*) só pode ser confirmado observando o que acontece depois.
 :::
@@ -292,6 +319,19 @@ df_pivot = df_cluster_table.set_index('cluster').T
 print(df_pivot.round(1))
 ```
 
+```{python}
+#| include: false
+med = df_cluster_info.set_index("cluster")
+for c in med.index:
+    for col in cols:
+        d = 1 if col == "interesse" else 0
+        num[f"{c}_{col}"] = fmt_dec(med.loc[c, col], d)
+    n_c = (df_cluster["cluster"] == c).sum()
+    num[f"{c}_n"] = fmt_int(n_c)
+    num[f"{c}_pct"] = pct(n_c / len(df_cluster))
+num["D_pct_sem_compra"] = pct((df_cluster.loc[df_cluster["cluster"] == "D", "vlr_tran_total_6m"] == 0).mean(), 0)
+```
+
 Definição da função utilizada para construção dos gráficos spider.
 
 ```{python}
@@ -360,27 +400,27 @@ make_spider(df_cluster_info)
 
 Com base na tabela e no gráfico acima, podemos desenhar o perfil comportamental de cada grupo. Esta etapa é fundamental para que o time de marketing saiba o que oferecer para quem.
 
-- **Cluster A: O "Fiel do Dia a Dia" (*Heavy User*) — 9.998 clientes (16,7%)**
-    - **Perfil:** Renda moderada (mediana de R$ 3.656) e bom score de crédito (631), mas é quem gera o maior faturamento semestral (R$ 2.466).
-    - **Comportamento:** É o cliente mais engajado da base. Compra com altíssima frequência (mediana de 4 dias desde a última compra, interesse 1,0) e concentra suas compras de abastecimento no mercado, liderando com folga os gastos em mercearia (R$ 232), FLV (R$ 219), cerveja (R$ 29) e queijos (R$ 18). Curiosamente, quase não consome vinhos (mediana de R$ 0,60).
+- **Cluster A: O "Fiel do Dia a Dia" (*Heavy User*) — `r py$num$A_n` clientes (`r py$num$A_pct`)**
+    - **Perfil:** Renda moderada (mediana de R\$ `r py$num$A_renda`) e score de crédito intermediário (`r py$num$A_score_serasa`), mas é quem gera o maior gasto no semestre (mediana de R\$ `r py$num$A_vlr_tran_total_6m`).
+    - **Comportamento:** É o cliente mais engajado da base. Compra em quase todas as semanas (interesse de `r py$num$A_interesse`) e fez a última compra há `r py$num$A_dias_ult_compra` dias (mediana). Concentra no mercado suas compras de abastecimento e lidera com folga os gastos em mercearia (R\$ `r py$num$A_gasto_mercearia_6m`), FLV (R\$ `r py$num$A_gasto_flv_6m`) e cerveja (R\$ `r py$num$A_gasto_cerveja_6m`). Quase não compra vinhos: a mediana é zero.
     - **Estratégia:** Manutenção de fidelidade e blindagem contra a concorrência.
     - **Ação:** Programa de pontos ou benefícios em perecíveis (FLV) para manter a recorrência semanal.
 
-- **Cluster B: O "Alta Renda Seletivo" — 19.989 clientes (33,3%)**
-    - **Perfil:** Possui o maior poder aquisitivo da base (renda mediana de R$ 6.166) e o melhor score Serasa (771), mas gasta quase quatro vezes menos que o Cluster A (R$ 674 no semestre).
-    - **Comportamento:** Faz compras mensais (recência mediana de 26 dias) e mantêm alto interesse (1,0), mas não realiza a "compra do mês" no supermercado — seus gastos medianos em mercearia (R$ 42) e FLV (R$ 46) são modestos. Embora a mediana de vinhos seja baixa (R$ 2), este é o único grupo onde o consumo de vinhos e queijos finos puxa a média da categoria para cima (como visto no gráfico de radar), indicando um subgrupo relevante de consumidores *gourmet*.
+- **Cluster B: O "Alta Renda Seletivo" — `r py$num$B_n` clientes (`r py$num$B_pct`)**
+    - **Perfil:** Tem o maior poder aquisitivo da base (renda mediana de R\$ `r py$num$B_renda`), o melhor score Serasa (`r py$num$B_score_serasa`) e é o grupo mais velho (mediana de `r py$num$B_idade` anos).
+    - **Comportamento:** Compra em cerca de 4 a cada 10 semanas (interesse de `r py$num$B_interesse`), com gasto semestral de R\$ `r py$num$B_vlr_tran_total_6m`, abaixo do Cluster A apesar da renda muito maior. É o único grupo com gasto mediano relevante em vinhos (R\$ `r py$num$B_gasto_vinho_6m`) e queijos (R\$ `r py$num$B_gasto_queijo_6m`), mas gasta pouco em mercearia (R\$ `r py$num$B_gasto_mercearia_6m`, menos até que o Cluster C): faz no mercado as compras de conveniência e de itens especiais, e provavelmente o abastecimento da casa em outro lugar.
     - **Estratégia:** Aumento de *share of wallet* e venda cruzada (*cross-sell*) de itens de maior margem.
-    - **Ação:** Ofertas direcionadas de adega, queijos especiais e produtos importados para capturar uma fatia maior do seu orçamento.
+    - **Ação:** Ofertas direcionadas de adega, queijos especiais e produtos importados, além de incentivos para trazer a "compra do mês" para o mercado.
 
-- **Cluster C: O "Consumidor Esporádico" — 20.013 clientes (33,4%)**
-    - **Perfil:** Renda (R$ 3.192) e score (574) intermediários, dividindo com o Cluster B o posto de maior grupo da base.
-    - **Comportamento:** Apresenta engajamento moderado a baixo (interesse 0,7) e compras bastante espaçadas (mediana de 53 dias sem comprar). O gasto semestral é baixo (R$ 206), restrito a compras pontuais de mercearia (R$ 7,60) e FLV (R$ 4,60), com gasto mediano nulo em bebidas alcoólicas e queijos.
+- **Cluster C: O "Consumidor Esporádico" — `r py$num$C_n` clientes (`r py$num$C_pct`)**
+    - **Perfil:** O maior grupo da base e o mais jovem (mediana de `r py$num$C_idade` anos), com renda (R\$ `r py$num$C_renda`) e score (`r py$num$C_score_serasa`) intermediários.
+    - **Comportamento:** Compra em cerca de 1 a cada 3 semanas (interesse de `r py$num$C_interesse`), e a mediana de recência é de `r py$num$C_dias_ult_compra` dias. O gasto semestral é baixo (R\$ `r py$num$C_vlr_tran_total_6m`) e se concentra em compras rápidas de mercearia (R\$ `r py$num$C_gasto_mercearia_6m`), cerveja (R\$ `r py$num$C_gasto_cerveja_6m`) e um pouco de FLV (R\$ `r py$num$C_gasto_flv_6m`), com gasto mediano zero em vinhos e queijos.
     - **Estratégia:** Aumento de frequência e construção de hábito.
-    - **Ação:** Campanhas via aplicativo com gatilhos de recorrência (ex.: descontos progressivos na segunda visita do mês) para reduzir o intervalo de 53 dias.
+    - **Ação:** Campanhas via aplicativo com gatilhos de recorrência (ex.: descontos progressivos na segunda visita do mês) para encurtar o intervalo entre as compras.
 
-- **Cluster D: O "Inativo" (*Churn* / Hibernando) — 10.000 clientes (16,7%)**
-    - **Perfil:** Menor renda (R$ 2.654), menor score Serasa (519) e interesse zerado (0,0).
-    - **Comportamento:** Grupo em estado crítico de inatividade. A mediana de recência é de 181 dias (cerca de seis meses sem transacionar), resultando em gasto mediano praticamente nulo no último semestre (R$ 0,10 no total e R$ 0,00 em todas as categorias). Os dados transversais não permitem afirmar se são ex-clientes perdidos para a concorrência ou cadastros de compra única.
+- **Cluster D: O "Inativo" (*Churn* / Hibernando) — `r py$num$D_n` clientes (`r py$num$D_pct`)**
+    - **Perfil:** Menor renda (R\$ `r py$num$D_renda`) e menor score Serasa (`r py$num$D_score_serasa`) da base.
+    - **Comportamento:** A mediana de recência é de `r py$num$D_dias_ult_compra` dias, bem além da janela de 6 meses: `r py$num$D_pct_sem_compra` dos clientes do grupo não compraram nada no período, e os demais fizeram poucas compras no início da janela (em geral, há mais de quatro meses) e pararam. O gasto mediano no semestre é zero. A foto da base não permite afirmar se são ex-clientes perdidos para a concorrência ou clientes ocasionais (de compra única, por exemplo).
     - **Estratégia:** Reativação seletiva e de baixo custo (evitando subsidiar clientes sem potencial de retorno).
     - **Ação:** Testar uma campanha automatizada de reativação (e-mail/push) com grupo de controle antes de investir em cupons agressivos.
 
@@ -437,14 +477,27 @@ resumo["% do gasto"] = 100 * resumo["gasto_total"] / resumo["gasto_total"].sum()
 print(resumo.round(1))
 ```
 
-Os números revelam uma forte concentração de receita: o Cluster A reúne apenas 16,7% dos clientes (9.998 pessoas), mas responde por 57,7% de todo o faturamento do semestre (cerca de R$ 24,65 milhões). Juntos, os clusters A e B representam exatos 50,0% da base e geram 89,9% da receita total.
+```{python}
+#| include: false
+for c in resumo.index:
+    num[f"{c}_pct_gasto"] = pct(resumo.loc[c, "% do gasto"] / 100)
+    num[f"{c}_gasto_mi"] = fmt_dec(resumo.loc[c, "gasto_total"] / 1e6, 1)
+    num[f"{c}_gasto_mil"] = fmt_int(resumo.loc[c, "gasto_total"] / 1e3)
+num["AB_pct"] = pct(resumo.loc[["A", "B"], "% clientes"].sum() / 100)
+num["AB_pct_gasto"] = pct(resumo.loc[["A", "B"], "% do gasto"].sum() / 100)
+num["CD_pct"] = pct(resumo.loc[["C", "D"], "% clientes"].sum() / 100)
+num["CD_pct_gasto"] = pct(resumo.loc[["C", "D"], "% do gasto"].sum() / 100)
+num["razao_A_D"] = fmt_int(resumo.loc["A", "gasto_total"] / resumo.loc["D", "gasto_total"])
+```
 
-No extremo oposto, o Cluster D também representa 16,7% dos clientes (10.000 pessoas), mas contribui com irrisórios 0,1% do gasto total (cerca de R$ 58 mil no semestre inteiro, com mediana de R$ 0,10). Já o Cluster C, embora seja o maior grupo em volume de cadastros (33,4%), entrega menos de um décimo do faturamento (9,9%).
+Os números revelam uma forte concentração de receita: o Cluster A reúne apenas `r py$num$A_pct` dos clientes (`r py$num$A_n` pessoas), mas responde por `r py$num$A_pct_gasto` de todo o gasto do semestre (cerca de R\$ `r py$num$A_gasto_mi` milhões). Juntos, os clusters A e B representam `r py$num$AB_pct` da base e geram `r py$num$AB_pct_gasto` da receita.
+
+No extremo oposto, o Cluster D representa `r py$num$D_pct` dos clientes (`r py$num$D_n` pessoas), mas contribui com apenas `r py$num$D_pct_gasto` do gasto total (cerca de R\$ `r py$num$D_gasto_mil` mil no semestre inteiro). Já o Cluster C, o maior grupo da base (`r py$num$C_pct` dos clientes), responde por `r py$num$C_pct_gasto` do gasto.
 
 Essa comparação é fundamental para priorizar o orçamento de marketing: um grupo grande, mas de baixo gasto (como o Cluster C), pode ter um potencial de retorno imediato menor do que um grupo pequeno de clientes de alto valor (como o Cluster A). Ao mesmo tempo, um grupo volumoso de gasto moderado a baixo pode ter mais espaço para crescer, e a decisão depende do custo e do efeito esperado de cada ação.
 
 ::: {.callout-important title="Reflexão importante"}
-Os clusters A e D têm praticamente o mesmo tamanho (cerca de 10 mil clientes cada, ou 16,7% da base), mas o Cluster A gera mais de 420 vezes o faturamento do Cluster D! Vale a pena investir a mesma verba e energia de marketing nos dois grupos, ou devemos proteger intensamente o Cluster A enquanto usamos canais automatizados de baixo custo para tentar reativar o D? Essa é a base da segmentação estratégica!
+Os clusters A e D têm tamanhos parecidos (`r py$num$A_n` e `r py$num$D_n` clientes), mas o Cluster A gera cerca de `r py$num$razao_A_D` vezes o gasto do Cluster D! Vale a pena investir a mesma verba e energia de marketing nos dois grupos, ou devemos proteger intensamente o Cluster A enquanto usamos canais automatizados de baixo custo para tentar reativar o D? Essa é a base da segmentação estratégica!
 :::
 
 
@@ -489,14 +542,29 @@ k_sil = list(k_values)[int(np.argmax(silhueta))]
 print(f"Maior silhouette: k = {k_sil}")
 ```
 
-<!-- O cotovelo é um critério subjetivo, por isso o usamos junto com a silhouette. Se os dois critérios apontarem para valores diferentes, ou se nenhum deles indicar um ponto claro, a decisão final deve considerar também o que é operacionalmente viável para o negócio, como discutimos mais adiante. -->
+```{python}
+#| include: false
+crit = dict(zip(k_values, zip(inercia, silhueta)))
+for k, (ine, sil) in crit.items():
+    num[f"inercia_{k}"] = fmt_int(ine / 1e3)
+    num[f"sil_{k}"] = fmt_dec(sil, 2)
+```
 
 Analisando os gráficos gerados para $k$ variando de 2 a 7, observamos que:
 
-- No **Método do Cotovelo**, a inércia cai abruptamente de $k=2$ (~403 mil) para $k=3$ (~257 mil), mantém um ritmo forte de redução até **$k=5$** (~146 mil) e passa a diminuir de forma mais suave a partir daí.
-- No **Coeficiente de silhouette**, a qualidade da separação cresce até atingir seu pico em **$k=5$** (0,511) e **$k=6$** (0,512), recuando em $k=7$ (0,498).
+- No **Método do Cotovelo**, a inércia cai bastante de $k=2$ (cerca de `r py$num$inercia_2` mil) para $k=3$ (`r py$num$inercia_3` mil) e $k=4$ (`r py$num$inercia_4` mil), e passa a diminuir de forma mais suave a partir daí (`r py$num$inercia_5` mil com $k=5$). O "cotovelo" não é nítido, o que é comum em dados reais.
+- No **Coeficiente de silhouette**, o maior valor ocorre em **$k=3$** (`r py$num$sil_3`). Com $k=4$, ele cai para `r py$num$sil_4`, ainda acima dos valores de $k=5$ a $k=7$ (de `r py$num$sil_7` a `r py$num$sil_5`). Valores entre 0,2 e 0,4 são comuns em bases de clientes, em que os grupos se tocam nas bordas.
 
-Embora as métricas puramente estatísticas sugiram que dividir a base em 5 grupos traria uma separação ligeiramente mais nítida, **$k=4$ já entrega um coeficiente de silhouette bastante sólido (0,478)** — muito superior ao de $k=2$ (0,398) — e garante grupos grandes o suficiente para serem acionados na prática. Em projetos reais de ciência de dados, o cotovelo é um critério subjetivo e nem sempre coincide com o máximo da silhouette; por isso, a decisão final equilibra rigor estatístico com a **viabilidade operacional** do time de marketing (gerenciar 4 personas distintas é mais ágil do que criar 5 ou 6 réguas de relacionamento), como discutimos mais adiante.
+Por que a silhouette prefere 3 grupos? A tabela abaixo cruza os grupos obtidos com $k=3$ (linhas) e com $k=4$ (colunas).
+
+```{python}
+rotulos_k3 = KMeans(n_clusters=3, random_state=42, init='k-means++', n_init=10).fit_predict(df_norm)
+pd.crosstab(rotulos_k3, df_cluster["cluster"], rownames=["k = 3"], colnames=["k = 4"])
+```
+
+Com $k=3$, o algoritmo **junta os clusters C (Esporádico) e D (Inativo)** em um só grupo. Do ponto de vista estatístico, faz sentido: os dois têm renda, score e gasto baixos e ficam próximos no espaço das variáveis. Do ponto de vista do negócio, porém, são clientes muito diferentes: o C compra com regularidade e precisa de estímulo para **comprar mais vezes**, enquanto o D **parou de comprar** e precisa de uma ação de reativação. Juntá-los levaria a uma única campanha para dois problemas distintos.
+
+Por isso, mantemos **$k=4$**: a separação estatística é um pouco menor, mas cada grupo corresponde a uma ação de marketing diferente. Em projetos reais, o cotovelo é um critério subjetivo e nem sempre coincide com o máximo da silhouette; a decisão final equilibra o critério estatístico com a **viabilidade operacional** do time de marketing, como discutimos mais adiante.
 
 ## Visualização dos Clusters através do PCA
 
@@ -549,17 +617,24 @@ loadings = pd.DataFrame(pca.components_.T, index=cols, columns=['PC1', 'PC2'])
 print(loadings.round(2))
 ```
 
+Os pesos permitem dar nome aos eixos do gráfico:
+
+- **PC1 (engajamento):** tem pesos positivos para o gasto total, o `interesse` e os gastos em FLV e mercearia, e negativo para a recência. Da esquerda para a direita, vamos dos clientes inativos (D) aos mais engajados (A).
+- **PC2 (renda e mix gourmet):** tem pesos positivos para renda, score, vinhos e queijos, e negativos para mercearia e cerveja. Ele separa o Alta Renda Seletivo (B, acima) do Fiel do Dia a Dia (A, abaixo), dois grupos que gastam bastante, mas de formas diferentes.
+
 ::: {.callout-note title="Como interpretar o gráfico"}
 Com 11 variáveis, dois componentes dificilmente explicam toda a variabilidade dos dados. A variância explicada (mostrada no título) indica o quanto da informação original foi preservada na projeção. Se ela for baixa, é esperado que alguns grupos pareçam se sobrepor no gráfico, e essa sobreposição visual não significa, por si só, que os clusters estejam mal separados nas 11 dimensões originais.
 :::
 
 ## Uso prático da segmentação
 
-A última etapa do CRISP-DM é a **implantação**: transformar os grupos em ações. Alguns pontos práticos:
+A última etapa do CRISP-DM é a **implantação**: transformar os grupos em ações.
 
-- **Classificar novos clientes:** em vez de refazer o agrupamento, guardamos o modelo, a média, o desvio padrão e o mapa de rótulos, e usamos a mesma padronização para atribuir novos clientes a um dos grupos.
-- **Atualizar periodicamente:** os hábitos mudam. Recomenda-se refazer a segmentação de tempos em tempos e acompanhar se o tamanho e o perfil dos grupos permanecem estáveis.
-- **Medir o efeito das ações:** cada campanha por segmento deve ser testada com um grupo de controle, para saber se o resultado vem da ação ou do comportamento que o cliente já teria.
+**Para que serve.** A segmentação organiza a base em quatro públicos com ações distintas: fidelizar o A, aumentar a participação no orçamento do B, criar hábito no C e reativar o D. Ela ajuda a definir a mensagem, o canal e a verba de cada campanha.
+
+**Para que não serve.** Os grupos descrevem o comportamento passado e não preveem a resposta a uma oferta: saber que um cliente está no Cluster D não diz se ele vai voltar com um cupom. Também não devem ser usados para negar crédito ou condições a um cliente com base em renda ou score (veja o aviso sobre a LGPD).
+
+**Como usar em produção.** Em vez de refazer o agrupamento, guardamos o modelo, a média, o desvio padrão e o mapa de rótulos, e usamos a mesma padronização para atribuir novos clientes a um dos grupos. As variáveis do novo cliente precisam ser calculadas da mesma forma: janela de 6 meses e recência contada até a data de referência.
 
 ```{python eval=FALSE}
 import joblib
@@ -575,6 +650,12 @@ def classificar_clientes(novos, artefatos):
     return [artefatos["mapa"][k] for k in rotulos]
 ```
 
+**Manutenção.**
+
+- Refazer a foto da base periodicamente (por exemplo, a cada mês) e acompanhar quantos clientes **migram** entre grupos: um cliente que passa do A para o C é um alerta antes que ele chegue ao D.
+- Refazer o agrupamento de tempos em tempos e verificar se o tamanho e o perfil dos grupos permanecem estáveis.
+- Testar cada campanha por segmento com um grupo de controle, para saber se o resultado vem da ação ou do comportamento que o cliente já teria.
+
 ## Discussão
 
 Ao final desta análise, é fundamental refletir sobre a escolha do número de clusters ($k$). Os critérios estatísticos (cotovelo e silhouette) são um guia, e não uma regra: no mundo real, essa decisão é frequentemente exógena ao modelo.
@@ -589,7 +670,9 @@ A escolha final do número de segmentos deve considerar o equilíbrio entre prec
 
 - Diferenciação Estratégica: O agrupamento só faz sentido se os grupos resultantes exigirem ações de negócio distintas. Se dois clusters identificados pelo algoritmo recebem a mesma oferta de "Desconto em Vinhos", eles deveriam, na prática, ser tratados como um único segmento.
 
-O algoritmo K-Means nos ofereceu um mapa, mas a navegação é feita pelo gestor. Identificamos que metade da nossa base está dividida entre clientes esporádicos (**Cluster C**, 33,4%) e inativos (**Cluster D**, 16,7%), respondendo juntos por apenas 10% do faturamento. Este é um insight técnico com uma implicação estratégica relevante, mas que precisa ser lido junto com a tabela de valor de cada grupo: reativar ou estimular esses clientes só compensa se o retorno esperado superar o custo da ação, e isso deve ser testado antes de ser ampliado.
+Neste estudo, a silhouette preferia 3 grupos, mas isso juntaria clientes que pedem ações opostas (estimular a frequência e reativar), e por isso ficamos com 4.
+
+O algoritmo K-Means nos ofereceu um mapa, mas a navegação é feita pelo gestor. Identificamos que `r py$num$CD_pct` da base são clientes esporádicos (**Cluster C**, `r py$num$C_pct`) ou inativos (**Cluster D**, `r py$num$D_pct`), que respondem juntos por apenas `r py$num$CD_pct_gasto` do gasto. Este é um insight técnico com uma implicação estratégica relevante, mas que precisa ser lido junto com a tabela de valor de cada grupo: reativar ou estimular esses clientes só compensa se o retorno esperado superar o custo da ação, e isso deve ser testado antes de ser ampliado.
 
 ::: {.callout-tip title="Desafio Próximo"}
 Como exercício de reflexão: se o orçamento de marketing fosse cortado pela metade, quais desses 4 clusters você deixaria de atender primeiro? Por quê?
@@ -603,7 +686,12 @@ O agrupamento bem-sucedido não é aquele que apenas minimiza a inércia, mas aq
 
 **Limitações:**
 
+* A base é simulada. Os perfis foram construídos para ilustrar o método, e em uma base real os grupos tendem a ser menos nítidos.
+* A base é uma foto em uma única data de referência: não mostra como cada cliente evolui ao longo do tempo.
+* As categorias de produto cobrem só parte do gasto, e não há informação de margem: um grupo que gasta mais não é, necessariamente, o mais lucrativo.
 * O K-Means assume grupos aproximadamente esféricos e é sensível a valores atípicos e a variáveis muito assimétricas ou com muitos zeros, como os gastos por categoria. Transformações (como o logaritmo) ou outros algoritmos podem ser alternativas.
 * Não avaliamos a estabilidade dos grupos (por exemplo, com outras sementes ou subamostras da base).
 * Os perfis são descritivos: eles não provam que uma ação específica terá o efeito esperado sobre cada grupo, o que só pode ser verificado com testes.
 * O uso de dados demográficos e de crédito exige atenção à LGPD.
+
+**Próximos passos:** aplicar o logaritmo aos gastos antes do agrupamento e comparar os grupos; avaliar a estabilidade da segmentação com outras sementes e subamostras; incluir a margem por categoria para medir o valor de cada grupo em lucro, e não só em faturamento; repetir a foto em datas sucessivas para acompanhar a migração de clientes entre os grupos; e testar uma campanha por segmento com grupo de controle.
