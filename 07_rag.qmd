@@ -84,21 +84,7 @@ O LangChain mudou bastante desde as primeiras versões. Neste capítulo usamos a
 
 ## Configuração
 
-Neste livro, os trechos em Python são executados pelo pacote `reticulate`, a partir do R. Usamos a mesma instalação de Python dos demais capítulos, indicada no início do capítulo com `use_python()`. Os pacotes são instalados uma única vez nessa instalação, pelo terminal:
-
-```bash
-python -m pip install langchain langchain-openai langchain-text-splitters langchain-community langchain-pinecone pinecone pypdf tiktoken numpy pandas scikit-learn matplotlib requests
-```
-
-Para usar a API da OpenAI (e, opcionalmente, o Pinecone), é preciso ter as chaves de acesso, que nunca devem ficar no código nem no repositório. Como o Python é executado a partir do R, a forma mais simples é guardá-las no arquivo `.Renviron`, na pasta do projeto. O R lê esse arquivo ao iniciar e repassa as variáveis ao Python, e o arquivo está listado no `.gitignore`, para não ir para o repositório:
-
-```bash
-OPENAI_API_KEY=cole-sua-chave-aqui
-PINECONE_API_KEY=cole-sua-chave-aqui
-```
-
-A segunda linha só é necessária para usar o Pinecone. Depois de editar o `.Renviron`, reinicie a sessão do R. Quem executar o código fora do R (em um terminal ou no Jupyter) pode definir as mesmas variáveis de ambiente no sistema.
-
+Para executar o código deste capítulo, é preciso ter uma chave de API da OpenAI e, para usar o Pinecone como banco vetorial, também uma chave do Pinecone. As chaves devem ficar em variáveis de ambiente (`OPENAI_API_KEY` e `PINECONE_API_KEY`), nunca no código nem no repositório.
 
 O documento consultado é o manual de referência do pacote `ggplot2`, o mesmo usado no tutorial que deu origem a este capítulo, na versão 3.5.1 (abril de 2024). Ele já está no arquivo `data/ggplot2.pdf`, e todos os resultados e números de página do capítulo se referem a esse arquivo.
 
@@ -546,6 +532,9 @@ Antes de chamar um modelo de linguagem, vale testar apenas a recuperação: os t
 
 Fazemos a mesma busca duas vezes: com a pergunta em português, como a pessoa escreveria, e com a mesma pergunta escrita em inglês, o idioma do documento.
 
+- Em português: *“`r py$PERGUNTA`”*
+- Em inglês: *“`r py$PERGUNTA_EM_INGLES`”*
+
 ```{python}
 pergunta = PERGUNTA
 
@@ -602,7 +591,7 @@ Isso mostra duas coisas. Primeiro, o idioma importa: o modelo de embedding aprox
 
 ### O modelo sozinho
 
-Como ponto de partida, fazemos a pergunta ao modelo de linguagem **sem** o documento. Ele responde com o que aprendeu no treinamento e não tem como citar uma fonte.
+Como ponto de partida, fazemos ao modelo de linguagem, **sem** o documento, a mesma pergunta do teste da busca: *“`r py$PERGUNTA`”*. Ele responde com o que aprendeu no treinamento e não tem como citar uma fonte.
 
 ```{python}
 from langchain.chat_models import init_chat_model
@@ -627,7 +616,7 @@ else:
 
 `r py$rag$sozinho`
 
-A segunda pergunta só pode ser respondida com o documento em mãos: qual versão do `ggplot2` ele descreve.
+A segunda pergunta, *“`r py$PERGUNTA_ESPECIFICA`”*, só pode ser respondida com o documento em mãos.
 
 ```{python}
 resposta_especifica_sozinho = llm.invoke(PERGUNTA_ESPECIFICA).content
@@ -649,7 +638,7 @@ else:
 
 ### RAG de duas etapas
 
-A forma mais simples de RAG sempre busca os trechos e os coloca no *prompt* de sistema, com uma única chamada ao modelo por pergunta. No LangChain atual, isso é feito com um agente sem ferramentas e um *middleware* que monta o *prompt* a cada pergunta.
+A forma mais simples de RAG sempre busca os trechos e os coloca no *prompt* de sistema, com uma única chamada ao modelo por pergunta. No LangChain atual, isso é feito com um agente sem ferramentas e um *middleware* que monta o *prompt* a cada pergunta. Usamos de novo a pergunta *“`r py$PERGUNTA`”*.
 
 ```{python}
 from langchain.agents import create_agent
@@ -763,7 +752,7 @@ def responder(pergunta, id_sessao="abc123"):
     return {"resposta": r["messages"][-1].text, "paginas": paginas_consultadas(r)}
 ```
 
-Testamos uma pergunta e, em seguida, uma pergunta de acompanhamento que só faz sentido com o histórico, usando o mesmo `id_sessao`.
+Testamos de novo a pergunta *“`r py$PERGUNTA`”* e, em seguida, na mesma conversa (mesmo `id_sessao`), a pergunta de acompanhamento *“`r py$PERGUNTA_ACOMPANHAMENTO`”*, que só faz sentido com o histórico.
 
 ```{python}
 r1 = obter_resposta(PERGUNTA)
@@ -822,7 +811,7 @@ else:
 
 `r py$rag$r2`
 
-A pergunta específica, que o modelo sozinho não tinha como responder:
+A pergunta específica, *“`r py$PERGUNTA_ESPECIFICA`”*, que o modelo sozinho não tinha como responder:
 
 ```{python}
 r_esp = obter_resposta(PERGUNTA_ESPECIFICA, id_sessao="teste-especifica")
@@ -842,7 +831,7 @@ else:
 
 `r py$rag$esp`
 
-E uma pergunta fora do escopo do documento, para verificar se o assistente se recusa a responder em vez de inventar.
+E uma pergunta fora do escopo do documento, *“`r py$PERGUNTA_FORA_DO_ESCOPO`”*, para verificar se o assistente se recusa a responder em vez de inventar.
 
 ```{python}
 r3 = obter_resposta(PERGUNTA_FORA_DO_ESCOPO, id_sessao="teste-escopo")
@@ -1027,7 +1016,7 @@ if dif == 0:
 else:
     comp = (f"o agente acertou {abs(dif)} pergunta{'s' if abs(dif) > 1 else ''} "
             f"{'a mais' if dif > 0 else 'a menos'} do que a busca direta")
-erros_agente = perguntas_teste.loc[~agente_ok, "topico"].tolist()
+erros_agente = perguntas_teste.loc[~agente_ok, ["pergunta", "topico"]].values.tolist()
 media_paginas = f"{avaliacao_agente['páginas consultadas'].mean():.1f}".replace(".", ",")
 rag["aval"] = (
     f"Nesta execução, a busca direta com k = {K} encontrou as páginas esperadas em {int(direta.sum())} "
@@ -1037,8 +1026,8 @@ rag["aval"] = (
     f"em média, {media_paginas} páginas por pergunta, contra no máximo {K} da busca direta."
 )
 rag["aval_erros"] = (
-    "As perguntas em que o agente não chegou às páginas esperadas tratam de: "
-    + ", ".join(f"`{t}`" for t in erros_agente) + ". "
+    "As perguntas em que o agente não chegou às páginas esperadas foram: "
+    + "; ".join(f"*“{q}”* (`{t}`)" for q, t in erros_agente) + ". "
     "Vale olhar caso a caso: o gabarito considera só a seção da função principal, e parte das respostas "
     "pode estar também em outras seções do manual."
 ) if erros_agente else "O agente chegou às páginas esperadas em todas as perguntas."
@@ -1096,6 +1085,19 @@ Além de verificar se o agente chega às páginas certas, medimos três aspectos
 - **Recuperação:** nas 25 perguntas no escopo, o agente consultou alguma página do gabarito?
 - **Fidelidade da citação:** as páginas citadas na resposta foram de fato consultadas? (Vimos no capítulo um caso em que o modelo citou uma página que não tinha consultado.)
 - **Abstenção:** nas 5 perguntas fora do escopo, o assistente se recusa a responder? E, nas perguntas no escopo, ele se recusa sem necessidade?
+
+As 5 perguntas fora do escopo, que ainda não tinham aparecido no capítulo, são:
+
+```{python}
+#| echo: false
+perguntas_fora = (todas_perguntas.loc[todas_perguntas["tipo"] == "fora_do_escopo", ["pergunta"]]
+                  .reset_index(drop=True))
+```
+
+```{r}
+#| echo: false
+tabela(py$perguntas_fora)
+```
 
 A abstenção é identificada por expressões como "não encontrei" na resposta. É uma regra simples, que pode errar; por isso, as respostas completas ficam guardadas no arquivo de resultados, para conferência.
 
@@ -1186,7 +1188,7 @@ ex = res[res["topico"] == "guide_axis"].set_index("modelo")
 anexo["exemplo"] = ""
 if len(ex) == 2 and str(ex.loc[b, "acertou_recuperacao"]) == "True" and str(ex.loc[a, "acertou_recuperacao"]) == "False":
     anexo["exemplo"] = (
-        f" Na pergunta sobre girar os rótulos do eixo x, por exemplo, o `{a}` fez uma única busca "
+        f" Na pergunta *“{ex.loc[a, 'pergunta']}”*, por exemplo, o `{a}` fez uma única busca "
         f"(\"{ex.loc[a, 'consultas']}\") e não chegou às páginas de `guide_axis()`, enquanto o `{b}` fez "
         f"{ex.loc[b, 'consultas'].count(' | ') + 1} buscas, a última delas por `guide_axis`, e consultou "
         "as páginas em que o manual documenta a rotação.")
@@ -1207,7 +1209,7 @@ frase_fora = (
 )
 if len(nao_absteve) and logistica.all():
     frase_fora += (
-        " A exceção foi a pergunta sobre regressão logística: os modelos a interpretaram como \"mostrar "
+        f" A exceção foi a pergunta *“{nao_absteve['pergunta'].iloc[0]}”*: os modelos a interpretaram como \"mostrar "
         "uma regressão logística em um gráfico\" e responderam com o exemplo de `geom_smooth()` com "
         "`family = \"binomial\"`, que está no manual (p. 180 e 181). A pergunta é ambígua, e a resposta é "
         "defensável, o que mostra que classificar uma pergunta como \"fora do escopo\" também exige cuidado.")
