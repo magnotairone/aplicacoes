@@ -150,7 +150,35 @@ Isso importa na prática por três motivos: o **custo** é cobrado por token, a 
 
 A maioria dos modelos atuais usa variações do algoritmo **BPE** (*Byte Pair Encoding*). A ideia é simples: começar com cada caractere como um token e, repetidamente, **juntar o par de símbolos vizinhos mais frequente** em um novo símbolo. Pares comuns viram pedaços de palavra, e palavras muito frequentes acabam virando um único token.
 
-O código abaixo implementa essa ideia em poucas linhas, usando um texto minúsculo de exemplo. O símbolo `_` marca o fim de uma palavra.
+O BPE tem duas fases: o **treinamento**, que aprende uma lista de regras de fusão a partir de um texto, e a **aplicação**, que usa essas regras para quebrar qualquer palavra em tokens.
+
+**Treinamento, passo a passo:**
+
+1. Separe o texto em palavras e conte quantas vezes cada uma aparece.
+2. Escreva cada palavra como uma sequência de caracteres e acrescente um marcador de fim de palavra (aqui, `_`). O marcador permite distinguir, por exemplo, um `a` no meio de uma palavra de um `a` no final.
+3. Conte todos os pares de símbolos vizinhos, ponderando pela frequência da palavra: um par que aparece em uma palavra repetida 10 vezes conta 10.
+4. Escolha o par mais frequente e junte-o em um único símbolo em todas as palavras. Guarde essa fusão como uma nova regra.
+5. Volte ao passo 3 e repita até atingir o número de fusões desejado. Esse número controla o tamanho do vocabulário.
+
+**Aplicação:** para tokenizar uma palavra, escreva-a como caracteres seguidos de `_` e aplique as regras aprendidas **na mesma ordem em que foram aprendidas**. O que sobrar no fim são os tokens.
+
+**Um exemplo à mão.** Considere o texto "casa casas caso casa". As palavras e suas frequências são `casa` (2), `casas` (1) e `caso` (1), que começam assim:
+
+| Palavra | Frequência | Símbolos |
+|---|---|---|
+| casa | 2 | `c a s a _` |
+| casas | 1 | `c a s a s _` |
+| caso | 1 | `c a s o _` |
+
+- **Fusão 1:** o par mais frequente é `a` + `s`, com 5 ocorrências (2 em `casa`, 2 em `casas` e 1 em `caso`). Ele vira o símbolo `as`: `c as a _`, `c as as _`, `c as o _`.
+- **Fusão 2:** agora o mais frequente é `c` + `as`, com 4 ocorrências, e vira `cas`: `cas a _`, `cas as _`, `cas o _`.
+- **Fusão 3:** há um empate entre `cas` + `a` e `a` + `_`, com 2 ocorrências cada. Nesse caso fica o primeiro par encontrado, `cas` + `a`, e `casa` vira um único símbolo: `casa _`.
+
+Com essas três regras, a palavra `casas` vira `cas as _`, e não `casa s _`, como talvez se esperasse. As regras são aplicadas na ordem em que foram aprendidas: a regra 1 junta os dois pares `a` + `s` de `casas`, e a palavra fica `c as as _`; a regra 2 a transforma em `cas as _`. Quando chega a vez da regra 3 (`cas` + `a`), não há mais um `a` sozinho depois de `cas`, e ela não se aplica. O BPE junta pares de forma "gulosa", na ordem das regras, e por isso nem sempre divide as palavras como uma pessoa dividiria.
+
+Uma palavra que não estava no texto, como `casinha`, aproveita o que já foi aprendido e vira `cas i n h a _`: as partes conhecidas viram pedaços maiores, e o resto fica letra a letra.
+
+O código abaixo implementa essas duas fases, usando um texto um pouco maior, sobre atendimento. A função `treinar_bpe()` faz os passos 1 a 5, e a função `tokenizar_bpe()` faz a aplicação.
 
 ```{python}
 from collections import Counter
