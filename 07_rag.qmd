@@ -59,17 +59,24 @@ O processo tem duas fases. A **indexação** é feita uma vez (ou quando o docum
 
 ```{mermaid}
 %%| eval: true
-flowchart LR
+flowchart TB
   subgraph IND["Indexação (feita uma vez)"]
-    A["Documento PDF"] --> B["Pedaços (chunks)"] --> C["Embeddings"] --> D[("Banco vetorial")]
+    direction LR
+    A["Documento<br/>PDF"] --> B["Pedaços<br/>(chunks)"] --> C["Embeddings<br/>dos pedaços"] --> D[("Banco<br/>vetorial")]
   end
   subgraph CON["Consulta (a cada pergunta)"]
-    E["Pergunta"] --> F["Embedding da pergunta"] --> G["Busca por similaridade"]
-    D --> G --> H["Trechos relevantes"]
-    H --> I["Modelo de linguagem"]
-    E --> I
-    I --> J["Resposta com fontes"]
+    direction TB
+    subgraph REC["Recuperação"]
+      direction LR
+      E["Pergunta"] --> F["Embedding<br/>da pergunta"] --> G["Busca por<br/>similaridade"] --> H["Trechos<br/>relevantes"]
+    end
+    subgraph GER["Geração"]
+      direction LR
+      I["Modelo de linguagem<br/>(pergunta + trechos)"] --> J["Resposta<br/>com fontes"]
+    end
+    REC --> GER
   end
+  IND -->|"a busca usa o banco vetorial"| CON
 ```
 
 ::: {.callout-note title="O que mudou em relação às versões anteriores do LangChain"}
