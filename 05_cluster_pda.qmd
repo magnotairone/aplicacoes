@@ -18,6 +18,16 @@ library(kableExtra)
 python_local <- "C:/Users/m_tai/AppData/Local/Programs/Python/Python313/python.exe"
 if (file.exists(python_local)) use_python(python_local, required = TRUE)
 
+# tabelas geradas em Python e exibidas com kable (mesmo padrão do cap. 2)
+tabela <- function(df, caption = NULL, rolagem = FALSE, align = NULL) {
+  tab <- knitr::kable(df, "html", caption = caption, row.names = FALSE, align = align,
+                      format.args = list(big.mark = ".", decimal.mark = ",")) |>
+    kable_styling(bootstrap_options = c("striped", "hover", "condensed"),
+                  full_width = FALSE)
+  if (rolagem) tab <- scroll_box(tab, width = "100%")
+  tab
+}
+
 knitr::opts_chunk$set(
   warning = FALSE,
   message = FALSE,
@@ -159,14 +169,24 @@ print(f"Número de linhas na base: {n_linhas}.")
 Em seguida, visualizamos uma amostra aleatória dos dados para validar a estrutura das colunas e o formato das informações (tipos de dados e preenchimento).
 
 ```{python}
-df.sample(10)
+amostra = df.sample(10, random_state=42).reset_index(drop=True)
+```
+
+```{r}
+#| echo: false
+tabela(py$amostra, rolagem = TRUE)
 ```
 
 A função describe() é fundamental para entender a distribuição de cada variável. Note os percentis extremos (1% e 99%): eles revelam a presença de clientes com comportamento muito fora da média, o que pode influenciar a posição dos centroides no K-Means. Observe também se as variáveis de gasto por categoria têm muitos zeros: nem todo cliente compra em todas as categorias, o que torna as distribuições assimétricas, algo que o K-Means, baseado em distâncias, não trata bem.
 
 ```{python}
-print("Estatísticas descritivas básicas:")
-df.describe(percentiles = [.01, .1, .25, .5, .75, .9, .99])
+desc = df.describe(percentiles = [.01, .1, .25, .5, .75, .9, .99]).T.round(2)
+desc = desc.drop(columns="count").reset_index().rename(columns={"index": "Variável"})
+```
+
+```{r}
+#| echo: false
+tabela(py$desc, rolagem = TRUE)
 ```
 
 A matriz de correlação nos permite identificar quais variáveis "caminham juntas". No contexto de um mercado, é comum observarmos correlações positivas entre categorias complementares (ex: Vinho e Queijo).
@@ -304,19 +324,28 @@ df_cluster["cluster"] = [mapa[k] for k in rotulos_brutos]
 Após a convergência do algoritmo, precisamos "dar nome aos bois". Para isso, usamos os valores originais (não padronizados) para observar as medianas reais de cada grupo e entender o volume de clientes em cada um.
 
 ::: {.callout-tip title="Dica Analítica"}
-Observe o campo Count. Clusters muito pequenos (ex: menos de 5% da base) podem indicar nichos muito específicos ou até mesmo outliers que o algoritmo isolou.
+Observe a linha Clientes. Clusters muito pequenos (ex: menos de 5% da base) podem indicar nichos muito específicos ou até mesmo outliers que o algoritmo isolou.
 :::
 
 ```{python}
 df_cluster_info = df_cluster.groupby("cluster").median().reset_index()
 
 df_cluster_count = df_cluster.groupby("cluster").count()["idade"].reset_index()
-df_cluster_count.columns = ["cluster", "Count"]
+df_cluster_count.columns = ["cluster", "Clientes"]
 
 df_cluster_table = pd.merge(df_cluster_info, df_cluster_count, how="left", on="cluster")
 
-df_pivot = df_cluster_table.set_index('cluster').T
-print(df_pivot.round(1))
+df_pivot = df_cluster_table.set_index("cluster").T
+df_pivot.columns.name = None
+# texto formatado: uma casa decimal, e a contagem de clientes sem decimais
+df_pivot = df_pivot.apply(lambda col: [fmt_int(v) if var == "Clientes" else fmt_dec(v, 1)
+                                       for var, v in col.items()])
+df_pivot = df_pivot.reset_index().rename(columns={"index": "Variável (mediana)"})
+```
+
+```{r}
+#| echo: false
+tabela(py$df_pivot, align = c("l", rep("r", 4)))
 ```
 
 ```{python}
@@ -474,7 +503,14 @@ resumo = df_cluster.groupby("cluster").agg(
 resumo["% clientes"] = 100 * resumo["clientes"] / resumo["clientes"].sum()
 resumo["% do gasto"] = 100 * resumo["gasto_total"] / resumo["gasto_total"].sum()
 
-print(resumo.round(1))
+tab_resumo = resumo.round(1).reset_index().rename(columns={
+    "cluster": "Cluster", "clientes": "Clientes",
+    "gasto_total": "Gasto total (R$)", "gasto_mediano": "Gasto mediano (R$)"})
+```
+
+```{r}
+#| echo: false
+tabela(py$tab_resumo)
 ```
 
 ```{python}
@@ -559,7 +595,15 @@ Por que a silhouette prefere 3 grupos? A tabela abaixo cruza os grupos obtidos c
 
 ```{python}
 rotulos_k3 = KMeans(n_clusters=3, random_state=42, init='k-means++', n_init=10).fit_predict(df_norm)
-pd.crosstab(rotulos_k3, df_cluster["cluster"], rownames=["k = 3"], colnames=["k = 4"])
+tab_k3 = pd.crosstab(rotulos_k3, df_cluster["cluster"])
+tab_k3.columns.name = None
+tab_k3.index = [f"Grupo {i + 1}" for i in tab_k3.index]
+tab_k3 = tab_k3.reset_index().rename(columns={"index": "Grupo (k = 3)"})
+```
+
+```{r}
+#| echo: false
+tabela(py$tab_k3)
 ```
 
 Com $k=3$, o algoritmo **junta os clusters C (Esporádico) e D (Inativo)** em um só grupo. Do ponto de vista estatístico, faz sentido: os dois têm renda, score e gasto baixos e ficam próximos no espaço das variáveis. Do ponto de vista do negócio, porém, são clientes muito diferentes: o C compra com regularidade e precisa de estímulo para **comprar mais vezes**, enquanto o D **parou de comprar** e precisa de uma ação de reativação. Juntá-los levaria a uma única campanha para dois problemas distintos.
@@ -614,7 +658,12 @@ Para saber o que cada componente representa, veja o peso (*loading*) de cada var
 
 ```{python}
 loadings = pd.DataFrame(pca.components_.T, index=cols, columns=['PC1', 'PC2'])
-print(loadings.round(2))
+tab_loadings = loadings.round(2).reset_index().rename(columns={"index": "Variável"})
+```
+
+```{r}
+#| echo: false
+tabela(py$tab_loadings)
 ```
 
 Os pesos permitem dar nome aos eixos do gráfico:
