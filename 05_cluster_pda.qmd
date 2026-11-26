@@ -591,14 +591,20 @@ Analisando os gráficos gerados para $k$ variando de 2 a 7, observamos que:
 - No **Método do Cotovelo**, a inércia cai bastante de $k=2$ (cerca de `r py$num$inercia_2` mil) para $k=3$ (`r py$num$inercia_3` mil) e $k=4$ (`r py$num$inercia_4` mil), e passa a diminuir de forma mais suave a partir daí (`r py$num$inercia_5` mil com $k=5$). O "cotovelo" não é nítido, o que é comum em dados reais.
 - No **Coeficiente de silhouette**, o maior valor ocorre em **$k=3$** (`r py$num$sil_3`). Com $k=4$, ele cai para `r py$num$sil_4`, ainda acima dos valores de $k=5$ a $k=7$ (de `r py$num$sil_7` a `r py$num$sil_5`). Valores entre 0,2 e 0,4 são comuns em bases de clientes, em que os grupos se tocam nas bordas.
 
-Por que a silhouette prefere 3 grupos? A tabela abaixo cruza os grupos obtidos com $k=3$ (linhas) e com $k=4$ (colunas).
+Por que a silhouette prefere 3 grupos? Para descobrir, rodamos o K-Means também com $k=3$ e comparamos as duas segmentações. Na tabela abaixo, **cada linha é um grupo encontrado com $k=3$**, e as colunas mostram de qual cluster da segmentação com $k=4$ (A, B, C ou D) vêm os seus clientes. O nome de cada linha resume essa composição.
 
 ```{python}
 rotulos_k3 = KMeans(n_clusters=3, random_state=42, init='k-means++', n_init=10).fit_predict(df_norm)
 tab_k3 = pd.crosstab(rotulos_k3, df_cluster["cluster"])
 tab_k3.columns.name = None
-tab_k3.index = [f"Grupo {i + 1}" for i in tab_k3.index]
-tab_k3 = tab_k3.reset_index().rename(columns={"index": "Grupo (k = 3)"})
+
+# nome de cada grupo de k = 3: os clusters de k = 4 com pelo menos 10% dos seus clientes
+def nome_grupo(linha):
+    principais = [c for c in linha.index if linha[c] >= 0.1 * linha.sum()]
+    return "≈ " + principais[0] if len(principais) == 1 else " + ".join(principais)
+
+tab_k3.index = [nome_grupo(linha) for _, linha in tab_k3.iterrows()]
+tab_k3 = tab_k3.sort_index(key=lambda s: s.str.replace("≈ ", "")).reset_index().rename(columns={"index": "Grupo com k = 3"})
 ```
 
 ```{r}
@@ -606,7 +612,7 @@ tab_k3 = tab_k3.reset_index().rename(columns={"index": "Grupo (k = 3)"})
 tabela(py$tab_k3)
 ```
 
-Com $k=3$, o algoritmo **junta os clusters C (Esporádico) e D (Inativo)** em um só grupo. Do ponto de vista estatístico, faz sentido: os dois têm renda, score e gasto baixos e ficam próximos no espaço das variáveis. Do ponto de vista do negócio, porém, são clientes muito diferentes: o C compra com regularidade e precisa de estímulo para **comprar mais vezes**, enquanto o D **parou de comprar** e precisa de uma ação de reativação. Juntá-los levaria a uma única campanha para dois problemas distintos.
+As duas primeiras linhas mostram que dois dos grupos de $k=3$ são praticamente os clusters A e B. A terceira reúne quase todos os clientes do C e do D: ao pedir só 3 grupos, o algoritmo **junta o Esporádico (C) e o Inativo (D)**. Do ponto de vista estatístico, faz sentido: os dois têm renda, score e gasto baixos e ficam próximos no espaço das variáveis. Do ponto de vista do negócio, porém, são clientes muito diferentes: o C compra com regularidade e precisa de estímulo para **comprar mais vezes**, enquanto o D **parou de comprar** e precisa de uma ação de reativação. Juntá-los levaria a uma única campanha para dois problemas distintos.
 
 Por isso, mantemos **$k=4$**: a separação estatística é um pouco menor, mas cada grupo corresponde a uma ação de marketing diferente. Em projetos reais, o cotovelo é um critério subjetivo e nem sempre coincide com o máximo da silhouette; a decisão final equilibra o critério estatístico com a **viabilidade operacional** do time de marketing, como discutimos mais adiante.
 
