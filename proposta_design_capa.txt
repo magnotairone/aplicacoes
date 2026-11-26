@@ -1,0 +1,45 @@
+A PROPOSTA DA CAPA
+Ciência de Dados Aplicada, estudos de caso de ciência de dados para negócios
+
+
+A IDEIA CENTRAL: DADOS REAIS COMEÇAM BAGUNÇADOS
+
+O livro quer mostrar a ciência de dados como ela é na prática, não com os exemplos limpos dos livros didáticos. A capa conta isso numa imagem só: no canto inferior esquerdo, uma massa caótica de pontos e traços coloridos; seguindo na diagonal, esse ruído vai se alinhando até virar linhas paralelas e grupos bem definidos. É o trabalho que cada capítulo faz: partir de uma situação confusa (uma máquina que pode falhar, um mercado de aluguéis, as cestas de um supermercado, uma pilha de documentos) e chegar a algo que apoia uma decisão.
+
+
+CADA ELEMENTO REMETE A UMA PARTE DO LIVRO, SEM SER LITERAL
+
+- O caos são os dados brutos: muitas fontes, muitas cores, nenhuma estrutura aparente. A densidade e a mistura lembram que o mundo real não chega organizado.
+
+- A transição, onde os pontos começam a se alinhar, é a preparação e a exploração dos dados, a etapa que mais consome tempo num projeto real.
+
+- As linhas paralelas são o padrão que um modelo encontra, como numa regressão: um sinal claro que emerge do ruído e segue uma direção.
+
+- Os quatro grupos remetem diretamente aos capítulos de agrupamento. Cada um tem uma cor e uma forma, como segmentos de clientes ou classes num modelo de classificação. Eles têm núcleo denso, borda rala e alguns pontos soltos, como num gráfico de dispersão real, em vez de círculos perfeitos. Assim até a "ordem" continua parecendo dado de verdade, imperfeito.
+
+- A diagonal do canto inferior esquerdo ao superior direito é o sentido de leitura e de progresso. O olho acompanha o percurso do caos à ordem, como um projeto que avança da pergunta de negócio ao resultado. É também o espírito do ciclo CRISP-DM que organiza o livro, ainda que de forma indireta.
+
+
+AS CORES SEGUEM UMA REGRA DE BOA VISUALIZAÇÃO DE DADOS
+
+Os grupos usam tons da paleta Okabe-Ito, criada para pessoas com daltonismo, e cada grupo também tem uma forma própria (pontos cheios, tracinhos, anéis). Assim eles se distinguem mesmo sem cor, que é a mesma boa prática que um livro de ciência de dados deveria ensinar nos gráficos. A capa pratica o que o conteúdo defende.
+
+
+A TIPOGRAFIA É EDITORIAL
+
+A Schibsted Grotesk é firme e moderna, sem o clichê de fonte "de tecnologia", como as monoespaçadas ou futuristas. O título fica alinhado à esquerda no espaço livre, à moda dos cartazes suíços, que combinam com a precisão da parte organizada da ilustração. "Aplicada" aparece em laranja porque é a palavra que diferencia o livro: não é ciência de dados em abstrato, é ciência de dados aplicada a problemas de negócio. O laranja ainda conversa com o grupo vermelho ao lado, ligando a palavra ao resultado da análise.
+
+
+O FUNDO CREME SUGERE PAPEL IMPRESSO
+
+A textura de papel e a estética de serigrafia (cores chapadas, grão leve) dão à capa um ar artesanal e humano. Isso lembra que ciência de dados exige julgamento, contexto e interpretação, não só algoritmo. O mesmo creme virou o fundo das páginas do site, então a capa e o livro formam uma identidade só.
+
+
+O QUE A CAPA EVITA DE PROPÓSITO
+
+Código binário, circuitos, cérebros digitais, robôs e azul neon. É o visual genérico de "tecnologia" que deixa as capas de livros técnicos todas iguais. A capa aposta numa imagem abstrata, colorida e sem texto na ilustração, que faz sentido mesmo para quem não conhece o assunto e que, para quem conhece, esconde referências a técnicas do livro.
+
+
+EM UMA FRASE
+
+A capa mostra o caminho do caos dos dados reais até a clareza de uma análise bem-feita, e é esse caminho que o livro ensina, capítulo a capítulo.
