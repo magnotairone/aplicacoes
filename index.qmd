@@ -49,7 +49,7 @@ Antes desses dois blocos, o livro começa pela análise descritiva, base de qual
 
 ### Ponto de partida
 
-- [**Atrasos em voos**](01_analise_descritiva.qmd) (análise descritiva, em R). Com dados dos voos que partiram de Nova York em 2013, o capítulo apresenta os tipos de variáveis, as medidas de posição e de dispersão e os principais gráficos, e depois os usa para responder perguntas de negócio, como quais rotas e companhias concentram os maiores atrasos e qual o papel das condições meteorológicas.
+- [**Atrasos de voos nos aeroportos de Nova York**](01_analise_descritiva.qmd) (análise descritiva, em R). Um gestor de operações quer saber onde e quando os atrasos acontecem. Com os mais de 300 mil voos que partiram de Nova York em 2013, o capítulo apresenta os tipos de variáveis, as medidas resumo e os principais gráficos, e os usa para encontrar os gargalos: rotas e companhias, aeroportos e horários, sazonalidade e o papel do clima.
 
 ### Aprendizado supervisionado
 
