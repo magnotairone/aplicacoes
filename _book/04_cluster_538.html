@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>5&nbsp; Consumo de bebidas alcoólicas em diversos países – Ciência de Dados Aplicada</title>
+<title>5&nbsp; Segmentação de mercados de bebidas no mundo – Ciência de Dados Aplicada</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -105,23 +105,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     "search-label": "Procurar"
   }
 }</script>
-<link href="site_libs/htmltools-fill-0.5.8.1/fill.css" rel="stylesheet">
+<script src="site_libs/kePrint-0.0.1/kePrint.js"></script>
 
-<script src="site_libs/htmlwidgets-1.6.4/htmlwidgets.js"></script>
-
-<script src="site_libs/plotly-binding-4.11.0/plotly.js"></script>
-
-<script src="site_libs/typedarray-0.1/typedarray.min.js"></script>
-
-<script src="site_libs/jquery-3.5.1/jquery.min.js"></script>
-
-<link href="site_libs/crosstalk-1.2.2/css/crosstalk.min.css" rel="stylesheet">
-
-<script src="site_libs/crosstalk-1.2.2/js/crosstalk.min.js"></script>
-
-<link href="site_libs/plotly-htmlwidgets-css-2.11.1/plotly-htmlwidgets.css" rel="stylesheet">
-
-<script src="site_libs/plotly-main-2.11.1/plotly-latest.min.js"></script>
+<link href="site_libs/lightable-0.0.1/lightable.css" rel="stylesheet">
 
 
   <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
@@ -166,7 +152,7 @@ window.Quarto = {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Alternar barra lateral" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./04_cluster_538.html">Agrupamento</a></li><li class="breadcrumb-item"><a href="./04_cluster_538.html"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Consumo de bebidas alcoólicas em diversos países</span></a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./04_cluster_538.html">Agrupamento</a></li><li class="breadcrumb-item"><a href="./04_cluster_538.html"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Segmentação de mercados de bebidas no mundo</span></a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Alternar barra lateral" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="Procurar" onclick="window.quartoOpenSearch();">
@@ -257,7 +243,7 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./04_cluster_538.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Consumo de bebidas alcoólicas em diversos países</span></span></a>
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Segmentação de mercados de bebidas no mundo</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -318,24 +304,35 @@ window.Quarto = {
     <h2 id="toc-title">Índice</h2>
    
   <ul>
-  <li><a href="#pacotes-utilizados" id="toc-pacotes-utilizados" class="nav-link active" data-scroll-target="#pacotes-utilizados"><span class="header-section-number">5.1</span> Pacotes Utilizados</a></li>
-  <li><a href="#carregando-e-preparando-os-dados" id="toc-carregando-e-preparando-os-dados" class="nav-link" data-scroll-target="#carregando-e-preparando-os-dados"><span class="header-section-number">5.2</span> Carregando e Preparando os Dados</a></li>
-  <li><a href="#análise-exploratória" id="toc-análise-exploratória" class="nav-link" data-scroll-target="#análise-exploratória"><span class="header-section-number">5.3</span> Análise Exploratória</a></li>
-  <li><a href="#padronização-dos-dados" id="toc-padronização-dos-dados" class="nav-link" data-scroll-target="#padronização-dos-dados"><span class="header-section-number">5.4</span> Padronização dos Dados</a>
+  <li><a href="#dados" id="toc-dados" class="nav-link active" data-scroll-target="#dados"><span class="header-section-number">5.1</span> Dados</a></li>
+  <li><a href="#análise-exploratória" id="toc-análise-exploratória" class="nav-link" data-scroll-target="#análise-exploratória"><span class="header-section-number">5.2</span> Análise exploratória</a></li>
+  <li><a href="#como-o-k-médias-funciona" id="toc-como-o-k-médias-funciona" class="nav-link" data-scroll-target="#como-o-k-médias-funciona"><span class="header-section-number">5.3</span> Como o k-médias funciona</a>
   <ul class="collapse">
-  <li><a href="#análise-de-cluster" id="toc-análise-de-cluster" class="nav-link" data-scroll-target="#análise-de-cluster"><span class="header-section-number">5.4.1</span> Análise de Cluster</a></li>
+  <li><a href="#por-que-padronizar" id="toc-por-que-padronizar" class="nav-link" data-scroll-target="#por-que-padronizar"><span class="header-section-number">5.3.1</span> Por que padronizar</a></li>
+  <li><a href="#como-escolher-k" id="toc-como-escolher-k" class="nav-link" data-scroll-target="#como-escolher-k"><span class="header-section-number">5.3.2</span> Como escolher <span class="math inline">\(k\)</span></a></li>
   </ul></li>
-  <li><a href="#visualização-do-resultado-da-clusterização-no-mapa-mundi" id="toc-visualização-do-resultado-da-clusterização-no-mapa-mundi" class="nav-link" data-scroll-target="#visualização-do-resultado-da-clusterização-no-mapa-mundi"><span class="header-section-number">5.5</span> Visualização do resultado da clusterização no mapa-mundi</a></li>
-  <li><a href="#conclusão" id="toc-conclusão" class="nav-link" data-scroll-target="#conclusão"><span class="header-section-number">5.6</span> Conclusão</a></li>
+  <li><a href="#segmentação-1-volume-onde-o-consumo-é-forte" id="toc-segmentação-1-volume-onde-o-consumo-é-forte" class="nav-link" data-scroll-target="#segmentação-1-volume-onde-o-consumo-é-forte"><span class="header-section-number">5.4</span> Segmentação 1: volume (onde o consumo é forte?)</a></li>
+  <li><a href="#segmentação-2-mix-o-que-se-bebe" id="toc-segmentação-2-mix-o-que-se-bebe" class="nav-link" data-scroll-target="#segmentação-2-mix-o-que-se-bebe"><span class="header-section-number">5.5</span> Segmentação 2: mix (o que se bebe?)</a>
+  <ul class="collapse">
+  <li><a href="#volume-e-mix-duas-perguntas-diferentes" id="toc-volume-e-mix-duas-perguntas-diferentes" class="nav-link" data-scroll-target="#volume-e-mix-duas-perguntas-diferentes"><span class="header-section-number">5.5.1</span> Volume e mix: duas perguntas diferentes</a></li>
+  </ul></li>
+  <li><a href="#enriquecimento-com-dados-externos" id="toc-enriquecimento-com-dados-externos" class="nav-link" data-scroll-target="#enriquecimento-com-dados-externos"><span class="header-section-number">5.6</span> Enriquecimento com dados externos</a>
+  <ul class="collapse">
+  <li><a href="#cruzando-as-bases-o-problema-dos-nomes" id="toc-cruzando-as-bases-o-problema-dos-nomes" class="nav-link" data-scroll-target="#cruzando-as-bases-o-problema-dos-nomes"><span class="header-section-number">5.6.1</span> Cruzando as bases: o problema dos nomes</a></li>
+  </ul></li>
+  <li><a href="#quanto-vale-cada-grupo" id="toc-quanto-vale-cada-grupo" class="nav-link" data-scroll-target="#quanto-vale-cada-grupo"><span class="header-section-number">5.7</span> Quanto vale cada grupo</a></li>
+  <li><a href="#os-grupos-de-mix-no-mapa" id="toc-os-grupos-de-mix-no-mapa" class="nav-link" data-scroll-target="#os-grupos-de-mix-no-mapa"><span class="header-section-number">5.8</span> Os grupos de mix no mapa</a></li>
+  <li><a href="#uso-prático" id="toc-uso-prático" class="nav-link" data-scroll-target="#uso-prático"><span class="header-section-number">5.9</span> Uso prático</a></li>
+  <li><a href="#conclusão" id="toc-conclusão" class="nav-link" data-scroll-target="#conclusão"><span class="header-section-number">5.10</span> Conclusão</a></li>
   </ul>
 </nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
-<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./04_cluster_538.html">Agrupamento</a></li><li class="breadcrumb-item"><a href="./04_cluster_538.html"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Consumo de bebidas alcoólicas em diversos países</span></a></li></ol></nav>
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./04_cluster_538.html">Agrupamento</a></li><li class="breadcrumb-item"><a href="./04_cluster_538.html"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Segmentação de mercados de bebidas no mundo</span></a></li></ol></nav>
 <div class="quarto-title">
-<h1 class="title"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Consumo de bebidas alcoólicas em diversos países</span></h1>
+<h1 class="title"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Segmentação de mercados de bebidas no mundo</span></h1>
 </div>
 
 
@@ -352,362 +349,435 @@ window.Quarto = {
 </header>
 
 
-<p>Neste relatório, vamos explorar um conjunto de dados sobre o consumo de bebidas alcoólicas em diversos países. Vamos utilizar técnicas de análise de dados e aprendizado de máquina para entender padrões de consumo e identificar grupos de países com comportamentos similares.</p>
-<p>A fonte dos dados é a página <a href="https://fivethirtyeight.com/features/dear-mona-followup-where-do-people-drink-the-most-beer-wine-and-spirits/">FiveThirtyEight</a> e os dados podem ser baixados <a href="https://github.com/fivethirtyeight/data/tree/master/alcohol-consumption">neste repositório</a>, no arquivo <code>drinks.csv</code>.</p>
-<p>Esta base de dados contém informações sobre o consumo de álcool em diferentes países, com as seguintes colunas: “country” (país), “beer_servings” (porções de cerveja), “spirit_servings” (porções de destilados), “wine_servings” (porções de vinho) e “total_litres_of_pure_alcohol” (total de litros de álcool puro consumidos). Esses dados foram coletados pela Organização Mundial da Saúde (OMS) e fornecem uma visão abrangente dos hábitos de consumo de álcool em todo o mundo. As informações incluem a média de consumo de álcool por pessoa em cada país, desagregada por tipo de bebida alcoólica, como vinho, cerveja, destilados e outras. Esses dados são apresentados em litros de álcool puro consumidos em 2010, mas foram convertidos em unidades mais compreensíveis, como taças de vinho, latas de cerveja e doses de destilados por pessoa em cada país.</p>
-<section id="pacotes-utilizados" class="level2" data-number="5.1">
-<h2 data-number="5.1" class="anchored" data-anchor-id="pacotes-utilizados"><span class="header-section-number">5.1</span> Pacotes Utilizados</h2>
-<p>Vamos começar carregando as bibliotecas necessárias para realizar as análises. Ao lado de cada pacote, há um comentário sobre a utilidade de cada um deles nesta análise.</p>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse) <span class="co"># Conjunto de pacotes para manipulação e visualização de dados</span></span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(GGally) <span class="co"># Visualização de dados de maneira eficiente.</span></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(factoextra) <span class="co"># Análise e visualização de resultados de métodos de clustering</span></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggrepel) <span class="co"># Adicionar rótulos em gráficos sem sobreposição</span></span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(plotly) <span class="co"># Gráficos interativos</span></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(cluster) <span class="co"># Análise de clusters</span></span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-</section>
-<section id="carregando-e-preparando-os-dados" class="level2" data-number="5.2">
-<h2 data-number="5.2" class="anchored" data-anchor-id="carregando-e-preparando-os-dados"><span class="header-section-number">5.2</span> Carregando e Preparando os Dados</h2>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Leitura e mudança de tipo da variável total_litres_of_pure_alcohol</span></span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>dados <span class="ot">&lt;-</span> <span class="fu">read_csv2</span>(<span class="st">"data/drinks.csv"</span>) <span class="sc">|&gt;</span> </span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>   <span class="fu">mutate</span>(<span class="at">total_litres_of_pure_alcohol =</span> <span class="fu">as.numeric</span>(total_litres_of_pure_alcohol))</span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Renomeando colunas</span></span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>dados <span class="ot">&lt;-</span> dados <span class="sc">|&gt;</span> </span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">beer =</span> beer_servings, </span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>         <span class="at">spirit =</span> spirit_servings, </span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>         <span class="at">wine =</span> wine_servings, </span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>         <span class="at">total_litres_alcohol =</span> total_litres_of_pure_alcohol)</span>
-<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a> </span>
-<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Primeiras linhas dos dados</span></span>
-<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>dados <span class="sc">|&gt;</span> </span>
-<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">slice_head</span>(<span class="at">n =</span> <span class="dv">5</span>)</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<div class="cell">
-<div class="cell-output-display">
-<table class="caption-top table table-sm table-striped small">
+<p>Uma multinacional de bebidas atua em dezenas de países, com três linhas de produto: <strong>cerveja</strong>, <strong>vinho</strong> e <strong>destilados</strong>. Definir uma estratégia diferente para cada país é caro e difícil de coordenar, e tratar todos os países da mesma forma ignora diferenças enormes de hábito. A saída comum é organizar os países em poucos <strong>grupos de mercado</strong>, cada um com um portfólio prioritário e uma postura própria (defender, crescer, entrar ou não priorizar).</p>
+<p>Três perguntas guiam a análise:</p>
+<ol type="1">
+<li><strong>Onde:</strong> em quais países o hábito de consumo de bebidas alcoólicas é mais forte?</li>
+<li><strong>O quê:</strong> em cada grupo de países, qual linha de produto deve liderar?</li>
+<li><strong>Quanto vale:</strong> qual é o tamanho de cada grupo de mercados, e por onde começar?</li>
+</ol>
+<p>Para responder às duas primeiras, usamos o <strong>k-médias</strong> (<em>k-means</em>), o algoritmo de agrupamento mais usado na prática. Este capítulo apresenta a técnica em detalhes, com uma base pequena em que é possível ver o que o algoritmo faz. O capítulo seguinte aplica a mesma técnica a uma base de clientes, com mais variáveis e foco na implantação. Para a terceira pergunta, <strong>enriquecemos</strong> a base com dados externos de população e renda.</p>
+<p>Seguimos as etapas do CRISP-DM apresentadas na introdução do livro. Todo o trabalho é feito em <strong>R</strong>.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
 <thead>
 <tr class="header">
-<th style="text-align: left;" data-quarto-table-cell-role="th">country</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">beer</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">spirit</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">wine</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">total_litres_alcohol</th>
+<th>Etapa do CRISP-DM</th>
+<th>Onde aparece no capítulo</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td style="text-align: left;">Afghanistan</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">0.0</td>
+<td>Entendimento do negócio</td>
+<td>Esta introdução: as decisões da multinacional</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">Albania</td>
-<td style="text-align: right;">89</td>
-<td style="text-align: right;">132</td>
-<td style="text-align: right;">54</td>
-<td style="text-align: right;">4.9</td>
+<td>Entendimento dos dados</td>
+<td>Dados e análise exploratória</td>
 </tr>
 <tr class="odd">
-<td style="text-align: left;">Algeria</td>
-<td style="text-align: right;">25</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">14</td>
-<td style="text-align: right;">0.7</td>
+<td>Preparação dos dados</td>
+<td>Padronização (volume), cálculo das participações (mix) e enriquecimento com dados do Banco Mundial</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">Andorra</td>
-<td style="text-align: right;">245</td>
-<td style="text-align: right;">138</td>
-<td style="text-align: right;">312</td>
-<td style="text-align: right;">12.4</td>
+<td>Modelagem</td>
+<td>Como o k-médias funciona; segmentações por volume e por mix</td>
 </tr>
 <tr class="odd">
-<td style="text-align: left;">Angola</td>
-<td style="text-align: right;">217</td>
-<td style="text-align: right;">57</td>
-<td style="text-align: right;">45</td>
-<td style="text-align: right;">5.9</td>
+<td>Avaliação</td>
+<td>Cotovelo, silhouette, perfil dos grupos e comparação das duas segmentações</td>
+</tr>
+<tr class="even">
+<td>Implantação</td>
+<td>Quanto vale cada grupo, mapa e uso prático</td>
+</tr>
+</tbody>
+</table>
+<section id="dados" class="level2" data-number="5.1">
+<h2 data-number="5.1" class="anchored" data-anchor-id="dados"><span class="header-section-number">5.1</span> Dados</h2>
+<p>A base vem de uma reportagem do site <a href="https://fivethirtyeight.com/features/dear-mona-followup-where-do-people-drink-the-most-beer-wine-and-spirits/">FiveThirtyEight</a>, com dados da Organização Mundial da Saúde (OMS) de 2010, e pode ser baixada <a href="https://github.com/fivethirtyeight/data/tree/master/alcohol-consumption">neste repositório</a>. Para cada país, ela traz:</p>
+<ul>
+<li><code>cerveja</code>, <code>destilados</code> e <code>vinho</code>: consumo médio anual por pessoa, em <strong>porções</strong> (uma lata de cerveja, uma dose de destilado ou uma taça de vinho);</li>
+<li><code>litros_alcool</code>: consumo médio anual por pessoa, em <strong>litros de álcool puro</strong>, somando todas as bebidas.</li>
+</ul>
+<p>Os valores são médias por pessoa de 15 anos ou mais.</p>
+<div class="callout callout-style-default callout-warning callout-titled" title="Dados e limitações">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Aviso</span>Dados e limitações
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<ul>
+<li>Os dados são de <strong>um único ano (2010)</strong>. Hábitos de consumo mudam devagar, mas uma decisão real exigiria dados recentes.</li>
+<li>O consumo é <strong>por pessoa</strong>: um país pequeno com consumo alto pode ser um mercado menor do que um país populoso com consumo moderado. Por isso, mais adiante, juntamos dados de população.</li>
+<li>A base não tem preço, margem, concorrência nem regulação, fatores decisivos para entrar em um mercado.</li>
+<li>Em vários países o consumo é quase nulo por razões culturais, religiosas ou legais. Eles são tratados como <strong>fora do escopo</strong> da estratégia, e não como uma oportunidade.</li>
+</ul>
+</div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>dados <span class="ot">&lt;-</span> <span class="fu">read_delim</span>(<span class="st">"data/drinks.csv"</span>, <span class="at">delim =</span> <span class="st">";"</span>, <span class="at">show_col_types =</span> <span class="cn">FALSE</span>) <span class="sc">|&gt;</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">pais =</span> country,</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>         <span class="at">cerveja =</span> beer_servings,</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>         <span class="at">destilados =</span> spirit_servings,</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>         <span class="at">vinho =</span> wine_servings,</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>         <span class="at">litros_alcool =</span> total_litres_of_pure_alcohol) <span class="sc">|&gt;</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">litros_alcool =</span> <span class="fu">as.numeric</span>(litros_alcool),</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>         <span class="at">porcoes =</span> cerveja <span class="sc">+</span> destilados <span class="sc">+</span> vinho)</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>bebidas <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"cerveja"</span>, <span class="st">"destilados"</span>, <span class="st">"vinho"</span>)</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="cell">
+<div class="cell-output-display">
+<table class="table table-striped table-hover table-condensed caption-top table-sm small">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">pais</th>
+<th data-quarto-table-cell-role="th">cerveja</th>
+<th data-quarto-table-cell-role="th">destilados</th>
+<th data-quarto-table-cell-role="th">vinho</th>
+<th data-quarto-table-cell-role="th">litros_alcool</th>
+<th data-quarto-table-cell-role="th">porcoes</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Afghanistan</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0,0</td>
+<td>0</td>
+</tr>
+<tr class="even">
+<td>Albania</td>
+<td>89</td>
+<td>132</td>
+<td>54</td>
+<td>4,9</td>
+<td>275</td>
+</tr>
+<tr class="odd">
+<td>Algeria</td>
+<td>25</td>
+<td>0</td>
+<td>14</td>
+<td>0,7</td>
+<td>39</td>
+</tr>
+<tr class="even">
+<td>Andorra</td>
+<td>245</td>
+<td>138</td>
+<td>312</td>
+<td>12,4</td>
+<td>695</td>
+</tr>
+<tr class="odd">
+<td>Angola</td>
+<td>217</td>
+<td>57</td>
+<td>45</td>
+<td>5,9</td>
+<td>319</td>
 </tr>
 </tbody>
 </table>
 </div>
 </div>
+<p>A base tem 193 países. A coluna <code>porcoes</code> soma as três bebidas e será usada mais adiante.</p>
 </section>
-<section id="análise-exploratória" class="level2" data-number="5.3">
-<h2 data-number="5.3" class="anchored" data-anchor-id="análise-exploratória"><span class="header-section-number">5.3</span> Análise Exploratória</h2>
-<p>Vamos realizar uma análise exploratória inicial para entender a distribuição das variáveis e identificar possíveis padrões nos dados. Primeiramente, avaliando a relação entre as variáveis numéricas.</p>
+<section id="análise-exploratória" class="level2" data-number="5.2">
+<h2 data-number="5.2" class="anchored" data-anchor-id="análise-exploratória"><span class="header-section-number">5.2</span> Análise exploratória</h2>
+<p>As três bebidas têm distribuições bem assimétricas: muitos países com consumo baixo e poucos com consumo muito alto. O vinho é o caso mais extremo, com consumo próximo de zero na maior parte dos países.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>dados <span class="sc">|&gt;</span> </span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>country) <span class="sc">|&gt;</span> </span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggpairs</span>()</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>dados <span class="sc">|&gt;</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="fu">all_of</span>(bebidas), <span class="at">names_to =</span> <span class="st">"bebida"</span>, <span class="at">values_to =</span> <span class="st">"porcoes_ano"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(porcoes_ano)) <span class="sc">+</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="at">bins =</span> <span class="dv">25</span>, <span class="at">fill =</span> <span class="st">"#66c2a5"</span>, <span class="at">color =</span> <span class="st">"white"</span>) <span class="sc">+</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span> bebida) <span class="sc">+</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Porções por pessoa por ano"</span>, <span class="at">y =</span> <span class="st">"Número de países"</span>)</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="04_cluster_538_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="04_cluster_538_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
 </div>
-<p>No caso desses dados sobre consumo de bebidas alcoólicas em diferentes países, observamos que as porções de cerveja estão fortemente correlacionadas com o total de litros de álcool puro consumidos (correlação de 0.84)., o que sugere que o consumo de cerveja é um grande contribuinte para o consumo geral de álcool. Além disso, há uma correlação moderada entre porções de cerveja e porções de vinho (0.53), bem como entre porções de vinho e o total de litros de álcool puro (0.67), indicando que o consumo de vinho também está significativamente associado ao consumo geral de álcool. Por outro lado, as porções de destilados têm uma correlação mais fraca com as outras variáveis, sugerindo que o consumo de destilados pode ser menos influente no total de álcool consumido em comparação com cerveja e vinho.</p>
-<!-- ### Principais Países por Consumo de Bebidas Alcoólicas -->
-<p>Agora, vamos identificar os principais países em termos de consumo de diferentes tipos de bebidas alcoólicas.</p>
-<p><strong>Maiores Consumidores de Vinho</strong></p>
+<p>Os cinco maiores consumidores de cada bebida:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>dados <span class="sc">|&gt;</span> </span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(country, wine) <span class="sc">|&gt;</span> </span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(wine)) <span class="sc">|&gt;</span> </span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">slice_head</span>(<span class="at">n =</span> <span class="dv">5</span>)</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>top5 <span class="ot">&lt;-</span> <span class="cf">function</span>(bebida) {</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  dados <span class="sc">|&gt;</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">slice_max</span>(.data[[bebida]], <span class="at">n =</span> <span class="dv">5</span>, <span class="at">with_ties =</span> <span class="cn">FALSE</span>) <span class="sc">|&gt;</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">transmute</span>(<span class="sc">!!</span><span class="at">bebida :=</span> <span class="fu">paste0</span>(pais, <span class="st">" ("</span>, .data[[bebida]], <span class="st">")"</span>))</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>tab_top5 <span class="ot">&lt;-</span> <span class="fu">bind_cols</span>(<span class="fu">tibble</span>(Posição <span class="ot">=</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">5</span>), purrr<span class="sc">::</span><span class="fu">map</span>(bebidas, top5))</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="cell">
 <div class="cell-output-display">
-<table class="caption-top table table-sm table-striped small">
+<table class="table table-striped table-hover table-condensed caption-top table-sm small">
 <thead>
 <tr class="header">
-<th style="text-align: left;" data-quarto-table-cell-role="th">country</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">wine</th>
+<th data-quarto-table-cell-role="th">Posição</th>
+<th data-quarto-table-cell-role="th">cerveja</th>
+<th data-quarto-table-cell-role="th">destilados</th>
+<th data-quarto-table-cell-role="th">vinho</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td style="text-align: left;">France</td>
-<td style="text-align: right;">370</td>
+<td>1</td>
+<td>Namibia (376)</td>
+<td>Grenada (438)</td>
+<td>France (370)</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">Portugal</td>
-<td style="text-align: right;">339</td>
+<td>2</td>
+<td>Czech Republic (361)</td>
+<td>Belarus (373)</td>
+<td>Portugal (339)</td>
 </tr>
 <tr class="odd">
-<td style="text-align: left;">Andorra</td>
-<td style="text-align: right;">312</td>
+<td>3</td>
+<td>Gabon (347)</td>
+<td>Haiti (326)</td>
+<td>Andorra (312)</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">Switzerland</td>
-<td style="text-align: right;">280</td>
+<td>4</td>
+<td>Germany (346)</td>
+<td>Russian Federation (326)</td>
+<td>Switzerland (280)</td>
 </tr>
 <tr class="odd">
-<td style="text-align: left;">Denmark</td>
-<td style="text-align: right;">278</td>
+<td>5</td>
+<td>Lithuania (343)</td>
+<td>St. Lucia (315)</td>
+<td>Denmark (278)</td>
 </tr>
 </tbody>
 </table>
 </div>
 </div>
-<p><strong>Maiores Consumidores de Cerveja</strong></p>
+<p>E a correlação entre as variáveis:</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>dados <span class="sc">|&gt;</span> </span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(country, beer) <span class="sc">|&gt;</span> </span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(beer)) <span class="sc">|&gt;</span> </span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">slice_head</span>(<span class="at">n =</span> <span class="dv">5</span>)</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>tab_cor <span class="ot">&lt;-</span> dados <span class="sc">|&gt;</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="fu">all_of</span>(bebidas), litros_alcool) <span class="sc">|&gt;</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cor</span>() <span class="sc">|&gt;</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">round</span>(<span class="dv">2</span>) <span class="sc">|&gt;</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as_tibble</span>(<span class="at">rownames =</span> <span class="st">"Variável"</span>)</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="cell">
 <div class="cell-output-display">
-<table class="caption-top table table-sm table-striped small">
+<table class="table table-striped table-hover table-condensed caption-top table-sm small">
 <thead>
 <tr class="header">
-<th style="text-align: left;" data-quarto-table-cell-role="th">country</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">beer</th>
+<th data-quarto-table-cell-role="th">Variável</th>
+<th data-quarto-table-cell-role="th">cerveja</th>
+<th data-quarto-table-cell-role="th">destilados</th>
+<th data-quarto-table-cell-role="th">vinho</th>
+<th data-quarto-table-cell-role="th">litros_alcool</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td style="text-align: left;">Namibia</td>
-<td style="text-align: right;">376</td>
+<td>cerveja</td>
+<td>1,00</td>
+<td>0,46</td>
+<td>0,53</td>
+<td>0,84</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">Czech Republic</td>
-<td style="text-align: right;">361</td>
+<td>destilados</td>
+<td>0,46</td>
+<td>1,00</td>
+<td>0,19</td>
+<td>0,65</td>
 </tr>
 <tr class="odd">
-<td style="text-align: left;">Gabon</td>
-<td style="text-align: right;">347</td>
+<td>vinho</td>
+<td>0,53</td>
+<td>0,19</td>
+<td>1,00</td>
+<td>0,67</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">Germany</td>
-<td style="text-align: right;">346</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">Lithuania</td>
-<td style="text-align: right;">343</td>
+<td>litros_alcool</td>
+<td>0,84</td>
+<td>0,65</td>
+<td>0,67</td>
+<td>1,00</td>
 </tr>
 </tbody>
 </table>
 </div>
 </div>
-<p><strong>Maiores Consumidores de Bebidas Destiladas</strong></p>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>dados <span class="sc">|&gt;</span> </span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(country, spirit) <span class="sc">|&gt;</span> </span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(spirit)) <span class="sc">|&gt;</span> </span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">slice_head</span>(<span class="at">n =</span> <span class="dv">5</span>)</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<div class="cell">
-<div class="cell-output-display">
-<table class="caption-top table table-sm table-striped small">
-<thead>
-<tr class="header">
-<th style="text-align: left;" data-quarto-table-cell-role="th">country</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">spirit</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td style="text-align: left;">Grenada</td>
-<td style="text-align: right;">438</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">Belarus</td>
-<td style="text-align: right;">373</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">Haiti</td>
-<td style="text-align: right;">326</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">Russian Federation</td>
-<td style="text-align: right;">326</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">St. Lucia</td>
-<td style="text-align: right;">315</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
+<p>As três bebidas são positivamente correlacionadas (países que bebem mais de uma tendem a beber mais das outras), mas longe de 1: cada uma traz informação própria. Já <code>litros_alcool</code> é, em boa parte, uma combinação das três, e por isso <strong>não entra no agrupamento</strong>: incluí-la contaria o mesmo consumo duas vezes. Ela volta mais adiante, para medir o tamanho de cada mercado.</p>
+<p>Por fim, 13 países têm consumo zero nas três bebidas, e 31 consomem menos de 20 porções por pessoa por ano (menos de duas por mês).</p>
 </section>
-<section id="padronização-dos-dados" class="level2" data-number="5.4">
-<h2 data-number="5.4" class="anchored" data-anchor-id="padronização-dos-dados"><span class="header-section-number">5.4</span> Padronização dos Dados</h2>
-<p>Vamos padronizar as variáveis para realizar a análise de clusters. A padronização é importante porque os métodos de clustering, como o k-means, são baseados em medidas de distância entre os pontos de dados. Se as variáveis tiverem escalas diferentes, aquelas com variações maiores dominarão a análise, distorcendo os resultados. Normalizar os dados garantirá que todas as variáveis contribuam igualmente para a análise de cluster, resultando em agrupamentos mais corretos.</p>
+<section id="como-o-k-médias-funciona" class="level2" data-number="5.3">
+<h2 data-number="5.3" class="anchored" data-anchor-id="como-o-k-médias-funciona"><span class="header-section-number">5.3</span> Como o k-médias funciona</h2>
+<p>O k-médias divide as observações (aqui, países) em <span class="math inline">\(k\)</span> grupos, de forma que os países de um mesmo grupo sejam parecidos entre si e diferentes dos países dos outros grupos. O número <span class="math inline">\(k\)</span> é escolhido por quem faz a análise.</p>
+<p>O algoritmo é simples:</p>
+<ol type="1">
+<li>Sorteia <span class="math inline">\(k\)</span> pontos iniciais, os <strong>centroides</strong>, um para cada grupo.</li>
+<li>Atribui cada país ao centroide mais próximo (pela distância euclidiana).</li>
+<li>Recalcula cada centroide como a <strong>média</strong> dos países do seu grupo (daí o nome “k-médias”).</li>
+<li>Repete os passos 2 e 3 até que os grupos parem de mudar.</li>
+</ol>
+<p>O resultado depende do sorteio inicial. Por isso, o algoritmo é rodado várias vezes com sorteios diferentes (argumento <code>nstart</code>) e fica com a melhor solução, a que tem a menor <strong>soma de quadrados dentro dos grupos</strong>: a soma das distâncias ao quadrado entre cada país e o centroide do seu grupo. Quanto menor essa soma, mais compactos são os grupos.</p>
+<section id="por-que-padronizar" class="level3" data-number="5.3.1">
+<h3 data-number="5.3.1" class="anchored" data-anchor-id="por-que-padronizar"><span class="header-section-number">5.3.1</span> Por que padronizar</h3>
+<p>Como o algoritmo usa distâncias, uma variável com valores maiores ou mais espalhados pesa mais no resultado. Se uma variável estivesse em reais e outra em milhares de reais, a primeira dominaria o agrupamento apenas por causa da unidade. A <strong>padronização</strong> (subtrair a média e dividir pelo desvio padrão) coloca todas as variáveis na mesma escala.</p>
+<p>Aqui as três bebidas estão na mesma unidade (porções), mas com dispersões diferentes. Padronizamos mesmo assim, para que cada bebida tenha o mesmo peso na definição dos grupos.</p>
+</section>
+<section id="como-escolher-k" class="level3" data-number="5.3.2">
+<h3 data-number="5.3.2" class="anchored" data-anchor-id="como-escolher-k"><span class="header-section-number">5.3.2</span> Como escolher <span class="math inline">\(k\)</span></h3>
+<p>Não existe um <span class="math inline">\(k\)</span> “correto”. Dois critérios ajudam na escolha:</p>
+<ul>
+<li><strong>Método do cotovelo:</strong> a soma de quadrados dentro dos grupos sempre diminui quando aumentamos <span class="math inline">\(k\)</span> (com um grupo por país, ela seria zero). Procuramos o ponto em que a queda deixa de ser acentuada, o “cotovelo” do gráfico. É um critério subjetivo.</li>
+<li><strong>Coeficiente de silhouette:</strong> para cada país, compara <span class="math inline">\(a\)</span>, a distância média aos países do próprio grupo, com <span class="math inline">\(b\)</span>, a distância média aos países do grupo vizinho mais próximo:</li>
+</ul>
+<p><span class="math display">\[
+s = \frac{b - a}{\max(a, b)}.
+\]</span></p>
+<p>O valor vai de -1 a 1. Perto de 1, o país está bem no seu grupo; perto de 0, está na fronteira entre dois grupos; negativo, estaria melhor no grupo vizinho. A média de <span class="math inline">\(s\)</span> entre todos os países resume a qualidade do agrupamento, e valores maiores são melhores.</p>
+<p>A função abaixo calcula os dois critérios para vários valores de <span class="math inline">\(k\)</span>. Ela será usada nas duas segmentações.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>dados_pad <span class="ot">&lt;-</span> dados <span class="sc">|&gt;</span> </span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>country) <span class="sc">|&gt;</span> </span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale</span>()</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>avalia_k <span class="ot">&lt;-</span> <span class="cf">function</span>(x, <span class="at">ks =</span> <span class="dv">2</span><span class="sc">:</span><span class="dv">8</span>) {</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  distancias <span class="ot">&lt;-</span> <span class="fu">dist</span>(x)</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">map_dfr</span>(ks, <span class="cf">function</span>(k) {</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">set.seed</span>(<span class="dv">42</span>)</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    km <span class="ot">&lt;-</span> <span class="fu">kmeans</span>(x, <span class="at">centers =</span> k, <span class="at">nstart =</span> <span class="dv">25</span>)</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">tibble</span>(<span class="at">k =</span> k,</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>           <span class="st">`</span><span class="at">Soma de quadrados (cotovelo)</span><span class="st">`</span> <span class="ot">=</span> km<span class="sc">$</span>tot.withinss,</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>           <span class="st">`</span><span class="at">Silhouette médio</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">mean</span>(<span class="fu">silhouette</span>(km<span class="sc">$</span>cluster, distancias)[, <span class="st">"sil_width"</span>]))</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>  })</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>grafico_k <span class="ot">&lt;-</span> <span class="cf">function</span>(criterios) {</span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>  criterios <span class="sc">|&gt;</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>    <span class="fu">pivot_longer</span>(<span class="sc">-</span>k, <span class="at">names_to =</span> <span class="st">"criterio"</span>, <span class="at">values_to =</span> <span class="st">"valor"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(k, valor)) <span class="sc">+</span></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_line</span>() <span class="sc">+</span></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_point</span>() <span class="sc">+</span></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>    <span class="fu">facet_wrap</span>(<span class="sc">~</span> criterio, <span class="at">scales =</span> <span class="st">"free_y"</span>) <span class="sc">+</span></span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_x_continuous</span>(<span class="at">breaks =</span> criterios<span class="sc">$</span>k) <span class="sc">+</span></span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Número de grupos (k)"</span>, <span class="at">y =</span> <span class="cn">NULL</span>)</span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<section id="análise-de-cluster" class="level3" data-number="5.4.1">
-<h3 data-number="5.4.1" class="anchored" data-anchor-id="análise-de-cluster"><span class="header-section-number">5.4.1</span> Análise de Cluster</h3>
-<p>Agora, vamos utilizar o algoritmo K-means para agrupar os países em clusters com base no consumo de bebidas alcoólicas.</p>
+<p>Por fim, o k-médias numera os grupos de forma arbitrária (o grupo “1” de uma execução pode ser o “3” de outra). Para que o texto não dependa dessa numeração, damos a cada grupo um <strong>nome calculado a partir do seu centroide</strong>, como o de baixo consumo ou o de maior consumo de vinho.</p>
+</section>
+</section>
+<section id="segmentação-1-volume-onde-o-consumo-é-forte" class="level2" data-number="5.4">
+<h2 data-number="5.4" class="anchored" data-anchor-id="segmentação-1-volume-onde-o-consumo-é-forte"><span class="header-section-number">5.4</span> Segmentação 1: volume (onde o consumo é forte?)</h2>
+<p>Na primeira segmentação, agrupamos os países pelo <strong>volume</strong> consumido de cada bebida, com as três variáveis padronizadas.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1</span>)</span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="co"># obtem o kmeans considerando 2 clusters</span></span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>k_medias <span class="ot">&lt;-</span> <span class="fu">kmeans</span>(dados_pad, </span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>                   <span class="at">centers =</span> <span class="dv">2</span>,</span>
-<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>                   <span class="at">nstart =</span> <span class="dv">10</span>)</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>x_volume <span class="ot">&lt;-</span> <span class="fu">scale</span>(dados[bebidas])</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>crit_volume <span class="ot">&lt;-</span> <span class="fu">avalia_k</span>(x_volume)</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="fu">grafico_k</span>(crit_volume)</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="04_cluster_538_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
 </div>
-<p>A soma de quadrados total é mostrada abaixo.</p>
+</div>
+</div>
+<p>A soma de quadrados cai bastante até <span class="math inline">\(k=4\)</span> e mais devagar a partir daí. O silhouette médio com <span class="math inline">\(k=4\)</span> é 0,52 (o maior valor testado é 0,52, com <span class="math inline">\(k=\)</span> 4). Ficamos com <strong>4 grupos</strong>: um de baixo consumo e três de consumo alto, cada um puxado por uma bebida diferente.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># total SS (soma de quadrados total)</span></span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>k_medias<span class="sc">$</span>totss</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] 768</code></pre>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">42</span>)</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>km_volume <span class="ot">&lt;-</span> <span class="fu">kmeans</span>(x_volume, <span class="at">centers =</span> <span class="dv">4</span>, <span class="at">nstart =</span> <span class="dv">25</span>)</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="co"># nome de cada grupo: o de menor consumo total é o "Baixo consumo"; os demais</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="co"># recebem o nome da bebida com o maior centroide padronizado</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>centroides <span class="ot">&lt;-</span> <span class="fu">as_tibble</span>(km_volume<span class="sc">$</span>centers) <span class="sc">|&gt;</span> <span class="fu">mutate</span>(<span class="at">grupo =</span> <span class="fu">row_number</span>())</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>total_grupo <span class="ot">&lt;-</span> <span class="fu">tapply</span>(dados<span class="sc">$</span>porcoes, km_volume<span class="sc">$</span>cluster, mean)</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>nome_volume <span class="ot">&lt;-</span> centroides <span class="sc">|&gt;</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">bebida =</span> bebidas[<span class="fu">max.col</span>(<span class="fu">as.matrix</span>(centroides[bebidas]))],</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>         <span class="at">nome =</span> <span class="fu">if_else</span>(grupo <span class="sc">==</span> <span class="fu">which.min</span>(total_grupo), <span class="st">"Baixo consumo"</span>,</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>                        <span class="fu">paste</span>(<span class="st">"Alto consumo:"</span>, bebida)),</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>         <span class="at">nome =</span> <span class="fu">make.unique</span>(nome, <span class="at">sep =</span> <span class="st">" "</span>))</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>dados <span class="ot">&lt;-</span> dados <span class="sc">|&gt;</span></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">grupo_volume =</span> nome_volume<span class="sc">$</span>nome[km_volume<span class="sc">$</span>cluster])</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-</div>
-<div class="callout callout-style-default callout-tip callout-titled">
-<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="true" aria-label="Toggle callout">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Dica
-</div>
-<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
-</div>
-<div id="callout-1" class="callout-1-contents callout-collapse collapse show">
-<div class="callout-body-container callout-body">
-<p>O codigo abaixo faz a conta da soma de quadrados total, porém sem usar o resultado da função <code>kmeans</code>, o valor é calculado manualmente.</p>
+<p>A tabela mostra o consumo médio de cada bebida em cada grupo, na escala original, e três exemplos de países (os de maior consumo total no grupo).</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># armazena em um mesmo tibble os dados e o cluster estimado</span></span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>auxiliar <span class="ot">&lt;-</span> <span class="fu">tibble</span>(<span class="at">cluster =</span> k_medias<span class="sc">$</span>cluster) <span class="sc">|&gt;</span> </span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">bind_cols</span>(<span class="fu">as_tibble</span>(dados_pad))</span>
-<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>auxiliar <span class="sc">|&gt;</span> </span>
-<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">transmute</span>(<span class="at">beer =</span> (beer <span class="sc">-</span> <span class="fu">mean</span>(beer))<span class="sc">^</span><span class="dv">2</span>, </span>
-<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>            <span class="at">spirit =</span> (spirit <span class="sc">-</span> <span class="fu">mean</span>(spirit))<span class="sc">^</span><span class="dv">2</span>, </span>
-<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>            <span class="at">wine =</span> (wine <span class="sc">-</span> <span class="fu">mean</span>(wine))<span class="sc">^</span><span class="dv">2</span>,</span>
-<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>            <span class="at">total_litres_alcohol =</span> (total_litres_alcohol <span class="sc">-</span></span>
-<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>                                      <span class="fu">mean</span>(total_litres_alcohol))<span class="sc">^</span><span class="dv">2</span>, </span>
-<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>            <span class="at">totss =</span> beer <span class="sc">+</span> spirit <span class="sc">+</span> wine <span class="sc">+</span> total_litres_alcohol) <span class="sc">|&gt;</span> </span>
-<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">totss =</span> <span class="fu">sum</span>(totss)) <span class="sc">|&gt;</span> </span>
-<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pull</span>(totss)</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] 768</code></pre>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>perfil_volume <span class="ot">&lt;-</span> dados <span class="sc">|&gt;</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(<span class="at">Grupo =</span> grupo_volume) <span class="sc">|&gt;</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(Países <span class="ot">=</span> <span class="fu">n</span>(),</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>            <span class="fu">across</span>(<span class="fu">all_of</span>(bebidas), <span class="sc">~</span> <span class="fu">round</span>(<span class="fu">mean</span>(.x))),</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>            <span class="at">Exemplos =</span> <span class="fu">paste</span>(pais[<span class="fu">order</span>(<span class="sc">-</span>porcoes)][<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>], <span class="at">collapse =</span> <span class="st">", "</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(cerveja <span class="sc">+</span> destilados <span class="sc">+</span> vinho))</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-</div>
-</div>
-</div>
-</div>
-<p>A soma de quadrados intra-cluster está no vetor <code>$withinss</code>, cada componente é referente à um cluster.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># within SS</span></span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>k_medias<span class="sc">$</span>withinss</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] 100.7368 264.7697</code></pre>
+<div class="cell-output-display">
+<table class="table table-striped table-hover table-condensed caption-top table-sm small">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">Grupo</th>
+<th data-quarto-table-cell-role="th">Países</th>
+<th data-quarto-table-cell-role="th">cerveja</th>
+<th data-quarto-table-cell-role="th">destilados</th>
+<th data-quarto-table-cell-role="th">vinho</th>
+<th data-quarto-table-cell-role="th">Exemplos</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Alto consumo: vinho</td>
+<td>27</td>
+<td>205</td>
+<td>92</td>
+<td>223</td>
+<td>Andorra, France, Luxembourg</td>
+</tr>
+<tr class="even">
+<td>Alto consumo: cerveja</td>
+<td>30</td>
+<td>251</td>
+<td>119</td>
+<td>53</td>
+<td>Czech Republic, Lithuania, Poland</td>
+</tr>
+<tr class="odd">
+<td>Alto consumo: destilados</td>
+<td>31</td>
+<td>117</td>
+<td>230</td>
+<td>30</td>
+<td>Grenada, Russian Federation, Slovakia</td>
+</tr>
+<tr class="even">
+<td>Baixo consumo</td>
+<td>105</td>
+<td>36</td>
+<td>24</td>
+<td>10</td>
+<td>Montenegro, Sao Tome &amp; Principe, Seychelles</td>
+</tr>
+</tbody>
+</table>
 </div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co"># total within SS (mesmo que k_medias$tot.withinss)</span></span>
-<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>k_medias<span class="sc">$</span>withinss <span class="sc">|&gt;</span> </span>
-<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sum</span>()</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] 365.5065</code></pre>
 </div>
-</div>
-<div class="callout callout-style-default callout-tip callout-titled">
-<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-2-contents" aria-controls="callout-2" aria-expanded="true" aria-label="Toggle callout">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Dica
-</div>
-<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
-</div>
-<div id="callout-2" class="callout-2-contents callout-collapse collapse show">
-<div class="callout-body-container callout-body">
-<p>O codigo abaixo faz o cálculo da soma de quadrados total intracluster (mesmo que o numero acima).</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>auxiliar <span class="sc">|&gt;</span> </span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(cluster) <span class="sc">|&gt;</span> </span>
-<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">transmute</span>(<span class="at">beer =</span> (beer <span class="sc">-</span> <span class="fu">mean</span>(beer))<span class="sc">^</span><span class="dv">2</span>, </span>
-<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>            <span class="at">spirit =</span> (spirit <span class="sc">-</span> <span class="fu">mean</span>(spirit))<span class="sc">^</span><span class="dv">2</span>, </span>
-<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>            <span class="at">wine =</span> (wine <span class="sc">-</span> <span class="fu">mean</span>(wine))<span class="sc">^</span><span class="dv">2</span>,</span>
-<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>            <span class="at">total_litres_alcohol =</span> (total_litres_alcohol <span class="sc">-</span></span>
-<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>                                      <span class="fu">mean</span>(total_litres_alcohol))<span class="sc">^</span><span class="dv">2</span>, </span>
-<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>            <span class="at">withinss =</span> beer <span class="sc">+</span> spirit <span class="sc">+</span> wine <span class="sc">+</span> total_litres_alcohol) <span class="sc">|&gt;</span> </span>
-<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">withinss =</span> <span class="fu">sum</span>(withinss))</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 2 × 2
-  cluster withinss
-    &lt;int&gt;    &lt;dbl&gt;
-1       1     101.
-2       2     265.</code></pre>
-</div>
-</div>
-</div>
-</div>
-</div>
-<p>Portanto, quando os dados <strong>não</strong> estão agrupados em clusters, a soma total dos quadrados é de 768. No entanto, ao dividir os dados em dois grupos, a soma total dos quadrados dentro de cada cluster é de 365.51. Isso mostra que o processo de agrupamento reduziu a dispersão dos dados.</p>
-<section id="definição-do-número-de-clusters" class="level4">
-<h4 class="anchored" data-anchor-id="definição-do-número-de-clusters">Definição do Número de Clusters</h4>
-<p>O método do cotovelo é uma técnica comumente utilizada para determinar o número ideal de clusters em uma análise de agrupamento (clustering), como no algoritmo K-means. Esse método envolve traçar um gráfico que mostra a relação entre o número de clusters e a soma dos quadrados intra-cluster. À medida que o número de clusters aumenta, a soma dos quadrados diminui, pois os clusters se tornam mais específicos. No entanto, em algum ponto, adicionar mais clusters não resultará em uma redução significativa na soma dos quadrados. Esse ponto é chamado de “cotovelo” no gráfico.</p>
-<p>Portanto, o número de clusters ideal é geralmente escolhido no ponto em que a redução na soma dos quadrados se torna menos significativa, indicando que adicionar mais clusters não oferecerá muitos benefícios na explicação da variação nos dados. <strong>Note que esta escolha é subjetiva.</strong></p>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
-<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>k <span class="ot">&lt;-</span> <span class="dv">2</span><span class="sc">:</span><span class="dv">20</span></span>
-<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a><span class="fu">tibble</span>(<span class="at">k =</span> k) <span class="sc">|&gt;</span> </span>
-<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">w =</span> <span class="fu">map_dbl</span>(k, <span class="sc">~</span> <span class="fu">kmeans</span>(dados_pad, </span>
-<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>                                 <span class="at">centers =</span> .x,</span>
-<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>                                 <span class="at">nstart =</span> <span class="dv">10</span>)<span class="sc">$</span>tot.withinss)) <span class="sc">|&gt;</span> </span>
-<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(k, w)) <span class="sc">+</span> </span>
-<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span> </span>
-<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_x_continuous</span>(<span class="at">breaks =</span> k) <span class="sc">+</span></span>
-<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>()<span class="sc">+</span></span>
-<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Número de Clusters (k)"</span>, </span>
-<span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Within-cluster Soma dos Quadrados"</span>)</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>dados <span class="sc">|&gt;</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(cerveja, vinho, <span class="at">color =</span> grupo_volume, <span class="at">size =</span> destilados)) <span class="sc">+</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">alpha =</span> <span class="fl">0.7</span>) <span class="sc">+</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_brewer</span>(<span class="at">palette =</span> <span class="st">"Set2"</span>) <span class="sc">+</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Cerveja (porções por pessoa/ano)"</span>, <span class="at">y =</span> <span class="st">"Vinho (porções por pessoa/ano)"</span>,</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>       <span class="at">color =</span> <span class="st">"Grupo (volume)"</span>, <span class="at">size =</span> <span class="st">"Destilados"</span>)</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -716,385 +786,578 @@ Dica
 </div>
 </div>
 </div>
-<p>Através do método do cotovelo vamos considerar que o número de clusters, para este conjunto de dados é igual a 5.</p>
+<p>O grupo de <strong>baixo consumo</strong> reúne 105 países (54% da base): são mercados em que o hábito de beber é fraco por pessoa. Os três grupos de consumo alto têm perfis bem diferentes, cada um puxado por uma bebida. Para a multinacional, esta segmentação responde <strong>onde</strong> o hábito de consumo é forte, mas não diz, por si só, o que vender em cada lugar: um país do grupo de baixo consumo pode beber quase só destilados, e outro, quase só cerveja.</p>
+</section>
+<section id="segmentação-2-mix-o-que-se-bebe" class="level2" data-number="5.5">
+<h2 data-number="5.5" class="anchored" data-anchor-id="segmentação-2-mix-o-que-se-bebe"><span class="header-section-number">5.5</span> Segmentação 2: mix (o que se bebe?)</h2>
+<p>Na segunda segmentação, agrupamos os países pela <strong>participação</strong> de cada bebida no consumo total, sem olhar para o volume. Um país com 600 porções por ano, metade de vinho, fica igual a um com 60 porções, metade de vinho.</p>
+<p>Dois cuidados na preparação:</p>
+<ul>
+<li>Os 31 países com menos de 20 porções por pessoa por ano ficam de fora: com um consumo tão baixo, as participações são instáveis (um país com três porções, todas de vinho, seria “100% vinho”) e, com consumo zero, nem podem ser calculadas. Eles formam o grupo <strong>“Fora do escopo”</strong>.</li>
+<li>As participações <strong>não são padronizadas</strong>: elas já estão na mesma escala (de 0 a 1) e somam 1 em cada país.</li>
+</ul>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span>
-<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>descricao <span class="ot">&lt;-</span> dados <span class="sc">|&gt;</span> </span>
-<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">cluster =</span> <span class="fu">factor</span>(<span class="fu">kmeans</span>(dados_pad, <span class="at">centers =</span> <span class="dv">5</span>, <span class="at">nstart =</span> <span class="dv">10</span>)<span class="sc">$</span>cluster))</span>
-<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>descricao <span class="sc">|&gt;</span> </span>
-<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">slice_head</span>(<span class="at">n=</span><span class="dv">5</span>)</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>dados_mix <span class="ot">&lt;-</span> dados <span class="sc">|&gt;</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(porcoes <span class="sc">&gt;=</span> <span class="dv">20</span>) <span class="sc">|&gt;</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="fu">across</span>(<span class="fu">all_of</span>(bebidas), <span class="sc">~</span> .x <span class="sc">/</span> porcoes, <span class="at">.names =</span> <span class="st">"part_{.col}"</span>))</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>partes <span class="ot">&lt;-</span> <span class="fu">paste0</span>(<span class="st">"part_"</span>, bebidas)</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>x_mix <span class="ot">&lt;-</span> <span class="fu">as.matrix</span>(dados_mix[partes])</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>crit_mix <span class="ot">&lt;-</span> <span class="fu">avalia_k</span>(x_mix)</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a><span class="fu">grafico_k</span>(crit_mix)</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="04_cluster_538_files/figure-html/unnamed-chunk-18-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>O silhouette médio com <span class="math inline">\(k=4\)</span> é 0,45 (o maior valor testado é 0,48, com <span class="math inline">\(k=\)</span> 3). Aqui, a escolha de <span class="math inline">\(k\)</span> também é uma decisão de negócio: com três linhas de produto, queremos saber em quais mercados cada uma lidera e em quais nenhuma domina. Ficamos com <strong>4 grupos</strong>.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">42</span>)</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>km_mix <span class="ot">&lt;-</span> <span class="fu">kmeans</span>(x_mix, <span class="at">centers =</span> <span class="dv">4</span>, <span class="at">nstart =</span> <span class="dv">25</span>)</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="co"># nome de cada grupo: a bebida cuja participação mais supera a média geral;</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="co"># se dois grupos disputam a mesma bebida, o mais forte fica com o nome e o</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a><span class="co"># outro vira "Misto", com as duas bebidas de maior participação</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>media_geral <span class="ot">&lt;-</span> <span class="fu">colMeans</span>(x_mix)</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>excesso <span class="ot">&lt;-</span> <span class="fu">sweep</span>(km_mix<span class="sc">$</span>centers, <span class="dv">2</span>, media_geral)</span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>dominante <span class="ot">&lt;-</span> bebidas[<span class="fu">max.col</span>(excesso)]</span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>forca <span class="ot">&lt;-</span> <span class="fu">apply</span>(excesso, <span class="dv">1</span>, max)</span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>nome_mix <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(forca <span class="sc">==</span> <span class="fu">ave</span>(forca, dominante, <span class="at">FUN =</span> max),</span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>                   <span class="fu">str_to_title</span>(dominante), <span class="cn">NA</span>)</span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (g <span class="cf">in</span> <span class="fu">which</span>(<span class="fu">is.na</span>(nome_mix))) {</span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a>  duas <span class="ot">&lt;-</span> bebidas[<span class="fu">order</span>(<span class="sc">-</span>km_mix<span class="sc">$</span>centers[g, ])][<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>]</span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a>  nome_mix[g] <span class="ot">&lt;-</span> <span class="fu">paste</span>(<span class="st">"Misto:"</span>, duas[<span class="dv">1</span>], <span class="st">"e"</span>, duas[<span class="dv">2</span>])</span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a>dados_mix <span class="ot">&lt;-</span> dados_mix <span class="sc">|&gt;</span> <span class="fu">mutate</span>(<span class="at">grupo_mix =</span> nome_mix[km_mix<span class="sc">$</span>cluster])</span>
+<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-20"><a href="#cb11-20" aria-hidden="true" tabindex="-1"></a>dados <span class="ot">&lt;-</span> dados <span class="sc">|&gt;</span></span>
+<span id="cb11-21"><a href="#cb11-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(<span class="fu">select</span>(dados_mix, pais, grupo_mix), <span class="at">by =</span> <span class="st">"pais"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb11-22"><a href="#cb11-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">grupo_mix =</span> <span class="fu">replace_na</span>(grupo_mix, <span class="st">"Fora do escopo"</span>))</span>
+<span id="cb11-23"><a href="#cb11-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-24"><a href="#cb11-24" aria-hidden="true" tabindex="-1"></a><span class="co"># as mesmas cores para cada grupo de mix em todos os gráficos e no mapa</span></span>
+<span id="cb11-25"><a href="#cb11-25" aria-hidden="true" tabindex="-1"></a>cores_mix <span class="ot">&lt;-</span> <span class="fu">setNames</span>(<span class="fu">c</span>(RColorBrewer<span class="sc">::</span><span class="fu">brewer.pal</span>(<span class="dv">4</span>, <span class="st">"Set2"</span>), <span class="st">"grey60"</span>, <span class="st">"grey90"</span>),</span>
+<span id="cb11-26"><a href="#cb11-26" aria-hidden="true" tabindex="-1"></a>                      <span class="fu">c</span>(<span class="fu">sort</span>(<span class="fu">unique</span>(dados_mix<span class="sc">$</span>grupo_mix)), <span class="st">"Fora do escopo"</span>, <span class="st">"Sem dados"</span>))</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>perfil_mix <span class="ot">&lt;-</span> dados_mix <span class="sc">|&gt;</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(<span class="at">Grupo =</span> grupo_mix) <span class="sc">|&gt;</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(Países <span class="ot">=</span> <span class="fu">n</span>(),</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>            <span class="fu">across</span>(<span class="fu">all_of</span>(partes), <span class="sc">~</span> <span class="fu">pct</span>(<span class="fu">mean</span>(.x), <span class="dv">0</span>)),</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>            <span class="at">Exemplos =</span> <span class="fu">paste</span>(pais[<span class="fu">order</span>(<span class="sc">-</span>porcoes)][<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>], <span class="at">collapse =</span> <span class="st">", "</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="st">`</span><span class="at">% cerveja</span><span class="st">`</span> <span class="ot">=</span> part_cerveja, <span class="st">`</span><span class="at">% destilados</span><span class="st">`</span> <span class="ot">=</span> part_destilados,</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>         <span class="st">`</span><span class="at">% vinho</span><span class="st">`</span> <span class="ot">=</span> part_vinho)</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="cell">
 <div class="cell-output-display">
-<table class="caption-top table table-sm table-striped small">
+<table class="table table-striped table-hover table-condensed caption-top table-sm small">
 <thead>
 <tr class="header">
-<th style="text-align: left;" data-quarto-table-cell-role="th">country</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">beer</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">spirit</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">wine</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">total_litres_alcohol</th>
-<th style="text-align: left;" data-quarto-table-cell-role="th">cluster</th>
+<th data-quarto-table-cell-role="th">Grupo</th>
+<th data-quarto-table-cell-role="th">Países</th>
+<th data-quarto-table-cell-role="th">% cerveja</th>
+<th data-quarto-table-cell-role="th">% destilados</th>
+<th data-quarto-table-cell-role="th">% vinho</th>
+<th data-quarto-table-cell-role="th">Exemplos</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td style="text-align: left;">Afghanistan</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">0.0</td>
-<td style="text-align: left;">1</td>
+<td>Cerveja</td>
+<td>48</td>
+<td>78%</td>
+<td>14%</td>
+<td>8%</td>
+<td>Gabon, Venezuela, Panama</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">Albania</td>
-<td style="text-align: right;">89</td>
-<td style="text-align: right;">132</td>
-<td style="text-align: right;">54</td>
-<td style="text-align: right;">4.9</td>
-<td style="text-align: left;">2</td>
+<td>Destilados</td>
+<td>33</td>
+<td>21%</td>
+<td>72%</td>
+<td>7%</td>
+<td>Grenada, Belarus, St. Lucia</td>
 </tr>
 <tr class="odd">
-<td style="text-align: left;">Algeria</td>
-<td style="text-align: right;">25</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">14</td>
-<td style="text-align: right;">0.7</td>
-<td style="text-align: left;">1</td>
+<td>Misto: cerveja e destilados</td>
+<td>47</td>
+<td>47%</td>
+<td>43%</td>
+<td>11%</td>
+<td>Czech Republic, Russian Federation, Lithuania</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">Andorra</td>
-<td style="text-align: right;">245</td>
-<td style="text-align: right;">138</td>
-<td style="text-align: right;">312</td>
-<td style="text-align: right;">12.4</td>
-<td style="text-align: left;">4</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">Angola</td>
-<td style="text-align: right;">217</td>
-<td style="text-align: right;">57</td>
-<td style="text-align: right;">45</td>
-<td style="text-align: right;">5.9</td>
-<td style="text-align: left;">5</td>
+<td>Vinho</td>
+<td>34</td>
+<td>39%</td>
+<td>16%</td>
+<td>44%</td>
+<td>Andorra, France, Luxembourg</td>
 </tr>
 </tbody>
 </table>
 </div>
 </div>
-<p>O próximo passo é entender as características de cada um dos grupos obtidos, analisando cada uma das variáveis.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>descricao <span class="sc">|&gt;</span> </span>
-<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">cluster =</span> <span class="fu">fct_reorder</span>(cluster,  </span>
-<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>                               total_litres_alcohol,</span>
-<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>                               <span class="at">.fun =</span> median)) <span class="sc">|&gt;</span> </span>
-<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(total_litres_alcohol,</span>
-<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>             cluster,</span>
-<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>             <span class="at">fill =</span> cluster, <span class="at">group =</span> cluster)) <span class="sc">+</span> </span>
-<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_boxplot</span>(<span class="at">show.legend =</span> F) <span class="sc">+</span></span>
-<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Total de litros de álcool puro"</span>, </span>
-<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Cluster"</span>)</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>dados_mix <span class="sc">|&gt;</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(part_cerveja, part_vinho, <span class="at">color =</span> grupo_mix)) <span class="sc">+</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">size =</span> <span class="dv">2</span>, <span class="at">alpha =</span> <span class="fl">0.8</span>) <span class="sc">+</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_x_continuous</span>(<span class="at">labels =</span> scales<span class="sc">::</span>percent) <span class="sc">+</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_y_continuous</span>(<span class="at">labels =</span> scales<span class="sc">::</span>percent) <span class="sc">+</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">values =</span> cores_mix) <span class="sc">+</span></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Participação da cerveja"</span>, <span class="at">y =</span> <span class="st">"Participação do vinho"</span>,</span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>       <span class="at">color =</span> <span class="st">"Grupo (mix)"</span>,</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>       <span class="at">caption =</span> <span class="st">"A participação dos destilados é o que falta para 100%."</span>)</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="04_cluster_538_files/figure-html/unnamed-chunk-19-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="04_cluster_538_files/figure-html/unnamed-chunk-22-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
 </div>
+<p>Os grupos de mix dizem <strong>qual linha de produto lidera</strong> em cada mercado: nos países do grupo da cerveja, é ela que deve puxar o portfólio; nos do vinho, uma estratégia centrada em vinho conversa com o hábito local; e assim por diante. Nos grupos mistos, nenhuma bebida domina, e o portfólio precisa ser mais equilibrado.</p>
+<section id="volume-e-mix-duas-perguntas-diferentes" class="level3" data-number="5.5.1">
+<h3 data-number="5.5.1" class="anchored" data-anchor-id="volume-e-mix-duas-perguntas-diferentes"><span class="header-section-number">5.5.1</span> Volume e mix: duas perguntas diferentes</h3>
+<p>A tabela abaixo cruza as duas segmentações. Cada célula é o número de países que estão naquele grupo de volume (linha) e naquele grupo de mix (coluna).</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>descricao <span class="sc">|&gt;</span> </span>
-<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(beer, wine, <span class="at">color =</span> cluster)) <span class="sc">+</span> </span>
-<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span></span>
-<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Consumo de Cerveja"</span>, </span>
-<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Consumo de Vinho"</span>,</span>
-<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>       <span class="at">color =</span> <span class="st">"Cluster"</span>)</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="04_cluster_538_files/figure-html/unnamed-chunk-20-1.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
-</div>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>g1 <span class="ot">&lt;-</span> descricao <span class="sc">|&gt;</span> </span>
-<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(spirit, wine, </span>
-<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>             <span class="at">color =</span> cluster,</span>
-<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>             <span class="at">label =</span> country)) <span class="sc">+</span> </span>
-<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span></span>
-<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Consumo de Spirit (Unidades)"</span>,</span>
-<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Consumo de Wine (Unidades)"</span>,</span>
-<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>       <span class="at">color =</span> <span class="st">""</span>)</span>
-<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplotly</span>(g1)</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>tab_cruzada <span class="ot">&lt;-</span> dados <span class="sc">|&gt;</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">count</span>(<span class="st">`</span><span class="at">Grupo (volume)</span><span class="st">`</span> <span class="ot">=</span> grupo_volume, grupo_mix) <span class="sc">|&gt;</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_wider</span>(<span class="at">names_from =</span> grupo_mix, <span class="at">values_from =</span> n, <span class="at">values_fill =</span> <span class="dv">0</span>)</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <div class="cell">
 <div class="cell-output-display">
-<div class="plotly html-widget html-fill-item" id="htmlwidget-982514ce28ae593bde0f" style="width:100%;height:464px;"></div>
-<script type="application/json" data-for="htmlwidget-982514ce28ae593bde0f">{"x":{"data":[{"x":[0,0,46,0,4,0,2,2,1,3,1,0,3,44,4,0,3,0,3,0,31,1,0,3,21,22,34,0,55,0,15,11,4,0,1,0,0,0,6,18,1,0,6,2,16,0,39,42,0,5,1,12,11,0,13,35,15,1,2,21,3,22,41,18,2,0,19],"y":[0,14,5,0,13,0,1,1,1,1,9,0,1,3,1,0,0,1,10,2,21,0,0,0,1,2,1,0,31,0,4,1,0,0,1,0,0,0,10,5,0,8,0,1,1,0,1,7,0,0,7,11,1,0,0,16,0,4,19,5,20,7,9,11,1,0,4],"text":["spirit:   0<br />wine:   0<br />cluster: 1<br />country: Afghanistan","spirit:   0<br />wine:  14<br />cluster: 1<br />country: Algeria","spirit:  46<br />wine:   5<br />cluster: 1<br />country: Azerbaijan","spirit:   0<br />wine:   0<br />cluster: 1<br />country: Bangladesh","spirit:   4<br />wine:  13<br />cluster: 1<br />country: Benin","spirit:   0<br />wine:   0<br />cluster: 1<br />country: Bhutan","spirit:   2<br />wine:   1<br />cluster: 1<br />country: Brunei","spirit:   2<br />wine:   1<br />cluster: 1<br />country: Central African Republic","spirit:   1<br />wine:   1<br />cluster: 1<br />country: Chad","spirit:   3<br />wine:   1<br />cluster: 1<br />country: Comoros","spirit:   1<br />wine:   9<br />cluster: 1<br />country: Congo","spirit:   0<br />wine:   0<br />cluster: 1<br />country: North Korea","spirit:   3<br />wine:   1<br />cluster: 1<br />country: DR Congo","spirit:  44<br />wine:   3<br />cluster: 1<br />country: Djibouti","spirit:   4<br />wine:   1<br />cluster: 1<br />country: Egypt","spirit:   0<br />wine:   0<br />cluster: 1<br />country: Eritrea","spirit:   3<br />wine:   0<br />cluster: 1<br />country: Ethiopia","spirit:   0<br />wine:   1<br />cluster: 1<br />country: Gambia","spirit:   3<br />wine:  10<br />cluster: 1<br />country: Ghana","spirit:   0<br />wine:   2<br />cluster: 1<br />country: Guinea","spirit:  31<br />wine:  21<br />cluster: 1<br />country: Guinea-Bissau","spirit:   1<br />wine:   0<br />cluster: 1<br />country: Indonesia","spirit:   0<br />wine:   0<br />cluster: 1<br />country: Iran","spirit:   3<br />wine:   0<br />cluster: 1<br />country: Iraq","spirit:  21<br />wine:   1<br />cluster: 1<br />country: Jordan","spirit:  22<br />wine:   2<br />cluster: 1<br />country: Kenya","spirit:  34<br />wine:   1<br />cluster: 1<br />country: Kiribati","spirit:   0<br />wine:   0<br />cluster: 1<br />country: Kuwait","spirit:  55<br />wine:  31<br />cluster: 1<br />country: Lebanon","spirit:   0<br />wine:   0<br />cluster: 1<br />country: Libya","spirit:  15<br />wine:   4<br />cluster: 1<br />country: Madagascar","spirit:  11<br />wine:   1<br />cluster: 1<br />country: Malawi","spirit:   4<br />wine:   0<br />cluster: 1<br />country: Malaysia","spirit:   0<br />wine:   0<br />cluster: 1<br />country: Maldives","spirit:   1<br />wine:   1<br />cluster: 1<br />country: Mali","spirit:   0<br />wine:   0<br />cluster: 1<br />country: Marshall Islands","spirit:   0<br />wine:   0<br />cluster: 1<br />country: Mauritania","spirit:   0<br />wine:   0<br />cluster: 1<br />country: Monaco","spirit:   6<br />wine:  10<br />cluster: 1<br />country: Morocco","spirit:  18<br />wine:   5<br />cluster: 1<br />country: Mozambique","spirit:   1<br />wine:   0<br />cluster: 1<br />country: Myanmar","spirit:   0<br />wine:   8<br />cluster: 1<br />country: Nauru","spirit:   6<br />wine:   0<br />cluster: 1<br />country: Nepal","spirit:   2<br />wine:   1<br />cluster: 1<br />country: Niger","spirit:  16<br />wine:   1<br />cluster: 1<br />country: Oman","spirit:   0<br />wine:   0<br />cluster: 1<br />country: Pakistan","spirit:  39<br />wine:   1<br />cluster: 1<br />country: Papua New Guinea","spirit:  42<br />wine:   7<br />cluster: 1<br />country: Qatar","spirit:   0<br />wine:   0<br />cluster: 1<br />country: San Marino","spirit:   5<br />wine:   0<br />cluster: 1<br />country: Saudi Arabia","spirit:   1<br />wine:   7<br />cluster: 1<br />country: Senegal","spirit:  12<br />wine:  11<br />cluster: 1<br />country: Singapore","spirit:  11<br />wine:   1<br />cluster: 1<br />country: Solomon Islands","spirit:   0<br />wine:   0<br />cluster: 1<br />country: Somalia","spirit:  13<br />wine:   0<br />cluster: 1<br />country: Sudan","spirit:  35<br />wine:  16<br />cluster: 1<br />country: Syria","spirit:  15<br />wine:   0<br />cluster: 1<br />country: Tajikistan","spirit:   1<br />wine:   4<br />cluster: 1<br />country: Timor-Leste","spirit:   2<br />wine:  19<br />cluster: 1<br />country: Togo","spirit:  21<br />wine:   5<br />cluster: 1<br />country: Tonga","spirit:   3<br />wine:  20<br />cluster: 1<br />country: Tunisia","spirit:  22<br />wine:   7<br />cluster: 1<br />country: Turkey","spirit:  41<br />wine:   9<br />cluster: 1<br />country: Tuvalu","spirit:  18<br />wine:  11<br />cluster: 1<br />country: Vanuatu","spirit:   2<br />wine:   1<br />cluster: 1<br />country: Vietnam","spirit:   0<br />wine:   0<br />cluster: 1<br />country: Yemen","spirit:  19<br />wine:   4<br />cluster: 1<br />country: Zambia"],"type":"scatter","mode":"markers","marker":{"autocolorscale":false,"color":"rgba(248,118,109,1)","opacity":1,"size":5.6692913385826778,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(248,118,109,1)"}},"hoveron":"points","name":"1","legendgroup":"1","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[132,128,179,63,41,173,35,7,0,1,56,65,1,76,87,137,74,69,35,100,69,98,114,69,97,97,0,29,152,31,50,114,118,5,16,2,18,38,25,3,104,2,27,71,9,135,6,101,18],"y":[54,45,11,7,8,8,35,7,0,7,16,1,4,3,11,5,3,2,1,149,2,2,0,9,9,6,123,0,2,18,18,128,1,2,9,0,24,140,51,2,0,2,86,32,0,5,1,8,4],"text":["spirit: 132<br />wine:  54<br />cluster: 2<br />country: Albania","spirit: 128<br />wine:  45<br />cluster: 2<br />country: Antigua & Barbuda","spirit: 179<br />wine:  11<br />cluster: 2<br />country: Armenia","spirit:  63<br />wine:   7<br />cluster: 2<br />country: Bahrain","spirit:  41<br />wine:   8<br />cluster: 2<br />country: Bolivia","spirit: 173<br />wine:   8<br />cluster: 2<br />country: Bosnia-Herzegovina","spirit:  35<br />wine:  35<br />cluster: 2<br />country: Botswana","spirit:   7<br />wine:   7<br />cluster: 2<br />country: Burkina Faso","spirit:   0<br />wine:   0<br />cluster: 2<br />country: Burundi","spirit:   1<br />wine:   7<br />cluster: 2<br />country: Cote d'Ivoire","spirit:  56<br />wine:  16<br />cluster: 2<br />country: Cabo Verde","spirit:  65<br />wine:   1<br />cluster: 2<br />country: Cambodia","spirit:   1<br />wine:   4<br />cluster: 2<br />country: Cameroon","spirit:  76<br />wine:   3<br />cluster: 2<br />country: Colombia","spirit:  87<br />wine:  11<br />cluster: 2<br />country: Costa Rica","spirit: 137<br />wine:   5<br />cluster: 2<br />country: Cuba","spirit:  74<br />wine:   3<br />cluster: 2<br />country: Ecuador","spirit:  69<br />wine:   2<br />cluster: 2<br />country: El Salvador","spirit:  35<br />wine:   1<br />cluster: 2<br />country: Fiji","spirit: 100<br />wine: 149<br />cluster: 2<br />country: Georgia","spirit:  69<br />wine:   2<br />cluster: 2<br />country: Guatemala","spirit:  98<br />wine:   2<br />cluster: 2<br />country: Honduras","spirit: 114<br />wine:   0<br />cluster: 2<br />country: India","spirit:  69<br />wine:   9<br />cluster: 2<br />country: Israel","spirit:  97<br />wine:   9<br />cluster: 2<br />country: Jamaica","spirit:  97<br />wine:   6<br />cluster: 2<br />country: Kyrgyzstan","spirit:   0<br />wine: 123<br />cluster: 2<br />country: Laos","spirit:  29<br />wine:   0<br />cluster: 2<br />country: Lesotho","spirit: 152<br />wine:   2<br />cluster: 2<br />country: Liberia","spirit:  31<br />wine:  18<br />cluster: 2<br />country: Mauritius","spirit:  50<br />wine:  18<br />cluster: 2<br />country: Micronesia","spirit: 114<br />wine: 128<br />cluster: 2<br />country: Montenegro","spirit: 118<br />wine:   1<br />cluster: 2<br />country: Nicaragua","spirit:   5<br />wine:   2<br />cluster: 2<br />country: Nigeria","spirit:  16<br />wine:   9<br />cluster: 2<br />country: South Korea","spirit:   2<br />wine:   0<br />cluster: 2<br />country: Rwanda","spirit:  18<br />wine:  24<br />cluster: 2<br />country: Samoa","spirit:  38<br />wine: 140<br />cluster: 2<br />country: Sao Tome & Principe","spirit:  25<br />wine:  51<br />cluster: 2<br />country: Seychelles","spirit:   3<br />wine:   2<br />cluster: 2<br />country: Sierra Leone","spirit: 104<br />wine:   0<br />cluster: 2<br />country: Sri Lanka","spirit:   2<br />wine:   2<br />cluster: 2<br />country: Swaziland","spirit:  27<br />wine:  86<br />cluster: 2<br />country: Macedonia","spirit:  71<br />wine:  32<br />cluster: 2<br />country: Turkmenistan","spirit:   9<br />wine:   0<br />cluster: 2<br />country: Uganda","spirit: 135<br />wine:   5<br />cluster: 2<br />country: United Arab Emirates","spirit:   6<br />wine:   1<br />cluster: 2<br />country: Tanzania","spirit: 101<br />wine:   8<br />cluster: 2<br />country: Uzbekistan","spirit:  18<br />wine:   4<br />cluster: 2<br />country: Zimbabwe"],"type":"scatter","mode":"markers","marker":{"autocolorscale":false,"color":"rgba(163,165,0,1)","opacity":1,"size":5.6692913385826778,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(163,165,0,1)"}},"hoveron":"points","name":"2","legendgroup":"2","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[176,173,373,252,192,254,286,438,302,326,202,246,189,200,160,186,226,326,205,315,221,293,178,258,237],"y":[51,36,42,94,8,74,26,28,1,1,16,12,8,7,21,1,18,73,32,71,11,116,7,1,45],"text":["spirit: 176<br />wine:  51<br />cluster: 3<br />country: Bahamas","spirit: 173<br />wine:  36<br />cluster: 3<br />country: Barbados","spirit: 373<br />wine:  42<br />cluster: 3<br />country: Belarus","spirit: 252<br />wine:  94<br />cluster: 3<br />country: Bulgaria","spirit: 192<br />wine:   8<br />cluster: 3<br />country: China","spirit: 254<br />wine:  74<br />cluster: 3<br />country: Cook Islands","spirit: 286<br />wine:  26<br />cluster: 3<br />country: Dominica","spirit: 438<br />wine:  28<br />cluster: 3<br />country: Grenada","spirit: 302<br />wine:   1<br />cluster: 3<br />country: Guyana","spirit: 326<br />wine:   1<br />cluster: 3<br />country: Haiti","spirit: 202<br />wine:  16<br />cluster: 3<br />country: Japan","spirit: 246<br />wine:  12<br />cluster: 3<br />country: Kazakhstan","spirit: 189<br />wine:   8<br />cluster: 3<br />country: Mongolia","spirit: 200<br />wine:   7<br />cluster: 3<br />country: Niue","spirit: 160<br />wine:  21<br />cluster: 3<br />country: Peru","spirit: 186<br />wine:   1<br />cluster: 3<br />country: Philippines","spirit: 226<br />wine:  18<br />cluster: 3<br />country: Moldova","spirit: 326<br />wine:  73<br />cluster: 3<br />country: Russian Federation","spirit: 205<br />wine:  32<br />cluster: 3<br />country: St. Kitts & Nevis","spirit: 315<br />wine:  71<br />cluster: 3<br />country: St. Lucia","spirit: 221<br />wine:  11<br />cluster: 3<br />country: St. Vincent & the Grenadines","spirit: 293<br />wine: 116<br />cluster: 3<br />country: Slovakia","spirit: 178<br />wine:   7<br />cluster: 3<br />country: Suriname","spirit: 258<br />wine:   1<br />cluster: 3<br />country: Thailand","spirit: 237<br />wine:  45<br />cluster: 3<br />country: Ukraine"],"type":"scatter","mode":"markers","marker":{"autocolorscale":false,"color":"rgba(0,191,125,1)","opacity":1,"size":5.6692913385826778,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(0,191,125,1)"}},"hoveron":"points","name":"3","legendgroup":"3","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[138,25,72,75,84,124,87,81,0,151,117,112,215,118,42,133,88,79,67,122,51,60,100,126,35],"y":[312,221,212,191,212,172,254,278,233,370,175,218,185,165,237,271,190,175,339,167,276,186,280,195,220],"text":["spirit: 138<br />wine: 312<br />cluster: 4<br />country: Andorra","spirit:  25<br />wine: 221<br />cluster: 4<br />country: Argentina","spirit:  72<br />wine: 212<br />cluster: 4<br />country: Australia","spirit:  75<br />wine: 191<br />cluster: 4<br />country: Austria","spirit:  84<br />wine: 212<br />cluster: 4<br />country: Belgium","spirit: 124<br />wine: 172<br />cluster: 4<br />country: Chile","spirit:  87<br />wine: 254<br />cluster: 4<br />country: Croatia","spirit:  81<br />wine: 278<br />cluster: 4<br />country: Denmark","spirit:   0<br />wine: 233<br />cluster: 4<br />country: Equatorial Guinea","spirit: 151<br />wine: 370<br />cluster: 4<br />country: France","spirit: 117<br />wine: 175<br />cluster: 4<br />country: Germany","spirit: 112<br />wine: 218<br />cluster: 4<br />country: Greece","spirit: 215<br />wine: 185<br />cluster: 4<br />country: Hungary","spirit: 118<br />wine: 165<br />cluster: 4<br />country: Ireland","spirit:  42<br />wine: 237<br />cluster: 4<br />country: Italy","spirit: 133<br />wine: 271<br />cluster: 4<br />country: Luxembourg","spirit:  88<br />wine: 190<br />cluster: 4<br />country: Netherlands","spirit:  79<br />wine: 175<br />cluster: 4<br />country: New Zealand","spirit:  67<br />wine: 339<br />cluster: 4<br />country: Portugal","spirit: 122<br />wine: 167<br />cluster: 4<br />country: Romania","spirit:  51<br />wine: 276<br />cluster: 4<br />country: Slovenia","spirit:  60<br />wine: 186<br />cluster: 4<br />country: Sweden","spirit: 100<br />wine: 280<br />cluster: 4<br />country: Switzerland","spirit: 126<br />wine: 195<br />cluster: 4<br />country: United Kingdom","spirit:  35<br />wine: 220<br />cluster: 4<br />country: Uruguay"],"type":"scatter","mode":"markers","marker":{"autocolorscale":false,"color":"rgba(0,176,246,1)","opacity":1,"size":5.6692913385826778,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(0,176,246,1)"}},"hoveron":"points","name":"4","legendgroup":"4","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[57,114,145,122,154,170,147,194,133,98,61,216,244,100,68,3,71,63,104,117,215,131,76,157,156,158,100],"y":[45,8,16,100,113,134,9,59,97,59,78,62,56,120,5,1,129,23,18,74,56,127,81,112,7,84,3],"text":["spirit:  57<br />wine:  45<br />cluster: 5<br />country: Angola","spirit: 114<br />wine:   8<br />cluster: 5<br />country: Belize","spirit: 145<br />wine:  16<br />cluster: 5<br />country: Brazil","spirit: 122<br />wine: 100<br />cluster: 5<br />country: Canada","spirit: 154<br />wine: 113<br />cluster: 5<br />country: Cyprus","spirit: 170<br />wine: 134<br />cluster: 5<br />country: Czech Republic","spirit: 147<br />wine:   9<br />cluster: 5<br />country: Dominican Republic","spirit: 194<br />wine:  59<br />cluster: 5<br />country: Estonia","spirit: 133<br />wine:  97<br />cluster: 5<br />country: Finland","spirit:  98<br />wine:  59<br />cluster: 5<br />country: Gabon","spirit:  61<br />wine:  78<br />cluster: 5<br />country: Iceland","spirit: 216<br />wine:  62<br />cluster: 5<br />country: Latvia","spirit: 244<br />wine:  56<br />cluster: 5<br />country: Lithuania","spirit: 100<br />wine: 120<br />cluster: 5<br />country: Malta","spirit:  68<br />wine:   5<br />cluster: 5<br />country: Mexico","spirit:   3<br />wine:   1<br />cluster: 5<br />country: Namibia","spirit:  71<br />wine: 129<br />cluster: 5<br />country: Norway","spirit:  63<br />wine:  23<br />cluster: 5<br />country: Palau","spirit: 104<br />wine:  18<br />cluster: 5<br />country: Panama","spirit: 117<br />wine:  74<br />cluster: 5<br />country: Paraguay","spirit: 215<br />wine:  56<br />cluster: 5<br />country: Poland","spirit: 131<br />wine: 127<br />cluster: 5<br />country: Serbia","spirit:  76<br />wine:  81<br />cluster: 5<br />country: South Africa","spirit: 157<br />wine: 112<br />cluster: 5<br />country: Spain","spirit: 156<br />wine:   7<br />cluster: 5<br />country: Trinidad & Tobago","spirit: 158<br />wine:  84<br />cluster: 5<br />country: USA","spirit: 100<br />wine:   3<br />cluster: 5<br />country: Venezuela"],"type":"scatter","mode":"markers","marker":{"autocolorscale":false,"color":"rgba(231,107,243,1)","opacity":1,"size":5.6692913385826778,"symbol":"circle","line":{"width":1.8897637795275593,"color":"rgba(231,107,243,1)"}},"hoveron":"points","name":"5","legendgroup":"5","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null}],"layout":{"margin":{"t":23.305936073059364,"r":7.3059360730593621,"b":37.260273972602747,"l":43.105022831050235},"plot_bgcolor":"rgba(255,255,255,1)","paper_bgcolor":"rgba(255,255,255,1)","font":{"color":"rgba(0,0,0,1)","family":"","size":14.611872146118724},"xaxis":{"domain":[0,1],"automargin":true,"type":"linear","autorange":false,"range":[-21.900000000000002,459.89999999999998],"tickmode":"array","ticktext":["0","100","200","300","400"],"tickvals":[0,100,200,300,400],"categoryorder":"array","categoryarray":["0","100","200","300","400"],"nticks":null,"ticks":"outside","tickcolor":"rgba(51,51,51,1)","ticklen":3.6529680365296811,"tickwidth":0,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":11.68949771689498},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(235,235,235,1)","gridwidth":0,"zeroline":false,"anchor":"y","title":{"text":"Consumo de Spirit (Unidades)","font":{"color":"rgba(0,0,0,1)","family":"","size":14.611872146118724}},"hoverformat":".2f"},"yaxis":{"domain":[0,1],"automargin":true,"type":"linear","autorange":false,"range":[-18.5,388.5],"tickmode":"array","ticktext":["0","100","200","300"],"tickvals":[0,100,200,300],"categoryorder":"array","categoryarray":["0","100","200","300"],"nticks":null,"ticks":"outside","tickcolor":"rgba(51,51,51,1)","ticklen":3.6529680365296811,"tickwidth":0,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":11.68949771689498},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(235,235,235,1)","gridwidth":0,"zeroline":false,"anchor":"x","title":{"text":"Consumo de Wine (Unidades)","font":{"color":"rgba(0,0,0,1)","family":"","size":14.611872146118724}},"hoverformat":".2f"},"shapes":[{"type":"rect","fillcolor":"rgba(255,255,255,1)","line":{"color":"rgba(51,51,51,1)","width":0,"linetype":"solid"},"yref":"paper","xref":"paper","layer":"below","x0":0,"x1":1,"y0":0,"y1":1}],"showlegend":true,"legend":{"bgcolor":"rgba(255,255,255,1)","bordercolor":"transparent","borderwidth":0,"font":{"color":"rgba(0,0,0,1)","family":"","size":11.68949771689498},"title":{"text":"","font":{"color":"rgba(0,0,0,1)","family":"","size":14.611872146118724}}},"hovermode":"closest","barmode":"relative"},"config":{"doubleClick":"reset","modeBarButtonsToAdd":["hoverclosest","hovercompare"],"showSendToCloud":false},"source":"A","attrs":{"7ba44fa4037":{"x":{},"y":{},"colour":{},"label":{},"type":"scatter"}},"cur_data":"7ba44fa4037","visdat":{"7ba44fa4037":["function (y) ","x"]},"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.20000000000000001,"selected":{"opacity":1},"debounce":0},"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot","plotly_sunburstclick"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
-</div>
-</div>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>descricao <span class="sc">|&gt;</span></span>
-<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(cluster) <span class="sc">|&gt;</span> </span>
-<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="fu">across</span>(<span class="fu">where</span>(is.numeric), mean))</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<p>A tabela abaixo mostra o cálculo de medias de cada variável em cada grupo.</p>
-<div class="cell">
-<div class="cell-output-display">
-<table class="caption-top table table-sm table-striped small">
+<table class="table table-striped table-hover table-condensed caption-top table-sm small">
 <thead>
 <tr class="header">
-<th style="text-align: left;" data-quarto-table-cell-role="th">cluster</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">beer</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">spirit</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">wine</th>
-<th style="text-align: right;" data-quarto-table-cell-role="th">total_litres_alcohol</th>
+<th data-quarto-table-cell-role="th">Grupo (volume)</th>
+<th data-quarto-table-cell-role="th">Cerveja</th>
+<th data-quarto-table-cell-role="th">Misto: cerveja e destilados</th>
+<th data-quarto-table-cell-role="th">Vinho</th>
+<th data-quarto-table-cell-role="th">Destilados</th>
+<th data-quarto-table-cell-role="th">Fora do escopo</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td style="text-align: left;">1</td>
-<td style="text-align: right;">18.80597</td>
-<td style="text-align: right;">9.925373</td>
-<td style="text-align: right;">4.074627</td>
-<td style="text-align: right;">0.7850746</td>
+<td>Alto consumo: cerveja</td>
+<td>13</td>
+<td>16</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">2</td>
-<td style="text-align: right;">74.20408</td>
-<td style="text-align: right;">62.795918</td>
-<td style="text-align: right;">21.653061</td>
-<td style="text-align: right;">4.1612245</td>
+<td>Alto consumo: destilados</td>
+<td>0</td>
+<td>13</td>
+<td>0</td>
+<td>18</td>
+<td>0</td>
 </tr>
 <tr class="odd">
-<td style="text-align: left;">3</td>
-<td style="text-align: right;">129.28000</td>
-<td style="text-align: right;">248.560000</td>
-<td style="text-align: right;">32.000000</td>
-<td style="text-align: right;">7.6120000</td>
+<td>Alto consumo: vinho</td>
+<td>0</td>
+<td>1</td>
+<td>26</td>
+<td>0</td>
+<td>0</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">4</td>
-<td style="text-align: right;">212.36000</td>
-<td style="text-align: right;">92.080000</td>
-<td style="text-align: right;">229.360000</td>
-<td style="text-align: right;">9.6960000</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">5</td>
-<td style="text-align: right;">261.18519</td>
-<td style="text-align: right;">124.962963</td>
-<td style="text-align: right;">62.074074</td>
-<td style="text-align: right;">8.1925926</td>
+<td>Baixo consumo</td>
+<td>35</td>
+<td>17</td>
+<td>7</td>
+<td>15</td>
+<td>31</td>
 </tr>
 </tbody>
 </table>
 </div>
 </div>
-<p>Com base nos grupos identificados, podemos interpretar as características de cada um deles:</p>
+<p>Os países de <strong>baixo consumo</strong> se espalham por 4 grupos de mix diferentes: beber pouco não diz nada sobre <strong>o que</strong> se bebe. Um exemplo é a Índia. Pelo volume, ela está no grupo “Baixo consumo”, com 123 porções por pessoa por ano; pelo mix, está no grupo “Destilados”, porque 93% do que se bebe ali são destilados. As duas leituras são verdadeiras e servem a decisões diferentes:</p>
 <ul>
-<li><strong>Grupo 1</strong>: Este grupo possui a menor média de consumo de todas as variáveis, com valores relativamente baixos de consumo de cerveja, destilados e vinho. O consumo total de álcool é o mais baixo entre todos os grupos.</li>
-<li><strong>Grupo 2</strong>: Este grupo apresenta um consumo moderado de cerveja, destilados e vinho, com valores médios para todas as variáveis. O consumo total de álcool é intermediário em comparação com os outros grupos.</li>
-<li><strong>Grupo 3</strong>: Este grupo se destaca pelo alto consumo de cerveja e destilados, com valores muito acima da média em comparação com os outros grupos. O consumo de vinho também é elevado, mas menor em comparação com cerveja e destilados. O consumo total de álcool é o segundo mais alto entre os grupos.</li>
-<li><strong>Grupo 4</strong>: Este grupo é caracterizado por um consumo muito alto de cerveja, vinho e destilados, com valores muito acima da média em comparação com os outros grupos. O consumo total de álcool é o mais alto entre todos os grupos.</li>
-<li><strong>Grupo 5</strong>: Este grupo tem um alto consumo de cerveja, destilados e vinho, embora não tão alto quanto o Grupo 4. O consumo total de álcool é alto, mas menor que o do Grupo 4 e do Grupo 3.</li>
+<li>o <strong>volume</strong> responde <strong>onde</strong> o hábito é forte, e ajuda a priorizar mercados;</li>
+<li>o <strong>mix</strong> responde <strong>o que</strong> vender, e ajuda a definir o portfólio de cada mercado.</li>
 </ul>
-<p>Se tivesse que atribuir um nome para cada grupo, quais nomes você daria?</p>
-<p>Podemos visualizar essas características através do gráfico abaixo.</p>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>descricao <span class="sc">|&gt;</span></span>
-<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(cluster) <span class="sc">|&gt;</span> </span>
-<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="fu">across</span>(<span class="fu">where</span>(is.numeric), mean)) <span class="sc">|&gt;</span> </span>
-<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="sc">-</span>cluster) <span class="sc">|&gt;</span> </span>
-<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(name, value, <span class="at">group =</span> cluster, <span class="at">color =</span> cluster)) <span class="sc">+</span> </span>
-<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>() <span class="sc">+</span> </span>
-<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span></span>
-<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">""</span>, </span>
-<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Valor medio"</span>, </span>
-<span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a>       <span class="at">color =</span> <span class="st">"Cluster"</span>)</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="04_cluster_538_files/figure-html/unnamed-chunk-25-1.png" class="img-fluid figure-img" width="672"></p>
-</figure>
+<div class="callout callout-style-default callout-important callout-titled" title="A escolha das variáveis é uma decisão de negócio">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Importante</span>A escolha das variáveis é uma decisão de negócio
 </div>
 </div>
-</div>
-<p>Uma alternativa ao gráfico acima (que mostra os valores na escala original) é o gráfico abaixo, que apresenta os valores padronizados.</p>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>descricao <span class="sc">|&gt;</span> </span>
-<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="fu">across</span>(<span class="fu">where</span>(is.numeric), scale)) <span class="sc">|&gt;</span> </span>
-<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(cluster) <span class="sc">|&gt;</span> </span>
-<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="fu">across</span>(<span class="fu">where</span>(is.numeric), mean)) <span class="sc">|&gt;</span> </span>
-<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="sc">-</span>cluster) <span class="sc">|&gt;</span> </span>
-<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(name, value, <span class="at">group =</span> cluster, <span class="at">color =</span> cluster)) <span class="sc">+</span> </span>
-<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>() <span class="sc">+</span> </span>
-<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span></span>
-<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">""</span>, </span>
-<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Valor medio (padronizado)"</span>,</span>
-<span id="cb26-11"><a href="#cb26-11" aria-hidden="true" tabindex="-1"></a>       <span class="at">color =</span> <span class="st">"Cluster"</span>)</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="04_cluster_538_files/figure-html/unnamed-chunk-26-1.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
+<div class="callout-body-container callout-body">
+<p>O mesmo algoritmo, aplicado aos mesmos dados, produziu duas segmentações diferentes, porque as variáveis foram preparadas de formas diferentes (volume padronizado ou participações). Nenhuma é “a certa”: cada uma responde a uma pergunta. Antes de rodar um agrupamento, defina qual decisão ele deve apoiar.</p>
 </div>
 </div>
 </section>
-<section id="cálculo-do-coeficiente-de-silhouette" class="level4">
-<h4 class="anchored" data-anchor-id="cálculo-do-coeficiente-de-silhouette">Cálculo do Coeficiente de Silhouette</h4>
-<p>O coeficiente de silhouette é uma medida de qualidade dos clusters em uma análise de cluster. Ele varia de -1 a 1, onde valores próximos de 1 indicam que os pontos estão bem agrupados no cluster, valores próximos de 0 indicam que os clusters estão sobrepostos e valores próximos de -1 indicam que os pontos foram atribuídos aos clusters errados.</p>
-<p>O coeficiente de silhouette é calculado para cada observação e fornece uma medida da semelhança entre essa observação e os outros membros do mesmo cluster, em comparação com os membros de outros clusters.</p>
-<p>Para calcular o coeficiente de silhouette para uma observação, são usadas duas métricas:</p>
+</section>
+<section id="enriquecimento-com-dados-externos" class="level2" data-number="5.6">
+<h2 data-number="5.6" class="anchored" data-anchor-id="enriquecimento-com-dados-externos"><span class="header-section-number">5.6</span> Enriquecimento com dados externos</h2>
+<p>Até aqui, os grupos dizem como cada país consome, por pessoa. Para saber <strong>quanto vale</strong> cada grupo, falta o tamanho dos mercados: um país com consumo moderado e 100 milhões de adultos pode valer mais do que vários países pequenos de consumo alto.</p>
+<p>Buscar dados externos para complementar uma base é uma prática comum em projetos reais: dados públicos de população, renda, clima ou localização muitas vezes explicam mais do que as variáveis internas. Aqui, usamos os indicadores do <strong>Banco Mundial</strong> para 2010, o mesmo ano dos dados da OMS:</p>
 <ul>
-<li><span class="math inline">\(a\)</span>: A distância média entre a observação e todas as outras observações no mesmo cluster.</li>
-<li><span class="math inline">\(b\)</span>: A distância média entre a observação e todas as observações no cluster mais próximo que a observação não faz parte.</li>
+<li><strong>população de 15 anos ou mais</strong>, a mesma base do consumo por pessoa da OMS;</li>
+<li><strong>PIB per capita em paridade de poder de compra</strong> (PPC), em dólares internacionais constantes, uma medida de renda comparável entre países;</li>
+<li><strong>região</strong> e <strong>faixa de renda</strong> de cada país.</li>
 </ul>
-<p>O coeficiente de silhouette para uma observação é então calculado como:</p>
-<p><span class="math display">\[ \text{silhouette} = \frac{b - a}{\max(a, b)}. \]</span></p>
-<p>O coeficiente de silhouette médio para todos os pontos em um cluster é a medida de silhouette para esse cluster. Quanto mais próximo de 1, melhor a separação dos clusters; quanto mais próximo de -1, mais inadequada é a atribuição do ponto ao cluster.</p>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="co"># obtem os coeficientes</span></span>
-<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>res_sil <span class="ot">&lt;-</span> <span class="fu">silhouette</span>(<span class="fu">as.numeric</span>(descricao<span class="sc">$</span>cluster), </span>
-<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>                      <span class="fu">dist</span>(dados_pad)<span class="sc">^</span><span class="dv">2</span>)</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Os dados foram baixados da API do Banco Mundial pelo script <code>scripts/baixa_dados_banco_mundial.py</code> e gravados em <code>data/banco_mundial_2010.csv</code>.</p>
+<div class="callout callout-style-default callout-note callout-titled" title="Variáveis ativas e variáveis descritivas">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
 </div>
-<p>A função abaixo obtem a media do coeficiente por cluster e gera um gráfico.</p>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="fu">fviz_silhouette</span>(res_sil)</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Nota</span>Variáveis ativas e variáveis descritivas
 </div>
-<p>O código abaixo visualiza o número ótimo de clusters baseado no coeficiente de silhouette médio dos clusters. O gráfico resultante ajuda a encontrar o número ideal de clusters com base na separação entre os clusters e a coesão interna dos dados.</p>
+</div>
+<div class="callout-body-container callout-body">
+<p>População e renda <strong>não entram no agrupamento</strong>. Se a população entrasse, China e Índia formariam um grupo só por serem grandes, mesmo com hábitos diferentes; com a renda, os grupos passariam a separar países ricos e pobres, algo que já sabemos sem modelo. Em segmentação, é comum distinguir as <strong>variáveis ativas</strong>, que formam os grupos (aqui, o consumo), das <strong>variáveis descritivas</strong>, que os caracterizam depois (aqui, população e renda).</p>
+</div>
+</div>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="co"># grafico silhouette</span></span>
-<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a><span class="fu">fviz_nbclust</span>(dados_pad, kmeans, <span class="at">method =</span> <span class="st">"silhouette"</span>)</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>banco_mundial <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">"data/banco_mundial_2010.csv"</span>, <span class="at">show_col_types =</span> <span class="cn">FALSE</span>)</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<section id="cruzando-as-bases-o-problema-dos-nomes" class="level3" data-number="5.6.1">
+<h3 data-number="5.6.1" class="anchored" data-anchor-id="cruzando-as-bases-o-problema-dos-nomes"><span class="header-section-number">5.6.1</span> Cruzando as bases: o problema dos nomes</h3>
+<p>Para juntar as duas bases, precisamos de uma <strong>chave</strong> comum. O Banco Mundial identifica cada país pelo código ISO de três letras (<code>BRA</code>, <code>FRA</code>), mas a base da OMS traz só o nome do país, em inglês e com grafias próprias (“Bosnia-Herzegovina”, “Antigua &amp; Barbuda”). Cruzar pelo nome falharia em muitos casos.</p>
+<p>O pacote <code>countrycode</code> converte nomes de países, escritos de várias formas, em códigos padronizados:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>dados <span class="ot">&lt;-</span> dados <span class="sc">|&gt;</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">iso3 =</span> <span class="fu">countrycode</span>(pais, <span class="at">origin =</span> <span class="st">"country.name"</span>, <span class="at">destination =</span> <span class="st">"iso3c"</span>,</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>                            <span class="at">warn =</span> <span class="cn">FALSE</span>))</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>sem_codigo <span class="ot">&lt;-</span> dados <span class="sc">|&gt;</span> <span class="fu">filter</span>(<span class="fu">is.na</span>(iso3)) <span class="sc">|&gt;</span> <span class="fu">pull</span>(pais)</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Países sem código ISO identificado: Micronesia. Em seguida, juntamos as bases pelo código e verificamos quantos países ficaram sem dados do Banco Mundial:</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>dados <span class="ot">&lt;-</span> dados <span class="sc">|&gt;</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(banco_mundial, <span class="at">by =</span> <span class="st">"iso3"</span>)</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>sem_populacao <span class="ot">&lt;-</span> dados <span class="sc">|&gt;</span> <span class="fu">filter</span>(<span class="fu">is.na</span>(populacao_15mais)) <span class="sc">|&gt;</span> <span class="fu">pull</span>(pais)</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>sem_pib <span class="ot">&lt;-</span> dados <span class="sc">|&gt;</span> <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(populacao_15mais), <span class="fu">is.na</span>(pib_per_capita_ppc)) <span class="sc">|&gt;</span> <span class="fu">pull</span>(pais)</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<ul>
+<li>Sem população (o país não está na base do Banco Mundial): Cook Islands, Micronesia, Niue.</li>
+<li>Com população, mas sem PIB per capita: Cuba, North Korea, Djibouti, Eritrea, Monaco, Venezuela, Yemen.</li>
+</ul>
+<p>Faltas como essas são normais ao cruzar bases de fontes diferentes: territórios que não são membros do Banco Mundial ou países sem estatísticas confiáveis no período. O importante é <strong>verificar e registrar</strong> o que não casou, e não descobrir o problema depois, em um total que não fecha. Nas contas a seguir, esses países ficam de fora dos totais.</p>
+</section>
+</section>
+<section id="quanto-vale-cada-grupo" class="level2" data-number="5.7">
+<h2 data-number="5.7" class="anchored" data-anchor-id="quanto-vale-cada-grupo"><span class="header-section-number">5.7</span> Quanto vale cada grupo</h2>
+<p>Com a população, calculamos o <strong>tamanho de cada mercado</strong> em litros de álcool puro por ano:</p>
+<p><span class="math display">\[
+\text{volume do mercado} = \text{litros de álcool puro por pessoa} \times \text{população de 15 anos ou mais}.
+\]</span></p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>dados <span class="ot">&lt;-</span> dados <span class="sc">|&gt;</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">volume_mercado =</span> litros_alcool <span class="sc">*</span> populacao_15mais)</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>valor_grupo <span class="ot">&lt;-</span> <span class="cf">function</span>(grupo) {</span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>  dados <span class="sc">|&gt;</span></span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(volume_mercado)) <span class="sc">|&gt;</span></span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">group_by</span>(<span class="at">Grupo =</span> .data[[grupo]]) <span class="sc">|&gt;</span></span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">summarise</span>(Países <span class="ot">=</span> <span class="fu">n</span>(),</span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>              <span class="st">`</span><span class="at">Adultos (milhões)</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">round</span>(<span class="fu">sum</span>(populacao_15mais) <span class="sc">/</span> <span class="fl">1e6</span>),</span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a>              <span class="st">`</span><span class="at">Volume (milhões de litros)</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">round</span>(<span class="fu">sum</span>(volume_mercado) <span class="sc">/</span> <span class="fl">1e6</span>),</span>
+<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a>              <span class="st">`</span><span class="at">PIB per capita mediano (US$ PPC)</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">round</span>(<span class="fu">median</span>(pib_per_capita_ppc, <span class="at">na.rm =</span> <span class="cn">TRUE</span>))) <span class="sc">|&gt;</span></span>
+<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="st">`</span><span class="at">% do volume mundial</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">pct</span>(<span class="st">`</span><span class="at">Volume (milhões de litros)</span><span class="st">`</span> <span class="sc">/</span></span>
+<span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a>                                         <span class="fu">sum</span>(<span class="st">`</span><span class="at">Volume (milhões de litros)</span><span class="st">`</span>))) <span class="sc">|&gt;</span></span>
+<span id="cb18-14"><a href="#cb18-14" aria-hidden="true" tabindex="-1"></a>    <span class="fu">arrange</span>(<span class="fu">desc</span>(<span class="st">`</span><span class="at">Volume (milhões de litros)</span><span class="st">`</span>))</span>
+<span id="cb18-15"><a href="#cb18-15" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Pelo <strong>volume</strong> (onde):</p>
+<div class="cell">
+<div class="cell-output-display">
+<table class="table table-striped table-hover table-condensed caption-top table-sm small">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">Grupo</th>
+<th data-quarto-table-cell-role="th">Países</th>
+<th data-quarto-table-cell-role="th">Adultos (milhões)</th>
+<th data-quarto-table-cell-role="th">Volume (milhões de litros)</th>
+<th data-quarto-table-cell-role="th">PIB per capita mediano (US$ PPC)</th>
+<th data-quarto-table-cell-role="th">% do volume mundial</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Alto consumo: destilados</td>
+<td>29</td>
+<td>1.564</td>
+<td>9.215</td>
+<td>16.772</td>
+<td>39,1%</td>
+</tr>
+<tr class="even">
+<td>Alto consumo: cerveja</td>
+<td>30</td>
+<td>736</td>
+<td>5.769</td>
+<td>20.058</td>
+<td>24,5%</td>
+</tr>
+<tr class="odd">
+<td>Baixo consumo</td>
+<td>104</td>
+<td>2.347</td>
+<td>4.644</td>
+<td>5.396</td>
+<td>19,7%</td>
+</tr>
+<tr class="even">
+<td>Alto consumo: vinho</td>
+<td>27</td>
+<td>405</td>
+<td>3.951</td>
+<td>49.130</td>
+<td>16,8%</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>Pelo <strong>mix</strong> (o que):</p>
+<div class="cell">
+<div class="cell-output-display">
+<table class="table table-striped table-hover table-condensed caption-top table-sm small">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">Grupo</th>
+<th data-quarto-table-cell-role="th">Países</th>
+<th data-quarto-table-cell-role="th">Adultos (milhões)</th>
+<th data-quarto-table-cell-role="th">Volume (milhões de litros)</th>
+<th data-quarto-table-cell-role="th">PIB per capita mediano (US$ PPC)</th>
+<th data-quarto-table-cell-role="th">% do volume mundial</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Destilados</td>
+<td>32</td>
+<td>2.313</td>
+<td>9.229</td>
+<td>10.439</td>
+<td>39,1%</td>
+</tr>
+<tr class="even">
+<td>Misto: cerveja e destilados</td>
+<td>45</td>
+<td>825</td>
+<td>6.864</td>
+<td>21.094</td>
+<td>29,1%</td>
+</tr>
+<tr class="odd">
+<td>Vinho</td>
+<td>34</td>
+<td>456</td>
+<td>3.925</td>
+<td>37.815</td>
+<td>16,6%</td>
+</tr>
+<tr class="even">
+<td>Cerveja</td>
+<td>48</td>
+<td>722</td>
+<td>3.494</td>
+<td>8.246</td>
+<td>14,8%</td>
+</tr>
+<tr class="odd">
+<td>Fora do escopo</td>
+<td>31</td>
+<td>735</td>
+<td>66</td>
+<td>4.125</td>
+<td>0,3%</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>A primeira tabela traz uma informação que a segmentação sozinha escondia. O grupo de <strong>baixo consumo</strong> reúne 46% da população adulta dos países com dados e responde por 20% do volume total de álcool. O maior mercado do grupo, India, consome sozinho cerca de 1.878 milhões de litros de álcool puro por ano, mais do que muitos países de consumo alto. Consumo baixo por pessoa não significa, necessariamente, mercado pequeno. Por outro lado, um hábito fraco por pessoa indica um crescimento mais lento e mais caro.</p>
+<p>O gráfico abaixo mostra cada país pela população adulta e pela renda, com o tamanho do ponto proporcional ao volume do mercado e a cor indicando o grupo de mix. Os 12 maiores mercados estão identificados.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>maiores <span class="ot">&lt;-</span> dados <span class="sc">|&gt;</span> <span class="fu">slice_max</span>(volume_mercado, <span class="at">n =</span> <span class="dv">12</span>)</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>dados <span class="sc">|&gt;</span></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(volume_mercado), <span class="sc">!</span><span class="fu">is.na</span>(pib_per_capita_ppc)) <span class="sc">|&gt;</span></span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(populacao_15mais <span class="sc">/</span> <span class="fl">1e6</span>, pib_per_capita_ppc)) <span class="sc">+</span></span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">size =</span> volume_mercado <span class="sc">/</span> <span class="fl">1e6</span>, <span class="at">color =</span> grupo_mix), <span class="at">alpha =</span> <span class="fl">0.7</span>) <span class="sc">+</span></span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_text_repel</span>(<span class="at">data =</span> <span class="fu">filter</span>(maiores, <span class="sc">!</span><span class="fu">is.na</span>(pib_per_capita_ppc)),</span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>                  <span class="fu">aes</span>(<span class="at">label =</span> pais), <span class="at">size =</span> <span class="dv">3</span>, <span class="at">max.overlaps =</span> <span class="cn">Inf</span>) <span class="sc">+</span></span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_x_log10</span>(<span class="at">labels =</span> scales<span class="sc">::</span><span class="fu">label_number</span>(<span class="at">big.mark =</span> <span class="st">"."</span>, <span class="at">decimal.mark =</span> <span class="st">","</span>)) <span class="sc">+</span></span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_y_log10</span>(<span class="at">labels =</span> scales<span class="sc">::</span><span class="fu">label_number</span>(<span class="at">big.mark =</span> <span class="st">"."</span>, <span class="at">decimal.mark =</span> <span class="st">","</span>)) <span class="sc">+</span></span>
+<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">values =</span> cores_mix) <span class="sc">+</span></span>
+<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Adultos (milhões, escala log)"</span>, <span class="at">y =</span> <span class="st">"PIB per capita, US$ PPC (escala log)"</span>,</span>
+<span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a>       <span class="at">color =</span> <span class="st">"Grupo (mix)"</span>, <span class="at">size =</span> <span class="st">"Volume (milhões de litros)"</span>)</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="04_cluster_538_files/figure-html/unnamed-chunk-29-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="04_cluster_538_files/figure-html/unnamed-chunk-34-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
 </div>
-<p>Ao observar o resultado do coeficiente de silhouette, concluímos que é melhor agrupar os dados em 3 grupos em vez de 5, como concluído através da análise do gráfico do cotovelo anteriormente.</p>
-<p>Portanto, devemos executar novamente o modelo kmeans agora considerando <span class="math inline">\(k=3.\)</span></p>
+<p>Esse gráfico ajuda a <strong>priorizar dentro de cada grupo</strong>: países grandes e de renda alta (no alto, à direita) combinam volume e potencial para produtos premium; países grandes e de renda baixa têm volume, mas pedem produtos de preço acessível.</p>
+<p>A tabela a seguir lista os 10 maiores mercados e os dois grupos de cada um: o de volume indica a força do hábito, e o de mix indica com qual linha de produto entrar.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1</span>)</span>
-<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>avaliacao <span class="ot">&lt;-</span> descricao <span class="sc">|&gt;</span> </span>
-<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">cluster =</span> <span class="fu">factor</span>(<span class="fu">kmeans</span>(dados_pad, <span class="at">centers =</span> <span class="dv">3</span>)<span class="sc">$</span>cluster))</span>
-<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a>avaliacao <span class="sc">|&gt;</span> </span>
-<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(total_litres_alcohol, </span>
-<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a>             <span class="fu">fct_reorder</span>(cluster, total_litres_alcohol, <span class="at">.fun =</span> median), </span>
-<span id="cb30-8"><a href="#cb30-8" aria-hidden="true" tabindex="-1"></a>             <span class="at">fill =</span> cluster, <span class="at">group =</span> cluster)) <span class="sc">+</span> </span>
-<span id="cb30-9"><a href="#cb30-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_boxplot</span>(<span class="at">show.legend =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
-<span id="cb30-10"><a href="#cb30-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Total de litros de álcool puro"</span>, </span>
-<span id="cb30-11"><a href="#cb30-11" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="cn">NULL</span>)</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>tab_maiores <span class="ot">&lt;-</span> dados <span class="sc">|&gt;</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">slice_max</span>(volume_mercado, <span class="at">n =</span> <span class="dv">10</span>) <span class="sc">|&gt;</span></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">transmute</span>(País <span class="ot">=</span> pais,</span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>            <span class="st">`</span><span class="at">Volume (milhões de litros)</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">round</span>(volume_mercado <span class="sc">/</span> <span class="fl">1e6</span>),</span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>            <span class="st">`</span><span class="at">PIB per capita (US$ PPC)</span><span class="st">`</span> <span class="ot">=</span> pib_per_capita_ppc,</span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>            <span class="st">`</span><span class="at">Grupo (volume)</span><span class="st">`</span> <span class="ot">=</span> grupo_volume,</span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>            <span class="st">`</span><span class="at">Grupo (mix)</span><span class="st">`</span> <span class="ot">=</span> grupo_mix)</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="cell">
 <div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="04_cluster_538_files/figure-html/unnamed-chunk-30-1.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
-</div>
-<p>Vamos nomear os clusters encontrados.</p>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>avaliacao <span class="ot">&lt;-</span> avaliacao <span class="sc">|&gt;</span> </span>
-<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">cluster =</span> <span class="fu">case_when</span>(</span>
-<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>    cluster <span class="sc">==</span> <span class="dv">2</span> <span class="sc">~</span> <span class="st">"alto"</span>, </span>
-<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>    cluster <span class="sc">==</span> <span class="dv">1</span> <span class="sc">~</span> <span class="st">"intermediário"</span>, </span>
-<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a>    <span class="cn">TRUE</span> <span class="sc">~</span> <span class="st">"baixo"</span>))</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<p>Finalmente, vamos visualizar as caracteristicas de cada cluster.</p>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>avaliacao <span class="sc">|&gt;</span> </span>
-<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(cluster) <span class="sc">|&gt;</span> </span>
-<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="fu">across</span>(<span class="fu">where</span>(is.numeric), mean)) <span class="sc">|&gt;</span> </span>
-<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="sc">-</span>cluster) <span class="sc">|&gt;</span> </span>
-<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(name, value, <span class="at">group =</span> cluster, <span class="at">color =</span> cluster)) <span class="sc">+</span> </span>
-<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>() <span class="sc">+</span> </span>
-<span id="cb32-7"><a href="#cb32-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span></span>
-<span id="cb32-8"><a href="#cb32-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">y =</span> <span class="st">"Valor"</span>, <span class="at">x =</span> <span class="cn">NULL</span>, <span class="at">color =</span> <span class="st">"Cluster"</span>)</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="04_cluster_538_files/figure-html/unnamed-chunk-32-1.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
-</div>
-</div>
-<p>Visualização das caracteristicas de cada cluster considerando os dados padronizados.</p>
-<div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>avaliacao <span class="sc">|&gt;</span> </span>
-<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="fu">across</span>(<span class="fu">where</span>(is.numeric), scale)) <span class="sc">|&gt;</span> </span>
-<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(cluster) <span class="sc">|&gt;</span> </span>
-<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="fu">across</span>(<span class="fu">where</span>(is.numeric), mean)) <span class="sc">|&gt;</span> </span>
-<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="sc">-</span>cluster) <span class="sc">|&gt;</span> </span>
-<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(name, value, <span class="at">group =</span> cluster, <span class="at">color =</span> cluster)) <span class="sc">+</span> </span>
-<span id="cb33-7"><a href="#cb33-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>() <span class="sc">+</span> </span>
-<span id="cb33-8"><a href="#cb33-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span></span>
-<span id="cb33-9"><a href="#cb33-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">y =</span> <span class="st">"Valor"</span>, <span class="at">x =</span> <span class="cn">NULL</span>, <span class="at">color =</span> <span class="st">"Cluster"</span>)</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="04_cluster_538_files/figure-html/unnamed-chunk-33-1.png" class="img-fluid figure-img" width="672"></p>
-</figure>
-</div>
+<table class="table table-striped table-hover table-condensed caption-top table-sm small">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th">País</th>
+<th data-quarto-table-cell-role="th">Volume (milhões de litros)</th>
+<th data-quarto-table-cell-role="th">PIB per capita (US$ PPC)</th>
+<th data-quarto-table-cell-role="th">Grupo (volume)</th>
+<th data-quarto-table-cell-role="th">Grupo (mix)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>China</td>
+<td>5.453</td>
+<td>10.476</td>
+<td>Alto consumo: destilados</td>
+<td>Destilados</td>
+</tr>
+<tr class="even">
+<td>USA</td>
+<td>2.161</td>
+<td>59.797</td>
+<td>Alto consumo: cerveja</td>
+<td>Misto: cerveja e destilados</td>
+</tr>
+<tr class="odd">
+<td>India</td>
+<td>1.878</td>
+<td>4.914</td>
+<td>Baixo consumo</td>
+<td>Destilados</td>
+</tr>
+<tr class="even">
+<td>Russian Federation</td>
+<td>1.394</td>
+<td>33.064</td>
+<td>Alto consumo: destilados</td>
+<td>Misto: cerveja e destilados</td>
+</tr>
+<tr class="odd">
+<td>Brazil</td>
+<td>1.050</td>
+<td>18.062</td>
+<td>Alto consumo: cerveja</td>
+<td>Misto: cerveja e destilados</td>
+</tr>
+<tr class="even">
+<td>Nigeria</td>
+<td>843</td>
+<td>7.963</td>
+<td>Baixo consumo</td>
+<td>Cerveja</td>
+</tr>
+<tr class="odd">
+<td>Germany</td>
+<td>798</td>
+<td>54.826</td>
+<td>Alto consumo: vinho</td>
+<td>Vinho</td>
+</tr>
+<tr class="even">
+<td>Japan</td>
+<td>777</td>
+<td>41.647</td>
+<td>Alto consumo: destilados</td>
+<td>Destilados</td>
+</tr>
+<tr class="odd">
+<td>France</td>
+<td>625</td>
+<td>49.130</td>
+<td>Alto consumo: vinho</td>
+<td>Vinho</td>
+</tr>
+<tr class="even">
+<td>United Kingdom</td>
+<td>537</td>
+<td>47.683</td>
+<td>Alto consumo: vinho</td>
+<td>Vinho</td>
+</tr>
+</tbody>
+</table>
 </div>
 </div>
 </section>
-</section>
-</section>
-<section id="visualização-do-resultado-da-clusterização-no-mapa-mundi" class="level2" data-number="5.5">
-<h2 data-number="5.5" class="anchored" data-anchor-id="visualização-do-resultado-da-clusterização-no-mapa-mundi"><span class="header-section-number">5.5</span> Visualização do resultado da clusterização no mapa-mundi</h2>
-<p>Note que antes de fazer o mapa, foi feito um trabalho de padronização dos nomes dos países nas duas bases, <code>drinks.csv</code> e na de mapas fornecida pelo pacaote <code>maps</code>.</p>
+<section id="os-grupos-de-mix-no-mapa" class="level2" data-number="5.8">
+<h2 data-number="5.8" class="anchored" data-anchor-id="os-grupos-de-mix-no-mapa"><span class="header-section-number">5.8</span> Os grupos de mix no mapa</h2>
+<p>O mapa mostra a segmentação por mix, a que orienta o portfólio. Para pintar cada país, cruzamos de novo pelo código ISO, agora com os nomes usados pelo pacote <code>maps</code>.</p>
 <div class="cell">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(maps)</span>
-<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>mapa <span class="ot">&lt;-</span> <span class="fu">map_data</span>(<span class="st">"world"</span>) </span>
-<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a>g1 <span class="ot">&lt;-</span> (avaliacao <span class="sc">|&gt;</span> <span class="fu">filter</span>(cluster<span class="sc">==</span><span class="st">"intermediário"</span>) <span class="sc">|&gt;</span> </span>
-<span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pull</span>(country))</span>
-<span id="cb34-7"><a href="#cb34-7" aria-hidden="true" tabindex="-1"></a>g1 <span class="ot">&lt;-</span> <span class="fu">c</span>(g1, <span class="st">"Russia"</span>, <span class="st">"Bosnia and Herzegovina"</span>)</span>
-<span id="cb34-8"><a href="#cb34-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb34-9"><a href="#cb34-9" aria-hidden="true" tabindex="-1"></a>g2 <span class="ot">&lt;-</span> (avaliacao <span class="sc">|&gt;</span> <span class="fu">filter</span>(cluster<span class="sc">==</span><span class="st">"alto"</span>) <span class="sc">|&gt;</span> </span>
-<span id="cb34-10"><a href="#cb34-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pull</span>(country))</span>
-<span id="cb34-11"><a href="#cb34-11" aria-hidden="true" tabindex="-1"></a>g2 <span class="ot">&lt;-</span> <span class="fu">c</span>(g2, <span class="st">"UK"</span>)</span>
-<span id="cb34-12"><a href="#cb34-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb34-13"><a href="#cb34-13" aria-hidden="true" tabindex="-1"></a>g3 <span class="ot">&lt;-</span> (avaliacao <span class="sc">|&gt;</span> <span class="fu">filter</span>(cluster<span class="sc">==</span><span class="st">"baixo"</span>) <span class="sc">|&gt;</span> </span>
-<span id="cb34-14"><a href="#cb34-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pull</span>(country))</span>
-<span id="cb34-15"><a href="#cb34-15" aria-hidden="true" tabindex="-1"></a>g3 <span class="ot">&lt;-</span> <span class="fu">c</span>(g3, <span class="st">"Republic of Congo"</span>, <span class="st">"Cape Verde"</span>, <span class="st">"Ivory Coast"</span>,</span>
-<span id="cb34-16"><a href="#cb34-16" aria-hidden="true" tabindex="-1"></a>        <span class="st">"Democratic Republic of the Congo"</span>)</span>
-<span id="cb34-17"><a href="#cb34-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb34-18"><a href="#cb34-18" aria-hidden="true" tabindex="-1"></a>mapa_cluster <span class="ot">&lt;-</span> mapa <span class="sc">|&gt;</span> </span>
-<span id="cb34-19"><a href="#cb34-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">fill =</span> <span class="st">"NA"</span>) <span class="sc">|&gt;</span> </span>
-<span id="cb34-20"><a href="#cb34-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">fill =</span> <span class="fu">ifelse</span>(region <span class="sc">%in%</span> g1, <span class="st">"Intermediário"</span>, fill),</span>
-<span id="cb34-21"><a href="#cb34-21" aria-hidden="true" tabindex="-1"></a>         <span class="at">fill =</span> <span class="fu">ifelse</span>(region <span class="sc">%in%</span> g2, <span class="st">"Alto"</span>, fill),</span>
-<span id="cb34-22"><a href="#cb34-22" aria-hidden="true" tabindex="-1"></a>         <span class="at">fill =</span> <span class="fu">ifelse</span>(region <span class="sc">%in%</span> g3, <span class="st">"Baixo"</span>, fill)) <span class="sc">|&gt;</span> </span>
-<span id="cb34-23"><a href="#cb34-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">fill =</span> <span class="fu">factor</span>(fill, <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"Baixo"</span>, <span class="st">"Intermediário"</span>, <span class="st">"Alto"</span>, <span class="st">"NA"</span>)))</span>
-<span id="cb34-24"><a href="#cb34-24" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb34-25"><a href="#cb34-25" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(mapa_cluster, <span class="fu">aes</span>(long, lat, <span class="at">fill =</span> fill, <span class="at">group=</span>group)) <span class="sc">+</span> </span>
-<span id="cb34-26"><a href="#cb34-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_polygon</span>(<span class="at">colour=</span><span class="st">"gray"</span>) <span class="sc">+</span></span>
-<span id="cb34-27"><a href="#cb34-27" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">"lightgreen"</span>, <span class="st">"lightblue"</span>, <span class="st">"salmon"</span>, <span class="st">"lightgray"</span>))<span class="sc">+</span></span>
-<span id="cb34-28"><a href="#cb34-28" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="cn">NULL</span>, <span class="at">y =</span> <span class="cn">NULL</span>, <span class="at">fill =</span> <span class="cn">NULL</span>) <span class="sc">+</span></span>
-<span id="cb34-29"><a href="#cb34-29" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_void</span>()</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>mapa <span class="ot">&lt;-</span> <span class="fu">map_data</span>(<span class="st">"world"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">iso3 =</span> <span class="fu">countrycode</span>(region, <span class="at">origin =</span> <span class="st">"country.name"</span>, <span class="at">destination =</span> <span class="st">"iso3c"</span>,</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>                            <span class="at">warn =</span> <span class="cn">FALSE</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(<span class="fu">select</span>(dados, iso3, grupo_mix), <span class="at">by =</span> <span class="st">"iso3"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">grupo_mix =</span> <span class="fu">replace_na</span>(grupo_mix, <span class="st">"Sem dados"</span>))</span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(mapa, <span class="fu">aes</span>(long, lat, <span class="at">group =</span> group, <span class="at">fill =</span> grupo_mix)) <span class="sc">+</span></span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_polygon</span>(<span class="at">color =</span> <span class="st">"white"</span>, <span class="at">linewidth =</span> <span class="fl">0.1</span>) <span class="sc">+</span></span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_manual</span>(<span class="at">values =</span> cores_mix) <span class="sc">+</span></span>
+<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">coord_quickmap</span>(<span class="at">ylim =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">55</span>, <span class="dv">85</span>)) <span class="sc">+</span></span>
+<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">fill =</span> <span class="st">"Grupo (mix)"</span>) <span class="sc">+</span></span>
+<span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_void</span>() <span class="sc">+</span></span>
+<span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"bottom"</span>)</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="04_cluster_538_files/figure-html/unnamed-chunk-34-1.png" class="img-fluid figure-img" style="width:100.0%"></p>
+<p><img src="04_cluster_538_files/figure-html/unnamed-chunk-37-1.png" class="img-fluid figure-img" style="width:100.0%"></p>
 </figure>
 </div>
 </div>
 </div>
+<p>A geografia aparece com clareza, embora o algoritmo não tenha recebido nenhuma informação sobre localização: países vizinhos e de culturas próximas tendem a ter o mesmo mix. Esse é um bom sinal de que os grupos capturam algo real, e não apenas ruído dos dados.</p>
 </section>
-<section id="conclusão" class="level2" data-number="5.6">
-<h2 data-number="5.6" class="anchored" data-anchor-id="conclusão"><span class="header-section-number">5.6</span> Conclusão</h2>
-<p>Neste relatório, exploramos os dados de consumo de bebidas alcoólicas em diversos países e utilizamos o algoritmo K-means para agrupar os países em clusters com base nesses dados. A análise nos permitiu identificar padrões de consumo e características distintas entre os grupos de países.</p>
+<section id="uso-prático" class="level2" data-number="5.9">
+<h2 data-number="5.9" class="anchored" data-anchor-id="uso-prático"><span class="header-section-number">5.9</span> Uso prático</h2>
+<p><strong>Para que serve.</strong> As duas segmentações organizam a estratégia internacional em poucos blocos. O mix define a <strong>linha de produto que lidera</strong> o portfólio em cada grupo de mercados (e, com isso, campanhas, distribuição e lançamentos). O volume, combinado com a população e a renda, ajuda a decidir <strong>onde priorizar</strong> investimentos e com que posicionamento de preço.</p>
+<p><strong>Para que não serve.</strong> Os grupos não substituem o estudo de cada país antes de uma decisão de entrada: regulação, impostos, concorrência e canais de distribuição podem inviabilizar um mercado que parece atraente na segmentação. E os países “Fora do escopo” não são uma oportunidade de expansão: em muitos deles, o consumo é baixo por razões culturais, religiosas ou legais que devem ser respeitadas.</p>
+<p><strong>Como usar.</strong> Uma forma prática é montar uma matriz com o grupo de mix nas linhas e a prioridade (definida pelo volume do mercado e pela renda) nas colunas, e atribuir a cada célula uma postura: defender a liderança, crescer, entrar ou não priorizar.</p>
+<p><strong>Manutenção.</strong></p>
+<ul>
+<li>Refazer as segmentações sempre que houver dados novos de consumo: hábitos mudam devagar, mas mudam (o vinho, por exemplo, ganhou espaço em vários países fora da Europa).</li>
+<li>Atualizar a população e a renda, que mudam mais rápido que o consumo.</li>
+<li>Acompanhar os países que mudam de grupo entre uma atualização e outra: eles são os mercados em transformação.</li>
+</ul>
+</section>
+<section id="conclusão" class="level2" data-number="5.10">
+<h2 data-number="5.10" class="anchored" data-anchor-id="conclusão"><span class="header-section-number">5.10</span> Conclusão</h2>
+<p>Neste capítulo, usamos o k-médias para segmentar 193 países de duas formas: pelo <strong>volume</strong> de consumo de cada bebida, que mostra <strong>onde</strong> o hábito é forte, e pelo <strong>mix</strong> de bebidas, que mostra <strong>o que</strong> se bebe em cada lugar. As duas segmentações, feitas com o mesmo algoritmo e os mesmos dados, apontam direções diferentes, e juntas orientam a estratégia: o mix escolhe a linha de produto, e o volume, a prioridade. O enriquecimento com dados do Banco Mundial completou o quadro com o tamanho de cada mercado, mostrando que um consumo baixo por pessoa pode esconder um mercado grande.</p>
+<p><strong>Limitações:</strong></p>
+<ul>
+<li>Os dados de consumo são de um único ano (2010) e não distinguem marcas, preço ou qualidade.</li>
+<li>As porções por bebida podem não captar bem o consumo de bebidas produzidas e vendidas de forma informal, que é relevante em vários países.</li>
+<li>A base não tem informações de regulação, impostos, concorrência ou margem, decisivas para a estratégia.</li>
+<li>Alguns países ficaram sem dados do Banco Mundial e não entram nos totais.</li>
+<li>O k-médias assume grupos aproximadamente esféricos, e a escolha de <span class="math inline">\(k\)</span> combina critérios estatísticos com o objetivo do negócio.</li>
+</ul>
+<p><strong>Próximos passos:</strong> atualizar os dados de consumo com uma base mais recente da OMS; incluir a evolução do consumo ao longo do tempo, para separar mercados em crescimento e em queda; acrescentar dados de preço, impostos e participação de mercado da empresa; e testar a estabilidade dos grupos com outras sementes e valores de <span class="math inline">\(k\)</span>.</p>
 
 
 </section>

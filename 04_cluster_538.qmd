@@ -4,6 +4,8 @@ editor_options:
   chunk_output_type: console
 ---
 
+# Segmentação de mercados de bebidas no mundo
+
 ```{r include=FALSE}
 knitr::opts_chunk$set(
   warning = FALSE,
@@ -35,8 +37,6 @@ fmt_int <- function(x) format(round(x), big.mark = ".", decimal.mark = ",", scie
 fmt_dec <- function(x, d = 1) formatC(x, format = "f", digits = d, big.mark = ".", decimal.mark = ",")
 pct <- function(x, d = 1) paste0(fmt_dec(100 * x, d), "%")
 ```
-
-# Segmentação de mercados de bebidas no mundo
 
 Uma multinacional de bebidas atua em dezenas de países, com três linhas de produto: **cerveja**, **vinho** e **destilados**. Definir uma estratégia diferente para cada país é caro e difícil de coordenar, e tratar todos os países da mesma forma ignora diferenças enormes de hábito. A saída comum é organizar os países em poucos **grupos de mercado**, cada um com um portfólio prioritário e uma postura própria (defender, crescer, entrar ou não priorizar).
 
@@ -124,7 +124,7 @@ top5 <- function(bebida) {
     transmute(!!bebida := paste0(pais, " (", .data[[bebida]], ")"))
 }
 
-tab_top5 <- bind_cols(tibble(Posição = 1:5), map(bebidas, top5))
+tab_top5 <- bind_cols(tibble(Posição = 1:5), purrr::map(bebidas, top5))
 ```
 
 ```{r}
