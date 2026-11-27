@@ -306,10 +306,10 @@ window.Quarto = {
   <ul>
   <li><a href="#dados" id="toc-dados" class="nav-link active" data-scroll-target="#dados"><span class="header-section-number">5.1</span> Dados</a></li>
   <li><a href="#análise-exploratória" id="toc-análise-exploratória" class="nav-link" data-scroll-target="#análise-exploratória"><span class="header-section-number">5.2</span> Análise exploratória</a></li>
-  <li><a href="#como-o-k-médias-funciona" id="toc-como-o-k-médias-funciona" class="nav-link" data-scroll-target="#como-o-k-médias-funciona"><span class="header-section-number">5.3</span> Como o k-médias funciona</a>
+  <li><a href="#sec-kmeans" id="toc-sec-kmeans" class="nav-link" data-scroll-target="#sec-kmeans"><span class="header-section-number">5.3</span> Como o k-médias funciona</a>
   <ul class="collapse">
-  <li><a href="#por-que-padronizar" id="toc-por-que-padronizar" class="nav-link" data-scroll-target="#por-que-padronizar"><span class="header-section-number">5.3.1</span> Por que padronizar</a></li>
-  <li><a href="#como-escolher-k" id="toc-como-escolher-k" class="nav-link" data-scroll-target="#como-escolher-k"><span class="header-section-number">5.3.2</span> Como escolher <span class="math inline">\(k\)</span></a></li>
+  <li><a href="#sec-padronizar" id="toc-sec-padronizar" class="nav-link" data-scroll-target="#sec-padronizar"><span class="header-section-number">5.3.1</span> Por que padronizar</a></li>
+  <li><a href="#sec-escolha-k" id="toc-sec-escolha-k" class="nav-link" data-scroll-target="#sec-escolha-k"><span class="header-section-number">5.3.2</span> Como escolher <span class="math inline">\(k\)</span></a></li>
   </ul></li>
   <li><a href="#segmentação-1-volume-onde-o-consumo-é-forte" id="toc-segmentação-1-volume-onde-o-consumo-é-forte" class="nav-link" data-scroll-target="#segmentação-1-volume-onde-o-consumo-é-forte"><span class="header-section-number">5.4</span> Segmentação 1: volume (onde o consumo é forte?)</a></li>
   <li><a href="#segmentação-2-mix-o-que-se-bebe" id="toc-segmentação-2-mix-o-que-se-bebe" class="nav-link" data-scroll-target="#segmentação-2-mix-o-que-se-bebe"><span class="header-section-number">5.5</span> Segmentação 2: mix (o que se bebe?)</a>
@@ -624,8 +624,8 @@ window.Quarto = {
 <p>As três bebidas são positivamente correlacionadas (países que bebem mais de uma tendem a beber mais das outras), mas longe de 1: cada uma traz informação própria. Já <code>litros_alcool</code> é, em boa parte, uma combinação das três, e por isso <strong>não entra no agrupamento</strong>: incluí-la contaria o mesmo consumo duas vezes. Ela volta mais adiante, para medir o tamanho de cada mercado.</p>
 <p>Por fim, 13 países têm consumo zero nas três bebidas, e 31 consomem menos de 20 porções por pessoa por ano (menos de duas por mês).</p>
 </section>
-<section id="como-o-k-médias-funciona" class="level2" data-number="5.3">
-<h2 data-number="5.3" class="anchored" data-anchor-id="como-o-k-médias-funciona"><span class="header-section-number">5.3</span> Como o k-médias funciona</h2>
+<section id="sec-kmeans" class="level2" data-number="5.3">
+<h2 data-number="5.3" class="anchored" data-anchor-id="sec-kmeans"><span class="header-section-number">5.3</span> Como o k-médias funciona</h2>
 <p>O k-médias divide as observações (aqui, países) em <span class="math inline">\(k\)</span> grupos, de forma que os países de um mesmo grupo sejam parecidos entre si e diferentes dos países dos outros grupos. O número <span class="math inline">\(k\)</span> é escolhido por quem faz a análise.</p>
 <p>O algoritmo é simples:</p>
 <ol type="1">
@@ -635,13 +635,13 @@ window.Quarto = {
 <li>Repete os passos 2 e 3 até que os grupos parem de mudar.</li>
 </ol>
 <p>O resultado depende do sorteio inicial. Por isso, o algoritmo é rodado várias vezes com sorteios diferentes (argumento <code>nstart</code>) e fica com a melhor solução, a que tem a menor <strong>soma de quadrados dentro dos grupos</strong>: a soma das distâncias ao quadrado entre cada país e o centroide do seu grupo. Quanto menor essa soma, mais compactos são os grupos.</p>
-<section id="por-que-padronizar" class="level3" data-number="5.3.1">
-<h3 data-number="5.3.1" class="anchored" data-anchor-id="por-que-padronizar"><span class="header-section-number">5.3.1</span> Por que padronizar</h3>
+<section id="sec-padronizar" class="level3" data-number="5.3.1">
+<h3 data-number="5.3.1" class="anchored" data-anchor-id="sec-padronizar"><span class="header-section-number">5.3.1</span> Por que padronizar</h3>
 <p>Como o algoritmo usa distâncias, uma variável com valores maiores ou mais espalhados pesa mais no resultado. Se uma variável estivesse em reais e outra em milhares de reais, a primeira dominaria o agrupamento apenas por causa da unidade. A <strong>padronização</strong> (subtrair a média e dividir pelo desvio padrão) coloca todas as variáveis na mesma escala.</p>
 <p>Aqui as três bebidas estão na mesma unidade (porções), mas com dispersões diferentes. Padronizamos mesmo assim, para que cada bebida tenha o mesmo peso na definição dos grupos.</p>
 </section>
-<section id="como-escolher-k" class="level3" data-number="5.3.2">
-<h3 data-number="5.3.2" class="anchored" data-anchor-id="como-escolher-k"><span class="header-section-number">5.3.2</span> Como escolher <span class="math inline">\(k\)</span></h3>
+<section id="sec-escolha-k" class="level3" data-number="5.3.2">
+<h3 data-number="5.3.2" class="anchored" data-anchor-id="sec-escolha-k"><span class="header-section-number">5.3.2</span> Como escolher <span class="math inline">\(k\)</span></h3>
 <p>Não existe um <span class="math inline">\(k\)</span> “correto”. Dois critérios ajudam na escolha:</p>
 <ul>
 <li><strong>Método do cotovelo:</strong> a soma de quadrados dentro dos grupos sempre diminui quando aumentamos <span class="math inline">\(k\)</span> (com um grupo por país, ela seria zero). Procuramos o ponto em que a queda deixa de ser acentuada, o “cotovelo” do gráfico. É um critério subjetivo.</li>

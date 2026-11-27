@@ -347,6 +347,7 @@ window.Quarto = {
 <li><p>Quais clientes estão pouco ativos e talvez precisem de uma oferta de reativação?</p></li>
 <li><p>Como otimizar o orçamento de marketing focando nos grupos com maior potencial de retorno?</p></li>
 </ul>
+<p>O funcionamento do k-médias, a padronização das variáveis e os critérios para escolher o número de grupos foram apresentados no capítulo anterior (<a href="04_cluster_538.html#sec-kmeans" class="quarto-xref"><span>Seção 5.3</span></a>). Aqui, o foco é o que muda em uma base de clientes real: muitas variáveis, a visualização dos grupos com o PCA, o valor de cada grupo para o negócio e a implantação da segmentação.</p>
 <p>Seguimos as etapas do CRISP-DM apresentadas na introdução do livro. Todo o trabalho é feito em <strong>Python</strong>.</p>
 <table class="caption-top table">
 <colgroup>
@@ -950,8 +951,7 @@ window.Quarto = {
 </section>
 <section id="algoritmo-k-médias" class="level2" data-number="6.3">
 <h2 data-number="6.3" class="anchored" data-anchor-id="algoritmo-k-médias"><span class="header-section-number">6.3</span> Algoritmo k-médias</h2>
-<p>Nesta etapa, aplicamos o algoritmo K-Means para agrupar nossos clientes. O objetivo é que a variância dentro de cada grupo seja a menor possível, enquanto a diferença entre os grupos seja maximizada.</p>
-<p>Como visto no capítulo anterior, a padronização é um passo crítico. Aqui, utilizamos o Z-score para garantir que variáveis como renda (na casa dos milhares) não dominem variáveis como interesse (unidades) apenas pela magnitude numérica.</p>
+<p>Nesta etapa, aplicamos o K-Means aos clientes. Antes, padronizamos as variáveis (<a href="04_cluster_538.html#sec-padronizar" class="quarto-xref"><span>Seção 5.3.1</span></a>). Aqui, isso é ainda mais importante do que no capítulo anterior, porque as escalas são muito diferentes: sem padronização, a renda (na casa dos milhares) dominaria o <code>interesse</code> (de 0 a 1) apenas pela magnitude dos números.</p>
 <p>Guardamos a média e o desvio padrão de cada variável, pois serão necessários para classificar novos clientes no futuro. Mantemos <strong>duas versões</strong> dos dados: <code>df</code> (valores originais, usados para interpretar os grupos) e <code>df_norm</code> (valores padronizados, usados pelo K-Means, pelo cotovelo, pela silhouette e pelo PCA).</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>media <span class="op">=</span> df.mean()</span>
@@ -1301,11 +1301,7 @@ window.Quarto = {
 </section>
 <section id="escolha-do-melhor-valor-de-k" class="level3" data-number="6.3.2">
 <h3 data-number="6.3.2" class="anchored" data-anchor-id="escolha-do-melhor-valor-de-k"><span class="header-section-number">6.3.2</span> Escolha do melhor valor de <span class="math inline">\(k\)</span></h3>
-<p>A escolha do número de grupos em uma análise de clustering não deve ser arbitrária. Para verificar se <span class="math inline">\(k=4\)</span> é razoável, usamos dois critérios, sempre calculados sobre os <strong>dados padronizados</strong> (os mesmos usados pelo K-Means):</p>
-<ul>
-<li><strong>Método do Cotovelo (Elbow Method):</strong> a <em>inércia</em> (soma dos quadrados das distâncias entre cada cliente e o centroide do seu grupo) sempre diminui quando aumentamos <span class="math inline">\(k\)</span>. Procuramos o ponto em que a queda deixa de ser acentuada e passa a ser marginal.</li>
-<li><strong>Coeficiente de silhouette:</strong> para cada cliente, compara a distância ao seu próprio grupo com a distância ao grupo vizinho mais próximo. Varia de -1 a 1, e valores maiores indicam grupos mais coesos e mais bem separados. Por custo computacional, é calculado em uma amostra de 10.000 clientes.</li>
-</ul>
+<p>Para verificar se <span class="math inline">\(k=4\)</span> é razoável, usamos os dois critérios apresentados no capítulo anterior (<a href="04_cluster_538.html#sec-escolha-k" class="quarto-xref"><span>Seção 5.3.2</span></a>): o método do cotovelo (no <code>scikit-learn</code>, a soma de quadrados dentro dos grupos se chama <em>inércia</em>) e o coeficiente de silhouette, ambos calculados sobre os dados padronizados. Com 60.000 clientes, a silhouette é calculada em uma amostra de 10.000 clientes, por custo computacional.</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>inercia <span class="op">=</span> []</span>
 <span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>silhueta <span class="op">=</span> []</span>
@@ -1406,7 +1402,7 @@ window.Quarto = {
 </div>
 </div>
 <p>As duas primeiras linhas mostram que dois dos grupos de <span class="math inline">\(k=3\)</span> são praticamente os clusters A e B. A terceira reúne quase todos os clientes do C e do D: ao pedir só 3 grupos, o algoritmo <strong>junta o Esporádico (C) e o Inativo (D)</strong>. Do ponto de vista estatístico, faz sentido: os dois têm renda, score e gasto baixos e ficam próximos no espaço das variáveis. Do ponto de vista do negócio, porém, são clientes muito diferentes: o C compra com regularidade e precisa de estímulo para <strong>comprar mais vezes</strong>, enquanto o D <strong>parou de comprar</strong> e precisa de uma ação de reativação. Juntá-los levaria a uma única campanha para dois problemas distintos.</p>
-<p>Por isso, mantemos <strong><span class="math inline">\(k=4\)</span></strong>: a separação estatística é um pouco menor, mas cada grupo corresponde a uma ação de marketing diferente. Em projetos reais, o cotovelo é um critério subjetivo e nem sempre coincide com o máximo da silhouette; a decisão final equilibra o critério estatístico com a <strong>viabilidade operacional</strong> do time de marketing, como discutimos mais adiante.</p>
+<p>Por isso, mantemos <strong><span class="math inline">\(k=4\)</span></strong>: a separação estatística é um pouco menor, mas cada grupo corresponde a uma ação de marketing diferente. A decisão final equilibra o critério estatístico com a <strong>viabilidade operacional</strong> do time de marketing, como discutimos mais adiante.</p>
 </section>
 </section>
 <section id="visualização-dos-clusters-através-do-pca" class="level2" data-number="6.4">
@@ -1600,7 +1596,6 @@ window.Quarto = {
 <li><p>Custo de Implementação: Cada novo segmento exige personalização de catálogo, artes, cupons e logística. Se o ganho em inércia ao aumentar <span class="math inline">\(k\)</span> é marginal, o custo operacional de gerenciar um grupo adicional provavelmente não se paga.</p></li>
 <li><p>Diferenciação Estratégica: O agrupamento só faz sentido se os grupos resultantes exigirem ações de negócio distintas. Se dois clusters identificados pelo algoritmo recebem a mesma oferta de “Desconto em Vinhos”, eles deveriam, na prática, ser tratados como um único segmento.</p></li>
 </ul>
-<p>Neste estudo, a silhouette preferia 3 grupos, mas isso juntaria clientes que pedem ações opostas (estimular a frequência e reativar), e por isso ficamos com 4.</p>
 <p>O algoritmo K-Means nos ofereceu um mapa, mas a navegação é feita pelo gestor. Identificamos que 60,7% da base são clientes esporádicos (<strong>Cluster C</strong>, 41,0%) ou inativos (<strong>Cluster D</strong>, 19,7%), que respondem juntos por apenas 24,2% do gasto. Este é um insight técnico com uma implicação estratégica relevante, mas que precisa ser lido junto com a tabela de valor de cada grupo: reativar ou estimular esses clientes só compensa se o retorno esperado superar o custo da ação, e isso deve ser testado antes de ser ampliado.</p>
 <div class="callout callout-style-default callout-tip callout-titled" title="Desafio Próximo">
 <div class="callout-header d-flex align-content-center">
