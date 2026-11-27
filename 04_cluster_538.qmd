@@ -229,7 +229,7 @@ sil_max <- function(criterios) max(criterios[["Silhouette médio"]])
 k_sil_max <- function(criterios) criterios$k[which.max(criterios[["Silhouette médio"]])]
 ```
 
-A soma de quadrados cai bastante até $k=4$ e mais devagar a partir daí. O silhouette médio com $k=4$ é `r fmt_dec(sil(crit_volume, 4), 2)` (o maior valor testado é `r fmt_dec(sil_max(crit_volume), 2)`, com $k=$ `r k_sil_max(crit_volume)`). Ficamos com **4 grupos**: um de baixo consumo e três de consumo alto, cada um puxado por uma bebida diferente.
+A soma de quadrados cai bastante até $k=4$ e mais devagar a partir daí. O silhouette médio com $k=4$ é `r fmt_dec(sil(crit_volume, 4), 2)`, `r if (k_sil_max(crit_volume) == 4) "o maior entre os valores testados" else paste0("próximo do maior valor testado (", fmt_dec(sil_max(crit_volume), 2), ", com k = ", k_sil_max(crit_volume), ")")`. Os dois critérios apontam na mesma direção, e ficamos com **4 grupos**: um de baixo consumo e três de consumo alto, cada um puxado por uma bebida diferente.
 
 ```{r}
 set.seed(42)
@@ -245,18 +245,23 @@ nome_volume <- centroides |>
                         paste("Alto consumo:", bebida)),
          nome = make.unique(nome, sep = " "))
 
+# distância de cada país ao centroide do seu grupo: os mais próximos são os
+# exemplos mais típicos do grupo
+dist_centroide <- function(x, km) sqrt(rowSums((x - km$centers[km$cluster, ])^2))
+
 dados <- dados |>
-  mutate(grupo_volume = nome_volume$nome[km_volume$cluster])
+  mutate(grupo_volume = nome_volume$nome[km_volume$cluster],
+         dist_volume = dist_centroide(x_volume, km_volume))
 ```
 
-A tabela mostra o consumo médio de cada bebida em cada grupo, na escala original, e três exemplos de países (os de maior consumo total no grupo).
+A tabela mostra o consumo médio de cada bebida em cada grupo, na escala original, e três exemplos de países: os mais próximos do centroide, ou seja, os mais típicos do grupo.
 
 ```{r}
 perfil_volume <- dados |>
   group_by(Grupo = grupo_volume) |>
   summarise(Países = n(),
             across(all_of(bebidas), ~ round(mean(.x))),
-            Exemplos = paste(pais[order(-porcoes)][1:3], collapse = ", ")) |>
+            Exemplos = paste(pais[order(dist_volume)][1:3], collapse = ", ")) |>
   arrange(desc(cerveja + destilados + vinho))
 ```
 
@@ -281,7 +286,7 @@ n_grupo <- function(col, nome) sum(dados[[col]] == nome)
 n_baixo_volume <- n_grupo("grupo_volume", "Baixo consumo")
 ```
 
-O grupo de **baixo consumo** reúne `r n_baixo_volume` países (`r pct(n_baixo_volume / n_paises, 0)` da base): são mercados em que o hábito de beber é fraco por pessoa. Os três grupos de consumo alto têm perfis bem diferentes, cada um puxado por uma bebida. Para a multinacional, esta segmentação responde **onde** o hábito de consumo é forte, mas não diz, por si só, o que vender em cada lugar: um país do grupo de baixo consumo pode beber quase só destilados, e outro, quase só cerveja.
+O grupo de **baixo consumo** reúne `r n_baixo_volume` países (`r pct(n_baixo_volume / n_paises, 0)` da base): são mercados em que o hábito de beber é fraco por pessoa. Os três grupos de consumo alto têm perfis bem diferentes, cada um puxado por uma bebida. O nome indica a bebida que mais **diferencia** o grupo, e não a única consumida: o grupo de alto consumo de vinho, por exemplo, também bebe bastante cerveja. Para a multinacional, esta segmentação responde **onde** o hábito de consumo é forte, mas não diz, por si só, o que vender em cada lugar: um país do grupo de baixo consumo pode beber quase só destilados, e outro, quase só cerveja.
 
 ## Segmentação 2: mix (o que se bebe?)
 
@@ -304,27 +309,23 @@ crit_mix <- avalia_k(x_mix)
 grafico_k(crit_mix)
 ```
 
-O silhouette médio com $k=4$ é `r fmt_dec(sil(crit_mix, 4), 2)` (o maior valor testado é `r fmt_dec(sil_max(crit_mix), 2)`, com $k=$ `r k_sil_max(crit_mix)`). Aqui, a escolha de $k$ também é uma decisão de negócio: com três linhas de produto, queremos saber em quais mercados cada uma lidera e em quais nenhuma domina. Ficamos com **4 grupos**.
+O silhouette médio com $k=4$ é `r fmt_dec(sil(crit_mix, 4), 2)` (o maior valor testado é `r fmt_dec(sil_max(crit_mix), 2)`, com $k=$ `r k_sil_max(crit_mix)`). Aqui, a escolha de $k$ também é uma decisão de negócio: com três linhas de produto, queremos saber em quais mercados cada uma lidera e em quais duas bebidas dividem o consumo. Ficamos com **4 grupos**.
 
 ```{r}
 set.seed(42)
 km_mix <- kmeans(x_mix, centers = 4, nstart = 25)
 
-# nome de cada grupo: a bebida cuja participação mais supera a média geral;
-# se dois grupos disputam a mesma bebida, o mais forte fica com o nome e o
-# outro vira "Misto", com as duas bebidas de maior participação
-media_geral <- colMeans(x_mix)
-excesso <- sweep(km_mix$centers, 2, media_geral)
-dominante <- bebidas[max.col(excesso)]
-forca <- apply(excesso, 1, max)
-nome_mix <- ifelse(forca == ave(forca, dominante, FUN = max),
-                   str_to_title(dominante), NA)
-for (g in which(is.na(nome_mix))) {
-  duas <- bebidas[order(-km_mix$centers[g, ])][1:2]
-  nome_mix[g] <- paste("Misto:", duas[1], "e", duas[2])
-}
+# nome de cada grupo: as bebidas com pelo menos 30% de participação no
+# centroide, da maior para a menor (ex.: "Cerveja" ou "Vinho e cerveja")
+nome_mix <- apply(km_mix$centers, 1, function(centro) {
+  principais <- bebidas[order(-centro)][sort(centro, decreasing = TRUE) >= 0.3]
+  str_to_sentence(paste(principais, collapse = " e "))
+})
+nome_mix <- make.unique(nome_mix, sep = " ")
 
-dados_mix <- dados_mix |> mutate(grupo_mix = nome_mix[km_mix$cluster])
+dados_mix <- dados_mix |>
+  mutate(grupo_mix = nome_mix[km_mix$cluster],
+         dist_mix = dist_centroide(x_mix, km_mix))
 
 dados <- dados |>
   left_join(select(dados_mix, pais, grupo_mix), by = "pais") |>
@@ -340,7 +341,7 @@ perfil_mix <- dados_mix |>
   group_by(Grupo = grupo_mix) |>
   summarise(Países = n(),
             across(all_of(partes), ~ pct(mean(.x), 0)),
-            Exemplos = paste(pais[order(-porcoes)][1:3], collapse = ", ")) |>
+            Exemplos = paste(pais[order(dist_mix)][1:3], collapse = ", ")) |>
   rename(`% cerveja` = part_cerveja, `% destilados` = part_destilados,
          `% vinho` = part_vinho)
 ```
@@ -363,7 +364,7 @@ dados_mix |>
        caption = "A participação dos destilados é o que falta para 100%.")
 ```
 
-Os grupos de mix dizem **qual linha de produto lidera** em cada mercado: nos países do grupo da cerveja, é ela que deve puxar o portfólio; nos do vinho, uma estratégia centrada em vinho conversa com o hábito local; e assim por diante. Nos grupos mistos, nenhuma bebida domina, e o portfólio precisa ser mais equilibrado.
+O nome de cada grupo lista as bebidas que respondem por pelo menos 30% do consumo no centroide, da maior para a menor. Os grupos de mix dizem **qual linha de produto lidera** em cada mercado. Nos grupos com uma só bebida no nome, ela domina o consumo e deve puxar o portfólio. Nos grupos com duas bebidas, elas dividem o consumo, e o portfólio precisa equilibrá-las: é o caso de países conhecidos pela cerveja, como Alemanha e Reino Unido, em que o vinho também tem participação bem acima da média mundial.
 
 ### Volume e mix: duas perguntas diferentes
 
@@ -437,7 +438,14 @@ sem_codigo <- dados |> filter(is.na(iso3)) |> pull(pais)
 txt_lista <- function(x) if (length(x) == 0) "nenhum" else paste(x, collapse = ", ")
 ```
 
-Países sem código ISO identificado: `r txt_lista(sem_codigo)`. Em seguida, juntamos as bases pelo código e verificamos quantos países ficaram sem dados do Banco Mundial:
+O pacote reconheceu todos os nomes, exceto: `r txt_lista(sem_codigo)`. O nome "Micronesia" é ambíguo: pode ser a região da Oceania ou o país Estados Federados da Micronésia, que é o caso aqui. Situações como essa são comuns e se resolvem com uma correção manual, registrada no código:
+
+```{r}
+dados <- dados |>
+  mutate(iso3 = if_else(pais == "Micronesia", "FSM", iso3))
+```
+
+Em seguida, juntamos as bases pelo código e verificamos quantos países ficaram sem dados do Banco Mundial:
 
 ```{r}
 dados <- dados |>
@@ -472,7 +480,7 @@ valor_grupo <- function(grupo) {
               `Adultos (milhões)` = round(sum(populacao_15mais) / 1e6),
               `Volume (milhões de litros)` = round(sum(volume_mercado) / 1e6),
               `PIB per capita mediano (US$ PPC)` = round(median(pib_per_capita_ppc, na.rm = TRUE))) |>
-    mutate(`% do volume mundial` = pct(`Volume (milhões de litros)` /
+    mutate(`% do volume total` = pct(`Volume (milhões de litros)` /
                                          sum(`Volume (milhões de litros)`))) |>
     arrange(desc(`Volume (milhões de litros)`))
 }
@@ -499,9 +507,15 @@ baixo <- filter(com_pop, grupo_volume == "Baixo consumo")
 pct_adultos_baixo <- sum(baixo$populacao_15mais) / sum(com_pop$populacao_15mais)
 pct_volume_baixo <- sum(baixo$volume_mercado) / sum(com_pop$volume_mercado)
 maior_baixo <- slice_max(baixo, volume_mercado, n = 1)
+altos <- filter(com_pop, grupo_volume != "Baixo consumo")
+n_altos_menores <- sum(altos$volume_mercado < maior_baixo$volume_mercado)
+maior_grupo <- valor_grupo("grupo_volume") |> slice(1)
+lider_maior_grupo <- com_pop |>
+  filter(grupo_volume == maior_grupo$Grupo) |>
+  slice_max(volume_mercado, n = 1)
 ```
 
-A primeira tabela traz uma informação que a segmentação sozinha escondia. O grupo de **baixo consumo** reúne `r pct(pct_adultos_baixo, 0)` da população adulta dos países com dados e responde por `r pct(pct_volume_baixo, 0)` do volume total de álcool. O maior mercado do grupo, `r maior_baixo$pais`, consome sozinho cerca de `r fmt_int(maior_baixo$volume_mercado / 1e6)` milhões de litros de álcool puro por ano, mais do que muitos países de consumo alto. Consumo baixo por pessoa não significa, necessariamente, mercado pequeno. Por outro lado, um hábito fraco por pessoa indica um crescimento mais lento e mais caro.
+A primeira tabela traz duas informações que a segmentação sozinha escondia. O grupo de maior volume é o "`r maior_grupo$Grupo`", com `r maior_grupo$"% do volume total"` do total, puxado por `r lider_maior_grupo$pais`. E o grupo de **baixo consumo** reúne `r pct(pct_adultos_baixo, 0)` da população adulta dos países com dados e responde por `r pct(pct_volume_baixo, 0)` do volume total de álcool. O maior mercado desse grupo, `r maior_baixo$pais`, consome sozinho cerca de `r fmt_int(maior_baixo$volume_mercado / 1e6)` milhões de litros de álcool puro por ano, mais do que `r n_altos_menores` dos `r nrow(altos)` países dos grupos de consumo alto. Consumo baixo por pessoa não significa, necessariamente, mercado pequeno. Por outro lado, um hábito fraco por pessoa indica um crescimento mais lento e mais caro.
 
 O gráfico abaixo mostra cada país pela população adulta e pela renda, com o tamanho do ponto proporcional ao volume do mercado e a cor indicando o grupo de mix. Os 12 maiores mercados estão identificados.
 
@@ -515,8 +529,10 @@ dados |>
   geom_point(aes(size = volume_mercado / 1e6, color = grupo_mix), alpha = 0.7) +
   geom_text_repel(data = filter(maiores, !is.na(pib_per_capita_ppc)),
                   aes(label = pais), size = 3, max.overlaps = Inf) +
-  scale_x_log10(labels = scales::label_number(big.mark = ".", decimal.mark = ",")) +
+  scale_x_log10(labels = scales::label_number(big.mark = ".", decimal.mark = ",",
+                                              drop0trailing = TRUE)) +
   scale_y_log10(labels = scales::label_number(big.mark = ".", decimal.mark = ",")) +
+  scale_size_continuous(labels = scales::label_number(big.mark = ".", decimal.mark = ",")) +
   scale_color_manual(values = cores_mix) +
   labs(x = "Adultos (milhões, escala log)", y = "PIB per capita, US$ PPC (escala log)",
        color = "Grupo (mix)", size = "Volume (milhões de litros)")
