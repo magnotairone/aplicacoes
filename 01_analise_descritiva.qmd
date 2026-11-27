@@ -141,14 +141,11 @@ ggplot() +
 #| include: false
 n_destinos <- n_distinct(voos$dest)
 sem_coordenada <- setdiff(unique(voos$dest), airports$faa)
-fora_mapa <- airports |>
-  filter(faa %in% voos$dest, lon <= -130 | lat <= 24) |>
-  pull(name)
 longos <- voos |> group_by(origin) |> summarise(p = mean(distance > 1500)) |> deframe() |> as.list()
 lga_max <- voos |> filter(origin == "LGA") |> slice_max(distance, n = 1, with_ties = FALSE)
 ```
 
-Os voos vão para `r n_destinos` destinos. O mapa mostra os dos Estados Unidos continentais. Ficam de fora `r paste(fora_mapa, collapse = " e ")`, fora do continente, e `r length(sem_coordenada)` destinos em Porto Rico e nas Ilhas Virgens Americanas (`r paste(sem_coordenada, collapse = ", ")`), que não têm coordenadas na tabela `airports`. A malha mostra que os aeroportos têm perfis diferentes. O JFK concentra as rotas longas, para a costa oeste: `r pct(longos$JFK, 0)` dos voos de lá passam de 1.500 milhas. No LaGuardia, são só `r pct(longos$LGA, 0)`, e o destino mais distante é `r lga_max$dest`, a `r fmt_int(lga_max$distance)` milhas: o aeroporto tem uma **regra de perímetro**, que limita os voos a cerca de 1.500 milhas, com exceção de Denver. Essas diferenças de perfil ajudam a entender as diferenças de desempenho que veremos adiante.
+Os voos vão para `r n_destinos` destinos. O mapa mostra os dos Estados Unidos continentais. Ficam de fora os voos para o Alasca (Anchorage) e o Havaí (Honolulu), fora do continente, e `r length(sem_coordenada)` destinos em Porto Rico e nas Ilhas Virgens Americanas (`r paste(sem_coordenada, collapse = ", ")`), que não têm coordenadas na tabela `airports`. A malha mostra que os aeroportos têm perfis diferentes. O JFK concentra as rotas longas, para a costa oeste: `r pct(longos$JFK, 0)` dos voos de lá passam de 1.500 milhas. No LaGuardia, são só `r pct(longos$LGA, 0)`, e o destino mais distante é Denver (`r lga_max$dest`), a `r fmt_int(lga_max$distance)` milhas: o aeroporto tem uma **regra de perímetro**, que limita os voos a cerca de 1.500 milhas, com exceção de Denver. Essas diferenças de perfil ajudam a entender as diferenças de desempenho que veremos adiante.
 
 
 ## Ferramentas da análise descritiva
@@ -428,7 +425,7 @@ aer <- voos |>
   arrange(desc(media))
 ```
 
-Newark tem o pior desempenho na partida: atraso médio de `r fmt_dec(aer$media[1])` minutos e `r pct(aer$pct_15[1], 0)` dos voos com mais de 15 minutos de atraso, contra `r fmt_dec(aer$media[3])` minutos e `r pct(aer$pct_15[3], 0)` no `r aer$origin[3]`, o melhor dos três. As medianas, porém, são parecidas e próximas de zero: o voo típico parte no horário nos três aeroportos, e a diferença está na frequência e no tamanho dos atrasos.
+Newark tem o pior desempenho na partida: atraso médio de `r fmt_dec(aer$media[1])` minutos e `r pct(aer$pct_15[1], 0)` dos voos com mais de 15 minutos de atraso, contra `r fmt_dec(aer$media[3])` minutos e `r pct(aer$pct_15[3], 0)` no `r nomes_origem[aer$origin[3]]`, o melhor dos três. As medianas, porém, são parecidas e próximas de zero: o voo típico parte no horário nos três aeroportos, e a diferença está na frequência e no tamanho dos atrasos.
 
 O horário revela o padrão mais forte da base:
 

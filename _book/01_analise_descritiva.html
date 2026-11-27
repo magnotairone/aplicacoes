@@ -566,7 +566,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </div>
-<p>Os voos vão para 105 destinos. O mapa mostra os dos Estados Unidos continentais. Ficam de fora Ted Stevens Anchorage Intl e Honolulu Intl, fora do continente, e 4 destinos em Porto Rico e nas Ilhas Virgens Americanas (BQN, SJU, STT, PSE), que não têm coordenadas na tabela <code>airports</code>. A malha mostra que os aeroportos têm perfis diferentes. O JFK concentra as rotas longas, para a costa oeste: 39% dos voos de lá passam de 1.500 milhas. No LaGuardia, são só 4%, e o destino mais distante é DEN, a 1.620 milhas: o aeroporto tem uma <strong>regra de perímetro</strong>, que limita os voos a cerca de 1.500 milhas, com exceção de Denver. Essas diferenças de perfil ajudam a entender as diferenças de desempenho que veremos adiante.</p>
+<p>Os voos vão para 105 destinos. O mapa mostra os dos Estados Unidos continentais. Ficam de fora os voos para o Alasca (Anchorage) e o Havaí (Honolulu), fora do continente, e 4 destinos em Porto Rico e nas Ilhas Virgens Americanas (BQN, SJU, STT, PSE), que não têm coordenadas na tabela <code>airports</code>. A malha mostra que os aeroportos têm perfis diferentes. O JFK concentra as rotas longas, para a costa oeste: 39% dos voos de lá passam de 1.500 milhas. No LaGuardia, são só 4%, e o destino mais distante é Denver (DEN), a 1.620 milhas: o aeroporto tem uma <strong>regra de perímetro</strong>, que limita os voos a cerca de 1.500 milhas, com exceção de Denver. Essas diferenças de perfil ajudam a entender as diferenças de desempenho que veremos adiante.</p>
 </section>
 </section>
 <section id="ferramentas-da-análise-descritiva" class="level2" data-number="1.2">
@@ -1184,7 +1184,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </table>
 </div>
 </div>
-<p>Newark tem o pior desempenho na partida: atraso médio de 15,1 minutos e 25% dos voos com mais de 15 minutos de atraso, contra 10,3 minutos e 19% no LGA, o melhor dos três. As medianas, porém, são parecidas e próximas de zero: o voo típico parte no horário nos três aeroportos, e a diferença está na frequência e no tamanho dos atrasos.</p>
+<p>Newark tem o pior desempenho na partida: atraso médio de 15,1 minutos e 25% dos voos com mais de 15 minutos de atraso, contra 10,3 minutos e 19% no LaGuardia (LGA), o melhor dos três. As medianas, porém, são parecidas e próximas de zero: o voo típico parte no horário nos três aeroportos, e a diferença está na frequência e no tamanho dos atrasos.</p>
 <p>O horário revela o padrão mais forte da base:</p>
 <div class="cell">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>voos <span class="sc">|&gt;</span></span>

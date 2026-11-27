@@ -277,7 +277,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#modelos-e-ajuste-de-hiperparâmetros" id="toc-modelos-e-ajuste-de-hiperparâmetros" class="nav-link" data-scroll-target="#modelos-e-ajuste-de-hiperparâmetros"><span class="header-section-number">4.4</span> Modelos e ajuste de hiperparâmetros</a></li>
   <li><a href="#avaliação-no-conjunto-de-teste" id="toc-avaliação-no-conjunto-de-teste" class="nav-link" data-scroll-target="#avaliação-no-conjunto-de-teste"><span class="header-section-number">4.5</span> Avaliação no conjunto de teste</a></li>
   <li><a href="#sugerindo-o-aluguel-de-um-novo-imóvel" id="toc-sugerindo-o-aluguel-de-um-novo-imóvel" class="nav-link" data-scroll-target="#sugerindo-o-aluguel-de-um-novo-imóvel"><span class="header-section-number">4.6</span> Sugerindo o aluguel de um novo imóvel</a></li>
-  <li><a href="#cuidados" id="toc-cuidados" class="nav-link" data-scroll-target="#cuidados"><span class="header-section-number">4.7</span> Cuidados</a></li>
+  <li><a href="#limitações-e-próximos-passos" id="toc-limitações-e-próximos-passos" class="nav-link" data-scroll-target="#limitações-e-próximos-passos"><span class="header-section-number">4.7</span> Limitações e próximos passos</a></li>
   </ul>
 </nav>
     </div>
@@ -303,6 +303,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
+<p>O capítulo anterior mostrou que é possível estimar o aluguel de um apartamento a partir das suas características, mas com um erro típico ainda relevante para fixar um preço. Este anexo é para quem quer levar aquele modelo a um uso real, como a <strong>sugestão de preço</strong> na hora em que um proprietário cadastra um imóvel em uma plataforma de anúncios. Para essa decisão, não basta um valor: a plataforma precisa sugerir um <strong>preço e uma faixa</strong> em que o aluguel provavelmente vai ficar, com o menor erro possível.</p>
+<p>O anexo é mais técnico que os capítulos e pode ser pulado por quem tem interesse apenas na aplicação: o resultado principal está na seção de avaliação no conjunto de teste e na função que sugere o aluguel de um novo imóvel.</p>
 <p>No capítulo anterior, a floresta aleatória usou apenas latitude e longitude para representar a localização, parâmetros padrão e o preço na escala original. Este anexo implementa os “próximos passos” daquele capítulo para chegar a um modelo mais próximo do que seria usado em produção:</p>
 <ol type="1">
 <li><strong>Distrito</strong> como variável, agrupando os distritos pequenos e codificando cada um pelo seu nível de preço.</li>
@@ -339,17 +341,18 @@ Nota
 <span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>brl <span class="ot">&lt;-</span> <span class="cf">function</span>(x) <span class="fu">paste0</span>(<span class="st">"R$ "</span>, <span class="fu">formatC</span>(x, <span class="at">format =</span> <span class="st">"f"</span>, <span class="at">digits =</span> <span class="dv">0</span>,</span>
 <span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>                                         <span class="at">big.mark =</span> <span class="st">"."</span>, <span class="at">decimal.mark =</span> <span class="st">","</span>))</span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>dados_aluguel <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">"data/sao-paulo-properties-april-2019.csv"</span>) <span class="sc">|&gt;</span> </span>
-<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">clean_names</span>() <span class="sc">|&gt;</span> </span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(negotiation_type <span class="sc">==</span> <span class="st">"rent"</span>,</span>
-<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>         longitude <span class="sc">&lt;=</span> <span class="sc">-</span><span class="fl">46.36531</span>, longitude <span class="sc">&gt;=</span> <span class="sc">-</span><span class="fl">46.82619</span>,</span>
-<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>         latitude <span class="sc">&lt;=</span> <span class="sc">-</span><span class="fl">23.35629</span>, latitude <span class="sc">&gt;=</span> <span class="sc">-</span><span class="fl">24.00826</span>) <span class="sc">|&gt;</span> </span>
-<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">distrito =</span> <span class="fu">factor</span>(<span class="fu">str_squish</span>(<span class="fu">str_remove</span>(district, <span class="st">"/.*$"</span>))),</span>
-<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>         <span class="at">dist_centro_km =</span> <span class="fu">distancia_centro</span>(latitude, longitude),</span>
-<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>         <span class="at">condo_m2 =</span> condo <span class="sc">/</span> <span class="fu">pmax</span>(size, <span class="dv">1</span>),</span>
-<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>         <span class="at">preco_log =</span> <span class="fu">log</span>(price)) <span class="sc">|&gt;</span> </span>
-<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>negotiation_type, <span class="sc">-</span>property_type, <span class="sc">-</span>district)</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>dec <span class="ot">&lt;-</span> <span class="cf">function</span>(x, <span class="at">d =</span> <span class="dv">1</span>) <span class="fu">formatC</span>(x, <span class="at">format =</span> <span class="st">"f"</span>, <span class="at">digits =</span> d, <span class="at">big.mark =</span> <span class="st">"."</span>, <span class="at">decimal.mark =</span> <span class="st">","</span>)</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>dados_aluguel <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">"data/sao-paulo-properties-april-2019.csv"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">clean_names</span>() <span class="sc">|&gt;</span> </span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(negotiation_type <span class="sc">==</span> <span class="st">"rent"</span>,</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>         longitude <span class="sc">&lt;=</span> <span class="sc">-</span><span class="fl">46.36531</span>, longitude <span class="sc">&gt;=</span> <span class="sc">-</span><span class="fl">46.82619</span>,</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>         latitude <span class="sc">&lt;=</span> <span class="sc">-</span><span class="fl">23.35629</span>, latitude <span class="sc">&gt;=</span> <span class="sc">-</span><span class="fl">24.00826</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">distrito =</span> <span class="fu">factor</span>(<span class="fu">str_squish</span>(<span class="fu">str_remove</span>(district, <span class="st">"/.*$"</span>))),</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>         <span class="at">dist_centro_km =</span> <span class="fu">distancia_centro</span>(latitude, longitude),</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>         <span class="at">condo_m2 =</span> condo <span class="sc">/</span> <span class="fu">pmax</span>(size, <span class="dv">1</span>),</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>         <span class="at">preco_log =</span> <span class="fu">log</span>(price)) <span class="sc">|&gt;</span> </span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>negotiation_type, <span class="sc">-</span>property_type, <span class="sc">-</span>district)</span></code></pre></div><button title="Copiar para a área de transferência" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
 <section id="divisão-dos-dados-e-validação-cruzada" class="level2" data-number="4.2">
@@ -522,7 +525,7 @@ Nota
 </table>
 </div>
 </div>
-<p>O erro absoluto médio (MAE) passou de R$ 696 para R$ 622, e o erro percentual mediano, de 14.7% para 13.2%. O erro percentual mediano é uma medida direta para o negócio: em metade dos imóveis, a sugestão erra menos do que esse percentual do aluguel real.</p>
+<p>O erro absoluto médio (MAE) passou de R$ 696 para R$ 622, e o erro percentual mediano, de 14,7% para 13,2%. O erro percentual mediano é uma medida direta para o negócio: em metade dos imóveis, a sugestão erra menos do que esse percentual do aluguel real.</p>
 </section>
 <section id="sugerindo-o-aluguel-de-um-novo-imóvel" class="level2" data-number="4.6">
 <h2 data-number="4.6" class="anchored" data-anchor-id="sugerindo-o-aluguel-de-um-novo-imóvel"><span class="header-section-number">4.6</span> Sugerindo o aluguel de um novo imóvel</h2>
@@ -574,15 +577,17 @@ Nota
 </table>
 </div>
 </div>
-<p>A faixa indica que, em 80% dos imóveis da validação cruzada, o aluguel anunciado ficou entre 0.75 e 1.35 vezes o valor previsto.</p>
+<p>A faixa indica que, em 80% dos imóveis da validação cruzada, o aluguel anunciado ficou entre 0,75 e 1,35 vezes o valor previsto.</p>
 </section>
-<section id="cuidados" class="level2" data-number="4.7">
-<h2 data-number="4.7" class="anchored" data-anchor-id="cuidados"><span class="header-section-number">4.7</span> Cuidados</h2>
+<section id="limitações-e-próximos-passos" class="level2" data-number="4.7">
+<h2 data-number="4.7" class="anchored" data-anchor-id="limitações-e-próximos-passos"><span class="header-section-number">4.7</span> Limitações e próximos passos</h2>
+<p><strong>Limitações:</strong></p>
 <ul>
-<li>Os dados são de abril de 2019 e de preços <strong>anunciados</strong>. Para uso real, é preciso treinar com dados atuais e monitorar o erro ao longo do tempo.</li>
+<li>Os dados são de abril de 2019 e de preços <strong>anunciados</strong>, e não dos valores efetivamente negociados.</li>
 <li>A faixa é empírica e pressupõe que o novo imóvel se pareça com os da base. Para imóveis atípicos (muito grandes, de altíssimo padrão), o erro tende a ser maior.</li>
 <li>A sugestão deve apoiar a decisão de quem define o preço, e não substituí-la.</li>
 </ul>
+<p><strong>Próximos passos:</strong> treinar o modelo com dados atuais e, se possível, com os valores de fechamento dos contratos; monitorar o erro ao longo do tempo, comparando o valor sugerido com o aluguel efetivamente fechado; e incluir informações de vizinhança, como a distância ao metrô e a serviços, que o distrito captura apenas em parte.</p>
 
 
 </section>
