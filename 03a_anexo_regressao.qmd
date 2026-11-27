@@ -14,6 +14,10 @@ knitr::opts_chunk$set(
 
 # Um modelo otimizado para sugerir o aluguel
 
+O capítulo anterior mostrou que é possível estimar o aluguel de um apartamento a partir das suas características, mas com um erro típico ainda relevante para fixar um preço. Este anexo é para quem quer levar aquele modelo a um uso real, como a **sugestão de preço** na hora em que um proprietário cadastra um imóvel em uma plataforma de anúncios. Para essa decisão, não basta um valor: a plataforma precisa sugerir um **preço e uma faixa** em que o aluguel provavelmente vai ficar, com o menor erro possível.
+
+O anexo é mais técnico que os capítulos e pode ser pulado por quem tem interesse apenas na aplicação: o resultado principal está na seção de avaliação no conjunto de teste e na função que sugere o aluguel de um novo imóvel.
+
 No capítulo anterior, a floresta aleatória usou apenas latitude e longitude para representar a localização, parâmetros padrão e o preço na escala original. Este anexo implementa os "próximos passos" daquele capítulo para chegar a um modelo mais próximo do que seria usado em produção:
 
 1. **Distrito** como variável, agrupando os distritos pequenos e codificando cada um pelo seu nível de preço.
@@ -208,8 +212,12 @@ sugerir_aluguel(novo_imovel) |>
 
 A faixa indica que, em 80% dos imóveis da validação cruzada, o aluguel anunciado ficou entre `r round(faixa[[1]], 2)` e `r round(faixa[[2]], 2)` vezes o valor previsto.
 
-## Cuidados
+## Limitações e próximos passos
 
-* Os dados são de abril de 2019 e de preços **anunciados**. Para uso real, é preciso treinar com dados atuais e monitorar o erro ao longo do tempo.
+**Limitações:**
+
+* Os dados são de abril de 2019 e de preços **anunciados**, e não dos valores efetivamente negociados.
 * A faixa é empírica e pressupõe que o novo imóvel se pareça com os da base. Para imóveis atípicos (muito grandes, de altíssimo padrão), o erro tende a ser maior.
 * A sugestão deve apoiar a decisão de quem define o preço, e não substituí-la.
+
+**Próximos passos:** treinar o modelo com dados atuais e, se possível, com os valores de fechamento dos contratos; monitorar o erro ao longo do tempo, comparando o valor sugerido com o aluguel efetivamente fechado; e incluir informações de vizinhança, como a distância ao metrô e a serviços, que o distrito captura apenas em parte.

@@ -313,8 +313,6 @@ Isso muda a leitura comercial: as regras de confiança mais baixa são, aqui, ma
 
 ## Uso prático das regras
 
-## Uso prático das regras
-
 A última etapa do CRISP-DM é a **implantação**. Algumas formas de transformar as regras em ação:
 
 - **Exposição e layout:** usar regras de antecedente curto (1 ou 2 itens) para posicionar produtos próximos ou montar kits.
