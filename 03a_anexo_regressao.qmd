@@ -46,6 +46,7 @@ distancia_centro <- function(lat, lon, lat0 = -23.5505, lon0 = -46.6333) {
 
 brl <- function(x) paste0("R$ ", formatC(x, format = "f", digits = 0,
                                          big.mark = ".", decimal.mark = ","))
+dec <- function(x, d = 1) formatC(x, format = "f", digits = d, big.mark = ".", decimal.mark = ",")
 
 dados_aluguel <- read_csv("data/sao-paulo-properties-april-2019.csv") |> 
   clean_names() |> 
@@ -172,7 +173,7 @@ comparacao <- bind_rows(
 knitr::kable(comparacao, digits = 1)
 ```
 
-O erro absoluto médio (MAE) passou de `r brl(comparacao$MAE[1])` para `r brl(comparacao$MAE[2])`, e o erro percentual mediano, de `r round(comparacao$"Erro % mediano"[1], 1)`% para `r round(comparacao$"Erro % mediano"[2], 1)`%. O erro percentual mediano é uma medida direta para o negócio: em metade dos imóveis, a sugestão erra menos do que esse percentual do aluguel real.
+O erro absoluto médio (MAE) passou de `r brl(comparacao$MAE[1])` para `r brl(comparacao$MAE[2])`, e o erro percentual mediano, de `r dec(comparacao$"Erro % mediano"[1])`% para `r dec(comparacao$"Erro % mediano"[2])`%. O erro percentual mediano é uma medida direta para o negócio: em metade dos imóveis, a sugestão erra menos do que esse percentual do aluguel real.
 
 ## Sugerindo o aluguel de um novo imóvel
 
@@ -210,7 +211,7 @@ sugerir_aluguel(novo_imovel) |>
   knitr::kable()
 ```
 
-A faixa indica que, em 80% dos imóveis da validação cruzada, o aluguel anunciado ficou entre `r round(faixa[[1]], 2)` e `r round(faixa[[2]], 2)` vezes o valor previsto.
+A faixa indica que, em 80% dos imóveis da validação cruzada, o aluguel anunciado ficou entre `r dec(faixa[[1]], 2)` e `r dec(faixa[[2]], 2)` vezes o valor previsto.
 
 ## Limitações e próximos passos
 
