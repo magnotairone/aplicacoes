@@ -59,7 +59,7 @@ Antes desses dois blocos, o livro começa pela análise descritiva, base de qual
 
 ### Aprendizado não supervisionado
 
-- [**Consumo de bebidas alcoólicas no mundo**](04_cluster_538.qmd) (agrupamento, em R). Com dados da Organização Mundial da Saúde sobre o consumo de cerveja, vinho e destilados em cerca de 190 países, o algoritmo k-médias forma grupos de países com hábitos parecidos. O capítulo discute como escolher o número de grupos (método do cotovelo e coeficiente de silhouette) e mostra o resultado em um mapa-múndi.
+- [**Segmentação de mercados de bebidas no mundo**](04_cluster_538.qmd) (agrupamento, em R). Uma multinacional de bebidas quer organizar sua estratégia internacional em poucos grupos de países. Com dados da Organização Mundial da Saúde sobre o consumo de cerveja, vinho e destilados em cerca de 190 países, o capítulo apresenta o algoritmo k-médias e mostra que a escolha das variáveis é uma decisão de negócio: agrupar pelo volume consumido indica onde o hábito é forte, e agrupar pelo mix de bebidas indica o que vender. Dados de população e renda do Banco Mundial completam a análise com o tamanho de cada mercado.
 - [**Segmentação de clientes de um mercado**](05_cluster_pda.qmd) (agrupamento, em Python). Um gestor de marketing quer parar de tratar todos os clientes da mesma forma. A partir de dados de perfil, de crédito e de comportamento de compra, o k-médias identifica segmentos como clientes de alto valor e clientes pouco ativos, estima quanto vale cada grupo e discute a diferença entre o número de grupos sugerido pela estatística e o mais útil para o negócio.
 - [**Venda cruzada em supermercado**](06_groceries.qmd) (regras de associação, em R). Um gerente de categoria precisa decidir quais produtos colocar em promoção conjunta ou lado a lado na gôndola. O algoritmo *apriori* encontra regras do tipo "quem compra X também compra Y", e o capítulo mostra como separar, entre milhares de regras, as que têm evidência suficiente e alcance comercial relevante.
 
@@ -73,7 +73,7 @@ Antes desses dois blocos, o livro começa pela análise descritiva, base de qual
 | Manutenção preditiva | Supervisionado | Classificação | Python |
 | Aluguel de apartamentos | Supervisionado | Regressão | R |
 | Modelo otimizado de aluguel | Supervisionado | Regressão | R |
-| Consumo de bebidas alcoólicas | Não supervisionado | Agrupamento | R |
+| Mercados de bebidas | Não supervisionado | Agrupamento | R |
 | Clientes de um mercado | Não supervisionado | Agrupamento | Python |
 | Venda cruzada | Não supervisionado | Regras de associação | R |
 | Assistente para documentos | Modelos de linguagem | RAG | Python |
