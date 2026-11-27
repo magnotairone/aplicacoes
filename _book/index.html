@@ -259,7 +259,13 @@ div.csl-indent {
   <li><a href="#introdução" id="toc-introdução" class="nav-link active" data-scroll-target="#introdução">Introdução</a>
   <ul class="collapse">
   <li><a href="#o-processo-que-guia-as-análises-crisp-dm" id="toc-o-processo-que-guia-as-análises-crisp-dm" class="nav-link" data-scroll-target="#o-processo-que-guia-as-análises-crisp-dm">O processo que guia as análises: CRISP-DM</a></li>
-  <li><a href="#o-que-você-vai-encontrar" id="toc-o-que-você-vai-encontrar" class="nav-link" data-scroll-target="#o-que-você-vai-encontrar">O que você vai encontrar</a></li>
+  <li><a href="#o-que-você-vai-encontrar" id="toc-o-que-você-vai-encontrar" class="nav-link" data-scroll-target="#o-que-você-vai-encontrar">O que você vai encontrar</a>
+  <ul class="collapse">
+  <li><a href="#ponto-de-partida" id="toc-ponto-de-partida" class="nav-link" data-scroll-target="#ponto-de-partida">Ponto de partida</a></li>
+  <li><a href="#aprendizado-supervisionado" id="toc-aprendizado-supervisionado" class="nav-link" data-scroll-target="#aprendizado-supervisionado">Aprendizado supervisionado</a></li>
+  <li><a href="#aprendizado-não-supervisionado" id="toc-aprendizado-não-supervisionado" class="nav-link" data-scroll-target="#aprendizado-não-supervisionado">Aprendizado não supervisionado</a></li>
+  <li><a href="#modelos-de-linguagem" id="toc-modelos-de-linguagem" class="nav-link" data-scroll-target="#modelos-de-linguagem">Modelos de linguagem</a></li>
+  </ul></li>
   <li><a href="#código-em-r-e-em-python" id="toc-código-em-r-e-em-python" class="nav-link" data-scroll-target="#código-em-r-e-em-python">Código em R e em Python</a></li>
   <li><a href="#sec-dados" id="toc-sec-dados" class="nav-link" data-scroll-target="#sec-dados">Dados e códigos</a></li>
   </ul></li>
@@ -307,7 +313,7 @@ div.csl-indent {
 <p>Este livro apresenta aplicações práticas de ciência de dados inspiradas em casos reais, vistas sob a ótica de negócios. Em cada capítulo, partimos de um problema que uma empresa poderia enfrentar (prever a falha de uma máquina, precificar um imóvel, entender o perfil dos clientes, definir ações de venda cruzada) e mostramos, passo a passo, como os dados podem ajudar a resolvê-lo.</p>
 <p>O foco não está em apresentar uma técnica isolada, mas em mostrar <strong>como ela se encaixa em um projeto de ponta a ponta</strong>: da pergunta de negócio até o uso prático dos resultados.</p>
 <p>Não é preciso saber programar para acompanhar o livro. Os capítulos trazem trechos de código em R e em Python, que reproduzem cada etapa das análises. Esses trechos são <strong>totalmente opcionais</strong>: o texto explica cada passo e interpreta cada resultado, de modo que o livro pode ser lido do começo ao fim sem nenhum conhecimento de linguagens de programação. Quem quiser reproduzir ou adaptar as análises encontra o código completo junto ao texto.</p>
-<p>[Última atualização: <span id="data-atualizacao">25/11/2026</span>.]</p>
+<p>[Última atualização: <span id="data-atualizacao">27/11/2026</span>.]</p>
 <section id="o-processo-que-guia-as-análises-crisp-dm" class="level2">
 <h2 class="anchored" data-anchor-id="o-processo-que-guia-as-análises-crisp-dm">O processo que guia as análises: CRISP-DM</h2>
 <p>Projetos de ciência de dados bem-sucedidos raramente começam pelo algoritmo. Para organizar o trabalho, usamos ao longo do livro o <strong>CRISP-DM</strong> (<em>Cross-Industry Standard Process for Data Mining</em>), um processo criado no fim da década de 1990 por um consórcio de empresas e instituições europeias e que se tornou um dos referenciais mais usados em projetos de análise de dados <span class="citation" data-cites="chapman2000crispdm wirth2000crispdm">(<a href="references.html#ref-chapman2000crispdm" role="doc-biblioref">Chapman et al. 2000</a>; <a href="references.html#ref-wirth2000crispdm" role="doc-biblioref">Wirth e Hipp 2000</a>)</span>. Ele é neutro em relação a setor, ferramenta e técnica, o que o torna adequado para casos tão distintos quanto os deste livro.</p>
@@ -348,14 +354,109 @@ Figura&nbsp;1: Fases do processo CRISP-DM. Fonte: Kenneth Jensen, via Wikimedia 
 <section id="o-que-você-vai-encontrar" class="level2">
 <h2 class="anchored" data-anchor-id="o-que-você-vai-encontrar">O que você vai encontrar</h2>
 <p>Os capítulos são estudos de caso <strong>inspirados em situações reais</strong>. Eles usam bases de dados públicas ou simuladas, e cada capítulo indica a origem dos dados e suas limitações. Os resultados, portanto, ilustram o uso das técnicas e não devem ser tomados como conclusões sobre os mercados ou setores retratados.</p>
-<!-- | Capítulo | Tema | Tipo de análise | Linguagem | -->
-<!-- |:--|:--|:--|:--| -->
-<!-- | 1 | Atrasos em voos | Análise descritiva | R | -->
-<!-- | 2 | Manutenção preditiva | Classificação | Python | -->
-<!-- | 3 | Aluguel de apartamentos | Regressão | R | -->
-<!-- | 4 | Consumo de bebidas alcoólicas | Agrupamento | R | -->
-<!-- | 5 | Clientes de um mercado | Agrupamento | Python | -->
-<!-- | 6 | Estratégias de cross-selling | Regras de associação | R | -->
+<p>A maior parte dos casos usa técnicas de <strong>aprendizado de máquina</strong>, que costumam ser divididas em dois grandes grupos, conforme o tipo de pergunta que se quer responder.</p>
+<ul>
+<li>No <strong>aprendizado supervisionado</strong>, existe uma variável que queremos prever (a falha de uma máquina, o valor de um aluguel) e um histórico em que essa variável já é conhecida. O modelo aprende com esses exemplos e depois é usado para prever casos novos. Como a resposta certa é conhecida no histórico, é possível medir com precisão quanto o modelo erra.</li>
+<li>No <strong>aprendizado não supervisionado</strong>, não há uma resposta a prever. O objetivo é descobrir estrutura nos próprios dados, como grupos de clientes parecidos entre si ou produtos que costumam ser comprados juntos. Sem um gabarito, a qualidade do resultado é julgada sobretudo pela sua coerência e pela sua utilidade para o negócio.</li>
+</ul>
+<p>Antes desses dois blocos, o livro começa pela análise descritiva, base de qualquer projeto, e termina com um caso de modelos de linguagem, que combina várias dessas ideias.</p>
+<section id="ponto-de-partida" class="level3">
+<h3 class="anchored" data-anchor-id="ponto-de-partida">Ponto de partida</h3>
+<ul>
+<li><a href="./01_analise_descritiva.html"><strong>Atrasos em voos</strong></a> (análise descritiva, em R). Com dados dos voos que partiram de Nova York em 2013, o capítulo apresenta os tipos de variáveis, as medidas de posição e de dispersão e os principais gráficos, e depois os usa para responder perguntas de negócio, como quais rotas e companhias concentram os maiores atrasos e qual o papel das condições meteorológicas.</li>
+</ul>
+</section>
+<section id="aprendizado-supervisionado" class="level3">
+<h3 class="anchored" data-anchor-id="aprendizado-supervisionado">Aprendizado supervisionado</h3>
+<ul>
+<li><a href="./02_classificacao_manutencao_preventiva.html"><strong>Manutenção preditiva</strong></a> (classificação, em Python). Uma indústria quer saber quais equipamentos inspecionar antes que quebrem. A partir de sensores como temperatura, rotação, torque e desgaste da ferramenta, modelos de classificação estimam a probabilidade de falha. Como uma quebra custa muito mais do que uma inspeção, o capítulo transforma essa probabilidade em uma regra de decisão, escolhendo o limiar que minimiza o custo total.</li>
+<li><a href="./03_regressao.html"><strong>Aluguel de apartamentos em São Paulo</strong></a> (regressão, em R). Uma imobiliária precisa sugerir o valor do aluguel de um imóvel recém-anunciado. Com cerca de 13,6 mil anúncios, o capítulo compara regressão linear, árvore de decisão e floresta aleatória, mede o erro de previsão em dados nunca vistos pelo modelo e mostra quais características (metragem, condomínio, localização) mais pesam no preço.</li>
+<li><a href="./03a_anexo_regressao.html"><strong>Um modelo otimizado para sugerir o aluguel</strong></a> (regressão, em R). Um anexo ao caso anterior que leva o modelo para mais perto do uso em produção: inclui o bairro como variável, modela o logaritmo do preço, ajusta hiperparâmetros por validação cruzada comparando floresta aleatória e XGBoost e termina com uma função que sugere uma faixa de aluguel para um imóvel novo.</li>
+</ul>
+</section>
+<section id="aprendizado-não-supervisionado" class="level3">
+<h3 class="anchored" data-anchor-id="aprendizado-não-supervisionado">Aprendizado não supervisionado</h3>
+<ul>
+<li><a href="./04_cluster_538.html"><strong>Consumo de bebidas alcoólicas no mundo</strong></a> (agrupamento, em R). Com dados da Organização Mundial da Saúde sobre o consumo de cerveja, vinho e destilados em cerca de 190 países, o algoritmo k-médias forma grupos de países com hábitos parecidos. O capítulo discute como escolher o número de grupos (método do cotovelo e coeficiente de silhouette) e mostra o resultado em um mapa-múndi.</li>
+<li><a href="./05_cluster_pda.html"><strong>Segmentação de clientes de um mercado</strong></a> (agrupamento, em Python). Um gestor de marketing quer parar de tratar todos os clientes da mesma forma. A partir de dados de perfil, de crédito e de comportamento de compra, o k-médias identifica segmentos como clientes de alto valor e clientes pouco ativos, estima quanto vale cada grupo e discute a diferença entre o número de grupos sugerido pela estatística e o mais útil para o negócio.</li>
+<li><a href="./06_groceries.html"><strong>Venda cruzada em supermercado</strong></a> (regras de associação, em R). Um gerente de categoria precisa decidir quais produtos colocar em promoção conjunta ou lado a lado na gôndola. O algoritmo <em>apriori</em> encontra regras do tipo “quem compra X também compra Y”, e o capítulo mostra como separar, entre milhares de regras, as que têm evidência suficiente e alcance comercial relevante.</li>
+</ul>
+</section>
+<section id="modelos-de-linguagem" class="level3">
+<h3 class="anchored" data-anchor-id="modelos-de-linguagem">Modelos de linguagem</h3>
+<ul>
+<li><a href="./07_rag.html"><strong>Conversando com seus documentos</strong></a> (RAG, em Python). Um assistente que responde perguntas com base em um documento e indica a página de onde tirou cada informação. O capítulo explica, com exemplos pequenos, a tokenização e os embeddings, constrói o assistente com a técnica de geração aumentada por recuperação (RAG) sobre o manual de um pacote de gráficos e avalia a taxa de acerto da busca e a qualidade das respostas, além de discutir custos e segurança. Ele não se encaixa bem na divisão anterior: os modelos de linguagem são treinados em enormes volumes de texto sem rótulos, mas aqui são usados para responder perguntas sobre um conteúdo específico.</li>
+</ul>
+<div id="tbl-casos" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-casos-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Tabela&nbsp;1: Resumo dos estudos de caso do livro.
+</figcaption>
+<div aria-describedby="tbl-casos-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th style="text-align: left;">Caso</th>
+<th style="text-align: left;">Tipo de aprendizado</th>
+<th style="text-align: left;">Técnica</th>
+<th style="text-align: left;">Linguagem</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Atrasos em voos</td>
+<td style="text-align: left;">—</td>
+<td style="text-align: left;">Análise descritiva</td>
+<td style="text-align: left;">R</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Manutenção preditiva</td>
+<td style="text-align: left;">Supervisionado</td>
+<td style="text-align: left;">Classificação</td>
+<td style="text-align: left;">Python</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Aluguel de apartamentos</td>
+<td style="text-align: left;">Supervisionado</td>
+<td style="text-align: left;">Regressão</td>
+<td style="text-align: left;">R</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Modelo otimizado de aluguel</td>
+<td style="text-align: left;">Supervisionado</td>
+<td style="text-align: left;">Regressão</td>
+<td style="text-align: left;">R</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Consumo de bebidas alcoólicas</td>
+<td style="text-align: left;">Não supervisionado</td>
+<td style="text-align: left;">Agrupamento</td>
+<td style="text-align: left;">R</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Clientes de um mercado</td>
+<td style="text-align: left;">Não supervisionado</td>
+<td style="text-align: left;">Agrupamento</td>
+<td style="text-align: left;">Python</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Venda cruzada</td>
+<td style="text-align: left;">Não supervisionado</td>
+<td style="text-align: left;">Regras de associação</td>
+<td style="text-align: left;">R</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Assistente para documentos</td>
+<td style="text-align: left;">Modelos de linguagem</td>
+<td style="text-align: left;">RAG</td>
+<td style="text-align: left;">Python</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+</section>
 </section>
 <section id="código-em-r-e-em-python" class="level2">
 <h2 class="anchored" data-anchor-id="código-em-r-e-em-python">Código em R e em Python</h2>
