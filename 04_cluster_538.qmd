@@ -151,7 +151,7 @@ As três bebidas são positivamente correlacionadas (países que bebem mais de u
 
 Por fim, `r n_zero` países têm consumo zero nas três bebidas, e `r n_baixo` consomem menos de 20 porções por pessoa por ano (menos de duas por mês).
 
-## Como o k-médias funciona
+## Como o k-médias funciona {#sec-kmeans}
 
 O k-médias divide as observações (aqui, países) em $k$ grupos, de forma que os países de um mesmo grupo sejam parecidos entre si e diferentes dos países dos outros grupos. O número $k$ é escolhido por quem faz a análise.
 
@@ -164,13 +164,13 @@ O algoritmo é simples:
 
 O resultado depende do sorteio inicial. Por isso, o algoritmo é rodado várias vezes com sorteios diferentes (argumento `nstart`) e fica com a melhor solução, a que tem a menor **soma de quadrados dentro dos grupos**: a soma das distâncias ao quadrado entre cada país e o centroide do seu grupo. Quanto menor essa soma, mais compactos são os grupos.
 
-### Por que padronizar
+### Por que padronizar {#sec-padronizar}
 
 Como o algoritmo usa distâncias, uma variável com valores maiores ou mais espalhados pesa mais no resultado. Se uma variável estivesse em reais e outra em milhares de reais, a primeira dominaria o agrupamento apenas por causa da unidade. A **padronização** (subtrair a média e dividir pelo desvio padrão) coloca todas as variáveis na mesma escala.
 
 Aqui as três bebidas estão na mesma unidade (porções), mas com dispersões diferentes. Padronizamos mesmo assim, para que cada bebida tenha o mesmo peso na definição dos grupos.
 
-### Como escolher $k$
+### Como escolher $k$ {#sec-escolha-k}
 
 Não existe um $k$ "correto". Dois critérios ajudam na escolha:
 
