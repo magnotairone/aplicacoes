@@ -1,560 +1,594 @@
 ---
 output: html_document
-editor_options: 
+editor_options:
   chunk_output_type: console
 ---
 
 ```{r include=FALSE}
-
 knitr::opts_chunk$set(
   warning = FALSE,
   message = FALSE,
   echo = TRUE
 )
-```
 
-# Consumo de bebidas alcoólicas em diversos países
-
-Neste relatório, vamos explorar um conjunto de dados sobre o consumo de bebidas alcoólicas em diversos países. Vamos utilizar técnicas de análise de dados e aprendizado de máquina para entender padrões de consumo e identificar grupos de países com comportamentos similares.
-
-A fonte dos dados é a página [FiveThirtyEight](https://fivethirtyeight.com/features/dear-mona-followup-where-do-people-drink-the-most-beer-wine-and-spirits/) e os dados podem ser baixados [neste repositório](https://github.com/fivethirtyeight/data/tree/master/alcohol-consumption), no arquivo `drinks.csv`.
-
-Esta base de dados contém informações sobre o consumo de álcool em diferentes países, com as seguintes colunas: "country" (país), "beer_servings" (porções de cerveja), "spirit_servings" (porções de destilados), "wine_servings" (porções de vinho) e "total_litres_of_pure_alcohol" (total de litros de álcool puro consumidos).
- Esses dados foram coletados pela Organização Mundial da Saúde (OMS) e fornecem uma visão abrangente dos hábitos de consumo de álcool em todo o mundo. As informações incluem a média de consumo de álcool por pessoa em cada país, desagregada por tipo de bebida alcoólica, como vinho, cerveja, destilados e outras. Esses dados são apresentados em litros de álcool puro consumidos em 2010, mas foram convertidos em unidades mais compreensíveis, como taças de vinho, latas de cerveja e doses de destilados por pessoa em cada país.
-
-## Pacotes Utilizados
-
-Vamos começar carregando as bibliotecas necessárias para realizar as análises.
-Ao lado de cada pacote, há um comentário sobre a utilidade de cada um deles nesta análise.
-
-```{r pacotes, message=FALSE, warning=FALSE}
-library(tidyverse) # Conjunto de pacotes para manipulação e visualização de dados
-library(GGally) # Visualização de dados de maneira eficiente.
-library(factoextra) # Análise e visualização de resultados de métodos de clustering
-library(ggrepel) # Adicionar rótulos em gráficos sem sobreposição
-library(plotly) # Gráficos interativos
-library(cluster) # Análise de clusters
-```
-
-## Carregando e Preparando os Dados
-
-```{r results='hide', message=FALSE, warning=FALSE}
-# Leitura e mudança de tipo da variável total_litres_of_pure_alcohol
-dados <- read_csv2("data/drinks.csv") |> 
-   mutate(total_litres_of_pure_alcohol = as.numeric(total_litres_of_pure_alcohol))
-
-# Renomeando colunas
-dados <- dados |> 
-  rename(beer = beer_servings, 
-         spirit = spirit_servings, 
-         wine = wine_servings, 
-         total_litres_alcohol = total_litres_of_pure_alcohol)
- 
-# Primeiras linhas dos dados
-dados |> 
-  slice_head(n = 5)
-```
-
-```{r echo=FALSE}
+library(tidyverse)
+library(cluster)      # silhouette
+library(ggrepel)      # rótulos sem sobreposição
+library(countrycode)  # nomes de países -> códigos ISO
+library(maps)         # contornos do mapa-múndi
 library(kableExtra)
-if (knitr::is_html_output()){
-  dados |> 
-    slice_head(n = 5) |> 
-    kable("html")
-} else {
-  dados |> 
-    slice_head(n = 5) |> 
-    kable("latex")
-}
+
 theme_set(theme_bw())
-```
 
-## Análise Exploratória
-
-Vamos realizar uma análise exploratória inicial para entender a distribuição das variáveis e identificar possíveis padrões nos dados.
-Primeiramente, avaliando a relação entre as variáveis numéricas.
-
-```{r}
-dados |> 
-  select(-country) |> 
-  ggpairs()
-```
-
-No caso desses dados sobre consumo de bebidas alcoólicas em diferentes países, observamos que as porções de cerveja estão fortemente correlacionadas com o total de litros de álcool puro consumidos (correlação de 0.84)., o que sugere que o consumo de cerveja é um grande contribuinte para o consumo geral de álcool. Além disso, há uma correlação moderada entre porções de cerveja e porções de vinho (0.53), bem como entre porções de vinho e o total de litros de álcool puro (0.67), indicando que o consumo de vinho também está significativamente associado ao consumo geral de álcool. Por outro lado, as porções de destilados têm uma correlação mais fraca com as outras variáveis, sugerindo que o consumo de destilados pode ser menos influente no total de álcool consumido em comparação com cerveja e vinho.
-
-<!-- ### Principais Países por Consumo de Bebidas Alcoólicas -->
-
-Agora, vamos identificar os principais países em termos de consumo de diferentes tipos de bebidas alcoólicas.
-
-**Maiores Consumidores de Vinho**
-
-```{r eval=FALSE}
-dados |> 
-  select(country, wine) |> 
-  arrange(desc(wine)) |> 
-  slice_head(n = 5)
-```
-
-```{r wine_table, echo=FALSE}
-if (knitr::is_html_output()){
-  dados |> 
-    select(country, wine) |> 
-    arrange(desc(wine)) |> 
-    slice_head(n = 5) |> 
-    kable("html")
-} else {
-  dados |> 
-    select(country, wine) |> 
-    arrange(desc(wine)) |> 
-    slice_head(n = 5) |> 
-    kable("latex")
+# tabelas no mesmo padrão dos demais capítulos
+tabela <- function(df, caption = NULL, rolagem = FALSE, align = NULL) {
+  tab <- knitr::kable(df, "html", caption = caption, row.names = FALSE, align = align,
+                      format.args = list(big.mark = ".", decimal.mark = ",")) |>
+    kable_styling(bootstrap_options = c("striped", "hover", "condensed"),
+                  full_width = FALSE)
+  if (rolagem) tab <- scroll_box(tab, width = "100%")
+  tab
 }
+
+# números citados no texto
+fmt_int <- function(x) format(round(x), big.mark = ".", decimal.mark = ",", scientific = FALSE)
+fmt_dec <- function(x, d = 1) formatC(x, format = "f", digits = d, big.mark = ".", decimal.mark = ",")
+pct <- function(x, d = 1) paste0(fmt_dec(100 * x, d), "%")
 ```
 
-**Maiores Consumidores de Cerveja**
+# Segmentação de mercados de bebidas no mundo
 
-```{r eval=FALSE}
-dados |> 
-  select(country, beer) |> 
-  arrange(desc(beer)) |> 
-  slice_head(n = 5)
-```
+Uma multinacional de bebidas atua em dezenas de países, com três linhas de produto: **cerveja**, **vinho** e **destilados**. Definir uma estratégia diferente para cada país é caro e difícil de coordenar, e tratar todos os países da mesma forma ignora diferenças enormes de hábito. A saída comum é organizar os países em poucos **grupos de mercado**, cada um com um portfólio prioritário e uma postura própria (defender, crescer, entrar ou não priorizar).
 
-```{r echo=FALSE}
-if (knitr::is_html_output()){
-  dados |> 
-    select(country, beer) |> 
-    arrange(desc(beer)) |> 
-    slice_head(n = 5) |> 
-    kable("html")
-  
-} else {
-  dados |> 
-    select(country, beer) |> 
-    arrange(desc(beer)) |> 
-    slice_head(n = 5) |> 
-    kable("latex")
-}
-```
+Três perguntas guiam a análise:
 
-**Maiores Consumidores de Bebidas Destiladas**
+1. **Onde:** em quais países o hábito de consumo de bebidas alcoólicas é mais forte?
+2. **O quê:** em cada grupo de países, qual linha de produto deve liderar?
+3. **Quanto vale:** qual é o tamanho de cada grupo de mercados, e por onde começar?
 
-```{r eval=FALSE}
-dados |> 
-  select(country, spirit) |> 
-  arrange(desc(spirit)) |> 
-  slice_head(n = 5)
-```
+Para responder às duas primeiras, usamos o **k-médias** (*k-means*), o algoritmo de agrupamento mais usado na prática. Este capítulo apresenta a técnica em detalhes, com uma base pequena em que é possível ver o que o algoritmo faz. O capítulo seguinte aplica a mesma técnica a uma base de clientes, com mais variáveis e foco na implantação. Para a terceira pergunta, **enriquecemos** a base com dados externos de população e renda.
 
-```{r echo=FALSE}
-if (knitr::is_html_output()){
-  dados |> 
-    select(country, spirit) |> 
-    arrange(desc(spirit)) |> 
-    slice_head(n = 5) |> 
-    kable("html")
-  
-} else {
-  dados |> 
-    select(country, spirit) |> 
-    arrange(desc(spirit)) |> 
-    slice_head(n = 5) |> 
-    kable("latex")
-}
-```
+Seguimos as etapas do CRISP-DM apresentadas na introdução do livro. Todo o trabalho é feito em **R**.
 
-## Padronização dos Dados
+| Etapa do CRISP-DM | Onde aparece no capítulo |
+|---|---|
+| Entendimento do negócio | Esta introdução: as decisões da multinacional |
+| Entendimento dos dados | Dados e análise exploratória |
+| Preparação dos dados | Padronização (volume), cálculo das participações (mix) e enriquecimento com dados do Banco Mundial |
+| Modelagem | Como o k-médias funciona; segmentações por volume e por mix |
+| Avaliação | Cotovelo, silhouette, perfil dos grupos e comparação das duas segmentações |
+| Implantação | Quanto vale cada grupo, mapa e uso prático |
 
-Vamos padronizar as variáveis para realizar a análise de clusters. A padronização é importante porque os métodos de clustering, como o k-means, são baseados em medidas de distância entre os pontos de dados. Se as variáveis tiverem escalas diferentes, aquelas com variações maiores dominarão a análise, distorcendo os resultados. Normalizar os dados garantirá que todas as variáveis contribuam igualmente para a análise de cluster, resultando em agrupamentos mais corretos.
+## Dados
 
-```{r}
-dados_pad <- dados |> 
-  select(-country) |> 
-  scale()
-```
+A base vem de uma reportagem do site [FiveThirtyEight](https://fivethirtyeight.com/features/dear-mona-followup-where-do-people-drink-the-most-beer-wine-and-spirits/), com dados da Organização Mundial da Saúde (OMS) de 2010, e pode ser baixada [neste repositório](https://github.com/fivethirtyeight/data/tree/master/alcohol-consumption). Para cada país, ela traz:
 
-### Análise de Cluster
+- `cerveja`, `destilados` e `vinho`: consumo médio anual por pessoa, em **porções** (uma lata de cerveja, uma dose de destilado ou uma taça de vinho);
+- `litros_alcool`: consumo médio anual por pessoa, em **litros de álcool puro**, somando todas as bebidas.
 
-Agora, vamos utilizar o algoritmo K-means para agrupar os países em clusters com base no consumo de bebidas alcoólicas.
+Os valores são médias por pessoa de 15 anos ou mais.
 
-```{r}
-set.seed(1)
-
-# obtem o kmeans considerando 2 clusters
-k_medias <- kmeans(dados_pad, 
-                   centers = 2,
-                   nstart = 10)
-```
-
-A soma de quadrados total é mostrada abaixo.
-
-```{r}
-# total SS (soma de quadrados total)
-k_medias$totss
-```
-
-::: {.callout-tip collapse="false"}
-
-O codigo abaixo faz a conta da soma de quadrados total, porém sem usar o resultado da função `kmeans`, o valor é calculado manualmente.
-
-```{r}
-# armazena em um mesmo tibble os dados e o cluster estimado
-auxiliar <- tibble(cluster = k_medias$cluster) |> 
-  bind_cols(as_tibble(dados_pad))
-
-auxiliar |> 
-  transmute(beer = (beer - mean(beer))^2, 
-            spirit = (spirit - mean(spirit))^2, 
-            wine = (wine - mean(wine))^2,
-            total_litres_alcohol = (total_litres_alcohol -
-                                      mean(total_litres_alcohol))^2, 
-            totss = beer + spirit + wine + total_litres_alcohol) |> 
-  summarise(totss = sum(totss)) |> 
-  pull(totss)
-```
-
+::: {.callout-warning title="Dados e limitações"}
+- Os dados são de **um único ano (2010)**. Hábitos de consumo mudam devagar, mas uma decisão real exigiria dados recentes.
+- O consumo é **por pessoa**: um país pequeno com consumo alto pode ser um mercado menor do que um país populoso com consumo moderado. Por isso, mais adiante, juntamos dados de população.
+- A base não tem preço, margem, concorrência nem regulação, fatores decisivos para entrar em um mercado.
+- Em vários países o consumo é quase nulo por razões culturais, religiosas ou legais. Eles são tratados como **fora do escopo** da estratégia, e não como uma oportunidade.
 :::
 
-A soma de quadrados intra-cluster está no vetor `$withinss`, cada componente é referente à um cluster.
-
 ```{r}
-# within SS
-k_medias$withinss
+dados <- read_delim("data/drinks.csv", delim = ";", show_col_types = FALSE) |>
+  rename(pais = country,
+         cerveja = beer_servings,
+         destilados = spirit_servings,
+         vinho = wine_servings,
+         litros_alcool = total_litres_of_pure_alcohol) |>
+  mutate(litros_alcool = as.numeric(litros_alcool),
+         porcoes = cerveja + destilados + vinho)
 
-# total within SS (mesmo que k_medias$tot.withinss)
-k_medias$withinss |> 
-  sum()
+bebidas <- c("cerveja", "destilados", "vinho")
 ```
 
-::: {.callout-tip collapse="false"}
-
-O codigo abaixo faz o cálculo da soma de quadrados total intracluster (mesmo que o numero acima).
-
 ```{r}
-auxiliar |> 
-  group_by(cluster) |> 
-  transmute(beer = (beer - mean(beer))^2, 
-            spirit = (spirit - mean(spirit))^2, 
-            wine = (wine - mean(wine))^2,
-            total_litres_alcohol = (total_litres_alcohol -
-                                      mean(total_litres_alcohol))^2, 
-            withinss = beer + spirit + wine + total_litres_alcohol) |> 
-  summarise(withinss = sum(withinss))
+#| echo: false
+tabela(slice_head(dados, n = 5))
 ```
 
+```{r}
+#| include: false
+n_paises <- nrow(dados)
+n_zero <- sum(dados$porcoes == 0)
+n_baixo <- sum(dados$porcoes < 20)
+```
+
+A base tem `r n_paises` países. A coluna `porcoes` soma as três bebidas e será usada mais adiante.
+
+## Análise exploratória
+
+As três bebidas têm distribuições bem assimétricas: muitos países com consumo baixo e poucos com consumo muito alto. O vinho é o caso mais extremo, com consumo próximo de zero na maior parte dos países.
+
+```{r}
+dados |>
+  pivot_longer(all_of(bebidas), names_to = "bebida", values_to = "porcoes_ano") |>
+  ggplot(aes(porcoes_ano)) +
+  geom_histogram(bins = 25, fill = "#66c2a5", color = "white") +
+  facet_wrap(~ bebida) +
+  labs(x = "Porções por pessoa por ano", y = "Número de países")
+```
+
+Os cinco maiores consumidores de cada bebida:
+
+```{r}
+top5 <- function(bebida) {
+  dados |>
+    slice_max(.data[[bebida]], n = 5, with_ties = FALSE) |>
+    transmute(!!bebida := paste0(pais, " (", .data[[bebida]], ")"))
+}
+
+tab_top5 <- bind_cols(tibble(Posição = 1:5), map(bebidas, top5))
+```
+
+```{r}
+#| echo: false
+tabela(tab_top5)
+```
+
+E a correlação entre as variáveis:
+
+```{r}
+tab_cor <- dados |>
+  select(all_of(bebidas), litros_alcool) |>
+  cor() |>
+  round(2) |>
+  as_tibble(rownames = "Variável")
+```
+
+```{r}
+#| echo: false
+tabela(tab_cor)
+```
+
+As três bebidas são positivamente correlacionadas (países que bebem mais de uma tendem a beber mais das outras), mas longe de 1: cada uma traz informação própria. Já `litros_alcool` é, em boa parte, uma combinação das três, e por isso **não entra no agrupamento**: incluí-la contaria o mesmo consumo duas vezes. Ela volta mais adiante, para medir o tamanho de cada mercado.
+
+Por fim, `r n_zero` países têm consumo zero nas três bebidas, e `r n_baixo` consomem menos de 20 porções por pessoa por ano (menos de duas por mês).
+
+## Como o k-médias funciona
+
+O k-médias divide as observações (aqui, países) em $k$ grupos, de forma que os países de um mesmo grupo sejam parecidos entre si e diferentes dos países dos outros grupos. O número $k$ é escolhido por quem faz a análise.
+
+O algoritmo é simples:
+
+1. Sorteia $k$ pontos iniciais, os **centroides**, um para cada grupo.
+2. Atribui cada país ao centroide mais próximo (pela distância euclidiana).
+3. Recalcula cada centroide como a **média** dos países do seu grupo (daí o nome "k-médias").
+4. Repete os passos 2 e 3 até que os grupos parem de mudar.
+
+O resultado depende do sorteio inicial. Por isso, o algoritmo é rodado várias vezes com sorteios diferentes (argumento `nstart`) e fica com a melhor solução, a que tem a menor **soma de quadrados dentro dos grupos**: a soma das distâncias ao quadrado entre cada país e o centroide do seu grupo. Quanto menor essa soma, mais compactos são os grupos.
+
+### Por que padronizar
+
+Como o algoritmo usa distâncias, uma variável com valores maiores ou mais espalhados pesa mais no resultado. Se uma variável estivesse em reais e outra em milhares de reais, a primeira dominaria o agrupamento apenas por causa da unidade. A **padronização** (subtrair a média e dividir pelo desvio padrão) coloca todas as variáveis na mesma escala.
+
+Aqui as três bebidas estão na mesma unidade (porções), mas com dispersões diferentes. Padronizamos mesmo assim, para que cada bebida tenha o mesmo peso na definição dos grupos.
+
+### Como escolher $k$
+
+Não existe um $k$ "correto". Dois critérios ajudam na escolha:
+
+- **Método do cotovelo:** a soma de quadrados dentro dos grupos sempre diminui quando aumentamos $k$ (com um grupo por país, ela seria zero). Procuramos o ponto em que a queda deixa de ser acentuada, o "cotovelo" do gráfico. É um critério subjetivo.
+- **Coeficiente de silhouette:** para cada país, compara $a$, a distância média aos países do próprio grupo, com $b$, a distância média aos países do grupo vizinho mais próximo:
+
+$$
+s = \frac{b - a}{\max(a, b)}.
+$$
+
+O valor vai de -1 a 1. Perto de 1, o país está bem no seu grupo; perto de 0, está na fronteira entre dois grupos; negativo, estaria melhor no grupo vizinho. A média de $s$ entre todos os países resume a qualidade do agrupamento, e valores maiores são melhores.
+
+A função abaixo calcula os dois critérios para vários valores de $k$. Ela será usada nas duas segmentações.
+
+```{r}
+avalia_k <- function(x, ks = 2:8) {
+  distancias <- dist(x)
+  map_dfr(ks, function(k) {
+    set.seed(42)
+    km <- kmeans(x, centers = k, nstart = 25)
+    tibble(k = k,
+           `Soma de quadrados (cotovelo)` = km$tot.withinss,
+           `Silhouette médio` = mean(silhouette(km$cluster, distancias)[, "sil_width"]))
+  })
+}
+
+grafico_k <- function(criterios) {
+  criterios |>
+    pivot_longer(-k, names_to = "criterio", values_to = "valor") |>
+    ggplot(aes(k, valor)) +
+    geom_line() +
+    geom_point() +
+    facet_wrap(~ criterio, scales = "free_y") +
+    scale_x_continuous(breaks = criterios$k) +
+    labs(x = "Número de grupos (k)", y = NULL)
+}
+```
+
+Por fim, o k-médias numera os grupos de forma arbitrária (o grupo "1" de uma execução pode ser o "3" de outra). Para que o texto não dependa dessa numeração, damos a cada grupo um **nome calculado a partir do seu centroide**, como o de baixo consumo ou o de maior consumo de vinho.
+
+## Segmentação 1: volume (onde o consumo é forte?)
+
+Na primeira segmentação, agrupamos os países pelo **volume** consumido de cada bebida, com as três variáveis padronizadas.
+
+```{r}
+x_volume <- scale(dados[bebidas])
+
+crit_volume <- avalia_k(x_volume)
+grafico_k(crit_volume)
+```
+
+```{r}
+#| include: false
+sil <- function(criterios, k) criterios[["Silhouette médio"]][criterios$k == k]
+sil_max <- function(criterios) max(criterios[["Silhouette médio"]])
+k_sil_max <- function(criterios) criterios$k[which.max(criterios[["Silhouette médio"]])]
+```
+
+A soma de quadrados cai bastante até $k=4$ e mais devagar a partir daí. O silhouette médio com $k=4$ é `r fmt_dec(sil(crit_volume, 4), 2)` (o maior valor testado é `r fmt_dec(sil_max(crit_volume), 2)`, com $k=$ `r k_sil_max(crit_volume)`). Ficamos com **4 grupos**: um de baixo consumo e três de consumo alto, cada um puxado por uma bebida diferente.
+
+```{r}
+set.seed(42)
+km_volume <- kmeans(x_volume, centers = 4, nstart = 25)
+
+# nome de cada grupo: o de menor consumo total é o "Baixo consumo"; os demais
+# recebem o nome da bebida com o maior centroide padronizado
+centroides <- as_tibble(km_volume$centers) |> mutate(grupo = row_number())
+total_grupo <- tapply(dados$porcoes, km_volume$cluster, mean)
+nome_volume <- centroides |>
+  mutate(bebida = bebidas[max.col(as.matrix(centroides[bebidas]))],
+         nome = if_else(grupo == which.min(total_grupo), "Baixo consumo",
+                        paste("Alto consumo:", bebida)),
+         nome = make.unique(nome, sep = " "))
+
+dados <- dados |>
+  mutate(grupo_volume = nome_volume$nome[km_volume$cluster])
+```
+
+A tabela mostra o consumo médio de cada bebida em cada grupo, na escala original, e três exemplos de países (os de maior consumo total no grupo).
+
+```{r}
+perfil_volume <- dados |>
+  group_by(Grupo = grupo_volume) |>
+  summarise(Países = n(),
+            across(all_of(bebidas), ~ round(mean(.x))),
+            Exemplos = paste(pais[order(-porcoes)][1:3], collapse = ", ")) |>
+  arrange(desc(cerveja + destilados + vinho))
+```
+
+```{r}
+#| echo: false
+tabela(perfil_volume)
+```
+
+```{r}
+#| fig-height: 4.5
+dados |>
+  ggplot(aes(cerveja, vinho, color = grupo_volume, size = destilados)) +
+  geom_point(alpha = 0.7) +
+  scale_color_brewer(palette = "Set2") +
+  labs(x = "Cerveja (porções por pessoa/ano)", y = "Vinho (porções por pessoa/ano)",
+       color = "Grupo (volume)", size = "Destilados")
+```
+
+```{r}
+#| include: false
+n_grupo <- function(col, nome) sum(dados[[col]] == nome)
+n_baixo_volume <- n_grupo("grupo_volume", "Baixo consumo")
+```
+
+O grupo de **baixo consumo** reúne `r n_baixo_volume` países (`r pct(n_baixo_volume / n_paises, 0)` da base): são mercados em que o hábito de beber é fraco por pessoa. Os três grupos de consumo alto têm perfis bem diferentes, cada um puxado por uma bebida. Para a multinacional, esta segmentação responde **onde** o hábito de consumo é forte, mas não diz, por si só, o que vender em cada lugar: um país do grupo de baixo consumo pode beber quase só destilados, e outro, quase só cerveja.
+
+## Segmentação 2: mix (o que se bebe?)
+
+Na segunda segmentação, agrupamos os países pela **participação** de cada bebida no consumo total, sem olhar para o volume. Um país com 600 porções por ano, metade de vinho, fica igual a um com 60 porções, metade de vinho.
+
+Dois cuidados na preparação:
+
+- Os `r n_baixo` países com menos de 20 porções por pessoa por ano ficam de fora: com um consumo tão baixo, as participações são instáveis (um país com três porções, todas de vinho, seria "100% vinho") e, com consumo zero, nem podem ser calculadas. Eles formam o grupo **"Fora do escopo"**.
+- As participações **não são padronizadas**: elas já estão na mesma escala (de 0 a 1) e somam 1 em cada país.
+
+```{r}
+dados_mix <- dados |>
+  filter(porcoes >= 20) |>
+  mutate(across(all_of(bebidas), ~ .x / porcoes, .names = "part_{.col}"))
+
+partes <- paste0("part_", bebidas)
+x_mix <- as.matrix(dados_mix[partes])
+
+crit_mix <- avalia_k(x_mix)
+grafico_k(crit_mix)
+```
+
+O silhouette médio com $k=4$ é `r fmt_dec(sil(crit_mix, 4), 2)` (o maior valor testado é `r fmt_dec(sil_max(crit_mix), 2)`, com $k=$ `r k_sil_max(crit_mix)`). Aqui, a escolha de $k$ também é uma decisão de negócio: com três linhas de produto, queremos saber em quais mercados cada uma lidera e em quais nenhuma domina. Ficamos com **4 grupos**.
+
+```{r}
+set.seed(42)
+km_mix <- kmeans(x_mix, centers = 4, nstart = 25)
+
+# nome de cada grupo: a bebida cuja participação mais supera a média geral;
+# se dois grupos disputam a mesma bebida, o mais forte fica com o nome e o
+# outro vira "Misto", com as duas bebidas de maior participação
+media_geral <- colMeans(x_mix)
+excesso <- sweep(km_mix$centers, 2, media_geral)
+dominante <- bebidas[max.col(excesso)]
+forca <- apply(excesso, 1, max)
+nome_mix <- ifelse(forca == ave(forca, dominante, FUN = max),
+                   str_to_title(dominante), NA)
+for (g in which(is.na(nome_mix))) {
+  duas <- bebidas[order(-km_mix$centers[g, ])][1:2]
+  nome_mix[g] <- paste("Misto:", duas[1], "e", duas[2])
+}
+
+dados_mix <- dados_mix |> mutate(grupo_mix = nome_mix[km_mix$cluster])
+
+dados <- dados |>
+  left_join(select(dados_mix, pais, grupo_mix), by = "pais") |>
+  mutate(grupo_mix = replace_na(grupo_mix, "Fora do escopo"))
+
+# as mesmas cores para cada grupo de mix em todos os gráficos e no mapa
+cores_mix <- setNames(c(RColorBrewer::brewer.pal(4, "Set2"), "grey60", "grey90"),
+                      c(sort(unique(dados_mix$grupo_mix)), "Fora do escopo", "Sem dados"))
+```
+
+```{r}
+perfil_mix <- dados_mix |>
+  group_by(Grupo = grupo_mix) |>
+  summarise(Países = n(),
+            across(all_of(partes), ~ pct(mean(.x), 0)),
+            Exemplos = paste(pais[order(-porcoes)][1:3], collapse = ", ")) |>
+  rename(`% cerveja` = part_cerveja, `% destilados` = part_destilados,
+         `% vinho` = part_vinho)
+```
+
+```{r}
+#| echo: false
+tabela(perfil_mix)
+```
+
+```{r}
+#| fig-height: 4.5
+dados_mix |>
+  ggplot(aes(part_cerveja, part_vinho, color = grupo_mix)) +
+  geom_point(size = 2, alpha = 0.8) +
+  scale_x_continuous(labels = scales::percent) +
+  scale_y_continuous(labels = scales::percent) +
+  scale_color_manual(values = cores_mix) +
+  labs(x = "Participação da cerveja", y = "Participação do vinho",
+       color = "Grupo (mix)",
+       caption = "A participação dos destilados é o que falta para 100%.")
+```
+
+Os grupos de mix dizem **qual linha de produto lidera** em cada mercado: nos países do grupo da cerveja, é ela que deve puxar o portfólio; nos do vinho, uma estratégia centrada em vinho conversa com o hábito local; e assim por diante. Nos grupos mistos, nenhuma bebida domina, e o portfólio precisa ser mais equilibrado.
+
+### Volume e mix: duas perguntas diferentes
+
+A tabela abaixo cruza as duas segmentações. Cada célula é o número de países que estão naquele grupo de volume (linha) e naquele grupo de mix (coluna).
+
+```{r}
+tab_cruzada <- dados |>
+  count(`Grupo (volume)` = grupo_volume, grupo_mix) |>
+  pivot_wider(names_from = grupo_mix, values_from = n, values_fill = 0)
+```
+
+```{r}
+#| echo: false
+tabela(tab_cruzada)
+```
+
+```{r}
+#| include: false
+india <- filter(dados, pais == "India")
+n_mix_no_baixo <- dados |>
+  filter(grupo_volume == "Baixo consumo", grupo_mix != "Fora do escopo") |>
+  distinct(grupo_mix) |>
+  nrow()
+```
+
+Os países de **baixo consumo** se espalham por `r n_mix_no_baixo` grupos de mix diferentes: beber pouco não diz nada sobre **o que** se bebe. Um exemplo é a Índia. Pelo volume, ela está no grupo "`r india$grupo_volume`", com `r india$porcoes` porções por pessoa por ano; pelo mix, está no grupo "`r india$grupo_mix`", porque `r pct(india$destilados / india$porcoes, 0)` do que se bebe ali são destilados. As duas leituras são verdadeiras e servem a decisões diferentes:
+
+- o **volume** responde **onde** o hábito é forte, e ajuda a priorizar mercados;
+- o **mix** responde **o que** vender, e ajuda a definir o portfólio de cada mercado.
+
+::: {.callout-important title="A escolha das variáveis é uma decisão de negócio"}
+O mesmo algoritmo, aplicado aos mesmos dados, produziu duas segmentações diferentes, porque as variáveis foram preparadas de formas diferentes (volume padronizado ou participações). Nenhuma é "a certa": cada uma responde a uma pergunta. Antes de rodar um agrupamento, defina qual decisão ele deve apoiar.
 :::
 
-Portanto, quando os dados **não** estão agrupados em clusters, a soma total dos quadrados é de `r k_medias$totss`. 
-No entanto, ao dividir os dados em dois grupos, a soma total dos quadrados dentro de cada cluster é de `r round(k_medias$tot.withinss, 2)`. 
-Isso mostra que o processo de agrupamento reduziu a dispersão dos dados.
+## Enriquecimento com dados externos
 
+Até aqui, os grupos dizem como cada país consome, por pessoa. Para saber **quanto vale** cada grupo, falta o tamanho dos mercados: um país com consumo moderado e 100 milhões de adultos pode valer mais do que vários países pequenos de consumo alto.
 
-#### Definição do Número de Clusters
+Buscar dados externos para complementar uma base é uma prática comum em projetos reais: dados públicos de população, renda, clima ou localização muitas vezes explicam mais do que as variáveis internas. Aqui, usamos os indicadores do **Banco Mundial** para 2010, o mesmo ano dos dados da OMS:
 
-O método do cotovelo é uma técnica comumente utilizada para determinar o número ideal de clusters em uma análise de agrupamento (clustering), como no algoritmo K-means. Esse método envolve traçar um gráfico que mostra a relação entre o número de clusters e a soma dos quadrados intra-cluster. À medida que o número de clusters aumenta, a soma dos quadrados diminui, pois os clusters se tornam mais específicos. No entanto, em algum ponto, adicionar mais clusters não resultará em uma redução significativa na soma dos quadrados. Esse ponto é chamado de "cotovelo" no gráfico.
+- **população de 15 anos ou mais**, a mesma base do consumo por pessoa da OMS;
+- **PIB per capita em paridade de poder de compra** (PPC), em dólares internacionais constantes, uma medida de renda comparável entre países;
+- **região** e **faixa de renda** de cada país.
 
-Portanto, o número de clusters ideal é geralmente escolhido no ponto em que a redução na soma dos quadrados se torna menos significativa, indicando que adicionar mais clusters não oferecerá muitos benefícios na explicação da variação nos dados.
-**Note que esta escolha é subjetiva.**
+Os dados foram baixados da API do Banco Mundial pelo script `scripts/baixa_dados_banco_mundial.py` e gravados em `data/banco_mundial_2010.csv`.
 
-```{r}
-set.seed(123)
-
-k <- 2:20
-tibble(k = k) |> 
-  mutate(w = map_dbl(k, ~ kmeans(dados_pad, 
-                                 centers = .x,
-                                 nstart = 10)$tot.withinss)) |> 
-  ggplot(aes(k, w)) + 
-  geom_point() + 
-  scale_x_continuous(breaks = k) +
-  geom_line()+
-  labs(x = "Número de Clusters (k)", 
-       y = "Within-cluster Soma dos Quadrados")
-
-```
-
-Através do método do cotovelo vamos considerar que o número de clusters, para este conjunto de dados é igual a 5.
-
-```{r eval=FALSE}
-set.seed(123)
-
-descricao <- dados |> 
-  mutate(cluster = factor(kmeans(dados_pad, centers = 5, nstart = 10)$cluster))
-
-descricao |> 
-  slice_head(n=5)
-
-```
-
-
-```{r echo=FALSE}
-
-set.seed(123)
-
-descricao <- dados |> 
-  mutate(cluster = factor(kmeans(dados_pad, centers = 5, nstart = 10)$cluster))
-
-if (knitr::is_html_output()){
-  descricao  |> 
-  slice_head(n=5) |> 
-    kable("html")
-} else {
-  descricao  |> 
-  slice_head(n=5) |> 
-    kable("latex")
-}
-```
-O próximo passo é entender as características de cada um dos grupos obtidos, analisando cada uma das variáveis.
+::: {.callout-note title="Variáveis ativas e variáveis descritivas"}
+População e renda **não entram no agrupamento**. Se a população entrasse, China e Índia formariam um grupo só por serem grandes, mesmo com hábitos diferentes; com a renda, os grupos passariam a separar países ricos e pobres, algo que já sabemos sem modelo. Em segmentação, é comum distinguir as **variáveis ativas**, que formam os grupos (aqui, o consumo), das **variáveis descritivas**, que os caracterizam depois (aqui, população e renda).
+:::
 
 ```{r}
-descricao |> 
-  mutate(cluster = fct_reorder(cluster,  
-                               total_litres_alcohol,
-                               .fun = median)) |> 
-  ggplot(aes(total_litres_alcohol,
-             cluster,
-             fill = cluster, group = cluster)) + 
-  geom_boxplot(show.legend = F) +
-  labs(x = "Total de litros de álcool puro", 
-       y = "Cluster")
+banco_mundial <- read_csv("data/banco_mundial_2010.csv", show_col_types = FALSE)
+```
+
+### Cruzando as bases: o problema dos nomes
+
+Para juntar as duas bases, precisamos de uma **chave** comum. O Banco Mundial identifica cada país pelo código ISO de três letras (`BRA`, `FRA`), mas a base da OMS traz só o nome do país, em inglês e com grafias próprias ("Bosnia-Herzegovina", "Antigua & Barbuda"). Cruzar pelo nome falharia em muitos casos.
+
+O pacote `countrycode` converte nomes de países, escritos de várias formas, em códigos padronizados:
+
+```{r}
+dados <- dados |>
+  mutate(iso3 = countrycode(pais, origin = "country.name", destination = "iso3c",
+                            warn = FALSE))
+
+sem_codigo <- dados |> filter(is.na(iso3)) |> pull(pais)
 ```
 
 ```{r}
-descricao |> 
-  ggplot(aes(beer, wine, color = cluster)) + 
-  geom_point() +
-  labs(x = "Consumo de Cerveja", 
-       y = "Consumo de Vinho",
-       color = "Cluster")
+#| include: false
+txt_lista <- function(x) if (length(x) == 0) "nenhum" else paste(x, collapse = ", ")
 ```
 
-```{r eval=FALSE}
-g1 <- descricao |> 
-  ggplot(aes(spirit, wine, 
-             color = cluster,
-             label = country)) + 
-  geom_point() +
-  labs(x = "Consumo de Spirit (Unidades)",
-       y = "Consumo de Wine (Unidades)",
-       color = "")
+Países sem código ISO identificado: `r txt_lista(sem_codigo)`. Em seguida, juntamos as bases pelo código e verificamos quantos países ficaram sem dados do Banco Mundial:
 
+```{r}
+dados <- dados |>
+  left_join(banco_mundial, by = "iso3")
 
-ggplotly(g1)
+sem_populacao <- dados |> filter(is.na(populacao_15mais)) |> pull(pais)
+sem_pib <- dados |> filter(!is.na(populacao_15mais), is.na(pib_per_capita_ppc)) |> pull(pais)
 ```
 
-```{r echo=FALSE}
-g1 <- descricao |> 
-  ggplot(aes(spirit, wine, 
-             color = cluster,
-             label = country)) + 
-  geom_point() +
-  labs(x = "Consumo de Spirit (Unidades)",
-       y = "Consumo de Wine (Unidades)",
-       color = "")
+- Sem população (o país não está na base do Banco Mundial): `r txt_lista(sem_populacao)`.
+- Com população, mas sem PIB per capita: `r txt_lista(sem_pib)`.
 
-if (knitr::is_html_output()){
-  ggplotly(g1)
-} else {
-  print(g1)
+Faltas como essas são normais ao cruzar bases de fontes diferentes: territórios que não são membros do Banco Mundial ou países sem estatísticas confiáveis no período. O importante é **verificar e registrar** o que não casou, e não descobrir o problema depois, em um total que não fecha. Nas contas a seguir, esses países ficam de fora dos totais.
+
+## Quanto vale cada grupo
+
+Com a população, calculamos o **tamanho de cada mercado** em litros de álcool puro por ano:
+
+$$
+\text{volume do mercado} = \text{litros de álcool puro por pessoa} \times \text{população de 15 anos ou mais}.
+$$
+
+```{r}
+dados <- dados |>
+  mutate(volume_mercado = litros_alcool * populacao_15mais)
+
+valor_grupo <- function(grupo) {
+  dados |>
+    filter(!is.na(volume_mercado)) |>
+    group_by(Grupo = .data[[grupo]]) |>
+    summarise(Países = n(),
+              `Adultos (milhões)` = round(sum(populacao_15mais) / 1e6),
+              `Volume (milhões de litros)` = round(sum(volume_mercado) / 1e6),
+              `PIB per capita mediano (US$ PPC)` = round(median(pib_per_capita_ppc, na.rm = TRUE))) |>
+    mutate(`% do volume mundial` = pct(`Volume (milhões de litros)` /
+                                         sum(`Volume (milhões de litros)`))) |>
+    arrange(desc(`Volume (milhões de litros)`))
 }
 ```
 
-
-```{r eval=FALSE}
-descricao |>
-  group_by(cluster) |> 
-  summarise(across(where(is.numeric), mean))
-```
-A tabela abaixo mostra o cálculo de medias de cada variável em cada grupo.
-
-```{r echo=FALSE}
-if (knitr::is_html_output()){
-  descricao |>
-    group_by(cluster) |> 
-    summarise(across(where(is.numeric), mean)) |> 
-    kable("html")
-} else {
-  descricao |>
-    group_by(cluster) |> 
-    summarise(across(where(is.numeric), mean)) |> 
-    kable("latex")
-}
-```
-
-Com base nos grupos identificados, podemos interpretar as características de cada um deles:
-
-- **Grupo 1**: Este grupo possui a menor média de consumo de todas as variáveis, com valores relativamente baixos de consumo de cerveja, destilados e vinho. O consumo total de álcool é o mais baixo entre todos os grupos.
-- **Grupo 2**: Este grupo apresenta um consumo moderado de cerveja, destilados e vinho, com valores médios para todas as variáveis. O consumo total de álcool é intermediário em comparação com os outros grupos.
-- **Grupo 3**: Este grupo se destaca pelo alto consumo de cerveja e destilados, com valores muito acima da média em comparação com os outros grupos. O consumo de vinho também é elevado, mas menor em comparação com cerveja e destilados. O consumo total de álcool é o segundo mais alto entre os grupos.
-- **Grupo 4**: Este grupo é caracterizado por um consumo muito alto de cerveja, vinho e destilados, com valores muito acima da média em comparação com os outros grupos. O consumo total de álcool é o mais alto entre todos os grupos.
-- **Grupo 5**: Este grupo tem um alto consumo de cerveja, destilados e vinho, embora não tão alto quanto o Grupo 4. O consumo total de álcool é alto, mas menor que o do Grupo 4 e do Grupo 3.
-
-Se tivesse que atribuir um nome para cada grupo, quais nomes você daria?
-
-Podemos visualizar essas características através do gráfico abaixo.
-```{r}
-descricao |>
-  group_by(cluster) |> 
-  summarise(across(where(is.numeric), mean)) |> 
-  pivot_longer(-cluster) |> 
-  ggplot(aes(name, value, group = cluster, color = cluster)) + 
-  geom_line() + 
-  geom_point() +
-  labs(x = "", 
-       y = "Valor medio", 
-       color = "Cluster")
-```
-Uma alternativa ao gráfico acima (que mostra os valores na escala original) é o gráfico abaixo, que apresenta os valores padronizados.
+Pelo **volume** (onde):
 
 ```{r}
-descricao |> 
-  mutate(across(where(is.numeric), scale)) |> 
-  group_by(cluster) |> 
-  summarise(across(where(is.numeric), mean)) |> 
-  pivot_longer(-cluster) |> 
-  ggplot(aes(name, value, group = cluster, color = cluster)) + 
-  geom_line() + 
-  geom_point() +
-  labs(x = "", 
-       y = "Valor medio (padronizado)",
-       color = "Cluster")
+#| echo: false
+tabela(valor_grupo("grupo_volume"))
 ```
 
-#### Cálculo do Coeficiente de Silhouette
-
-O coeficiente de silhouette é uma medida de qualidade dos clusters em uma análise de cluster. 
-Ele varia de -1 a 1, onde valores próximos de 1 indicam que os pontos estão bem agrupados no cluster, valores próximos de 0 indicam que os clusters estão sobrepostos e valores próximos de -1 indicam que os pontos foram atribuídos aos clusters errados.
-
-O coeficiente de silhouette é calculado para cada observação e fornece uma medida da semelhança entre essa observação e os outros membros do mesmo cluster, em comparação com os membros de outros clusters. 
-
-Para calcular o coeficiente de silhouette para uma observação, são usadas duas métricas: 
-
-- $a$: A distância média entre a observação e todas as outras observações no mesmo cluster.
-- $b$: A distância média entre a observação e todas as observações no cluster mais próximo que a observação não faz parte.
-
-O coeficiente de silhouette para uma observação é então calculado como:
-
-$$ \text{silhouette} = \frac{b - a}{\max(a, b)}. $$
-
-O coeficiente de silhouette médio para todos os pontos em um cluster é a medida de silhouette para esse cluster. Quanto mais próximo de 1, melhor a separação dos clusters; quanto mais próximo de -1, mais inadequada é a atribuição do ponto ao cluster. 
-
+Pelo **mix** (o que):
 
 ```{r}
-# obtem os coeficientes
-res_sil <- silhouette(as.numeric(descricao$cluster), 
-                      dist(dados_pad)^2)
+#| echo: false
+tabela(valor_grupo("grupo_mix"))
 ```
-
-
-A função abaixo obtem a media do coeficiente por cluster e gera um gráfico. 
-
-```{r eval=FALSE}
-fviz_silhouette(res_sil)
-```
-
-O código abaixo visualiza o número ótimo de clusters baseado no coeficiente de silhouette médio dos clusters. 
-O gráfico resultante ajuda a encontrar o número ideal de clusters com base na separação entre os clusters e a coesão interna dos dados. 
 
 ```{r}
-# grafico silhouette
-fviz_nbclust(dados_pad, kmeans, method = "silhouette")
+#| include: false
+com_pop <- filter(dados, !is.na(volume_mercado))
+baixo <- filter(com_pop, grupo_volume == "Baixo consumo")
+pct_adultos_baixo <- sum(baixo$populacao_15mais) / sum(com_pop$populacao_15mais)
+pct_volume_baixo <- sum(baixo$volume_mercado) / sum(com_pop$volume_mercado)
+maior_baixo <- slice_max(baixo, volume_mercado, n = 1)
 ```
 
-Ao observar o resultado do coeficiente de silhouette, concluímos que é melhor agrupar os dados em 3 grupos em vez de 5, como concluído através da análise do gráfico do cotovelo anteriormente.
+A primeira tabela traz uma informação que a segmentação sozinha escondia. O grupo de **baixo consumo** reúne `r pct(pct_adultos_baixo, 0)` da população adulta dos países com dados e responde por `r pct(pct_volume_baixo, 0)` do volume total de álcool. O maior mercado do grupo, `r maior_baixo$pais`, consome sozinho cerca de `r fmt_int(maior_baixo$volume_mercado / 1e6)` milhões de litros de álcool puro por ano, mais do que muitos países de consumo alto. Consumo baixo por pessoa não significa, necessariamente, mercado pequeno. Por outro lado, um hábito fraco por pessoa indica um crescimento mais lento e mais caro.
 
-Portanto, devemos executar novamente o modelo kmeans agora considerando $k=3.$
+O gráfico abaixo mostra cada país pela população adulta e pela renda, com o tamanho do ponto proporcional ao volume do mercado e a cor indicando o grupo de mix. Os 12 maiores mercados estão identificados.
 
 ```{r}
-set.seed(1)
-avaliacao <- descricao |> 
-  mutate(cluster = factor(kmeans(dados_pad, centers = 3)$cluster))
+#| fig-height: 5.5
+maiores <- dados |> slice_max(volume_mercado, n = 12)
 
-avaliacao |> 
-  ggplot(aes(total_litres_alcohol, 
-             fct_reorder(cluster, total_litres_alcohol, .fun = median), 
-             fill = cluster, group = cluster)) + 
-  geom_boxplot(show.legend = FALSE) +
-  labs(x = "Total de litros de álcool puro", 
-       y = NULL)
+dados |>
+  filter(!is.na(volume_mercado), !is.na(pib_per_capita_ppc)) |>
+  ggplot(aes(populacao_15mais / 1e6, pib_per_capita_ppc)) +
+  geom_point(aes(size = volume_mercado / 1e6, color = grupo_mix), alpha = 0.7) +
+  geom_text_repel(data = filter(maiores, !is.na(pib_per_capita_ppc)),
+                  aes(label = pais), size = 3, max.overlaps = Inf) +
+  scale_x_log10(labels = scales::label_number(big.mark = ".", decimal.mark = ",")) +
+  scale_y_log10(labels = scales::label_number(big.mark = ".", decimal.mark = ",")) +
+  scale_color_manual(values = cores_mix) +
+  labs(x = "Adultos (milhões, escala log)", y = "PIB per capita, US$ PPC (escala log)",
+       color = "Grupo (mix)", size = "Volume (milhões de litros)")
 ```
 
-Vamos nomear os clusters encontrados.
+Esse gráfico ajuda a **priorizar dentro de cada grupo**: países grandes e de renda alta (no alto, à direita) combinam volume e potencial para produtos premium; países grandes e de renda baixa têm volume, mas pedem produtos de preço acessível.
+
+A tabela a seguir lista os 10 maiores mercados e os dois grupos de cada um: o de volume indica a força do hábito, e o de mix indica com qual linha de produto entrar.
 
 ```{r}
-avaliacao <- avaliacao |> 
-  mutate(cluster = case_when(
-    cluster == 2 ~ "alto", 
-    cluster == 1 ~ "intermediário", 
-    TRUE ~ "baixo"))
+tab_maiores <- dados |>
+  slice_max(volume_mercado, n = 10) |>
+  transmute(País = pais,
+            `Volume (milhões de litros)` = round(volume_mercado / 1e6),
+            `PIB per capita (US$ PPC)` = pib_per_capita_ppc,
+            `Grupo (volume)` = grupo_volume,
+            `Grupo (mix)` = grupo_mix)
 ```
-
-
-Finalmente, vamos visualizar as caracteristicas de cada cluster.
-```{r}
-avaliacao |> 
-  group_by(cluster) |> 
-  summarise(across(where(is.numeric), mean)) |> 
-  pivot_longer(-cluster) |> 
-  ggplot(aes(name, value, group = cluster, color = cluster)) + 
-  geom_line() + 
-  geom_point() +
-  labs(y = "Valor", x = NULL, color = "Cluster")
-```
-
-
-Visualização das caracteristicas de cada cluster considerando os dados padronizados.
 
 ```{r}
-avaliacao |> 
-  mutate(across(where(is.numeric), scale)) |> 
-  group_by(cluster) |> 
-  summarise(across(where(is.numeric), mean)) |> 
-  pivot_longer(-cluster) |> 
-  ggplot(aes(name, value, group = cluster, color = cluster)) + 
-  geom_line() + 
-  geom_point() +
-  labs(y = "Valor", x = NULL, color = "Cluster")
+#| echo: false
+tabela(tab_maiores)
 ```
 
-## Visualização do resultado da clusterização no mapa-mundi
+## Os grupos de mix no mapa
 
-Note que antes de fazer o mapa, foi feito um trabalho de padronização dos nomes dos países nas duas bases, `drinks.csv` e na de mapas fornecida pelo pacaote `maps`.
+O mapa mostra a segmentação por mix, a que orienta o portfólio. Para pintar cada país, cruzamos de novo pelo código ISO, agora com os nomes usados pelo pacote `maps`.
 
-```{r echo=TRUE, eval=TRUE, message=FALSE, warning=FALSE, out.width="100%", fig.height=3}
-library(maps)
+```{r}
+#| fig-height: 4.5
+#| out-width: "100%"
+mapa <- map_data("world") |>
+  mutate(iso3 = countrycode(region, origin = "country.name", destination = "iso3c",
+                            warn = FALSE)) |>
+  left_join(select(dados, iso3, grupo_mix), by = "iso3") |>
+  mutate(grupo_mix = replace_na(grupo_mix, "Sem dados"))
 
-mapa <- map_data("world") 
-
-g1 <- (avaliacao |> filter(cluster=="intermediário") |> 
-  pull(country))
-g1 <- c(g1, "Russia", "Bosnia and Herzegovina")
-
-g2 <- (avaliacao |> filter(cluster=="alto") |> 
-  pull(country))
-g2 <- c(g2, "UK")
-
-g3 <- (avaliacao |> filter(cluster=="baixo") |> 
-  pull(country))
-g3 <- c(g3, "Republic of Congo", "Cape Verde", "Ivory Coast",
-        "Democratic Republic of the Congo")
-
-mapa_cluster <- mapa |> 
-  mutate(fill = "NA") |> 
-  mutate(fill = ifelse(region %in% g1, "Intermediário", fill),
-         fill = ifelse(region %in% g2, "Alto", fill),
-         fill = ifelse(region %in% g3, "Baixo", fill)) |> 
-  mutate(fill = factor(fill, levels = c("Baixo", "Intermediário", "Alto", "NA")))
-
-ggplot(mapa_cluster, aes(long, lat, fill = fill, group=group)) + 
-  geom_polygon(colour="gray") +
-  scale_fill_manual(values = c("lightgreen", "lightblue", "salmon", "lightgray"))+
-  labs(x = NULL, y = NULL, fill = NULL) +
-  theme_void()
+ggplot(mapa, aes(long, lat, group = group, fill = grupo_mix)) +
+  geom_polygon(color = "white", linewidth = 0.1) +
+  scale_fill_manual(values = cores_mix) +
+  coord_quickmap(ylim = c(-55, 85)) +
+  labs(fill = "Grupo (mix)") +
+  theme_void() +
+  theme(legend.position = "bottom")
 ```
 
+A geografia aparece com clareza, embora o algoritmo não tenha recebido nenhuma informação sobre localização: países vizinhos e de culturas próximas tendem a ter o mesmo mix. Esse é um bom sinal de que os grupos capturam algo real, e não apenas ruído dos dados.
+
+## Uso prático
+
+**Para que serve.** As duas segmentações organizam a estratégia internacional em poucos blocos. O mix define a **linha de produto que lidera** o portfólio em cada grupo de mercados (e, com isso, campanhas, distribuição e lançamentos). O volume, combinado com a população e a renda, ajuda a decidir **onde priorizar** investimentos e com que posicionamento de preço.
+
+**Para que não serve.** Os grupos não substituem o estudo de cada país antes de uma decisão de entrada: regulação, impostos, concorrência e canais de distribuição podem inviabilizar um mercado que parece atraente na segmentação. E os países "Fora do escopo" não são uma oportunidade de expansão: em muitos deles, o consumo é baixo por razões culturais, religiosas ou legais que devem ser respeitadas.
+
+**Como usar.** Uma forma prática é montar uma matriz com o grupo de mix nas linhas e a prioridade (definida pelo volume do mercado e pela renda) nas colunas, e atribuir a cada célula uma postura: defender a liderança, crescer, entrar ou não priorizar.
+
+**Manutenção.**
+
+- Refazer as segmentações sempre que houver dados novos de consumo: hábitos mudam devagar, mas mudam (o vinho, por exemplo, ganhou espaço em vários países fora da Europa).
+- Atualizar a população e a renda, que mudam mais rápido que o consumo.
+- Acompanhar os países que mudam de grupo entre uma atualização e outra: eles são os mercados em transformação.
 
 ## Conclusão
 
-Neste relatório, exploramos os dados de consumo de bebidas alcoólicas em diversos países e utilizamos o algoritmo K-means para agrupar os países em clusters com base nesses dados. A análise nos permitiu identificar padrões de consumo e características distintas entre os grupos de países.
+Neste capítulo, usamos o k-médias para segmentar `r n_paises` países de duas formas: pelo **volume** de consumo de cada bebida, que mostra **onde** o hábito é forte, e pelo **mix** de bebidas, que mostra **o que** se bebe em cada lugar. As duas segmentações, feitas com o mesmo algoritmo e os mesmos dados, apontam direções diferentes, e juntas orientam a estratégia: o mix escolhe a linha de produto, e o volume, a prioridade. O enriquecimento com dados do Banco Mundial completou o quadro com o tamanho de cada mercado, mostrando que um consumo baixo por pessoa pode esconder um mercado grande.
 
+**Limitações:**
 
+* Os dados de consumo são de um único ano (2010) e não distinguem marcas, preço ou qualidade.
+* As porções por bebida podem não captar bem o consumo de bebidas produzidas e vendidas de forma informal, que é relevante em vários países.
+* A base não tem informações de regulação, impostos, concorrência ou margem, decisivas para a estratégia.
+* Alguns países ficaram sem dados do Banco Mundial e não entram nos totais.
+* O k-médias assume grupos aproximadamente esféricos, e a escolha de $k$ combina critérios estatísticos com o objetivo do negócio.
+
+**Próximos passos:** atualizar os dados de consumo com uma base mais recente da OMS; incluir a evolução do consumo ao longo do tempo, para separar mercados em crescimento e em queda; acrescentar dados de preço, impostos e participação de mercado da empresa; e testar a estabilidade dos grupos com outras sementes e valores de $k$.
