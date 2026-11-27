@@ -1,7 +1,6 @@
-# Análise Descritiva de Dados
+# Atrasos de voos nos aeroportos de Nova York
 
 ```{r include=FALSE}
-
 knitr::opts_chunk$set(
   warning = FALSE,
   message = FALSE,
@@ -9,666 +8,617 @@ knitr::opts_chunk$set(
 )
 
 library(nycflights13)
-library(kableExtra)
+library(maps)       # contornos dos estados (antes do tidyverse, para não mascarar purrr::map)
 library(tidyverse)
-
-set.seed(1)
-
-flights <- flights |> 
-  mutate(origin = factor(origin),
-         dest = factor(dest),
-         tailnum = factor(tailnum),
-         carrier = factor(carrier)) |> 
-  slice_sample(prop = 0.1)
+library(skimr)
+library(ggrepel)
+library(kableExtra)
 
 theme_set(theme_bw())
-```
 
-Este capítulo tem como objetivo apresentar os fundamentos da análise descritiva de dados, explorando conceitos estatísticos básicos e técnicas de visualização amplamente utilizadas em ciência de dados. Ao longo do capítulo, esses conceitos são aplicados a um conjunto de dados reais do setor aéreo, permitindo conectar teoria estatística a problemas práticos de análise e tomada de decisão.
-
-<!-- O objetivo deste capítulo é oferecer uma compreensão abrangente da análise descritiva de dados, fundamental em estatística e ciência de dados. Essa análise permite explorar e resumir características importantes dos dados, oferecendo insights iniciais para análises mais detalhadas. -->
-
-<!-- Antes de avançarmos para análises aplicadas e questões estratégicas, é necessário formalizar alguns conceitos fundamentais de estatística descritiva e visualização de dados. Esses conceitos serão utilizados ao longo do estudo de caso apresentado nas seções seguintes. -->
-
-
-## Base de Dados e Contexto do Estudo
-
-<!-- Para exemplificar os conceitos abordados neste capítulo, utilizaremos o conjunto de dados do pacote R `{nycflights13}`.  -->
-<!-- Este pacote contém diversas tabelas que fornecem informações detalhadas sobre voos que partiram dos aeroportos de Nova York em 2013, dentre elas:  -->
-
-Nesta seção, é apresentado o conjunto de dados utilizado ao longo do capítulo. O pacote `{nycflights13}` fornece informações detalhadas sobre voos que partiram dos aeroportos de Nova York em 2013, além de dados meteorológicos e características dos aeroportos e aeronaves. A compreensão da estrutura e do contexto desses dados é fundamental para interpretar corretamente as análises realizadas nas seções seguintes.
-As tabelas disponíves são:
-
-  - `flights`, que contém informações sobre voos, como horários de partida e chegada, companhias aéreas, destinos e atrasos; 
-  - `weather`, que fornece dados meteorológicos relacionados aos aeroportos de Nova York durante o ano de 2013;
-  - `airlines`, que lista informações sobre as companhias aéreas que operam em Nova York; 
-  - `airports`, que contém detalhes sobre os aeroportos de Nova York;
-  - `planes`, que oferece dados sobre os aviões utilizados nos voos. Essas tabelas abrangentes permitem uma análise abrangente e detalhada do sistema de transporte aéreo da cidade de Nova York em 2013.
-
-A análise será feita utilizando a liguagem `R`. Utilize o código abaixo para carregar o pacote na sua sessão e exibir uma amostra da base que registra os voos, `flights`.
-  
-```{r eval=FALSE}
-library(tidyverse)
-
-set.seed(1)
-
-flights |> 
-  slice_sample(n = 5)
-```
-
-```{r echo=FALSE}
-library(tidyverse)
-set.seed(1)
-
-if (knitr::is_html_output()){
-  flights |> 
-    slice_sample(n = 5) |> 
-    kable("html")
-} else {
-  flights |> 
-    slice_sample(n = 5) |> 
-    kable("latex")
+# tabelas no mesmo padrão dos demais capítulos
+tabela <- function(df, caption = NULL, rolagem = FALSE, align = NULL) {
+  tab <- knitr::kable(df, "html", caption = caption, row.names = FALSE, align = align,
+                      format.args = list(big.mark = ".", decimal.mark = ",")) |>
+    kable_styling(bootstrap_options = c("striped", "hover", "condensed"),
+                  full_width = FALSE)
+  if (rolagem) tab <- scroll_box(tab, width = "100%")
+  tab
 }
+
+# números citados no texto
+fmt_int <- function(x) format(round(x), big.mark = ".", decimal.mark = ",", scientific = FALSE)
+fmt_dec <- function(x, d = 1) formatC(x, format = "f", digits = d, big.mark = ".", decimal.mark = ",")
+pct <- function(x, d = 1) paste0(fmt_dec(100 * x, d), "%")
 ```
 
-## Fundamentos de Estatística Descritiva
+Atrasos custam caro: passageiros perdem conexões, tripulações estouram a jornada de trabalho, aeronaves ficam fora de posição para o voo seguinte e o atendimento é sobrecarregado com remarcações. Para reduzi-los, a equipe de operações precisa, antes de tudo, saber **onde** e **quando** eles acontecem.
 
-A análise descritiva busca resumir e organizar informações contidas em um conjunto de dados, fornecendo uma visão inicial de seus principais padrões e características. Nesta seção, são apresentados os conceitos fundamentais relacionados aos tipos de variáveis e às principais medidas descritivas, que servirão de base para todas as análises exploratórias realizadas ao longo do capítulo.
+Neste capítulo, um gestor de operações analisa todos os voos que partiram dos três aeroportos da cidade de Nova York em um ano, para decidir onde concentrar os esforços de melhoria. Quatro perguntas guiam a análise:
 
-### Tipos de Variáveis
+1. **Gargalos:** quais rotas e companhias concentram os maiores atrasos?
+2. **Aeroportos e horários:** há diferença entre os aeroportos? Em que horários os atrasos pioram?
+3. **Sazonalidade:** a época do ano e o dia da semana afetam a operação?
+4. **Clima:** quanto o tempo ruim piora a pontualidade?
 
-As variáveis em um conjunto de dados podem ser classificadas em diferentes tipos, dependendo da natureza da informação que representam. Existem dois principais tipos de variáveis: qualitativas e quantitativas.
+Para responder, usamos a **análise descritiva**: resumir e visualizar os dados para encontrar padrões, sem construir modelos. Ela é o ponto de partida de qualquer projeto de dados, e muitas vezes já basta para orientar decisões. Ao longo do capítulo, apresentamos as ferramentas básicas da estatística descritiva (tipos de variáveis, medidas resumo e gráficos), sempre aplicadas a uma pergunta do caso.
 
-#### Variáveis Qualitativas
+Seguimos as etapas do CRISP-DM apresentadas na introdução do livro. Todo o trabalho é feito em **R**.
 
-São características não numéricas que descrevem qualidades ou atributos dos elementos em estudo. Podem ser subdivididas em:
+| Etapa do CRISP-DM | Onde aparece no capítulo |
+|---|---|
+| Entendimento do negócio | Esta introdução: as perguntas do gestor de operações |
+| Entendimento dos dados | Dados e ferramentas da análise descritiva |
+| Preparação dos dados | Tratamento dos voos cancelados e junção com os dados de clima |
+| Modelagem | Não se aplica: o capítulo é descritivo |
+| Avaliação | Estudo de caso: gargalos, aeroportos e horários, sazonalidade e clima |
+| Implantação | Uso prático: um painel de indicadores de pontualidade |
 
-- **Nominal**: Não possuem ordem intrínseca. Exemplos incluem origem (`orign`: EWR, LGA, JFK) e destino (`dest`: IAH, MIA, BQN) dos voos.
-- **Ordinal**: Possuem uma ordem intrínseca. Exemplos incluem níveis de classificação ou categorias ordenadas, como faixas de atraso (baixo, médio, alto) ou níveis de prioridade operacional.
+## Dados
 
-Variáveis temporais, como mês e dia, frequentemente ocupam uma posição intermediária, podendo ser tratadas como quantitativas discretas ou categóricas ordenadas, a depender do objetivo da análise.
+Os dados vêm do pacote `nycflights13`, que reúne informações de todos os voos domésticos que **partiram** dos três aeroportos da cidade de Nova York em **2013**: John F. Kennedy (JFK), LaGuardia (LGA) e Newark (EWR). O pacote traz cinco tabelas:
 
-#### Variáveis Quantitativas
+- `flights`: um registro por voo, com data, horários previstos e realizados, atrasos, companhia aérea, origem, destino e distância;
+- `weather`: as condições do tempo, hora a hora, em cada aeroporto de origem;
+- `airlines`: o nome de cada companhia aérea;
+- `airports`: informações dos aeroportos;
+- `planes`: informações das aeronaves.
 
-Representam quantidades numéricas mensuráveis. Podem ser subdivididas em contínuas e discretas:
+As variáveis de atraso mais usadas no capítulo são:
 
-- **Contínua**: Podem assumir qualquer valor dentro de um intervalo. Exemplos incluem tempo de voo (`air_time`) em minutos e distância percorrida (`distance`) em milhas.
-- **Discreta**: São contáveis e assumem valores inteiros. Exemplos incluem hora programada da partida (`hour`) e minuto programado da partida (`minute`).
+- `dep_delay`: atraso na **partida**, em minutos (diferença entre o horário real e o previsto). É a medida da operação no aeroporto de origem.
+- `arr_delay`: atraso na **chegada**, em minutos. É o atraso que o passageiro sente.
 
-### Medidas Descritivas
-
-As medidas descritivas são ferramentas essenciais para resumir e interpretar as características fundamentais de uma distribuição de dados.
-
-
-#### Medidas de Posição:
-
-As medidas de posição fornecem informações sobre a localização dos dados dentro da distribuição.
-
-- **Mínimo**: O menor valor observado no conjunto de dados.
-- **Máximo**: O maior valor observado no conjunto de dados.
-- **Moda**: O valor que ocorre com maior frequência no conjunto de dados.
-- **Média**: A média aritmética dos valores no conjunto de dados.
-- **Mediana**: O valor que separa os dados em duas metades, onde metade dos dados estão abaixo dela e metade acima.
-- **Percentis**: São os valores que dividem uma amostra ordenada em cem partes iguais. O percentil 50 é equivalente à mediana.
-
-#### Medidas de Dispersão:
-
-As medidas de dispersão indicam o quão espalhados os dados estão em torno da medida de posição central. 
-
-- **Amplitude**: A diferença entre o maior e o menor valor no conjunto de dados.
-- **Distância Interquartil**: A diferença entre o terceiro quartil (Q3) e o primeiro quartil (Q1). Ela indica a dispersão dos valores centrais.
-- **Variância**: A média dos quadrados das diferenças entre cada valor e a média.
-- **Desvio Padrão**: A raiz quadrada da variância. Indica a dispersão dos valores em relação à média.
-- **Coeficiente de Variação**: É a razão entre o desvio padrão e a média, expressa como uma porcentagem. Fornece uma medida relativa da variabilidade em relação à magnitude da média.
-
-### Resumo estatístico automatizado
-
-A função `skim()` do pacote `skimr`, quando aplicada à uma base de dados, fornece um resumo estatístico das variáveis contidas no dataframe, incluindo contagem de observações, média, desvio padrão, mínimo, máximo e quartis para variáveis numéricas, além da contagem de valores únicos e dos valores mais frequentes para variáveis categóricas.
-
-
-```{r warning=FALSE, message=FALSE}
-library(skimr)
-
-skim(flights)
-```
-
-Veja que a tabela `flights` indica um conjunto relativamente grande e bem estruturado, com 33.677 observações e 19 variáveis, majoritariamente numéricas, o que é adequado para análises descritivas e exploratórias. As variáveis categóricas apresentam alta completude e diversidade relevante — com três aeroportos de origem, 99 destinos e 16 companhias aéreas — refletindo uma malha aérea ampla e heterogênea. As variáveis de atraso na partida e na chegada exibem médias positivas, mas medianas negativas, evidenciando distribuições assimétricas à direita, nas quais poucos atrasos extremos elevam a média. Observa-se também a presença moderada de valores ausentes, concentrados principalmente em horários e atrasos, o que é consistente com cancelamentos ou registros incompletos. Em conjunto, os dados sugerem boa qualidade geral, variabilidade operacional significativa e potencial para revelar padrões relevantes de pontualidade, sazonalidade e desempenho entre aeroportos e rotas.
-
-### Visualização de dados
-
-<!-- A visualização de dados desempenha um papel central na análise exploratória, pois permite transformar informações numéricas em representações visuais intuitivas. Nesta seção, são apresentados os principais tipos de gráficos utilizados em estatística e ciência de dados, com exemplos aplicados ao conjunto de dados de voos, destacando quando e por que cada tipo de visualização é mais adequado. -->
-
-A visualização de dados é essencial na análise de dados, pois transfoma valores em representações visuais claras. 
-Os gráficos facilitam a identificação de padrões e tendências, além de melhorar a comunicação dos resultados, contribuindo para a tomada de decisões informadas.
-
-Os gráficos apresentados a seguir não têm como objetivo responder perguntas de negócio específicas, mas ilustrar como diferentes tipos de visualizações podem ser utilizados para explorar dados conforme o tipo de variável envolvida.
-
-#### Histograma
-
-Um histograma é útil para representar a distribuição de uma variável quantitativa. Ele divide os dados em intervalos e mostra a frequência de observações em cada intervalo.
+Valores negativos indicam voos que partiram ou chegaram **adiantados**.
 
 ```{r}
-
-ggplot(flights, aes(x = air_time)) +
-  geom_histogram(binwidth = 30, fill = "skyblue", color = "black") +
-  labs(title = "Distribuição do Tempo de Voo", 
-       x = "Tempo de Voo (minutos)", 
-       y = "Frequência")
-```
-
-#### Boxplot (Gráfico de Caixa)
-
-Um boxplot é útil para visualizar a distribuição, a mediana e a dispersão dos dados. Ele representa os quartis, a mediana e os possíveis valores discrepantes.
-
-Por ser um gráfico que contém bastante informação, apresento em detalhes os principais elementos de um boxplot:
-
-1. **Caixa (Box)**: A caixa do boxplot representa o intervalo interquartil (IQR), que é a distância entre o primeiro quartil (Q1) e o terceiro quartil (Q3). Ela abrange o meio dos dados e mostra onde está localizada a maior parte dos valores.
-
-2. **Linha Mediana (Mediana)**: A linha dentro da caixa representa a mediana dos dados, que é o valor que divide o conjunto de dados ao meio.
-
-3. **Whiskers (Hastes)**: As hastes que se estendem para fora da caixa, conhecidas como whiskers, mostram a extensão dos dados. Podem ser calculadas de diferentes maneiras, mas geralmente estendem-se até 1,5 vezes o IQR a partir dos quartis.
-
-4. **Outliers (Valores Atípicos)**: Valores que estão além das extremidades dos whiskers são considerados outliers e são representados individualmente no gráfico.
-
-5. **Pontos**: Além dos outliers, pontos individuais podem ser mostrados no gráfico para representar dados que são excepcionalmente distantes da maioria dos valores.
-
-Esses elementos combinados fornecem uma representação concisa e informativa da distribuição dos dados, destacando medidas de tendência central, variabilidade e presença de valores atípicos.
-
-```{r}
-# Criando um boxplot para a variável "distance"
-ggplot(flights, aes(y = distance)) +
-  geom_boxplot(fill = "lightgreen", color = "black") +
-  labs(title = "Distribuição da Distância dos Voos", y = "Distância (milhas)")
-```
-
-#### Gráfico de Densidade
-
-Um gráfico de densidade é útil para visualizar a distribuição de uma variável quantitativa de forma suavizada.
-
-```{r}
-# Criando um gráfico de densidade para a variável "dep_delay"
-ggplot(flights, aes(x = dep_delay)) +
-  geom_density(fill = "lightcoral", color = "black") +
-  labs(title = "Densidade do Atraso na Partida", 
-       x = "Atraso na Partida (minutos)", 
-       y = "Densidade")
-
-```
-
-#### Gráfico de Dispersão
-
-Um gráfico de dispersão é útil para visualizar a relação entre duas variáveis quantitativas. Ele mostra como uma variável depende da outra.
-
-```{r cache=TRUE}
-# Criando um gráfico de dispersão para a relação entre "air_time" e "distance"
-ggplot(flights, aes(x = air_time, y = distance)) +
-  geom_point(color = "darkorange", alpha = 0.5) +
-  labs(title = "Relação entre Tempo de Voo e Distância", 
-       x = "Tempo de Voo (minutos)", 
-       y = "Distância (milhas)")
-
-```
-
-#### Gráfico de Barras
-
-Um gráfico de barras é útil para representar a frequência de ocorrência de diferentes categorias em uma variável discreta.
-
-
-```{r}
-# Criando um gráfico de barras para a variável "origin"
-ggplot(flights, aes(x = origin)) +
-  geom_bar(fill = "lightblue", color = "black") +
-  labs(title = "Frequência de Voos por Origem", 
-       x = "Origem", 
-       y = "Frequência")
-```
-
-#### Gráfico de Setores (Pizza)
-
-Um gráfico de setores é útil para representar a proporção de cada categoria em relação ao total.
-
-```{r}
-# Criando um gráfico de setores para a variável "origin"
-ggplot(flights, aes(x = "", fill = origin)) +
-  geom_bar(width = 1) +
-  coord_polar(theta = "y") +
-  labs(title = "Proporção de Voos por Destino", fill = "Origem", 
-       x = NULL, y = NULL)+
-  scale_fill_manual(values = c("EWR" = "skyblue", 
-                               "LGA" = "lightgreen", 
-                               "JFK" = "salmon"))  # Definindo cores personalizadas
-
-```
-
-Embora gráficos de setores sejam populares, seu uso deve ser criterioso, pois dificultam comparações precisas entre categorias. Em muitos contextos, gráficos de barras oferecem maior clareza.
-
-#### Gráfico de Mosaico
-
-Um gráfico de mosaico é útil para visualizar a relação entre duas variáveis categóricas, mostrando a proporção de cada categoria em cada nível da outra variável.
-
-```{r}
-# Criando um gráfico de mosaico para a relação entre "origin" e dia da semana do voo.
-
-dias_pt <- c(
-  "domingo",
-  "segunda-feira",
-  "terça-feira",
-  "quarta-feira",
-  "quinta-feira",
-  "sexta-feira",
-  "sábado"
-)
-
-flights |>  
-  mutate(
-    day_of_week = wday(time_hour, label = TRUE, abbr = FALSE, locale = "Portuguese_Brazil.utf8"), 
-    day_of_week = factor(day_of_week, levels = dias_pt)
-  ) |>
-  ggplot(aes(x = origin, fill = day_of_week)) +
-  geom_bar(position = "fill") +
-  labs(
-    title = "Relação entre Origem e Dia da Semana",
-    fill = "Dia da Semana",
-    x = "Origem",
-    y = "Proporção"
-  ) +
-  scale_fill_manual(values = RColorBrewer::brewer.pal(7, "Set2"))
-
-```
-
-### Associação entre Duas Variáveis
-
-Até este ponto, a análise concentrou-se principalmente em variáveis isoladas, explorando suas distribuições e características individuais. No entanto, muitas perguntas relevantes em ciência de dados envolvem compreender como duas ou mais variáveis se relacionam. A análise de associação permite investigar padrões conjuntos, dependências e possíveis relações entre variáveis, constituindo um passo intermediário entre a exploração descritiva e análises explicativas mais avançadas.
-
-Um exemplo de análise de associação entre duas variáveis pode ser feito ao contar o número de voos de cada origem para cada destino e selecionar os 5 destinos mais frequentes para cada origem, podemos explorar a associação entre origem e destin
-O código abaixo fornece os 5 destinos mais frequentes a partir de cada origem, permitindo-nos explorar a associação entre origem e destino de voos.
-
-```{r}
-most_frequent_dest <- flights |> 
-  group_by(origin, dest) |> 
-  count() |> 
-  arrange(desc(n)) |>  
-  group_by(origin) |>
-  slice_max(n, n = 5)
-
-most_frequent_dest |> 
-  kableExtra::kable()
-```
-
-
-```{r echo=FALSE}
-if (knitr::is_html_output()){
-  most_frequent_dest |> 
-    kable("html")
-} else {
-  most_frequent_dest |> 
-    kable("latex")
-}
-```
-
-Além da análise tabular, também podemos visualizar os destinos mais frequentes por origem usando um gráfico de barras.
-
-```{r}
-# Gráfico de barras dos destinos mais frequentes por origem
-library(tidytext)
-ggplot(most_frequent_dest, aes(x = reorder_within(dest,n,dest), y = n, fill = dest)) +
-  geom_bar(stat = "identity", position = "dodge") +
-  scale_x_reordered() +
-  labs(title = "Destinos Mais Frequentes por Origem", 
-       x = "Origem", 
-       y = "Número de Voos", 
-       fill = "Destino") +
-  facet_grid(~origin, scales = "free_x") +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
-
-```
-
-Podemos investigar se existe alguma relação entre a distância do voo e o atraso médio. Para explorar essa relação, podemos criar um gráfico de dispersão que mostra a distância média em relação ao atraso médio para cada destino.
-
-```{r}
-library(plotly)
-grafico <- flights |> 
-  filter(!is.na(distance), !is.na(arr_delay)) |>
-  group_by(dest) |>
-  summarise(distance = mean(distance),
-            delay = mean(arr_delay)) |> 
-  mutate(sinal = ifelse(delay > 0, "Atrasou", "Adiantou")) |>
-  ggplot(aes(x = distance, y = delay, label = dest, color = sinal))+
-  geom_point() +  
-  scale_color_manual(values = c("Adiantou" = "lightgreen", 
-                                "Atrasou" = "salmon")) +  # Definindo cores manualmente
-  labs(title = "Relação entre Distância Média e Atraso Médio por Destino", 
-       x = "Distância Média (milhas)", 
-       y = "Atraso Médio (minutos)", 
-       color = "Atraso / Adiantamento")
-```
-
-```{r echo=FALSE}
-if (knitr::is_html_output()){
-  ggplotly(grafico)
-} else {
-  grafico
-}
-```
-
-**Exercício:** quais outras variáveis poderiam ter suas relações exploradas? 
-
-
-## Estudo de Caso: questões estratégicas de negócio
-
-Esta seção propõe um conjunto de questões analíticas com foco em tomada de decisão e interpretação gerencial. Diferentemente das seções anteriores, que tiveram caráter predominantemente ilustrativo, este estudo de caso propõe uma análise orientada por perguntas de negócio. O objetivo é demonstrar como as ferramentas de estatística descritiva e visualização podem ser combinadas para apoiar diagnósticos operacionais e decisões gerenciais em contextos reais.
-
-### Questões estratégicas de negócio
-
-As questões a seguir têm como objetivo consolidar os conceitos apresentados e estimular o leitor a conduzir uma análise exploratória orientada a decisões de negócio. Para responder às questões, considere agregações por origem, destino e tempo, bem como o uso de visualizações comparativas. Não há uma única abordagem correta.
-
-1. Quais são os principais gargalos operacionais?
-
-    - Identificação de rotas com maiores atrasos, cancelamentos e remanejamentos.
-    - Alguma rota específica tem consistentemente atrasos elevados?
-
-2. Há diferenças operacionais entre os três aeroportos de Nova York (JFK, LGA e EWR)?
-    
-    - Qual deles apresenta maior índice de atrasos? Quais são os horários mais críticos?
-
-3. A sazonalidade afeta a operação?
-
-    - Existem meses ou dias da semana com maior índice de cancelamentos ou atrasos?
-
-4. Como as condições meteorológicas impactam os voos?
-
-    - Quais eventos climáticos mais afetam as operações? Neve, tempestades ou ventos fortes?
-
-::: {.callout-tip title="Respostas" collapse="true"}
-
-Os principais achados do estudo de caso estão consolidados abaixo e interpretados à luz de implicações operacionais e estratégicas. O objetivo é destacar como análises descritivas podem apoiar decisões gerenciais, além de discutir limitações e possíveis extensões da análise realizada.
-
-**1. Quais são os principais gargalos operacionais?**
-
-Vamos identificar rotas (origem–destino) com maior atraso médio na chegada, considerando apenas rotas com volume relevante de voos.
-
-```{r}
-gargalos_rotas <- flights |>
-  filter(!is.na(arr_delay)) |>
-  group_by(origin, dest) |>
-  summarise(
-    atraso_medio = mean(arr_delay),
-    n_voos = n(),
-    .groups = "drop"
-  ) |>
-  filter(n_voos >= 50) |>
-  arrange(desc(atraso_medio))
-
-```
-
-```{r echo=FALSE}
-
-if (knitr::is_html_output()){
-  gargalos_rotas |> 
-  slice_max(atraso_medio, n = 10) |>
-  kableExtra::kable("html")
-} else {
-  gargalos_rotas |> 
-  slice_max(atraso_medio, n = 10) |>
-  kableExtra::kable("latex")
-}
-```
-
-Veja no gráfico abaixo o top 10 rotas com maior atraso médio na chegada.
-
-```{r}
-ggplot(
-  gargalos_rotas |> slice_max(atraso_medio, n = 10),
-  aes(x = reorder(paste(origin, dest, sep = " → "), atraso_medio),
-      y = atraso_medio)
-) +
-  geom_col(fill = "salmon") +
-  coord_flip() +
-  labs(
-    title = "Rotas com Maior Atraso Médio na Chegada",
-    x = "Rota",
-    y = "Atraso médio (minutos)"
-  )
-```
-
-Note que os gargalos operacionais não estão distribuídos aleatoriamente, mas concentrados em um conjunto específico de rotas, com destaque para aquelas que partem dos aeroportos de Newark (EWR) e JFK. Em particular, EWR aparece de forma recorrente entre as rotas mais problemáticas, sugerindo a presença de restrições estruturais ou operacionais persistentes. Além disso, observa-se que vários dos maiores atrasos médios ocorrem em rotas de curta ou média distância, o que indica que esses atrasos não são explicados apenas pelo tempo de voo, mas possivelmente por congestionamentos, limitações de capacidade aeroportuária ou atrasos acumulados ainda em solo.
-
-Do ponto de vista estratégico, os resultados indicam que iniciativas de melhoria operacional devem priorizar rotas específicas, em vez de ações genéricas sobre toda a malha. A recorrência de EWR entre as rotas mais atrasadas sugere a necessidade de uma avaliação aprofundada da capacidade do aeroporto, incluindo alocação de slots, eficiência das operações em solo e sensibilidade a fatores externos, como condições meteorológicas. Intervenções direcionadas nesses pontos têm potencial para gerar ganhos relevantes de pontualidade com custo relativamente controlado.
-
-Além disso, o fato de rotas mais curtas apresentarem atrasos elevados aponta para oportunidades de melhoria rápida por meio de ajustes operacionais, como revisão de horários críticos, otimização de processos de embarque e desembarque e melhor coordenação entre companhias aéreas e controle de tráfego aéreo. Essas ações podem reduzir atrasos sem depender de investimentos estruturais de longo prazo, contribuindo diretamente para a melhoria da experiência do passageiro e da eficiência operacional.
-
-Uma vez identificadas as rotas críticas, surge a questão de saber se esses atrasos estão associados a características estruturais da rota ou a práticas operacionais específicas das companhias aéreas.
-
-```{r}
-# Selecionar rotas críticas (top 10)
-rotas_criticas <- gargalos_rotas |>
-  slice_max(atraso_medio, n = 10) |>
-  select(origin, dest)
-
-# Atraso médio por companhia dentro das rotas críticas
-atraso_cia_rotas <- flights |>
-  semi_join(rotas_criticas, by = c("origin", "dest")) |>
-  filter(!is.na(arr_delay)) |>
-  group_by(origin, dest, carrier) |>
-  summarise(
-    atraso_medio = mean(arr_delay),
-    n_voos = n(),
-    .groups = "drop"
-  ) |>
-  filter(n_voos >= 20) |>     # controle de volume
-  arrange(desc(atraso_medio))
-
-# atraso_cia_rotas |>
-#   kableExtra::kable()
-```
-
-
-```{r}
-ggplot(
-  atraso_cia_rotas,
-  aes(x = reorder(carrier, atraso_medio),
-      y = atraso_medio,
-      fill = carrier)
-) +
-  geom_col(show.legend = FALSE) +
-  coord_flip() +
-  facet_grid(origin + dest ~ ., scales = "free_y") +
-  labs(
-    title = "Atraso Médio por Companhia nas Rotas Críticas",
-    x = "Companhia aérea",
-    y = "Atraso médio na chegada (minutos)"
-  )
-
-```
-
-A análise dos atrasos por companhia aérea nas rotas críticas revela que os gargalos observados não são, em sua maioria, de natureza estrutural do aeroporto ou da rota. Em diversas rotas com elevado atraso médio, observa-se forte concentração em uma única companhia aérea, em especial a EV (ExpressJet Airlines), que domina praticamente todas as rotas mais problemáticas a partir de EWR, mesmo quando o número de voos é suficientemente grande para garantir robustez estatística. Além disso, em rotas operadas por mais de uma companhia, como JFK–CLE, o desempenho heterogêneo entre empresas — com 9E (Endeavor Air) apresentando atraso médio substancialmente superior ao da MQ (Envoy Air) — indica que fatores operacionais internos, e não condições aeroportuárias ou da rota, desempenham papel central na geração dos atrasos. Esses resultados sugerem que políticas voltadas exclusivamente à infraestrutura aeroportuária seriam insuficientes para mitigar os atrasos observados, sendo necessária também a consideração de práticas operacionais específicas das companhias aéreas.
-
-
-**2. Há diferenças operacionais entre os três aeroportos de Nova York (JFK, LGA e EWR)?**
-
-```{r}
-atraso_origem <- flights |>
-  filter(!is.na(dep_delay)) |>
-  group_by(origin) |>
-  summarise(
-    atraso_medio = mean(dep_delay),
-    mediana = median(dep_delay),
-    .groups = "drop"
-  )
-```
-
-Veja na tabela abaixo o atraso médio na partida por aeroporto.
-
-```{r echo=FALSE}
-
-if (knitr::is_html_output()){
-  atraso_origem |>
-  kableExtra::kable("html")
-} else {
-  atraso_origem |>
-  kableExtra::kable("latex")
-}
-```
-
-A figura a seguir mostra o atraso médio por horário e origem do voo.
-
-```{r}
-flights |>
-  filter(!is.na(dep_delay)) |>
-  mutate(hour = hour(time_hour)) |>
-  group_by(origin, hour) |>
-  summarise(atraso_medio = mean(dep_delay), .groups = "drop") |>
-  filter(atraso_medio >= 0) |> 
-  ggplot(aes(x = hour, y = atraso_medio)) +
-  geom_col(linewidth = 1, alpha = 0.8) +
-  labs(
-    title = "Atraso Médio por Horário e Aeroporto",
-    x = "Hora do dia",
-    y = "Atraso médio (minutos)"
-  ) +
-  facet_grid(~origin)
-```
-
-
-A análise agregada dos atrasos por aeroporto de origem mostra diferenças claras de desempenho operacional entre os três principais aeroportos de Nova York. O aeroporto de Newark (EWR) apresenta o maior atraso médio na partida (14,9 minutos), seguido por JFK (11,4 minutos) e LaGuardia (LGA), com o menor atraso médio (10,7 minutos). Apesar disso, as medianas negativas em todos os aeroportos indicam que mais da metade dos voos parte no horário ou antecipadamente, o que sugere que os atrasos médios elevados são influenciados por uma cauda de eventos extremos — poucos voos muito atrasados que puxam a média para cima.
-
-A análise por horário do dia revela um padrão consistente de deterioração operacional ao longo do dia, caracterizando um forte efeito de propagação de atrasos. Nos três aeroportos, os voos realizados nas primeiras horas da manhã apresentam atrasos médios próximos de zero ou mesmo negativos, indicando maior pontualidade. À medida que o dia avança, os atrasos médios aumentam progressivamente, alcançando seus piores níveis no final da tarde e início da noite. Esse padrão é mais acentuado em EWR, onde os atrasos ultrapassam 25 minutos entre 17h e 20h, evidenciando maior sensibilidade ao acúmulo de atrasos e possíveis limitações de capacidade.
-
-Comparativamente, JFK apresenta uma evolução mais gradual dos atrasos ao longo do dia, com crescimento significativo apenas a partir do início da tarde, enquanto LGA mantém níveis relativamente baixos até o meio da tarde, quando também passa a apresentar aumentos mais pronunciados. Ainda assim, LGA exibe picos relevantes em horários específicos, como no período noturno, indicando que, embora seja o aeroporto mais eficiente em média, não está imune a congestionamentos pontuais.
-
-Do ponto de vista estratégico, os resultados sugerem que EWR representa o principal gargalo operacional do sistema aeroportuário nova-iorquino, exigindo ações prioritárias de gestão de capacidade, revisão de slots e mitigação da propagação de atrasos ao longo do dia. Além disso, a forte dependência do horário reforça a importância de políticas operacionais voltadas para a proteção da malha nos períodos da manhã, uma vez que atrasos iniciais tendem a se amplificar nas horas subsequentes, afetando de forma sistêmica o desempenho ao longo do dia.
-
-**3. A sazonalidade afeta a operação?**
-
-```{r}
-atraso_mes <- flights |>
-  filter(!is.na(arr_delay)) |>
-  group_by(origin, month) |>
-  summarise(
-    atraso_medio = mean(arr_delay)
-  )
-
-ggplot(atraso_mes, aes(x = factor(month), y = atraso_medio)) +
-  geom_col(fill = "lightgreen") +
-  facet_grid(~origin) + 
-  labs(
-    title = "Atraso Médio por Mês",
-    x = "Mês",
-    y = "Atraso médio (minutos)"
-  )
+voos <- flights |>
+  left_join(airlines, by = "carrier") |>
+  rename(companhia = name)
 ```
 
 ```{r}
-dias_pt <- c(
-  "domingo", "segunda-feira", "terça-feira",
-  "quarta-feira", "quinta-feira", "sexta-feira", "sábado"
-)
-
-atraso_dia <- flights |>
-  mutate(
-    day_of_week = wday(
-      time_hour,
-      label = TRUE,
-      abbr = FALSE,
-      locale = "Portuguese_Brazil.utf8"
-    ),
-    day_of_week = factor(day_of_week, levels = dias_pt)
-  ) |>
-  filter(!is.na(arr_delay)) |>
-  group_by(origin, day_of_week) |>
-  summarise(atraso_medio = mean(arr_delay), .groups = "drop")
-
-ggplot(atraso_dia, aes(x = day_of_week, y = atraso_medio)) +
-  geom_col(fill = "plum") +
-  facet_grid(~origin) +
-  labs(
-    title = "Atraso Médio por Dia da Semana",
-    x = "Dia da semana",
-    y = "Atraso médio (minutos)"
-  )
+#| echo: false
+tabela(slice_head(select(voos, year:dest, companhia), n = 5), rolagem = TRUE)
 ```
-
-Os gráficos evidenciam um padrão claro de sazonalidade tanto ao longo da semana quanto ao longo do ano, com diferenças consistentes entre as origens. Em termos semanais, EWR apresenta atrasos médios sistematicamente mais elevados e maior variabilidade, sugerindo maior sensibilidade a congestionamentos operacionais, especialmente em dias úteis de maior demanda; JFK mostra atrasos médios mais moderados e estáveis, enquanto LGA apresenta comportamento intermediário, com alguns dias específicos concentrando picos de atraso. No recorte mensal, observa-se um efeito sazonal pronunciado: meses associados a maior demanda e condições meteorológicas adversas (verão e inverno) concentram os maiores atrasos médios, sobretudo em EWR e JFK, enquanto meses de transição tendem a apresentar desempenho operacional melhor. Em conjunto, os resultados indicam que a pontualidade é fortemente influenciada por fatores estruturais do aeroporto e por sazonalidade temporal, reforçando a importância de planejamento operacional diferenciado por origem, dia da semana e época do ano.
-
-**4. Como as condições meteorológicas impactam os voos?**
-
-Vamos aprofundar essa análise, olhando para as condições meteorológicas nas rotas que apresentam maior atraso médio na chegada.
 
 ```{r}
-rotas_criticas <- gargalos_rotas |> 
-  slice_max(atraso_medio, n = 10) |>
-  select(origin, dest)
-
-# Filtrar voos apenas dessas rotas
-flights_rotas_criticas <- flights |> 
-  semi_join(rotas_criticas, by = c("origin", "dest"))
-
-# Cruzar com dados meteorológicos
-flights_weather <- flights_rotas_criticas |> 
-  left_join(
-    weather,
-    by = c("origin", "time_hour")
-  )
-
-# Resumo descritivo das condições meteorológicas nas rotas críticas
-resumo_meteo <- flights_weather |> 
-  summarise(
-    temp_media = mean(temp, na.rm = TRUE),
-    vento_medio = mean(wind_speed, na.rm = TRUE),
-    visibilidade_media = mean(visib, na.rm = TRUE),
-    precipitacao_media = mean(precip, na.rm = TRUE),
-    atraso_medio = mean(arr_delay, na.rm = TRUE)
-  )
-
-resumo_meteo_origin_dest <- flights_weather |> 
-  group_by(origin, dest) |> 
-  summarise(
-    temp_media = mean(temp, na.rm = TRUE),
-    vento_medio = mean(wind_speed, na.rm = TRUE),
-    visibilidade_media = mean(visib, na.rm = TRUE),
-    precipitacao_media = mean(precip, na.rm = TRUE),
-    atraso_medio = mean(arr_delay, na.rm = TRUE)
-  )
-
+#| include: false
+n_voos <- nrow(voos)
+n_cancelados <- sum(is.na(voos$dep_time))
 ```
 
-A tabela abaixo mostra as estatísticas descritivas gerais das condições meteorológicas nos voos das rotas com maior atraso.
+A base tem `r fmt_int(n_voos)` voos. Desses, `r fmt_int(n_cancelados)` (`r pct(n_cancelados / n_voos)`) não têm horário de partida: são **voos cancelados**. Eles não têm atraso calculado e ficam de fora das médias de atraso, mas não devem ser esquecidos: um voo cancelado costuma ser pior para o passageiro do que um voo atrasado.
 
-```{r echo=FALSE}
-if (knitr::is_html_output()){
-  resumo_meteo |> 
-    kable("html")
-} else {
-  resumo_meteo |> 
-    kable("latex")
-}
-```
-
-A tabela abaixo segmenta a análise por rota.
-
-```{r echo=FALSE}
-if (knitr::is_html_output()){
-  resumo_meteo_origin_dest |> 
-    kable("html")
-} else {
-  resumo_meteo_origin_dest |> 
-    kable("latex")
-}
-```
-
-Os resultados indicam que os maiores atrasos médios observados nas rotas analisadas não estão associados, em geral, a condições meteorológicas adversas. As rotas com pior desempenho operacional apresentam, em média, temperaturas amenas, boa visibilidade, baixos níveis de precipitação e ventos moderados. Ainda assim, os atrasos médios são elevados, o que sugere que fatores climáticos exercem papel secundário na explicação dos gargalos identificados, atuando mais como agravantes pontuais do que como causa estrutural dos problemas.
-
-A análise por rota revela que os principais gargalos estão concentrados em poucos corredores específicos, com destaque para rotas partindo de Newark (EWR) e, em menor grau, de JFK. Algumas rotas, como JFK–CMH e EWR–RIC, apresentam atrasos médios persistentemente altos mesmo sob condições climáticas favoráveis, indicando ineficiências operacionais recorrentes, possivelmente relacionadas à gestão de slots, congestionamento aeroportuário ou propagação de atrasos ao longo do dia.
-
-Do ponto de vista estratégico, os achados sugerem que ações voltadas exclusivamente à mitigação de impactos climáticos terão efeito limitado na redução dos atrasos. Medidas focadas em melhoria de processos operacionais, aumento de resiliência da malha aérea e priorização de rotas cronicamente problemáticas tendem a gerar maior impacto. Em especial, o aeroporto de EWR emerge como um ponto crítico da operação, demandando atenção prioritária em iniciativas de planejamento, alocação de recursos e revisão de capacidade.
-
-Ressalta-se que esta análise é descritiva e não estabelece relações causais, sendo possível que eventos meteorológicos extremos, ainda que raros, tenham impactos desproporcionais não capturados pela média.
+::: {.callout-warning title="Dados e limitações"}
+- Os dados são de **um único ano (2013)** e cobrem apenas voos domésticos que **partem** de Nova York.
+- O clima está disponível só para os aeroportos de **origem**: o tempo no destino, que também afeta a chegada, não está na base.
+- A análise é **descritiva**: ela mostra onde e quando os atrasos acontecem e o que vem associado a eles, mas não prova causas.
 :::
 
-## Referências e Materiais Complementares
+### Para onde vão os voos
 
-O site [Data to Viz](https://www.data-to-viz.com/) é uma referência amplamente utilizada para apoiar a escolha adequada de visualizações gráficas em função do tipo de dado e do objetivo analítico. A plataforma organiza os principais tipos de gráficos de forma sistemática, auxiliando o analista a tomar decisões informadas sobre como representar informações de maneira clara e eficaz.
+O mapa abaixo mostra a malha de rotas, com um painel para cada aeroporto de origem: cada linha liga o aeroporto a um destino, com a espessura proporcional ao número de voos no ano. Em cinza, as rotas dos outros dois aeroportos, para comparação. As coordenadas vêm da tabela `airports`.
 
-Além de apresentar uma ampla galeria de visualizações — como gráficos de barras, dispersão, linhas, áreas, mapas e outras variações — o Data to Viz oferece exemplos práticos e orientações conceituais que ajudam a compreender as vantagens, limitações e contextos de uso de cada gráfico. O material também aborda boas práticas de visualização, incluindo aspectos de legibilidade, interpretação correta e comunicação responsável dos dados, tornando-se um complemento natural aos conceitos discutidos neste capítulo.
+```{r}
+#| fig-height: 9.5
+#| out-width: "100%"
+malha <- voos |>
+  count(origin, dest, name = "voos") |>
+  inner_join(select(airports, faa, lat_o = lat, lon_o = lon), by = c("origin" = "faa")) |>
+  inner_join(select(airports, faa, lat_d = lat, lon_d = lon), by = c("dest" = "faa")) |>
+  filter(lon_d > -130, lat_d > 24) |>  # só os EUA continentais
+  arrange(desc(voos))                  # rotas grossas embaixo, finas por cima
 
-Como leitura complementar, recomenda-se o livro Storytelling com Dados: Um guia sobre visualização de dados para profissionais de negócios, de Cole Nussbaumer Knaflic. A obra enfatiza a importância de estruturar narrativas claras a partir de dados, destacando como escolhas visuais, foco narrativo e contextualização adequada podem transformar análises técnicas em mensagens acionáveis para tomada de decisão. Em particular, o livro aprofunda aspectos de comunicação, hierarquia visual e redução de ruído gráfico, reforçando a ideia de que visualização de dados não é apenas uma ferramenta analítica, mas também um instrumento estratégico de comunicação.
+estados <- map_data("state")
+nomes_origem <- c(EWR = "Newark (EWR)", JFK = "John F. Kennedy (JFK)", LGA = "LaGuardia (LGA)")
+
+# um painel por aeroporto; em cinza, as rotas dos outros dois, para comparação
+ggplot() +
+  geom_polygon(data = estados, aes(long, lat, group = group),
+               fill = "grey95", color = "grey75", linewidth = 0.2) +
+  geom_curve(data = select(malha, -origin),
+             aes(x = lon_o, y = lat_o, xend = lon_d, yend = lat_d),
+             curvature = 0.2, color = "grey80", linewidth = 0.2) +
+  geom_curve(data = malha,
+             aes(x = lon_o, y = lat_o, xend = lon_d, yend = lat_d,
+                 color = origin, linewidth = voos),
+             curvature = 0.2, alpha = 0.7) +
+  geom_point(data = malha, aes(lon_d, lat_d, color = origin), size = 0.8) +
+  facet_wrap(~ origin, ncol = 1, labeller = as_labeller(nomes_origem)) +
+  scale_linewidth_continuous(range = c(0.15, 2),
+                             labels = scales::label_number(big.mark = ".")) +
+  coord_quickmap() +
+  guides(color = "none") +
+  labs(linewidth = "Voos no ano") +
+  theme_void() +
+  theme(legend.position = "bottom",
+        strip.text = element_text(face = "bold", size = 11, margin = margin(b = 4)),
+        panel.spacing = unit(1, "lines"))
+```
+
+```{r}
+#| include: false
+n_destinos <- n_distinct(voos$dest)
+sem_coordenada <- setdiff(unique(voos$dest), airports$faa)
+fora_mapa <- airports |>
+  filter(faa %in% voos$dest, lon <= -130 | lat <= 24) |>
+  pull(name)
+longos <- voos |> group_by(origin) |> summarise(p = mean(distance > 1500)) |> deframe() |> as.list()
+lga_max <- voos |> filter(origin == "LGA") |> slice_max(distance, n = 1, with_ties = FALSE)
+```
+
+Os voos vão para `r n_destinos` destinos. O mapa mostra os dos Estados Unidos continentais. Ficam de fora `r paste(fora_mapa, collapse = " e ")`, fora do continente, e `r length(sem_coordenada)` destinos em Porto Rico e nas Ilhas Virgens Americanas (`r paste(sem_coordenada, collapse = ", ")`), que não têm coordenadas na tabela `airports`. A malha mostra que os aeroportos têm perfis diferentes. O JFK concentra as rotas longas, para a costa oeste: `r pct(longos$JFK, 0)` dos voos de lá passam de 1.500 milhas. No LaGuardia, são só `r pct(longos$LGA, 0)`, e o destino mais distante é `r lga_max$dest`, a `r fmt_int(lga_max$distance)` milhas: o aeroporto tem uma **regra de perímetro**, que limita os voos a cerca de 1.500 milhas, com exceção de Denver. Essas diferenças de perfil ajudam a entender as diferenças de desempenho que veremos adiante.
+
+
+## Ferramentas da análise descritiva
+
+Antes do estudo de caso, apresentamos as ferramentas que vamos usar, cada uma aplicada a uma pergunta sobre os voos.
+
+### Tipos de variáveis
+
+O tipo de uma variável define como resumi-la e qual gráfico usar.
+
+- **Qualitativas** (ou categóricas) descrevem atributos:
+  - **nominais**, sem ordem: aeroporto de origem (`origin`), destino (`dest`), companhia aérea (`carrier`);
+  - **ordinais**, com ordem: por exemplo, faixas de atraso ("no horário", "até 15 minutos", "mais de 15 minutos").
+- **Quantitativas** representam medidas numéricas:
+  - **contínuas**, que podem assumir qualquer valor em um intervalo: tempo de voo (`air_time`), distância (`distance`), atraso;
+  - **discretas**, que assumem valores contáveis: hora prevista de partida (`hour`), número de voos por dia.
+
+Variáveis de tempo, como mês e dia da semana, ficam no meio do caminho: podem ser tratadas como números ou como categorias ordenadas, conforme o objetivo da análise.
+
+### Medidas resumo
+
+As **medidas de posição** indicam onde estão os valores: mínimo, máximo, média, mediana (o valor que divide os dados ao meio) e percentis (o percentil 90, por exemplo, é o valor abaixo do qual estão 90% dos dados). As **medidas de dispersão** indicam o quanto os valores variam: amplitude (máximo menos mínimo), intervalo interquartil (a distância entre os percentis 25 e 75), variância e desvio padrão.
+
+Vamos calculá-las para o atraso na partida:
+
+```{r}
+atraso <- voos$dep_delay[!is.na(voos$dep_delay)]
+
+medidas <- tibble(
+  Medida = c("Mínimo", "Percentil 25", "Mediana", "Média", "Percentil 75",
+             "Percentil 90", "Máximo", "Desvio padrão"),
+  `Atraso na partida (minutos)` = c(min(atraso), quantile(atraso, 0.25), median(atraso),
+                                    mean(atraso), quantile(atraso, 0.75),
+                                    quantile(atraso, 0.90), max(atraso), sd(atraso))
+) |>
+  mutate(`Atraso na partida (minutos)` = round(`Atraso na partida (minutos)`, 1))
+```
+
+```{r}
+#| echo: false
+tabela(medidas)
+```
+
+```{r}
+#| include: false
+media_atraso <- mean(atraso)
+mediana_atraso <- median(atraso)
+pct_adiantado <- mean(atraso <= 0)
+pct_15 <- mean(atraso > 15)
+```
+
+A tabela já traz uma lição importante: a **média** do atraso é de `r fmt_dec(media_atraso)` minutos, mas a **mediana** é de `r fmt_dec(mediana_atraso, 0)` minutos. Ou seja, mais da metade dos voos parte no horário ou adiantada (`r pct(pct_adiantado, 0)` deles), e a média é puxada para cima por poucos atrasos muito longos (o máximo passa de 20 horas). Quando a distribuição é assimétrica assim, a média sozinha engana: um "atraso médio de `r fmt_dec(media_atraso, 0)` minutos" não descreve o voo típico.
+
+Por isso, ao longo do capítulo, usamos também uma medida mais próxima da experiência do passageiro: o **percentual de voos com mais de 15 minutos de atraso**, critério de pontualidade usado pelas autoridades de aviação dos Estados Unidos. Na base toda, `r pct(pct_15)` dos voos partiram com mais de 15 minutos de atraso.
+
+Para um primeiro resumo de todas as variáveis de uma vez, a função `skim()`, do pacote `skimr`, mostra a contagem de valores faltantes, as medidas resumo e um mini-histograma de cada variável:
+
+```{r}
+skim(select(voos, dep_delay, arr_delay, air_time, distance, hour, origin, carrier))
+```
+
+### Gráficos para uma variável
+
+O **histograma** mostra a distribuição de uma variável quantitativa: ele divide os valores em faixas e conta quantas observações caem em cada uma. O histograma do atraso na partida confirma a assimetria: a grande maioria dos voos está perto de zero, e uma cauda longa se estende para a direita (o gráfico mostra só os atrasos de até 3 horas).
+
+```{r}
+voos |>
+  filter(dep_delay <= 180) |>
+  ggplot(aes(dep_delay)) +
+  geom_histogram(binwidth = 5, fill = "skyblue", color = "white") +
+  labs(x = "Atraso na partida (minutos)", y = "Número de voos")
+```
+
+O **gráfico de densidade** é uma versão suavizada do histograma. Ele é útil para comparar distribuições. O tempo de voo, por exemplo, mostra que os aeroportos têm perfis diferentes: o JFK concentra mais voos longos (para a costa oeste), e o LaGuardia, voos curtos e médios.
+
+```{r}
+voos |>
+  filter(!is.na(air_time)) |>
+  ggplot(aes(air_time, fill = origin)) +
+  geom_density(alpha = 0.4) +
+  labs(x = "Tempo de voo (minutos)", y = "Densidade", fill = "Origem")
+```
+
+O **gráfico de barras** mostra a frequência de cada categoria de uma variável qualitativa. Ordenar as barras pelo tamanho facilita a leitura:
+
+```{r}
+voos |>
+  count(companhia) |>
+  ggplot(aes(n, fct_reorder(companhia, n))) +
+  geom_col(fill = "lightblue") +
+  labs(x = "Número de voos", y = NULL)
+```
+
+O **gráfico de setores** (pizza) mostra a proporção de cada categoria no total. Ele é popular, mas deve ser usado com cuidado: o olho humano compara mal ângulos e áreas, e com mais de três ou quatro categorias as fatias ficam difíceis de distinguir. Aqui, com apenas três aeroportos, ele funciona razoavelmente; ainda assim, o gráfico de barras costuma ser mais claro.
+
+```{r}
+voos |>
+  count(origin) |>
+  ggplot(aes(x = "", y = n, fill = origin)) +
+  geom_col(width = 1) +
+  coord_polar(theta = "y") +
+  labs(x = NULL, y = NULL, fill = "Origem") +
+  theme_void()
+```
+
+### Gráficos para duas variáveis
+
+O **boxplot** resume a distribuição de uma variável quantitativa e é ótimo para comparar grupos. A caixa vai do percentil 25 ao 75 (o intervalo interquartil), a linha no meio da caixa é a mediana, e as hastes se estendem até 1,5 intervalo interquartil a partir da caixa. Os pontos além das hastes são valores atípicos (*outliers*). Comparando o atraso na partida entre os aeroportos (o gráfico corta o eixo em 2 horas para mostrar as caixas):
+
+```{r}
+voos |>
+  filter(!is.na(dep_delay)) |>
+  ggplot(aes(origin, dep_delay, fill = origin)) +
+  geom_boxplot(show.legend = FALSE, outlier.alpha = 0.1) +
+  coord_cartesian(ylim = c(-30, 120)) +
+  labs(x = "Origem", y = "Atraso na partida (minutos)")
+```
+
+As medianas dos três aeroportos ficam perto de zero, mas as caixas e as hastes mostram diferenças no lado dos atrasos, que veremos em detalhe no estudo de caso.
+
+As **barras empilhadas em 100%** mostram como uma variável qualitativa se divide dentro de cada categoria de outra. Aqui, a situação de pontualidade de cada voo (uma variável ordinal que criamos a partir do atraso) em cada aeroporto:
+
+```{r}
+voos |>
+  mutate(situacao = case_when(
+    is.na(dep_delay) ~ "Cancelado",
+    dep_delay <= 0 ~ "No horário ou adiantado",
+    dep_delay <= 15 ~ "Até 15 min de atraso",
+    TRUE ~ "Mais de 15 min de atraso"
+  ),
+  situacao = factor(situacao, levels = c("No horário ou adiantado", "Até 15 min de atraso",
+                                         "Mais de 15 min de atraso", "Cancelado"))) |>
+  ggplot(aes(origin, fill = situacao)) +
+  geom_bar(position = "fill") +
+  scale_y_continuous(labels = scales::percent) +
+  scale_fill_manual(values = c("#66c2a5", "#ffd92f", "#fc8d62", "grey50")) +
+  labs(x = "Origem", y = "Proporção dos voos", fill = NULL)
+```
+
+O **gráfico de dispersão** mostra a relação entre duas variáveis quantitativas. A relação entre distância e tempo de voo é quase uma reta, como esperado. Com mais de 300 mil voos, os pontos se sobreporiam a ponto de virar uma mancha, então o gráfico usa uma amostra de 5 mil voos:
+
+```{r}
+set.seed(1)
+voos |>
+  filter(!is.na(air_time)) |>
+  slice_sample(n = 5000) |>
+  ggplot(aes(distance, air_time)) +
+  geom_point(alpha = 0.3, color = "darkorange") +
+  labs(x = "Distância (milhas)", y = "Tempo de voo (minutos)")
+```
+
+Uma relação menos óbvia aparece quando resumimos os voos por destino: a distância média e o atraso médio na chegada de cada destino com pelo menos 50 voos.
+
+```{r}
+por_destino <- voos |>
+  filter(!is.na(arr_delay)) |>
+  group_by(dest) |>
+  summarise(distancia = mean(distance), atraso = mean(arr_delay), n = n()) |>
+  filter(n >= 50)
+
+por_destino |>
+  ggplot(aes(distancia, atraso)) +
+  geom_hline(yintercept = 0, linetype = "dashed") +
+  geom_point(aes(size = n), alpha = 0.6, color = "steelblue") +
+  geom_text_repel(data = slice_max(por_destino, abs(atraso), n = 6),
+                  aes(label = dest), size = 3) +
+  labs(x = "Distância média (milhas)", y = "Atraso médio na chegada (minutos)",
+       size = "Voos")
+```
+
+```{r}
+#| include: false
+cor_dist <- cor(por_destino$distancia, por_destino$atraso)
+```
+
+A correlação entre as duas é de `r fmt_dec(cor_dist, 2)`: destinos mais distantes tendem a ter atraso **menor** na chegada. Uma explicação possível é que voos longos conseguem recuperar parte do atraso da partida durante o voo. Mas atenção: a correlação descreve uma tendência média e não prova essa explicação, que precisaria ser verificada.
+
+## Estudo de caso
+
+Com as ferramentas apresentadas, voltamos às quatro perguntas do gestor de operações.
+
+### Gargalos: rotas e companhias
+
+Para encontrar os gargalos, calculamos o atraso médio na **chegada** (o que o passageiro sente) e o percentual de voos com mais de 15 minutos de atraso para cada rota (origem e destino). Consideramos apenas rotas com pelo menos 50 voos no ano, para que a média não seja definida por poucos voos.
+
+```{r}
+rotas <- voos |>
+  filter(!is.na(arr_delay)) |>
+  group_by(origin, dest) |>
+  summarise(voos = n(),
+            atraso_medio = mean(arr_delay),
+            pct_15 = mean(arr_delay > 15),
+            companhias = paste(names(sort(table(carrier), decreasing = TRUE)), collapse = ", "),
+            .groups = "drop") |>
+  filter(voos >= 50) |>
+  arrange(desc(atraso_medio))
+
+rotas_criticas <- slice_head(rotas, n = 10)
+```
+
+```{r}
+#| echo: false
+rotas_criticas |>
+  transmute(Rota = paste(origin, "→", dest), Voos = voos,
+            `Atraso médio (min)` = round(atraso_medio, 1),
+            `% com mais de 15 min` = pct(pct_15, 0),
+            Companhias = companhias) |>
+  tabela()
+```
+
+```{r}
+#| include: false
+n_rotas <- nrow(rotas)
+n_criticas_ewr <- sum(rotas_criticas$origin == "EWR")
+cias_criticas <- voos |>
+  semi_join(rotas_criticas, by = c("origin", "dest")) |>
+  count(carrier, companhia, sort = TRUE)
+cia_principal <- cias_criticas$companhia[1]
+pct_cia_principal <- cias_criticas$n[1] / sum(cias_criticas$n)
+pct_voos_criticos <- nrow(semi_join(voos, rotas_criticas, by = c("origin", "dest"))) / n_voos
+```
+
+Das `r n_rotas` rotas analisadas, as 10 com maior atraso médio têm um padrão claro: `r n_criticas_ewr` partem de **Newark (EWR)**, e a `r cia_principal` opera `r pct(pct_cia_principal, 0)` dos voos dessas rotas. Na coluna de companhias, cada rota crítica é praticamente operada por **uma única companhia**.
+
+Isso tem uma consequência importante para a interpretação: **não é possível separar o efeito da rota do efeito da companhia**. O atraso pode vir da operação da companhia, do aeroporto, da rota ou de tudo isso junto, e os dados descritivos não dizem qual. Para o gestor, o próximo passo é conversar com a companhia sobre essas rotas específicas, e não concluir de antemão quem é o responsável.
+
+Também vale dimensionar o problema: essas 10 rotas somam `r pct(pct_voos_criticos)` dos voos do ano. Resolver os atrasos delas melhora a vida de quem voa nessas rotas, mas não muda o quadro geral. Para isso, é preciso olhar para os aeroportos e os horários.
+
+A comparação entre as companhias, com o mesmo critério de pelo menos 50 voos, completa o quadro:
+
+```{r}
+por_companhia <- voos |>
+  filter(!is.na(arr_delay)) |>
+  group_by(companhia) |>
+  summarise(voos = n(), atraso_medio = mean(arr_delay), pct_15 = mean(arr_delay > 15)) |>
+  filter(voos >= 50)
+
+por_companhia |>
+  ggplot(aes(pct_15, fct_reorder(companhia, pct_15))) +
+  geom_col(fill = "salmon") +
+  scale_x_continuous(labels = scales::percent) +
+  labs(x = "Voos com mais de 15 minutos de atraso na chegada", y = NULL)
+```
+
+```{r}
+#| include: false
+ev <- filter(voos, carrier == "EV")
+pct_ev_em_ewr <- mean(ev$origin == "EWR")
+pct_ewr_ev <- mean(voos$carrier[voos$origin == "EWR"] == "EV")
+ev_pct15 <- filter(por_companhia, companhia == unique(ev$companhia))$pct_15
+```
+
+A ExpressJet, que opera quase todas as rotas críticas, também está entre as companhias com maior percentual de voos atrasados (`r pct(ev_pct15, 0)`), e tem um volume grande: ela faz `r pct(pct_ewr_ev, 0)` dos voos de Newark, e `r pct(pct_ev_em_ewr, 0)` dos voos dela saem de lá. Ou seja, o desempenho de Newark e o da ExpressJet estão entrelaçados, o que reforça o cuidado na interpretação.
+
+### Aeroportos e horários
+
+```{r}
+por_aeroporto <- voos |>
+  group_by(Origem = origin) |>
+  summarise(Voos = n(),
+            `Atraso médio (min)` = round(mean(dep_delay, na.rm = TRUE), 1),
+            `Atraso mediano (min)` = median(dep_delay, na.rm = TRUE),
+            `% com mais de 15 min` = pct(mean(dep_delay > 15, na.rm = TRUE), 1),
+            `% cancelados` = pct(mean(is.na(dep_time)), 1))
+```
+
+```{r}
+#| echo: false
+tabela(por_aeroporto)
+```
+
+```{r}
+#| include: false
+aer <- voos |>
+  group_by(origin) |>
+  summarise(media = mean(dep_delay, na.rm = TRUE), pct_15 = mean(dep_delay > 15, na.rm = TRUE)) |>
+  arrange(desc(media))
+```
+
+Newark tem o pior desempenho na partida: atraso médio de `r fmt_dec(aer$media[1])` minutos e `r pct(aer$pct_15[1], 0)` dos voos com mais de 15 minutos de atraso, contra `r fmt_dec(aer$media[3])` minutos e `r pct(aer$pct_15[3], 0)` no `r aer$origin[3]`, o melhor dos três. As medianas, porém, são parecidas e próximas de zero: o voo típico parte no horário nos três aeroportos, e a diferença está na frequência e no tamanho dos atrasos.
+
+O horário revela o padrão mais forte da base:
+
+```{r}
+voos |>
+  filter(!is.na(dep_delay)) |>
+  group_by(origin, hour) |>
+  summarise(pct_15 = mean(dep_delay > 15), voos = n(), .groups = "drop") |>
+  filter(voos >= 100) |>
+  ggplot(aes(hour, pct_15, color = origin)) +
+  geom_line(linewidth = 1) +
+  geom_point() +
+  scale_y_continuous(labels = scales::percent) +
+  scale_x_continuous(breaks = seq(5, 23, 2)) +
+  labs(x = "Hora prevista de partida", y = "Voos com mais de 15 min de atraso",
+       color = "Origem")
+```
+
+```{r}
+#| include: false
+por_hora <- voos |>
+  filter(!is.na(dep_delay)) |>
+  group_by(hour) |>
+  summarise(pct_15 = mean(dep_delay > 15), voos = n()) |>
+  filter(voos >= 100)
+manha <- filter(por_hora, hour <= 7)
+pico <- slice_max(por_hora, pct_15, n = 1)
+```
+
+Nos três aeroportos, os atrasos **crescem ao longo do dia**. Nos voos previstos até as 7h, `r pct(sum(manha$pct_15 * manha$voos) / sum(manha$voos), 0)` partem com mais de 15 minutos de atraso; no pior horário, às `r pico$hour`h, são `r pct(pico$pct_15, 0)`. É o efeito de **propagação**: a mesma aeronave e a mesma tripulação fazem vários voos por dia, e cada atraso empurra os voos seguintes. De manhã, a operação começa "limpa"; à noite, carrega os atrasos acumulados.
+
+Para o gestor, isso indica onde agir: proteger os primeiros voos do dia, prever folgas entre voos nos horários de pico e ter aeronaves e tripulações de reserva no fim da tarde, quando os atrasos se acumulam.
+
+### Sazonalidade
+
+```{r}
+por_mes <- voos |>
+  filter(!is.na(arr_delay)) |>
+  group_by(month) |>
+  summarise(pct_15 = mean(arr_delay > 15))
+
+por_mes |>
+  ggplot(aes(factor(month), pct_15)) +
+  geom_col(fill = "lightgreen") +
+  scale_y_continuous(labels = scales::percent) +
+  labs(x = "Mês", y = "Voos com mais de 15 min de atraso na chegada")
+```
+
+```{r}
+#| include: false
+meses_pt <- c("janeiro", "fevereiro", "março", "abril", "maio", "junho", "julho",
+              "agosto", "setembro", "outubro", "novembro", "dezembro")
+piores_meses <- slice_max(por_mes, pct_15, n = 3) |> arrange(month)
+melhor_mes <- slice_min(por_mes, pct_15, n = 1)
+```
+
+Os meses com mais atrasos são `r knitr::combine_words(meses_pt[piores_meses$month], and = " e ", oxford_comma = FALSE)`, períodos de férias e festas de fim de ano nos Estados Unidos, com aeroportos cheios e, no verão, tempestades frequentes. O melhor mês é `r meses_pt[melhor_mes$month]`, com `r pct(melhor_mes$pct_15, 0)` de voos atrasados.
+
+```{r}
+dias_pt <- c("domingo", "segunda", "terça", "quarta", "quinta", "sexta", "sábado")
+
+por_dia <- voos |>
+  filter(!is.na(arr_delay)) |>
+  mutate(dia = factor(dias_pt[wday(time_hour)], levels = dias_pt)) |>
+  group_by(dia) |>
+  summarise(pct_15 = mean(arr_delay > 15))
+
+por_dia |>
+  ggplot(aes(dia, pct_15)) +
+  geom_col(fill = "plum") +
+  scale_y_continuous(labels = scales::percent) +
+  labs(x = NULL, y = "Voos com mais de 15 min de atraso na chegada")
+```
+
+```{r}
+#| include: false
+pior_dia <- slice_max(por_dia, pct_15, n = 1)
+melhor_dia <- slice_min(por_dia, pct_15, n = 1)
+```
+
+Na semana, o pior dia é `r pior_dia$dia` (`r pct(pior_dia$pct_15, 0)` dos voos atrasados) e o melhor é `r melhor_dia$dia` (`r pct(melhor_dia$pct_15, 0)`), o dia com menos voos programados. A sazonalidade ajuda a planejar a capacidade: reforçar equipes e reservas nos meses e dias críticos.
+
+### Clima
+
+Para avaliar o papel do clima, juntamos a cada voo as condições do tempo no aeroporto de origem, na hora prevista da partida. A junção usa o aeroporto e a hora (`origin` e `time_hour`), que identificam cada registro da tabela `weather`.
+
+```{r}
+voos_clima <- voos |>
+  left_join(select(weather, origin, time_hour, temp, wind_speed, precip, visib),
+            by = c("origin", "time_hour"))
+```
+
+```{r}
+#| include: false
+pct_sem_clima <- mean(is.na(voos_clima$visib))
+vento_max <- max(weather$wind_speed, na.rm = TRUE)
+```
+
+Apenas `r pct(pct_sem_clima)` dos voos ficaram sem dados de clima. Um cuidado de qualidade dos dados: a tabela `weather` tem um registro de vento de `r fmt_int(vento_max)` milhas por hora, um valor impossível, que é claramente um erro de registro. Como usamos faixas de vento (acima de 20 mph), esse valor isolado não altera os resultados, mas, em uma análise real, ele deveria ser corrigido ou removido.
+
+Comparamos os voos que partiram **com e sem** cada condição adversa: chuva (qualquer precipitação), baixa visibilidade (menos de 3 milhas) e vento forte (acima de 20 milhas por hora).
+
+```{r}
+compara <- function(condicao, nome) {
+  voos_clima |>
+    filter(!is.na(dep_delay), !is.na({{ condicao }})) |>
+    group_by(Situação = if_else({{ condicao }}, "Com", "Sem")) |>
+    summarise(Voos = n(),
+              `Atraso médio (min)` = round(mean(dep_delay), 1),
+              `% com mais de 15 min` = mean(dep_delay > 15)) |>
+    mutate(Condição = nome, .before = 1)
+}
+
+clima <- bind_rows(
+  compara(precip > 0, "Chuva"),
+  compara(visib < 3, "Visibilidade baixa"),
+  compara(wind_speed > 20, "Vento forte")
+)
+```
+
+```{r}
+#| echo: false
+clima |>
+  mutate(`% com mais de 15 min` = pct(`% com mais de 15 min`, 1)) |>
+  tabela()
+```
+
+```{r}
+#| include: false
+chuva <- filter(clima, Condição == "Chuva")
+chuva_com <- filter(chuva, Situação == "Com")
+chuva_sem <- filter(chuva, Situação == "Sem")
+
+adverso <- voos_clima |>
+  filter(!is.na(dep_delay), !is.na(visib), !is.na(precip), !is.na(wind_speed)) |>
+  mutate(adverso = precip > 0 | visib < 3 | wind_speed > 20)
+pct_atrasados_tempo_bom <- with(filter(adverso, dep_delay > 15), mean(!adverso))
+
+cancel <- voos_clima |>
+  filter(!is.na(visib), !is.na(precip), !is.na(wind_speed)) |>
+  group_by(adverso = precip > 0 | visib < 3 | wind_speed > 20) |>
+  summarise(pct_cancelados = mean(is.na(dep_time)))
+cancel_adv <- cancel$pct_cancelados[cancel$adverso]
+cancel_bom <- cancel$pct_cancelados[!cancel$adverso]
+```
+
+O clima tem um efeito forte. Com chuva, o atraso médio na partida é de `r fmt_dec(chuva_com$"Atraso médio (min)")` minutos, contra `r fmt_dec(chuva_sem$"Atraso médio (min)")` sem chuva, e `r pct(chuva_com$"% com mais de 15 min", 0)` dos voos atrasam mais de 15 minutos, contra `r pct(chuva_sem$"% com mais de 15 min", 0)`. A baixa visibilidade tem um efeito parecido, e o vento forte, um efeito menor. O tempo ruim também multiplica os **cancelamentos**: `r pct(cancel_adv)` dos voos são cancelados em condições adversas, contra `r pct(cancel_bom)` com tempo bom.
+
+Quanto mais chuva, maior o atraso, o que reforça a associação:
+
+```{r}
+voos_clima |>
+  filter(!is.na(dep_delay), !is.na(precip)) |>
+  mutate(chuva = cut(precip, breaks = c(-Inf, 0, 0.05, 0.2, Inf),
+                     labels = c("Sem chuva", "Fraca", "Moderada", "Forte"))) |>
+  group_by(chuva) |>
+  summarise(pct_15 = mean(dep_delay > 15)) |>
+  ggplot(aes(chuva, pct_15)) +
+  geom_col(fill = "steelblue") +
+  scale_y_continuous(labels = scales::percent) +
+  labs(x = "Precipitação na hora da partida", y = "Voos com mais de 15 min de atraso")
+```
+
+Ainda assim, o clima não explica a maior parte do problema: `r pct(pct_atrasados_tempo_bom, 0)` dos voos que partiram com mais de 15 minutos de atraso saíram **com tempo bom**. O tempo ruim piora muito a operação quando acontece, mas acontece em poucas horas do ano. A maior parte dos atrasos é operacional, o que é uma boa notícia para o gestor: é a parte que ele consegue controlar.
+
+## Uso prático
+
+**Para que serve.** A análise aponta onde concentrar os esforços: os horários de fim de tarde e noite (propagação dos atrasos), o aeroporto de Newark, um pequeno grupo de rotas operadas quase sempre por uma única companhia e os meses de maior movimento. Também mostra que o clima, embora piore muito a operação, explica uma parte menor dos atrasos: há espaço para melhorar a operação mesmo com tempo bom.
+
+**Para que não serve.** A análise descritiva mostra associações, e não causas. Ela não diz, por exemplo, se as rotas críticas atrasam por causa da companhia, do aeroporto ou da rota, nem garante que uma ação específica vai reduzir os atrasos. Essas perguntas exigem investigar a operação e, quando possível, testar as mudanças.
+
+**Como usar.** Os resultados podem virar um **painel de indicadores de pontualidade**, com o percentual de voos com mais de 15 minutos de atraso e o percentual de cancelamentos, por aeroporto, horário, rota e companhia. Acompanhar esses números mês a mês mostra se as ações estão funcionando.
+
+**Manutenção.** Atualizar o painel periodicamente (por exemplo, todo mês) e comparar cada período com o mesmo período do ano anterior, para não confundir sazonalidade com melhora ou piora real.
+
+## Conclusão
+
+Neste capítulo, usamos a análise descritiva para entender os atrasos em `r fmt_int(n_voos)` voos que partiram de Nova York em 2013. As medidas resumo mostraram que a média engana em distribuições assimétricas, e por isso acompanhamos também o percentual de voos com mais de 15 minutos de atraso. Os gráficos revelaram os padrões principais: os atrasos se acumulam ao longo do dia, Newark tem o pior desempenho, poucas rotas concentram atrasos muito altos, os meses de férias são os mais críticos e o tempo ruim piora bastante a pontualidade, embora a maior parte dos atrasos aconteça com tempo bom.
+
+**Limitações:**
+
+* Os dados são de 2013 e cobrem apenas voos domésticos que partem de Nova York.
+* O clima está disponível só para o aeroporto de origem, e não para o destino.
+* Nas rotas críticas, o efeito da rota e o da companhia não podem ser separados, porque cada rota é praticamente operada por uma única companhia.
+* A análise é descritiva: os padrões encontrados são associações, e não relações de causa e efeito.
+
+**Próximos passos:** incluir o clima no aeroporto de destino; analisar o atraso da aeronave no voo anterior (usando a matrícula, `tailnum`), para medir diretamente a propagação; repetir a análise com dados recentes; e construir um modelo para **prever** a chance de atraso de um voo, um problema de classificação como o do próximo capítulo.
+
+## Referências e materiais complementares
+
+O site [Data to Viz](https://www.data-to-viz.com/) ajuda a escolher a visualização adequada para cada tipo de dado e objetivo. Ele organiza os principais tipos de gráfico de forma sistemática, com exemplos e orientações sobre vantagens, limitações e boas práticas de cada um.
+
+Como leitura complementar, recomendamos o livro *Storytelling com Dados: um guia sobre visualização de dados para profissionais de negócios*, de Cole Nussbaumer Knaflic. Ele mostra como estruturar narrativas claras a partir de dados e como escolhas visuais, foco e contexto transformam uma análise técnica em uma mensagem que apoia decisões.
