@@ -476,7 +476,7 @@ piores_meses <- slice_max(por_mes, pct_15, n = 3) |> arrange(month)
 melhor_mes <- slice_min(por_mes, pct_15, n = 1)
 ```
 
-Os meses com mais atrasos são `r paste(meses_pt[piores_meses$month], collapse = ", ")`, períodos de férias e festas de fim de ano nos Estados Unidos, com aeroportos cheios e, no verão, tempestades frequentes. O melhor mês é `r meses_pt[melhor_mes$month]`, com `r pct(melhor_mes$pct_15, 0)` de voos atrasados.
+Os meses com mais atrasos são `r knitr::combine_words(meses_pt[piores_meses$month], and = " e ", oxford_comma = FALSE)`, períodos de férias e festas de fim de ano nos Estados Unidos, com aeroportos cheios e, no verão, tempestades frequentes. O melhor mês é `r meses_pt[melhor_mes$month]`, com `r pct(melhor_mes$pct_15, 0)` de voos atrasados.
 
 ```{r}
 dias_pt <- c("domingo", "segunda", "terça", "quarta", "quinta", "sexta", "sábado")
@@ -554,12 +554,12 @@ chuva_com <- filter(chuva, Situação == "Com")
 chuva_sem <- filter(chuva, Situação == "Sem")
 
 adverso <- voos_clima |>
-  filter(!is.na(dep_delay), !is.na(visib)) |>
+  filter(!is.na(dep_delay), !is.na(visib), !is.na(precip), !is.na(wind_speed)) |>
   mutate(adverso = precip > 0 | visib < 3 | wind_speed > 20)
 pct_atrasados_tempo_bom <- with(filter(adverso, dep_delay > 15), mean(!adverso))
 
 cancel <- voos_clima |>
-  filter(!is.na(visib)) |>
+  filter(!is.na(visib), !is.na(precip), !is.na(wind_speed)) |>
   group_by(adverso = precip > 0 | visib < 3 | wind_speed > 20) |>
   summarise(pct_cancelados = mean(is.na(dep_time)))
 cancel_adv <- cancel$pct_cancelados[cancel$adverso]
