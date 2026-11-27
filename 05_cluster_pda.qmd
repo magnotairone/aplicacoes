@@ -642,15 +642,19 @@ print(f"Variância explicada pelo PC1: {var_explicada[0]*100:.2f}%")
 print(f"Variância explicada pelo PC2: {var_explicada[1]*100:.2f}%")
 print(f"Variância total explicada pelos dois componentes: {total_var:.2f}%")
 
-# 5. Gráfico
+# 5. Gráfico: uma amostra de 15 mil clientes, para que os pontos não se
+# sobreponham a ponto de virar uma mancha sólida
+df_pca_amostra = df_pca.sample(15000, random_state=42)
+
 plt.figure(figsize=(12, 8))
 sns.scatterplot(
     x='PC1', y='PC2',
     hue='cluster',
     hue_order=sorted(df_pca['cluster'].unique()),
     palette='Set2',  # mesma paleta usada no gráfico spider
-    data=df_pca,
-    alpha=0.3,
+    data=df_pca_amostra,
+    alpha=0.4,
+    s=12,
     edgecolor=None
 )
 plt.title(f'Visualização dos Clusters em 2D via PCA\n(Variância Total Explicada: {total_var:.1f}%)', size=15)
