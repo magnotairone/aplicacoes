@@ -98,34 +98,43 @@ A base tem `r fmt_int(n_voos)` voos. Desses, `r fmt_int(n_cancelados)` (`r pct(n
 
 ### Para onde vão os voos
 
-O mapa abaixo mostra a malha de rotas: cada linha liga um aeroporto de Nova York a um destino, com uma cor para cada aeroporto de origem e a espessura proporcional ao número de voos no ano. As coordenadas vêm da tabela `airports`.
+O mapa abaixo mostra a malha de rotas, com um painel para cada aeroporto de origem: cada linha liga o aeroporto a um destino, com a espessura proporcional ao número de voos no ano. Em cinza, as rotas dos outros dois aeroportos, para comparação. As coordenadas vêm da tabela `airports`.
 
 ```{r}
-#| fig-height: 5.5
+#| fig-height: 9.5
 #| out-width: "100%"
 malha <- voos |>
   count(origin, dest, name = "voos") |>
   inner_join(select(airports, faa, lat_o = lat, lon_o = lon), by = c("origin" = "faa")) |>
   inner_join(select(airports, faa, lat_d = lat, lon_d = lon), by = c("dest" = "faa")) |>
-  filter(lon_d > -130, lat_d > 24)  # só os EUA continentais
+  filter(lon_d > -130, lat_d > 24) |>  # só os EUA continentais
+  arrange(desc(voos))                  # rotas grossas embaixo, finas por cima
 
 estados <- map_data("state")
+nomes_origem <- c(EWR = "Newark (EWR)", JFK = "John F. Kennedy (JFK)", LGA = "LaGuardia (LGA)")
 
+# um painel por aeroporto; em cinza, as rotas dos outros dois, para comparação
 ggplot() +
   geom_polygon(data = estados, aes(long, lat, group = group),
-               fill = "grey95", color = "grey70", linewidth = 0.2) +
+               fill = "grey95", color = "grey75", linewidth = 0.2) +
+  geom_curve(data = select(malha, -origin),
+             aes(x = lon_o, y = lat_o, xend = lon_d, yend = lat_d),
+             curvature = 0.2, color = "grey80", linewidth = 0.2) +
   geom_curve(data = malha,
              aes(x = lon_o, y = lat_o, xend = lon_d, yend = lat_d,
                  color = origin, linewidth = voos),
-             curvature = 0.2, alpha = 0.5) +
-  geom_point(data = distinct(malha, dest, lon_d, lat_d), aes(lon_d, lat_d),
-             size = 0.8, color = "grey30") +
-  scale_linewidth_continuous(range = c(0.1, 1.5),
+             curvature = 0.2, alpha = 0.7) +
+  geom_point(data = malha, aes(lon_d, lat_d, color = origin), size = 0.8) +
+  facet_wrap(~ origin, ncol = 1, labeller = as_labeller(nomes_origem)) +
+  scale_linewidth_continuous(range = c(0.15, 2),
                              labels = scales::label_number(big.mark = ".")) +
-  scale_color_manual(values = c(EWR = "#e41a1c", JFK = "#377eb8", LGA = "#4daf4a")) +
   coord_quickmap() +
-  labs(color = "Origem", linewidth = "Voos no ano") +
-  theme_void()
+  guides(color = "none") +
+  labs(linewidth = "Voos no ano") +
+  theme_void() +
+  theme(legend.position = "bottom",
+        strip.text = element_text(face = "bold", size = 11, margin = margin(b = 4)),
+        panel.spacing = unit(1, "lines"))
 ```
 
 ```{r}
